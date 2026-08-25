@@ -71,6 +71,9 @@ public class BotConfig {
     private boolean proxyLavaplayer, proxyJda, proxyGithub;
     private double skipratio;
     private Language defaultLanguage;
+    private String updateRepository, updateGithubToken;
+    private boolean autoUpdate;
+    private int updateIntervalHours;
     private OnlineStatus status;
     private Activity game;
     private Config aliases, transforms;
@@ -247,6 +250,10 @@ public class BotConfig {
         // set values using ConfigOption enum for type safety and standardization
         token = TOKEN.getString(config);
         prefix = PREFIX.getString(config);
+        updateRepository = UPDATE_REPOSITORY.getString(config);
+        updateGithubToken = UPDATE_GITHUB_TOKEN.getString(config);
+        autoUpdate = UPDATE_AUTO.getBoolean(config);
+        updateIntervalHours = UPDATE_INTERVAL_HOURS.getInt(config);
         // An unrecognised code falls back to English with a warning rather than aborting
         // startup: a typo in one cosmetic setting should not stop the bot from running.
         defaultLanguage = Language.fromCode(LANGUAGE.getString(config)).orElseGet(() -> {
@@ -406,6 +413,26 @@ public class BotConfig {
     /** Default language for servers that have not chosen one. */
     public Language getDefaultLanguage() {
         return defaultLanguage;
+    }
+
+    /** Repository checked for new releases, as owner/name. */
+    public String getUpdateRepository() {
+        return updateRepository;
+    }
+
+    /** GitHub token for release lookups; empty for a public repository. */
+    public String getUpdateGithubToken() {
+        return updateGithubToken;
+    }
+
+    /** Whether the bot installs new releases and restarts into them by itself. */
+    public boolean isAutoUpdate() {
+        return autoUpdate;
+    }
+
+    /** Hours between update checks. */
+    public int getUpdateIntervalHours() {
+        return updateIntervalHours;
     }
 
     public String getPrefix() {
