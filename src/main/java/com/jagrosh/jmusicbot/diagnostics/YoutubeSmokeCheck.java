@@ -102,6 +102,12 @@ public final class YoutubeSmokeCheck
         "kJQP7kiw5Fk"
     };
 
+    /** Enables remote signature decoding, the same path {@code sources.youtube.useOAuth} takes. */
+    public static final String REMOTE_CIPHER_FLAG = "--remote-cipher";
+
+    /** Third-party cipher service the bot uses when OAuth is enabled. */
+    private static final String REMOTE_CIPHER_URL = "https://cipher.kikkia.dev/";
+
     private static final long LOAD_TIMEOUT_SECONDS = 45;
     private static final long PLAYBACK_TIMEOUT_SECONDS = 60;
 
@@ -141,18 +147,30 @@ public final class YoutubeSmokeCheck
 
     public static void main(String[] args)
     {
-        List<String> videoIds = args.length > 0 ? List.of(args) : List.of(DEFAULT_VIDEO_IDS);
+        // --remote-cipher mirrors what enabling OAuth does at runtime: signature decoding is
+        // offloaded to a remote service instead of parsing YouTube's player script locally.
+        // Having it as a switch is what makes "is local extraction broken, or is the whole
+        // chain broken?" answerable in one run instead of by guesswork.
+        boolean remoteCipher = List.of(args).contains(REMOTE_CIPHER_FLAG);
+        List<String> videoIds = List.of(args).stream()
+                                    .filter(arg -> !arg.startsWith("--"))
+                                    .toList();
+        if (videoIds.isEmpty())
+        {
+            videoIds = List.of(DEFAULT_VIDEO_IDS);
+        }
 
         System.out.println("=".repeat(72));
         System.out.println("NextVoiceCord — YouTube extraction smoke check");
         System.out.println("youtube-source: " + detectYoutubeSourceVersion());
+        System.out.println("cipher:         " + (remoteCipher ? "remote (" + REMOTE_CIPHER_URL + ")" : "local"));
         System.out.println("videos:         " + String.join(", ", videoIds));
         System.out.println("=".repeat(72));
 
         List<Result> results = new ArrayList<>();
         for (String videoId : videoIds)
         {
-            Result result = check(videoId);
+            Result result = check(videoId, remoteCipher);
             results.add(result);
             System.out.printf("%n[%s] %s — %s%n", result.status, videoId, result.detail);
 
@@ -221,7 +239,7 @@ public final class YoutubeSmokeCheck
         return EXIT_INCONCLUSIVE;
     }
 
-    private static Result check(String videoId)
+    private static Result check(String videoId, boolean remoteCipher)
     {
         System.out.printf("%n--- checking %s ---%n", videoId);
 
@@ -236,6 +254,11 @@ public final class YoutubeSmokeCheck
                     .setAllowSearch(true)
                     .setAllowDirectVideoIds(true)
                     .setAllowDirectPlaylistIds(true);
+
+            if (remoteCipher)
+            {
+                options.setRemoteCipher(REMOTE_CIPHER_URL, null, "nextvoicecord");
+            }
 
             // Deliberately the bot's own client list, not a copy: a duplicated list could
             // drift and let this check pass while real playback fails.

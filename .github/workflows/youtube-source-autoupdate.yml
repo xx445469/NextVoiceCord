@@ -50,6 +50,10 @@ permissions:
   pull-requests: write
 
 env:
+  # youtube-source is NOT on Maven Central. lavalink-devs publish to their own repository,
+  # which pom.xml already declares as the `arbjergDev` remote. Querying repo1.maven.org
+  # returns 404 for every version, so the workflow can never find an update.
+  YTS_REPO: https://maven.lavalink.dev/releases
   YTS_GROUP_PATH: dev/lavalink/youtube
   YTS_ARTIFACT: v2
   POM_PROPERTY: youtube-source.version
@@ -87,7 +91,7 @@ jobs:
             LATEST="${{ github.event.inputs.force_version }}"
             echo "Version forced via workflow_dispatch: $LATEST"
           else
-            METADATA_URL="https://repo1.maven.org/maven2/${YTS_GROUP_PATH}/${YTS_ARTIFACT}/maven-metadata.xml"
+            METADATA_URL="${YTS_REPO}/${YTS_GROUP_PATH}/${YTS_ARTIFACT}/maven-metadata.xml"
             # <release> is the newest non-snapshot. <latest> can point at a snapshot,
             # which must never be shipped to users.
             LATEST=$(curl -fsSL --retry 3 --retry-delay 5 "$METADATA_URL" \
@@ -138,9 +142,9 @@ jobs:
             version: ${{ needs.check-version.outputs.current }}
           - role: candidate
             version: ${{ needs.check-version.outputs.latest }}
-    outputs:
-      incumbent_verdict: ${{ steps.publish.outputs.incumbent }}
-      candidate_verdict: ${{ steps.publish.outputs.candidate }}
+    # No job-level outputs: this is a matrix, and matrix legs racing to write the same
+    # output means the last to finish wins. Verdicts travel as artifacts instead, which
+    # keeps each leg's result distinct.
     steps:
       - uses: actions/checkout@v6
 
