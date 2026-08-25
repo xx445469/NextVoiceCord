@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NextVoiceCord</title>
+<style>
+  /* Light and dark are both defined on :root, with only the tokens swapped under the
+     media query — the page follows the viewer's OS setting with no toggle to forget. */
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --border: #e3e6ea;
+    --text: #16181d;
+    --muted: #6b7280;
+    --accent: #5865f2;
+    --live: #2eb872;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1014;
+      --surface: #171a21;
+      --border: #262b35;
+      --text: #e7e9ee;
+      --muted: #939aa8;
+      --accent: #7c86ff;
+      --live: #3ad48a;
+      --shadow: none;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 20px 56px;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; }
+
+  header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+  h1 { font-size: 20px; font-weight: 650; margin: 0; letter-spacing: -.01em; }
+  .version { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .dot { margin-left: auto; display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; }
+  .dot i { width: 7px; height: 7px; border-radius: 50%; background: var(--live); display: block; }
+  .dot.stale i { background: var(--muted); }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 22px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .stat b { display: block; font-size: 24px; font-weight: 640; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 12.5px; }
+
+  .guild { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px 17px; margin-bottom: 10px; box-shadow: var(--shadow); }
+  .guild .top { display: flex; align-items: center; gap: 10px; }
+  .guild .name { font-weight: 580; }
+  .guild .meta { color: var(--muted); font-size: 12.5px; margin-left: auto; font-variant-numeric: tabular-nums; }
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--live); color: #fff; letter-spacing: .02em; }
+  .badge.idle { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+  .track { margin-top: 11px; }
+  .title { font-size: 14px; margin-bottom: 2px; overflow-wrap: anywhere; }
+  .artist { color: var(--muted); font-size: 12.5px; }
+  .bar { height: 4px; background: var(--border); border-radius: 999px; margin: 10px 0 5px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .8s linear; }
+  .times { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+  .empty { color: var(--muted); text-align: center; padding: 44px 0; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>NextVoiceCord</h1>
+    <span class="version" id="version"></span>
+    <span class="dot" id="live"><i></i><span id="livetext">connecting</span></span>
+  </header>
+
+  <div class="stats" id="stats"></div>
+  <div id="guilds"></div>
+
+  <footer>Read-only. Playback is controlled from Discord, where the bot knows who pressed what.</footer>
+</div>
+
+<script>
+// The token travels in the URL because that is what makes the link the bot prints work by
+// pasting. It is kept out of the address bar afterwards so a screenshot of the panel does
+// not hand it to whoever sees the screenshot.
+const token = new URLSearchParams(location.search).get('token') || '';
+if (token) history.replaceState(null, '', location.pathname);
+
+const el = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+let failures = 0;
+
+function setLive(ok, text) {
+  el('live').className = ok ? 'dot' : 'dot stale';
+  el('livetext').textContent = text;
+}
+
+function stat(value, label) {
+  return `<div class="stat"><b>${esc(value)}</b><span>${esc(label)}</span></div>`;
+}
+
+function guildCard(g) {
+  const badge = g.playing
+    ? '<span class="badge">playing</span>'
+    : '<span class="badge idle">idle</span>';
+
+  const meta = g.playing && g.channel
+    ? `${esc(g.channel)} · ${g.queue} queued · vol ${g.volume}`
+    : `${g.members} members`;
+
+  const track = g.playing ? `
+    <div class="track">
+      <div class="title">${esc(g.track)}</div>
+      <div class="artist">${esc(g.author || '')}</div>
+      <div class="bar"><i style="width:${Number(g.progress) || 0}%"></i></div>
+      <div class="times"><span>${esc(g.position)}</span><span>${esc(g.duration)}</span></div>
+    </div>` : '';
+
+  return `<div class="guild">
+      <div class="top">${badge}<span class="name">${esc(g.name)}</span><span class="meta">${esc(meta)}</span></div>
+      ${track}
+    </div>`;
+}
+
+async function refresh() {
+  try {
+    const res = await fetch('/api/status', { headers: { Authorization: 'Bearer ' + token } });
+    if (!res.ok) {
+      setLive(false, res.status === 401 ? 'unauthorised' : 'error ' + res.status);
+      return;
+    }
+    const d = await res.json();
+    failures = 0;
+    setLive(true, 'live');
+
+    el('version').textContent = d.version;
+    el('stats').innerHTML =
+        stat(d.playingCount, 'playing now') +
+        stat(d.guildCount, 'servers') +
+        stat(d.listeners, 'listeners') +
+        stat(d.uptime, 'uptime') +
+        stat(d.memoryUsedMb + ' MB', 'memory of ' + d.memoryMaxMb);
+
+    el('guilds').innerHTML = d.guilds.length
+        ? d.guilds.map(guildCard).join('')
+        : '<div class="empty">This bot is not in any servers yet.</div>';
+  } catch (e) {
+    // Shown after two consecutive failures rather than the first: a single dropped poll
+    // during a restart should not make a working panel look broken.
+    if (++failures >= 2) setLive(false, 'disconnected');
+  }
+}
+
+refresh();
+setInterval(refresh, 3000);
+</script>
+</body>
+</html>
