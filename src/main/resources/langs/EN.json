@@ -537,5 +537,37 @@
         "engineMissing": "The eval engine provided in the config (`{0}`) doesn't exist. This could be due to an invalid engine name, or the engine not existing in your version of java (`{1}`)."
       }
     }
+  },
+  "controller": {
+    "editor": {
+      "title": "Control Panel Layout",
+      "description": "Edit the buttons shown on the now-playing panel. The preview below shows what this layout produces — the buttons are disabled here.",
+      "warnings": "Some entries were adjusted:",
+      "applied": "Layout updated.",
+      "reset": "Layout reset to the default.",
+      "field": {
+        "source": "Source",
+        "layout": "Layout"
+      },
+      "source": {
+        "custom": "Custom",
+        "default": "Default"
+      },
+      "button": {
+        "edit": "Edit",
+        "refresh": "Refresh",
+        "reset": "Reset"
+      },
+      "modal": {
+        "title": "Edit control panel layout",
+        "label": "Layout (JSON)",
+        "placeholder": "[ { \"back\": {}, \"play-pause\": {}, \"skip\": {} } ]"
+      },
+      "errors": {
+        "invalidJson": "That is not valid JSON. Each row is an object of button names, and the whole layout is a list of rows.",
+        "notAnArray": "A layout must be a list of rows, for example: [ { \"skip\": {} } ]",
+        "noButtons": "That layout contains no usable buttons, so it was not applied."
+      }
+    }
   }
 }
