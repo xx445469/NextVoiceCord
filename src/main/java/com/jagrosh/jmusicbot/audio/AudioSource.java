@@ -3,7 +3,8 @@
  *
  * Modifications copyright 2026 adan (xx445469) - NextVoiceCord.
  * Changes: exposed buildYoutubeClients() so the YouTube smoke check can
- * exercise the exact same client list the bot uses at runtime.
+ * exercise the exact same client list the bot uses at runtime; added
+ * proof-of-origin token support and a configurable client list.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -39,6 +41,12 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceMan
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.YoutubeSourceOptions;
+import dev.lavalink.youtube.clients.AndroidMusicWithThumbnail;
+import dev.lavalink.youtube.clients.AndroidWithThumbnail;
+import dev.lavalink.youtube.clients.IosWithThumbnail;
+import dev.lavalink.youtube.clients.MusicWithThumbnail;
+import dev.lavalink.youtube.clients.Web;
+import dev.lavalink.youtube.clients.WebEmbeddedWithThumbnail;
 import dev.lavalink.youtube.clients.AndroidVrWithThumbnail;
 import dev.lavalink.youtube.clients.ClientOptions;
 import dev.lavalink.youtube.clients.MWebWithThumbnail;
@@ -236,8 +244,14 @@ public enum AudioSource
         final Logger logger = LoggerFactory.getLogger(AudioSource.class);
         
         boolean useOauth = config.useYouTubeOauth();
+
+        // Applied before any client is constructed: Web reads the static field when it builds
+        // its request context, so setting it afterwards would leave the first requests
+        // unauthenticated.
+        applyPoToken(config, logger);
+
         YoutubeSourceOptions options = buildYoutubeOptions(config);
-        Client[] clients = buildYoutubeClients(useOauth);
+        Client[] clients = buildYoutubeClients(config, useOauth, logger);
 
         YoutubeAudioSourceManager yt = new YoutubeAudioSourceManager(options, clients);
         yt.setPlaylistPageCount(config.getMaxYTPlaylistPages());
@@ -288,6 +302,87 @@ public enum AudioSource
      * client list. Keeping a single definition matters: a smoke check that duplicated the
      * list could pass while real playback fails.
      */
+    /**
+     * Supplies the proof-of-origin token, if one is configured.
+     *
+     * <p>YouTube increasingly refuses requests carrying neither a poToken nor an OAuth login,
+     * either with a bot check or by returning only formats that cannot be played. This is the
+     * mechanism upstream documents for it, and it is a no-op when unconfigured.
+     */
+    private static void applyPoToken(BotConfig config, Logger logger)
+    {
+        if (!config.hasYoutubePoToken())
+        {
+            return;
+        }
+        // Paired deliberately: a poToken is bound to the visitorData it was minted with and
+        // is rejected alongside any other, so the config requires both or neither.
+        Web.setPoTokenAndVisitorData(config.getYoutubePoToken(), config.getYoutubeVisitorData());
+        logger.info("YouTube proof-of-origin token applied.");
+    }
+
+    /**
+     * Builds the client list, from config where given.
+     *
+     * <p>YouTube breaks clients one at a time rather than all at once, so being able to
+     * reorder this without rebuilding is what makes a same-day workaround possible.
+     */
+    public static Client[] buildYoutubeClients(BotConfig config, boolean useOauth, Logger logger)
+    {
+        java.util.List<String> names = config.getYoutubeClients();
+        if (names == null || names.isEmpty())
+        {
+            return buildYoutubeClients(useOauth);
+        }
+
+        java.util.List<Client> clients = new java.util.ArrayList<>();
+        for (String name : names)
+        {
+            Client client = clientByName(name, useOauth);
+            if (client == null)
+            {
+                logger.warn("Unknown YouTube client '{}' in playback.youtube.clients; skipping it.", name);
+                continue;
+            }
+            clients.add(client);
+        }
+
+        if (clients.isEmpty())
+        {
+            // Falling back rather than starting with no clients: an empty list would make
+            // every YouTube request fail with an error that never mentions the config.
+            logger.warn("No usable clients in playback.youtube.clients; using the built-in defaults.");
+            return buildYoutubeClients(useOauth);
+        }
+
+        logger.info("YouTube clients: {}", names);
+        return clients.toArray(new Client[0]);
+    }
+
+    /** Maps a configured name to a client, or null if the name is not recognised. */
+    private static Client clientByName(String name, boolean useOauth)
+    {
+        // Metadata-only options mirror the OAuth path below: those clients cannot stream
+        // under OAuth, but are still the best at resolving track information.
+        ClientOptions metadataOnly = new ClientOptions();
+        metadataOnly.setPlayback(false);
+
+        return switch (name.trim().toUpperCase(Locale.ROOT).replace("_", ""))
+        {
+            case "MUSIC"          -> new MusicWithThumbnail();
+            case "WEB"            -> useOauth ? new WebWithThumbnail(metadataOnly) : new WebWithThumbnail();
+            case "WEBEMBEDDED"    -> new WebEmbeddedWithThumbnail();
+            case "ANDROID"        -> new AndroidWithThumbnail();
+            case "ANDROIDVR"      -> useOauth ? new AndroidVrWithThumbnail(metadataOnly) : new AndroidVrWithThumbnail();
+            case "ANDROIDMUSIC"   -> new AndroidMusicWithThumbnail();
+            case "IOS"            -> new IosWithThumbnail();
+            case "MWEB"           -> useOauth ? new MWebWithThumbnail(metadataOnly) : new MWebWithThumbnail();
+            case "TV"             -> new Tv();
+            case "TVHTML5SIMPLY"  -> new TvHtml5SimplyWithThumbnail();
+            default               -> null;
+        };
+    }
+
     public static Client[] buildYoutubeClients(boolean useOauth)
     {
         if (useOauth)
