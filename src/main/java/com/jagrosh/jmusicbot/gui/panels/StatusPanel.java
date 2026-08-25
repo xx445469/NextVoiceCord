@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import com.jagrosh.jmusicbot.gui.components.StyledComponents;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
@@ -70,7 +71,7 @@ public class StatusPanel extends JPanel {
         guildList.addListSelectionListener(this::onGuildSelected);
         
         JScrollPane listScrollPane = new JScrollPane(guildList);
-        listScrollPane.setBorder(new TitledBorder("Connected Guilds"));
+        listScrollPane.setBorder(StyledComponents.createSectionBorder("Connected Guilds"));
         listScrollPane.setPreferredSize(new Dimension(250, 0));
         
         // Initialize detail labels
@@ -95,7 +96,7 @@ public class StatusPanel extends JPanel {
         
         // Right panel with card layout for switching between no-selection and details
         JPanel rightPanel = new JPanel(new BorderLayout());
-        rightPanel.setBorder(new TitledBorder("Guild Details"));
+        rightPanel.setBorder(StyledComponents.createSectionBorder("Guild Details"));
         rightPanel.add(noSelectionLabel, BorderLayout.CENTER);
         
         // Create split pane

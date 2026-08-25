@@ -19,6 +19,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import com.formdev.flatlaf.ui.FlatLineBorder;
+import java.util.Locale;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
@@ -260,7 +262,71 @@ public final class StyledComponents {
      * Creates a titled border.
      */
     public static Border createTitledBorder(String title) {
-        return new TitledBorder(title);
+        return createSectionBorder(title);
+    }
+
+    /**
+     * A titled section: rounded hairline, muted uppercase label, breathing room inside.
+     *
+     * <p>Replaces the default {@link TitledBorder}, whose etched groove is the single most
+     * dated element a Swing window can contain — a bevel imitating a physical inset, a
+     * convention every desktop platform abandoned years ago.
+     *
+     * <p>The title is set smaller, letter-spaced and in a muted colour so it reads as a label
+     * for the content rather than competing with it. The default draws it at full body weight
+     * and colour, which makes every section heading shout as loudly as the data inside.
+     */
+    public static Border createSectionBorder(String title) {
+        Color line = UIManager.getColor("Component.borderColor");
+        if (line == null) {
+            line = UIManager.getColor("Separator.foreground");
+        }
+        if (line == null) {
+            line = new Color(0x80808080, true);
+        }
+
+        // Insets on the border itself rather than a nested EmptyBorder: one border object
+        // instead of two, and the padding then follows the rounded corner correctly.
+        FlatLineBorder outline = new FlatLineBorder(
+                new Insets(PADDING_LARGE, PADDING_MEDIUM, PADDING_MEDIUM, PADDING_MEDIUM),
+                line, 1f, 10);
+
+        TitledBorder titled = new TitledBorder(outline, title.toUpperCase(Locale.ROOT));
+        titled.setTitleFont(deriveLabelFont());
+        titled.setTitleColor(mutedForeground());
+        titled.setTitlePosition(TitledBorder.TOP);
+        titled.setTitleJustification(TitledBorder.LEADING);
+        return titled;
+    }
+
+    /** Small, semi-bold label type for section headings. */
+    private static Font deriveLabelFont() {
+        Font base = UIManager.getFont("Label.font");
+        if (base == null) {
+            base = new Font(Font.SANS_SERIF, Font.PLAIN, (int) FONT_SMALL);
+        }
+        return base.deriveFont(Font.BOLD, Math.max(10f, base.getSize2D() - 1f));
+    }
+
+    /**
+     * Label colour at reduced emphasis.
+     *
+     * <p>Blended toward the background rather than hardcoded grey, so it stays legible in
+     * both light and dark themes and follows a theme switch.
+     */
+    private static Color mutedForeground() {
+        Color fg = UIManager.getColor("Label.foreground");
+        Color bg = UIManager.getColor("Panel.background");
+        if (fg == null) {
+            return Color.GRAY;
+        }
+        if (bg == null) {
+            return fg;
+        }
+        return new Color(
+                (fg.getRed() + bg.getRed()) / 2,
+                (fg.getGreen() + bg.getGreen()) / 2,
+                (fg.getBlue() + bg.getBlue()) / 2);
     }
     
     /**

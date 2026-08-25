@@ -19,6 +19,7 @@ import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import com.jagrosh.jmusicbot.gui.components.StyledComponents;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.File;
@@ -71,7 +72,7 @@ public class SettingsPanel extends JPanel {
      */
     private JPanel createAppearanceSection() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("Appearance"));
+        panel.setBorder(StyledComponents.createSectionBorder("Appearance"));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -135,7 +136,7 @@ public class SettingsPanel extends JPanel {
      */
     private JPanel createConfigSection() {
         JPanel panel = new JPanel(new BorderLayout(8, 8));
-        panel.setBorder(new TitledBorder("Configuration"));
+        panel.setBorder(StyledComponents.createSectionBorder("Configuration"));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
         
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
@@ -166,7 +167,7 @@ public class SettingsPanel extends JPanel {
      */
     private JPanel createInfoSection() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("System Information"));
+        panel.setBorder(StyledComponents.createSectionBorder("System Information"));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
         
         GridBagConstraints gbc = new GridBagConstraints();

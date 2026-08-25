@@ -21,6 +21,7 @@ import com.jagrosh.jmusicbot.audio.VoiceConnectionMonitor;
 import com.jagrosh.jmusicbot.audio.VoiceConnectionMonitor.VoiceEvent;
 
 import javax.swing.*;
+import com.jagrosh.jmusicbot.gui.components.StyledComponents;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -76,7 +77,7 @@ public class EnhancedTimelinePanel extends JPanel {
         // Set minimum size but allow growth to fill available space
         setPreferredSize(new Dimension(600, MIN_LAYER_HEIGHT * 5 + MARGIN_TOP + MARGIN_BOTTOM));
         setMinimumSize(new Dimension(300, MIN_LAYER_HEIGHT * 5 + MARGIN_TOP + MARGIN_BOTTOM));
-        setBorder(new TitledBorder("Enhanced Timeline"));
+        setBorder(StyledComponents.createSectionBorder("Enhanced Timeline"));
         
         // Add mouse motion listener for tooltips
         addMouseMotionListener(new MouseMotionAdapter() {
