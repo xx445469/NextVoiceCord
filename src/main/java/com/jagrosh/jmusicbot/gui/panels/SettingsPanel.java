@@ -15,12 +15,11 @@
  */
 package com.jagrosh.jmusicbot.gui.panels;
 
+import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
+import com.jagrosh.jmusicbot.gui.theme.Tokens;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import com.jagrosh.jmusicbot.gui.components.StyledComponents;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -31,64 +30,69 @@ import java.io.IOException;
  * @author Arif Banai (arif-banai)
  */
 public class SettingsPanel extends JPanel {
-    
-    private final JComboBox<ThemeManager.Theme> themeComboBox;
-    private final JSpinner fontSizeSpinner;
-    
+
     public SettingsPanel() {
-        super(new BorderLayout(8, 8));
-        setBorder(new EmptyBorder(8, 8, 8, 8));
-        
-        // Create main content panel with vertical layout
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        
-        // Appearance section
-        JPanel appearancePanel = createAppearanceSection();
-        contentPanel.add(appearancePanel);
-        contentPanel.add(Box.createVerticalStrut(16));
-        
-        // Configuration section
-        JPanel configPanel = createConfigSection();
-        contentPanel.add(configPanel);
-        contentPanel.add(Box.createVerticalStrut(16));
-        
-        // Info section
-        JPanel infoPanel = createInfoSection();
-        contentPanel.add(infoPanel);
-        
-        // Add filler to push content to top
-        contentPanel.add(Box.createVerticalGlue());
-        
-        // Initialize combo box reference
-        themeComboBox = (JComboBox<ThemeManager.Theme>) findComponentByName(appearancePanel, "themeComboBox");
-        fontSizeSpinner = (JSpinner) findComponentByName(appearancePanel, "fontSizeSpinner");
-        
-        add(new JScrollPane(contentPanel), BorderLayout.CENTER);
+        setLayout(new BorderLayout(0, Tokens.SPACE_MD));
+        setOpaque(false);
+        setBorder(BorderFactory.createEmptyBorder(
+                Tokens.SPACE_LG, Tokens.SPACE_LG, Tokens.SPACE_LG, Tokens.SPACE_LG));
+
+        add(buildHeader(), BorderLayout.NORTH);
+        add(buildScrollArea(), BorderLayout.CENTER);
     }
-    
+
+    private Component buildHeader() {
+        JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
+        header.add(Widgets.pageTitle("Preferences"), BorderLayout.NORTH);
+        header.add(Widgets.muted("How this window looks — the bot itself is unaffected"), BorderLayout.SOUTH);
+        return header;
+    }
+
+    private Component buildScrollArea() {
+        JPanel content = Widgets.transparent(null);
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
+        content.add(createAppearanceSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createConfigSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createInfoSection());
+
+        JScrollPane scrollPane = new JScrollPane(content);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        return scrollPane;
+    }
+
+    /** One preference: a label on the left, its control on the right. */
+    private JPanel preferenceRow(String label, JComponent control) {
+        JPanel row = Widgets.transparent(new BorderLayout(Tokens.SPACE_MD, 0));
+        row.setAlignmentX(LEFT_ALIGNMENT);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+
+        JLabel l = new JLabel(label);
+        l.setFont(Tokens.fontBody());
+        l.setForeground(Tokens.text());
+        row.add(l, BorderLayout.WEST);
+
+        JPanel controlWrap = Widgets.transparent(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        controlWrap.add(control);
+        row.add(controlWrap, BorderLayout.EAST);
+        return row;
+    }
+
     /**
      * Creates the appearance settings section.
      */
     private JPanel createAppearanceSection() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(StyledComponents.createSectionBorder("Appearance"));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
-        
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 8, 4, 8);
-        gbc.anchor = GridBagConstraints.WEST;
-        
-        // Theme selector
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(new JLabel("Theme:"), gbc);
-        
-        gbc.gridx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
+        JPanel body = Widgets.transparent(null);
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+
         JComboBox<ThemeManager.Theme> themeBox = new JComboBox<>(ThemeManager.Theme.values());
-        themeBox.setName("themeComboBox");
+        themeBox.setFont(Tokens.fontBody());
         themeBox.setSelectedItem(ThemeManager.getCurrentTheme());
         themeBox.addActionListener(e -> {
             ThemeManager.Theme selected = (ThemeManager.Theme) themeBox.getSelectedItem();
@@ -96,121 +100,87 @@ public class SettingsPanel extends JPanel {
                 ThemeManager.setTheme(selected);
             }
         });
-        panel.add(themeBox, gbc);
-        
-        // Font size spinner
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.weightx = 0;
-        panel.add(new JLabel("Font Size:"), gbc);
-        
-        gbc.gridx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
+
         SpinnerNumberModel fontModel = new SpinnerNumberModel(
             ThemeManager.getBaseFontSize(), 8, 24, 1
         );
         JSpinner fontSpinner = new JSpinner(fontModel);
-        fontSpinner.setName("fontSizeSpinner");
+        fontSpinner.setFont(Tokens.fontBody());
         fontSpinner.addChangeListener(e -> {
             int size = (Integer) fontSpinner.getValue();
             ThemeManager.setBaseFontSize(size);
         });
-        panel.add(fontSpinner, gbc);
-        
-        // Note about persistence
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        JLabel noteLabel = new JLabel("<html><i>Note: Theme and font size changes are applied immediately but not saved to config.</i></html>");
-        noteLabel.setFont(noteLabel.getFont().deriveFont(10f));
-        noteLabel.setForeground(Color.GRAY);
-        panel.add(noteLabel, gbc);
-        
-        return panel;
+
+        body.add(preferenceRow("Theme", themeBox));
+        body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
+        body.add(preferenceRow("Font size", fontSpinner));
+        body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
+
+        JLabel note = Widgets.muted("Applied immediately. Not saved to config.");
+        note.setAlignmentX(LEFT_ALIGNMENT);
+        body.add(note);
+
+        return Widgets.titledCard("Appearance", body);
     }
-    
+
     /**
      * Creates the configuration info section.
      */
     private JPanel createConfigSection() {
-        JPanel panel = new JPanel(new BorderLayout(8, 8));
-        panel.setBorder(StyledComponents.createSectionBorder("Configuration"));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
-        
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        
-        // Open config folder button
-        JButton openFolderButton = new JButton("Open Config Folder");
+        JPanel body = Widgets.transparent(null);
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+
+        JPanel buttonPanel = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
+        buttonPanel.setAlignmentX(LEFT_ALIGNMENT);
+
+        JButton openFolderButton = new JButton("Open config folder");
+        openFolderButton.setFont(Tokens.fontBody());
         openFolderButton.addActionListener(e -> openConfigFolder());
         buttonPanel.add(openFolderButton);
-        
-        // Open config file button
+
         JButton openFileButton = new JButton("Open config.txt");
+        openFileButton.setFont(Tokens.fontBody());
         openFileButton.addActionListener(e -> openConfigFile());
         buttonPanel.add(openFileButton);
-        
-        panel.add(buttonPanel, BorderLayout.CENTER);
-        
-        JLabel pathLabel = new JLabel("<html><i>Config location: " + getConfigPath() + "</i></html>");
-        pathLabel.setFont(pathLabel.getFont().deriveFont(10f));
-        pathLabel.setForeground(Color.GRAY);
-        pathLabel.setBorder(new EmptyBorder(0, 8, 4, 8));
-        panel.add(pathLabel, BorderLayout.SOUTH);
-        
-        return panel;
+
+        body.add(buttonPanel);
+        body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
+
+        JLabel pathLabel = Widgets.muted("Location: " + getConfigPath());
+        pathLabel.setAlignmentX(LEFT_ALIGNMENT);
+        body.add(pathLabel);
+
+        return Widgets.titledCard("Configuration", body);
     }
-    
+
     /**
      * Creates the system info section.
      */
     private JPanel createInfoSection() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(StyledComponents.createSectionBorder("System Information"));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
-        
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(2, 8, 2, 8);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        
-        // Java version
-        gbc.gridy = 0;
-        panel.add(createInfoRow("Java Version:", System.getProperty("java.version")), gbc);
-        
-        // Java vendor
-        gbc.gridy = 1;
-        panel.add(createInfoRow("Java Vendor:", System.getProperty("java.vendor")), gbc);
-        
-        // OS
-        gbc.gridy = 2;
-        panel.add(createInfoRow("Operating System:", 
-            System.getProperty("os.name") + " " + System.getProperty("os.version")), gbc);
-        
-        // Current theme
-        gbc.gridy = 3;
-        panel.add(createInfoRow("Current Theme:", ThemeManager.getCurrentTheme().getDisplayName()), gbc);
-        
-        // FlatLaf version
-        gbc.gridy = 4;
-        panel.add(createInfoRow("FlatLaf:", "3.7"), gbc);
-        
-        return panel;
+        JPanel body = Widgets.transparent(null);
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+
+        body.add(preferenceRow("Java version", mutedValue(System.getProperty("java.version"))));
+        body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
+        body.add(preferenceRow("Java vendor", mutedValue(System.getProperty("java.vendor"))));
+        body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
+        body.add(preferenceRow("Operating system",
+                mutedValue(System.getProperty("os.name") + " " + System.getProperty("os.version"))));
+        body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
+        body.add(preferenceRow("Current theme", mutedValue(ThemeManager.getCurrentTheme().getDisplayName())));
+        body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
+        body.add(preferenceRow("FlatLaf", mutedValue("3.7")));
+
+        return Widgets.titledCard("System information", body);
     }
-    
-    /**
-     * Creates an info row with label and value.
-     */
-    private JPanel createInfoRow(String label, String value) {
-        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-        JLabel labelComponent = new JLabel(label);
-        labelComponent.setFont(labelComponent.getFont().deriveFont(Font.BOLD));
-        row.add(labelComponent);
-        row.add(new JLabel(value));
-        return row;
+
+    private JLabel mutedValue(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(Tokens.fontBody());
+        label.setForeground(Tokens.textMuted());
+        return label;
     }
-    
+
     /**
      * Gets the config file path.
      */
@@ -222,7 +192,7 @@ public class SettingsPanel extends JPanel {
             return configFile.getAbsolutePath();
         }
     }
-    
+
     /**
      * Opens the config folder in the system file manager.
      */
@@ -243,7 +213,7 @@ public class SettingsPanel extends JPanel {
             );
         }
     }
-    
+
     /**
      * Opens the config file in the default text editor.
      */
@@ -268,23 +238,5 @@ public class SettingsPanel extends JPanel {
                 JOptionPane.ERROR_MESSAGE
             );
         }
-    }
-    
-    /**
-     * Finds a component by name within a container.
-     */
-    private Component findComponentByName(Container container, String name) {
-        for (Component comp : container.getComponents()) {
-            if (name.equals(comp.getName())) {
-                return comp;
-            }
-            if (comp instanceof Container) {
-                Component found = findComponentByName((Container) comp, name);
-                if (found != null) {
-                    return found;
-                }
-            }
-        }
-        return null;
     }
 }

@@ -1,5 +1,6 @@
 package com.jagrosh.jmusicbot.commands.v2.admin;
 
+import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
@@ -28,6 +29,14 @@ import net.dv8tion.jda.api.modals.Modal;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Static rendering helpers for the /settings panel.
+ *
+ * <p>This is a static utility class with no {@link Bot} field of its own, so every method
+ * that produces user-visible text takes {@code bot} (and {@code guild}) as a parameter and
+ * resolves strings through {@link Bot#msg}. Callers live in {@code listener/} and
+ * {@code commands/v1|v2/}.
+ */
 public final class SettingsPanelRenderer
 {
     public static final String ACTION_ENUM = "enum";
@@ -64,26 +73,29 @@ public final class SettingsPanelRenderer
     }
 
     public static net.dv8tion.jda.api.entities.MessageEmbed buildSettingsEmbed(
-            Guild guild, Settings settings, BotConfig config, java.awt.Color color)
+            Bot bot, Guild guild, Settings settings, BotConfig config, java.awt.Color color)
     {
-        return buildSettingsEmbed(guild, settings, config, color, null);
+        return buildSettingsEmbed(bot, guild, settings, config, color, null);
     }
 
     public static net.dv8tion.jda.api.entities.MessageEmbed buildSettingsEmbed(
-            Guild guild, Settings settings, BotConfig config, java.awt.Color color, String invokerName)
+            Bot bot, Guild guild, Settings settings, BotConfig config, java.awt.Color color, String invokerName)
     {
         TextChannel textChannel = settings.getTextChannel(guild);
         VoiceChannel voiceChannel = settings.getVoiceChannel(guild);
         Role djRole = settings.getRole(guild);
 
-        String prefix = settings.getPrefix() == null ? "None" : "`" + settings.getPrefix() + "`";
+        String valueNone = bot.msg(guild, "settings.panel.valueNone");
+        String valueAny = bot.msg(guild, "settings.panel.valueAny");
+
+        String prefix = settings.getPrefix() == null ? valueNone : "`" + settings.getPrefix() + "`";
         int skipRatio = (int) Math.round(settings.getSkipRatio() * 100);
         String skipRatioDisplay = settings.getSkipRatio() < 0
-                ? "Default (`55%`)"
+                ? bot.msg(guild, "settings.panel.skipDefault")
                 : "`" + skipRatio + "%`";
-        String textChannelDisplay = textChannel == null ? "Any" : textChannel.getAsMention();
-        String voiceChannelDisplay = voiceChannel == null ? "Any" : voiceChannel.getAsMention();
-        String djRoleDisplay = djRole == null ? "None" : "**" + djRole.getName() + "**";
+        String textChannelDisplay = textChannel == null ? valueAny : textChannel.getAsMention();
+        String voiceChannelDisplay = voiceChannel == null ? valueAny : voiceChannel.getAsMention();
+        String djRoleDisplay = djRole == null ? valueNone : "**" + djRole.getName() + "**";
 
         boolean effectiveMinimal = settings.useMinimalNowPlayingMessage(config);
         boolean effectiveButtons = settings.showNowPlayingButtons(config);
@@ -91,41 +103,41 @@ public final class SettingsPanelRenderer
                 + "` (effective: `" + (effectiveMinimal ? "minimal" : "full") + "`)";
         String nowPlayingButtons = "`" + settings.getNowPlayingButtonsMode().getUserInputValue()
                 + "` (effective: `" + (effectiveButtons ? "on" : "off") + "`)";
-        String nowPlayingValue = "Layout: " + nowPlayingLayout + "\nButtons: " + nowPlayingButtons;
+        String nowPlayingValue = bot.msg(guild, "settings.panel.field.layout") + ": " + nowPlayingLayout
+                + "\n" + bot.msg(guild, "settings.panel.field.buttons") + ": " + nowPlayingButtons;
 
         String footer = invokerName != null && !invokerName.isBlank()
-                ? "Only " + invokerName + " can use these controls."
-                : "Only the command invoker can use these controls.";
+                ? bot.msg(guild, "settings.panel.footerNamed", invokerName)
+                : bot.msg(guild, "settings.panel.footerGeneric");
 
         return new EmbedBuilder()
-                .setTitle("MusicBot Settings")
+                .setTitle(bot.msg(guild, "settings.panel.title"))
                 .setColor(color)
-                .setDescription("Settings panel for **" + guild.getName() + "**.\n"
-                        + "Use the buttons below to update values.")
-                .addField("Text Channel", textChannelDisplay, true)
-                .addField("Voice Channel", voiceChannelDisplay, true)
-                .addField("DJ Role", djRoleDisplay, true)
-                .addField("Prefix", prefix, true)
-                .addField("Skip Ratio", skipRatioDisplay, true)
-                .addField("Queue Type", "`" + settings.getQueueType().getUserFriendlyName() + "`", true)
-                .addField("Now-Playing", nowPlayingValue, false)
+                .setDescription(bot.msg(guild, "settings.panel.description", guild.getName()))
+                .addField(bot.msg(guild, "settings.panel.field.textChannel"), textChannelDisplay, true)
+                .addField(bot.msg(guild, "settings.panel.field.voiceChannel"), voiceChannelDisplay, true)
+                .addField(bot.msg(guild, "settings.panel.field.djRole"), djRoleDisplay, true)
+                .addField(bot.msg(guild, "settings.panel.field.prefix"), prefix, true)
+                .addField(bot.msg(guild, "settings.panel.field.skipRatio"), skipRatioDisplay, true)
+                .addField(bot.msg(guild, "settings.panel.field.queueType"), "`" + settings.getQueueType().getUserFriendlyName() + "`", true)
+                .addField(bot.msg(guild, "settings.panel.field.nowPlaying"), nowPlayingValue, false)
                 .setFooter(footer)
                 .build();
     }
 
-    public static List<ActionRow> buildSettingsComponents(Settings settings, long userId)
+    public static List<ActionRow> buildSettingsComponents(Bot bot, Guild guild, Settings settings, long userId)
     {
-        Button queueToggle = toggleButton("queue", "Toggle Queue", userId);
-        Button layoutToggle = toggleButton("layout", "Toggle Layout", userId);
-        Button npButtonsToggle = toggleButton("npbuttons", "Toggle Buttons", userId);
+        Button queueToggle = toggleButton("queue", bot.msg(guild, "settings.panel.button.toggleQueue"), userId);
+        Button layoutToggle = toggleButton("layout", bot.msg(guild, "settings.panel.button.toggleLayout"), userId);
+        Button npButtonsToggle = toggleButton("npbuttons", bot.msg(guild, "settings.panel.button.toggleButtons"), userId);
 
-        Button setTextChannel = Button.secondary(buttonId(ACTION_OPEN, "settc", null, userId), "Set Text Channel");
-        Button setVoiceChannel = Button.secondary(buttonId(ACTION_OPEN, "setvc", null, userId), "Set Voice Channel");
-        Button setDjRole = Button.secondary(buttonId(ACTION_OPEN, "setdj", null, userId), "Set DJ Role");
-        Button setPrefix = Button.secondary(buttonId(ACTION_OPEN, "prefix", null, userId), "Set Prefix");
-        Button setSkip = Button.secondary(buttonId(ACTION_OPEN, "setskip", null, userId), "Set Skip %");
+        Button setTextChannel = Button.secondary(buttonId(ACTION_OPEN, "settc", null, userId), bot.msg(guild, "settings.panel.button.setTextChannel"));
+        Button setVoiceChannel = Button.secondary(buttonId(ACTION_OPEN, "setvc", null, userId), bot.msg(guild, "settings.panel.button.setVoiceChannel"));
+        Button setDjRole = Button.secondary(buttonId(ACTION_OPEN, "setdj", null, userId), bot.msg(guild, "settings.panel.button.setDjRole"));
+        Button setPrefix = Button.secondary(buttonId(ACTION_OPEN, "prefix", null, userId), bot.msg(guild, "settings.panel.button.setPrefix"));
+        Button setSkip = Button.secondary(buttonId(ACTION_OPEN, "setskip", null, userId), bot.msg(guild, "settings.panel.button.setSkip"));
 
-        Button close = Button.danger(buttonId(ACTION_CLOSE, "main", null, userId), "Close");
+        Button close = Button.danger(buttonId(ACTION_CLOSE, "main", null, userId), bot.msg(guild, "settings.panel.button.close"));
 
         return List.of(
                 ActionRow.of(queueToggle),
@@ -136,38 +148,40 @@ public final class SettingsPanelRenderer
     }
 
     public static List<MessageTopLevelComponent> buildSettingsMessageComponents(
-            Guild guild, Settings settings, BotConfig config, long userId, String invokerName)
+            Bot bot, Guild guild, Settings settings, BotConfig config, long userId, String invokerName)
     {
-        List<ContainerChildComponent> children = new ArrayList<>(buildSettingsDisplayChildren(guild, settings, config, invokerName, userId));
+        List<ContainerChildComponent> children = new ArrayList<>(buildSettingsDisplayChildren(bot, guild, settings, config, invokerName, userId));
         return List.of(Container.of(children));
     }
 
-    public static Modal buildModal(String key, long userId)
+    public static Modal buildModal(Bot bot, Guild guild, String key, long userId)
     {
         return switch (key)
         {
             case "prefix" -> buildSingleInputModal(
                     modalId("prefix", userId),
-                    "Set prefix",
+                    bot.msg(guild, "settings.modal.setPrefixTitle"),
                     "prefix_value",
-                    "Custom prefix (empty clears)"
+                    bot.msg(guild, "settings.modal.setPrefixPlaceholder"),
+                    bot.msg(guild, "settings.modal.labelValue")
             );
             case "setskip" -> buildSingleInputModal(
                     modalId("setskip", userId),
-                    "Set skip percentage",
+                    bot.msg(guild, "settings.modal.setSkipTitle"),
                     "setskip_value",
-                    "Integer from 0 to 100"
+                    bot.msg(guild, "settings.modal.setSkipPlaceholder"),
+                    bot.msg(guild, "settings.modal.labelValue")
             );
             default -> null;
         };
     }
 
-    public static EntitySelectMenu buildEntitySelectMenu(String key, long userId)
+    public static EntitySelectMenu buildEntitySelectMenu(Bot bot, Guild guild, String key, long userId)
     {
-        return buildEntitySelectMenu(key, userId, -1L);
+        return buildEntitySelectMenu(bot, guild, key, userId, -1L);
     }
 
-    public static EntitySelectMenu buildEntitySelectMenu(String key, long userId, long originalPanelMessageId)
+    public static EntitySelectMenu buildEntitySelectMenu(Bot bot, Guild guild, String key, long userId, long originalPanelMessageId)
     {
         String id = originalPanelMessageId > 0
                 ? entitySelectId(key, originalPanelMessageId, userId)
@@ -176,39 +190,39 @@ public final class SettingsPanelRenderer
         {
             case "settc" -> EntitySelectMenu.create(id, SelectTarget.CHANNEL)
                     .setChannelTypes(ChannelType.TEXT)
-                    .setPlaceholder("Choose a text channel")
+                    .setPlaceholder(bot.msg(guild, "settings.panel.select.textChannelPlaceholder"))
                     .setRequiredRange(1, 1)
                     .build();
             case "setvc" -> EntitySelectMenu.create(id, SelectTarget.CHANNEL)
                     .setChannelTypes(ChannelType.VOICE)
-                    .setPlaceholder("Choose a voice channel")
+                    .setPlaceholder(bot.msg(guild, "settings.panel.select.voiceChannelPlaceholder"))
                     .setRequiredRange(1, 1)
                     .build();
             case "setdj" -> EntitySelectMenu.create(id, SelectTarget.ROLE)
-                    .setPlaceholder("Choose the DJ role")
+                    .setPlaceholder(bot.msg(guild, "settings.panel.select.djRolePlaceholder"))
                     .setRequiredRange(1, 1)
                     .build();
             default -> null;
         };
     }
 
-    public static Button buildEntityClearButton(String key, long userId)
+    public static Button buildEntityClearButton(Bot bot, Guild guild, String key, long userId)
     {
-        return buildEntityClearButton(key, userId, -1L);
+        return buildEntityClearButton(bot, guild, key, userId, -1L);
     }
 
-    public static Button buildEntityClearButton(String key, long userId, long originalPanelMessageId)
+    public static Button buildEntityClearButton(Bot bot, Guild guild, String key, long userId, long originalPanelMessageId)
     {
         String value = originalPanelMessageId > 0 ? String.valueOf(originalPanelMessageId) : null;
         return switch (key)
         {
-            case "settc", "setvc" -> Button.secondary(buttonId(ACTION_CLEAR, key, value, userId), "Any");
-            case "setdj" -> Button.secondary(buttonId(ACTION_CLEAR, key, value, userId), "None");
+            case "settc", "setvc" -> Button.secondary(buttonId(ACTION_CLEAR, key, value, userId), bot.msg(guild, "settings.panel.valueAny"));
+            case "setdj" -> Button.secondary(buttonId(ACTION_CLEAR, key, value, userId), bot.msg(guild, "settings.panel.valueNone"));
             default -> null;
         };
     }
 
-    private static Modal buildSingleInputModal(String modalId, String title, String inputId, String placeholder)
+    private static Modal buildSingleInputModal(String modalId, String title, String inputId, String placeholder, String label)
     {
         TextInput input = TextInput.create(inputId, TextInputStyle.SHORT)
                 .setRequired(false)
@@ -216,7 +230,7 @@ public final class SettingsPanelRenderer
                 .setMaxLength(100)
                 .build();
         return Modal.create(modalId, title)
-                .addComponents(Label.of("Value", input))
+                .addComponents(Label.of(label, input))
                 .build();
     }
 
@@ -242,18 +256,21 @@ public final class SettingsPanelRenderer
     }
 
     private static List<ContainerChildComponent> buildSettingsDisplayChildren(
-            Guild guild, Settings settings, BotConfig config, String invokerName, long userId)
+            Bot bot, Guild guild, Settings settings, BotConfig config, String invokerName, long userId)
     {
         TextChannel textChannel = settings.getTextChannel(guild);
         VoiceChannel voiceChannel = settings.getVoiceChannel(guild);
         Role djRole = settings.getRole(guild);
 
-        String prefix = settings.getPrefix() == null ? "`None`" : "`" + settings.getPrefix() + "`";
+        String valueNone = bot.msg(guild, "settings.panel.valueNone");
+        String valueAny = bot.msg(guild, "settings.panel.valueAny");
+
+        String prefix = settings.getPrefix() == null ? "`" + valueNone + "`" : "`" + settings.getPrefix() + "`";
         int skipRatio = (int) Math.round(settings.getSkipRatio() * 100);
-        String skipRatioDisplay = settings.getSkipRatio() < 0 ? "Default (`55%`)" : "`" + skipRatio + "%`";
-        String textChannelDisplay = textChannel == null ? "Any" : textChannel.getAsMention();
-        String voiceChannelDisplay = voiceChannel == null ? "Any" : voiceChannel.getAsMention();
-        String djRoleDisplay = djRole == null ? "None" : "**" + FormatUtil.filter(djRole.getName()) + "**";
+        String skipRatioDisplay = settings.getSkipRatio() < 0 ? bot.msg(guild, "settings.panel.skipDefault") : "`" + skipRatio + "%`";
+        String textChannelDisplay = textChannel == null ? valueAny : textChannel.getAsMention();
+        String voiceChannelDisplay = voiceChannel == null ? valueAny : voiceChannel.getAsMention();
+        String djRoleDisplay = djRole == null ? valueNone : "**" + FormatUtil.filter(djRole.getName()) + "**";
 
         boolean effectiveMinimal = settings.useMinimalNowPlayingMessage(config);
         boolean effectiveButtons = settings.showNowPlayingButtons(config);
@@ -264,60 +281,60 @@ public final class SettingsPanelRenderer
         String queueType = "`" + settings.getQueueType().getUserFriendlyName() + "`";
 
         String footer = invokerName != null && !invokerName.isBlank()
-                ? "Only **" + FormatUtil.filter(invokerName) + "** can use these controls."
-                : "Only the command invoker can use these controls.";
+                ? bot.msg(guild, "settings.panel.footerNamed", "**" + FormatUtil.filter(invokerName) + "**")
+                : bot.msg(guild, "settings.panel.footerGeneric");
 
-        Button queueToggle = toggleButton("queue", "Toggle Queue", userId);
-        Button layoutToggle = toggleButton("layout", "Toggle Layout", userId);
-        Button npButtonsToggle = toggleButton("npbuttons", "Toggle Buttons", userId);
-        Button setPrefix = Button.secondary(buttonId(ACTION_OPEN, "prefix", null, userId), "Set Prefix");
-        Button setSkip = Button.secondary(buttonId(ACTION_OPEN, "setskip", null, userId), "Set Skip %");
-        Button close = Button.danger(buttonId(ACTION_CLOSE, "main", null, userId), "Close");
-        Button clearText = Button.secondary(buttonId(ACTION_CLEAR, "settc", null, userId), "Clear Text");
-        Button clearVoice = Button.secondary(buttonId(ACTION_CLEAR, "setvc", null, userId), "Clear Voice");
-        Button clearDj = Button.secondary(buttonId(ACTION_CLEAR, "setdj", null, userId), "Clear DJ");
+        Button queueToggle = toggleButton("queue", bot.msg(guild, "settings.panel.button.toggleQueue"), userId);
+        Button layoutToggle = toggleButton("layout", bot.msg(guild, "settings.panel.button.toggleLayout"), userId);
+        Button npButtonsToggle = toggleButton("npbuttons", bot.msg(guild, "settings.panel.button.toggleButtons"), userId);
+        Button setPrefix = Button.secondary(buttonId(ACTION_OPEN, "prefix", null, userId), bot.msg(guild, "settings.panel.button.setPrefix"));
+        Button setSkip = Button.secondary(buttonId(ACTION_OPEN, "setskip", null, userId), bot.msg(guild, "settings.panel.button.setSkip"));
+        Button close = Button.danger(buttonId(ACTION_CLOSE, "main", null, userId), bot.msg(guild, "settings.panel.button.close"));
+        Button clearText = Button.secondary(buttonId(ACTION_CLEAR, "settc", null, userId), bot.msg(guild, "settings.panel.button.clearText"));
+        Button clearVoice = Button.secondary(buttonId(ACTION_CLEAR, "setvc", null, userId), bot.msg(guild, "settings.panel.button.clearVoice"));
+        Button clearDj = Button.secondary(buttonId(ACTION_CLEAR, "setdj", null, userId), bot.msg(guild, "settings.panel.button.clearDj"));
 
-        EntitySelectMenu textChannelSelect = buildEntitySelectMenu("settc", userId);
-        EntitySelectMenu voiceChannelSelect = buildEntitySelectMenu("setvc", userId);
-        EntitySelectMenu djRoleSelect = buildEntitySelectMenu("setdj", userId);
+        EntitySelectMenu textChannelSelect = buildEntitySelectMenu(bot, guild, "settc", userId);
+        EntitySelectMenu voiceChannelSelect = buildEntitySelectMenu(bot, guild, "setvc", userId);
+        EntitySelectMenu djRoleSelect = buildEntitySelectMenu(bot, guild, "setdj", userId);
 
         return List.of(
-                TextDisplay.of("## MusicBot Settings"),
-                TextDisplay.of("Interactive settings panel for **" + FormatUtil.filter(guild.getName()) + "**.\n"
-                        + footer),
+                TextDisplay.of("## " + bot.msg(guild, "settings.panel.title")),
+                TextDisplay.of(bot.msg(guild, "settings.panel.description", FormatUtil.filter(guild.getName()))
+                        + "\n" + footer),
                 Separator.createDivider(Separator.Spacing.SMALL),
                 Section.of(
                         clearText,
-                        TextDisplay.of("Text Channel: " + textChannelDisplay)
+                        TextDisplay.of(bot.msg(guild, "settings.panel.field.textChannel") + ": " + textChannelDisplay)
                 ),
                 ActionRow.of(textChannelSelect),
                 Section.of(
                         clearVoice,
-                        TextDisplay.of("Voice Channel: " + voiceChannelDisplay)
+                        TextDisplay.of(bot.msg(guild, "settings.panel.field.voiceChannel") + ": " + voiceChannelDisplay)
                 ),
                 ActionRow.of(voiceChannelSelect),
                 Section.of(
                         clearDj,
-                        TextDisplay.of("DJ Role: " + djRoleDisplay)
+                        TextDisplay.of(bot.msg(guild, "settings.panel.field.djRole") + ": " + djRoleDisplay)
                 ),
                 ActionRow.of(djRoleSelect),
                 Separator.createDivider(Separator.Spacing.SMALL),
-                TextDisplay.of("Prefix: " + prefix
-                        + "\nSkip Ratio: " + skipRatioDisplay),
+                TextDisplay.of(bot.msg(guild, "settings.panel.field.prefix") + ": " + prefix
+                        + "\n" + bot.msg(guild, "settings.panel.field.skipRatio") + ": " + skipRatioDisplay),
                 ActionRow.of(setPrefix, setSkip),
                 Separator.createDivider(Separator.Spacing.SMALL),
                 Section.of(
                         queueToggle,
-                        TextDisplay.of("Queue Type: " + queueType)
+                        TextDisplay.of(bot.msg(guild, "settings.panel.field.queueType") + ": " + queueType)
                 ),
                 Section.of(
                         layoutToggle,
-                        TextDisplay.of("Layout: " + nowPlayingLayout
+                        TextDisplay.of(bot.msg(guild, "settings.panel.field.layout") + ": " + nowPlayingLayout
                         )
                 ),
                 Section.of(
                         npButtonsToggle,
-                        TextDisplay.of("Buttons: " + nowPlayingButtons)
+                        TextDisplay.of(bot.msg(guild, "settings.panel.field.buttons") + ": " + nowPlayingButtons)
                 ),
                 Separator.createDivider(Separator.Spacing.SMALL),
                 ActionRow.of(close)

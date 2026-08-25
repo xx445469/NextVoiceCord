@@ -17,289 +17,63 @@ package com.jagrosh.jmusicbot.gui.panels;
 
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.model.BotStatusData;
+import com.jagrosh.jmusicbot.gui.theme.Tokens;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import com.jagrosh.jmusicbot.gui.components.StyledComponents;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
 import java.util.List;
 
 /**
- * Panel displaying connected guilds with detailed view on selection.
- * Shows guild list on left, details on right when a guild is selected.
+ * Panel listing every connected guild as a card showing its voice and playback status
+ * directly, without requiring a click to see details.
  *
  * @author Arif Banai (arif-banai)
  */
 public class StatusPanel extends JPanel {
-    
+
     private final Bot bot;
-    private final DefaultListModel<GuildListItem> guildListModel;
-    private final JList<GuildListItem> guildList;
-    private final JPanel detailsPanel;
-    private final JLabel noSelectionLabel;
-    
-    // Detail labels
-    private final JLabel guildNameLabel;
-    private final JLabel guildIdLabel;
-    private final JLabel memberCountLabel;
-    private final JLabel voiceStatusLabel;
-    private final JLabel voiceChannelLabel;
-    private final JLabel nowPlayingLabel;
-    private final JLabel queueSizeLabel;
-    private final JLabel volumeLabel;
-    private final JLabel repeatModeLabel;
-    
+    private final JPanel serverList = Widgets.transparent(null);
+
     private List<Guild> currentGuilds = List.of();
-    
+
     public StatusPanel(Bot bot) {
-        super(new BorderLayout(8, 8));
-        setBorder(new EmptyBorder(8, 8, 8, 8));
-        
         this.bot = bot;
-        
-        // Initialize guild list
-        guildListModel = new DefaultListModel<>();
-        guildList = new JList<>(guildListModel);
-        guildList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        guildList.setCellRenderer(new GuildListCellRenderer());
-        guildList.addListSelectionListener(this::onGuildSelected);
-        
-        JScrollPane listScrollPane = new JScrollPane(guildList);
-        listScrollPane.setBorder(StyledComponents.createSectionBorder("Connected Guilds"));
-        listScrollPane.setPreferredSize(new Dimension(250, 0));
-        
-        // Initialize detail labels
-        guildNameLabel = new JLabel("-");
-        guildIdLabel = new JLabel("-");
-        memberCountLabel = new JLabel("-");
-        voiceStatusLabel = new JLabel("-");
-        voiceChannelLabel = new JLabel("-");
-        nowPlayingLabel = new JLabel("-");
-        queueSizeLabel = new JLabel("-");
-        volumeLabel = new JLabel("-");
-        repeatModeLabel = new JLabel("-");
-        
-        // Create details panel
-        detailsPanel = createDetailsPanel();
-        detailsPanel.setVisible(false);
-        
-        // No selection label
-        noSelectionLabel = new JLabel("Select a guild to view details", SwingConstants.CENTER);
-        noSelectionLabel.setForeground(Color.GRAY);
-        noSelectionLabel.setFont(noSelectionLabel.getFont().deriveFont(Font.ITALIC, 14f));
-        
-        // Right panel with card layout for switching between no-selection and details
-        JPanel rightPanel = new JPanel(new BorderLayout());
-        rightPanel.setBorder(StyledComponents.createSectionBorder("Guild Details"));
-        rightPanel.add(noSelectionLabel, BorderLayout.CENTER);
-        
-        // Create split pane
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listScrollPane, rightPanel);
-        splitPane.setDividerLocation(250);
-        splitPane.setResizeWeight(0.3);
-        
-        add(splitPane, BorderLayout.CENTER);
+
+        setLayout(new BorderLayout(0, Tokens.SPACE_MD));
+        setOpaque(false);
+        setBorder(BorderFactory.createEmptyBorder(
+                Tokens.SPACE_LG, Tokens.SPACE_LG, Tokens.SPACE_LG, Tokens.SPACE_LG));
+
+        serverList.setLayout(new BoxLayout(serverList, BoxLayout.Y_AXIS));
+
+        add(buildHeader(), BorderLayout.NORTH);
+        add(buildScrollArea(), BorderLayout.CENTER);
+
+        rebuild();
     }
-    
-    /**
-     * Creates the details panel with all guild information fields.
-     */
-    private JPanel createDetailsPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new EmptyBorder(8, 8, 8, 8));
-        
-        GridBagConstraints labelGbc = new GridBagConstraints();
-        labelGbc.anchor = GridBagConstraints.WEST;
-        labelGbc.insets = new Insets(4, 4, 4, 8);
-        labelGbc.gridx = 0;
-        
-        GridBagConstraints valueGbc = new GridBagConstraints();
-        valueGbc.anchor = GridBagConstraints.WEST;
-        valueGbc.insets = new Insets(4, 0, 4, 4);
-        valueGbc.gridx = 1;
-        valueGbc.weightx = 1.0;
-        valueGbc.fill = GridBagConstraints.HORIZONTAL;
-        
-        int row = 0;
-        
-        // Guild Info Section
-        addSectionHeader(panel, "Guild Information", row++, labelGbc);
-        addDetailRow(panel, "Name:", guildNameLabel, row++, labelGbc, valueGbc);
-        addDetailRow(panel, "ID:", guildIdLabel, row++, labelGbc, valueGbc);
-        addDetailRow(panel, "Members:", memberCountLabel, row++, labelGbc, valueGbc);
-        
-        // Voice Section
-        row++; // spacer
-        addSectionHeader(panel, "Voice Status", row++, labelGbc);
-        addDetailRow(panel, "Status:", voiceStatusLabel, row++, labelGbc, valueGbc);
-        addDetailRow(panel, "Channel:", voiceChannelLabel, row++, labelGbc, valueGbc);
-        
-        // Playback Section
-        row++; // spacer
-        addSectionHeader(panel, "Playback", row++, labelGbc);
-        addDetailRow(panel, "Now Playing:", nowPlayingLabel, row++, labelGbc, valueGbc);
-        addDetailRow(panel, "Queue Size:", queueSizeLabel, row++, labelGbc, valueGbc);
-        addDetailRow(panel, "Volume:", volumeLabel, row++, labelGbc, valueGbc);
-        addDetailRow(panel, "Repeat:", repeatModeLabel, row++, labelGbc, valueGbc);
-        
-        // Filler to push content to top
-        GridBagConstraints fillerGbc = new GridBagConstraints();
-        fillerGbc.gridx = 0;
-        fillerGbc.gridy = row;
-        fillerGbc.weighty = 1.0;
-        fillerGbc.fill = GridBagConstraints.VERTICAL;
-        panel.add(Box.createVerticalGlue(), fillerGbc);
-        
-        return panel;
+
+    private Component buildHeader() {
+        JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
+        header.add(Widgets.pageTitle("Servers"), BorderLayout.NORTH);
+        header.add(Widgets.muted("Every server this bot is connected to"), BorderLayout.SOUTH);
+        return header;
     }
-    
-    private void addSectionHeader(JPanel panel, String text, int row, GridBagConstraints gbc) {
-        JLabel header = new JLabel(text);
-        header.setFont(header.getFont().deriveFont(Font.BOLD, 13f));
-        gbc.gridy = row;
-        gbc.gridwidth = 2;
-        panel.add(header, gbc);
-        gbc.gridwidth = 1;
+
+    private Component buildScrollArea() {
+        JScrollPane scroll = new JScrollPane(serverList);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        return scroll;
     }
-    
-    private void addDetailRow(JPanel panel, String labelText, JLabel valueLabel, int row,
-                              GridBagConstraints labelGbc, GridBagConstraints valueGbc) {
-        JLabel label = new JLabel(labelText);
-        label.setForeground(Color.GRAY);
-        
-        labelGbc.gridy = row;
-        valueGbc.gridy = row;
-        
-        panel.add(label, labelGbc);
-        panel.add(valueLabel, valueGbc);
-    }
-    
-    /**
-     * Handles guild selection from the list.
-     */
-    private void onGuildSelected(ListSelectionEvent e) {
-        if (e.getValueIsAdjusting()) {
-            return;
-        }
-        
-        GuildListItem selected = guildList.getSelectedValue();
-        if (selected == null) {
-            showNoSelection();
-            return;
-        }
-        
-        updateDetailsForGuild(selected.guild());
-    }
-    
-    /**
-     * Shows the "no selection" state.
-     */
-    private void showNoSelection() {
-        Container parent = detailsPanel.getParent();
-        if (parent != null) {
-            parent.remove(detailsPanel);
-            parent.add(noSelectionLabel, BorderLayout.CENTER);
-            parent.revalidate();
-            parent.repaint();
-        }
-    }
-    
-    /**
-     * Shows detailed information for the selected guild.
-     */
-    private void updateDetailsForGuild(Guild guild) {
-        // Update labels
-        guildNameLabel.setText(guild.getName());
-        guildIdLabel.setText(guild.getId());
-        memberCountLabel.setText(String.valueOf(guild.getMemberCount()));
-        
-        // Voice status
-        boolean inVoice = guild.getAudioManager().isConnected();
-        if (inVoice) {
-            voiceStatusLabel.setText("Connected");
-            voiceStatusLabel.setForeground(new Color(46, 204, 113));
-            AudioChannel channel = guild.getAudioManager().getConnectedChannel();
-            voiceChannelLabel.setText(channel != null ? channel.getName() : "Unknown");
-        } else {
-            voiceStatusLabel.setText("Not Connected");
-            voiceStatusLabel.setForeground(Color.GRAY);
-            voiceChannelLabel.setText("-");
-        }
-        
-        // Playback info
-        updatePlaybackInfo(guild);
-        
-        // Show details panel
-        Container parent = noSelectionLabel.getParent();
-        if (parent != null) {
-            parent.remove(noSelectionLabel);
-            parent.add(detailsPanel, BorderLayout.CENTER);
-            detailsPanel.setVisible(true);
-            parent.revalidate();
-            parent.repaint();
-        }
-    }
-    
-    /**
-     * Updates playback information for a guild.
-     */
-    private void updatePlaybackInfo(Guild guild) {
-        try {
-            var sendingHandler = guild.getAudioManager().getSendingHandler();
-            if (!(sendingHandler instanceof AudioHandler handler)) {
-                setNoPlaybackInfo();
-                return;
-            }
-            
-            var player = handler.getPlayer();
-            var track = player != null ? player.getPlayingTrack() : null;
-            
-            if (track == null) {
-                nowPlayingLabel.setText("Nothing playing");
-                nowPlayingLabel.setForeground(Color.GRAY);
-            } else {
-                String title = FormatUtil.getTrackTitle(track);
-                if (title == null) {
-                    title = "";
-                }
-                if (title.length() > 40) {
-                    title = title.substring(0, 37) + "...";
-                }
-                nowPlayingLabel.setText(title);
-                nowPlayingLabel.setForeground(null); // default color
-            }
-            
-            // Queue size
-            int queueSize = handler.getQueue().size();
-            queueSizeLabel.setText(queueSize + " track" + (queueSize != 1 ? "s" : ""));
-            
-            // Volume
-            int volume = player != null ? player.getVolume() : 100;
-            volumeLabel.setText(volume + "%");
-            
-            // Repeat mode - fetched from settings manager
-            var repeatMode = bot.getSettingsManager().getSettings(guild).getRepeatMode();
-            repeatModeLabel.setText(repeatMode != null ? repeatMode.getUserFriendlyName() : "Off");
-            
-        } catch (Exception e) {
-            setNoPlaybackInfo();
-        }
-    }
-    
-    private void setNoPlaybackInfo() {
-        nowPlayingLabel.setText("-");
-        nowPlayingLabel.setForeground(Color.GRAY);
-        queueSizeLabel.setText("-");
-        volumeLabel.setText("-");
-        repeatModeLabel.setText("-");
-    }
-    
+
     /**
      * Updates the panel with shared status data from MainFrame.
      *
@@ -307,64 +81,135 @@ public class StatusPanel extends JPanel {
      */
     public void updateStatus(BotStatusData statusData) {
         this.currentGuilds = statusData.guilds();
-        
-        // Remember selected guild
-        GuildListItem selected = guildList.getSelectedValue();
-        String selectedId = selected != null ? selected.guild().getId() : null;
-        
-        // Update guild list
-        guildListModel.clear();
-        for (Guild guild : currentGuilds) {
-            boolean inVoice = guild.getAudioManager().isConnected();
-            guildListModel.addElement(new GuildListItem(guild, inVoice));
-        }
-        
-        // Restore selection if still exists
-        if (selectedId != null) {
-            for (int i = 0; i < guildListModel.size(); i++) {
-                if (guildListModel.get(i).guild().getId().equals(selectedId)) {
-                    guildList.setSelectedIndex(i);
-                    // Update details for selected guild
-                    updateDetailsForGuild(guildListModel.get(i).guild());
-                    break;
-                }
+        rebuild();
+    }
+
+    private void rebuild() {
+        serverList.removeAll();
+
+        if (currentGuilds.isEmpty()) {
+            serverList.add(buildEmptyState());
+        } else {
+            for (Guild guild : currentGuilds) {
+                serverList.add(buildServerCard(guild));
+                serverList.add(Box.createVerticalStrut(Tokens.SPACE_SM));
             }
         }
+
+        serverList.revalidate();
+        serverList.repaint();
     }
-    
-    /**
-     * Record to hold guild info for the list.
-     */
-    private record GuildListItem(Guild guild, boolean inVoice) {
-        @Override
-        public String toString() {
-            return guild.getName();
+
+    /** One server: voice status, what it's playing, and where — all visible without a click. */
+    private Component buildServerCard(Guild guild) {
+        Widgets.Card card = new Widgets.Card();
+        card.setLayout(new BorderLayout(0, Tokens.SPACE_SM));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 132));
+        card.setAlignmentX(LEFT_ALIGNMENT);
+
+        boolean inVoice = guild.getAudioManager().isConnected();
+        AudioHandler handler = null;
+        var sendingHandler = guild.getAudioManager().getSendingHandler();
+        if (sendingHandler instanceof AudioHandler ah) {
+            handler = ah;
         }
-    }
-    
-    /**
-     * Custom cell renderer for guild list items.
-     */
-    private static class GuildListCellRenderer extends DefaultListCellRenderer {
-        private static final Color VOICE_ACTIVE_COLOR = new Color(46, 204, 113);
-        
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                       int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            
-            if (value instanceof GuildListItem item) {
-                setText(item.guild().getName());
-                if (item.inVoice() && !isSelected) {
-                    setForeground(VOICE_ACTIVE_COLOR);
-                }
-                // Add voice indicator
-                if (item.inVoice()) {
-                    setText("♪ " + item.guild().getName());
-                }
+
+        var player = handler != null ? handler.getPlayer() : null;
+        var track = player != null ? player.getPlayingTrack() : null;
+        boolean paused = player != null && player.isPaused();
+
+        String badgeText;
+        Color badgeColor;
+        if (!inVoice) {
+            badgeText = "IDLE";
+            badgeColor = Tokens.textMuted();
+        } else if (track == null) {
+            badgeText = "CONNECTED";
+            badgeColor = Tokens.accent();
+        } else if (paused) {
+            badgeText = "PAUSED";
+            badgeColor = Tokens.warning();
+        } else {
+            badgeText = "PLAYING";
+            badgeColor = Tokens.success();
+        }
+
+        JPanel top = Widgets.transparent(new BorderLayout(Tokens.SPACE_SM, 0));
+        top.add(new Widgets.Badge(badgeText, badgeColor), BorderLayout.WEST);
+
+        JLabel name = new JLabel(guild.getName());
+        name.setFont(Tokens.fontHeading());
+        name.setForeground(Tokens.text());
+        top.add(name, BorderLayout.CENTER);
+
+        top.add(Widgets.muted(guild.getId() + "  ·  " + guild.getMemberCount() + " members"), BorderLayout.EAST);
+
+        JPanel middle = Widgets.transparent(null);
+        middle.setLayout(new BoxLayout(middle, BoxLayout.Y_AXIS));
+
+        String titleText = "Nothing playing";
+        Color titleColor = Tokens.textMuted();
+        if (track != null) {
+            String title = FormatUtil.getTrackTitle(track);
+            if (title == null) {
+                title = "";
             }
-            
-            return this;
+            titleText = title.length() > 60 ? title.substring(0, 57) + "..." : title;
+            titleColor = Tokens.text();
         }
+        JLabel titleLabel = new JLabel(titleText);
+        titleLabel.setFont(Tokens.fontBody());
+        titleLabel.setForeground(titleColor);
+        titleLabel.setAlignmentX(LEFT_ALIGNMENT);
+
+        String channelText = "Not connected to voice";
+        if (inVoice) {
+            AudioChannel channel = guild.getAudioManager().getConnectedChannel();
+            channelText = channel != null ? channel.getName() : "Unknown channel";
+        }
+
+        int queueSize = 0;
+        int volume = 100;
+        String repeatText = "Off";
+        try {
+            if (handler != null) {
+                queueSize = handler.getQueue().size();
+            }
+            if (player != null) {
+                volume = player.getVolume();
+            }
+            var repeatMode = bot.getSettingsManager().getSettings(guild).getRepeatMode();
+            repeatText = repeatMode != null ? repeatMode.getUserFriendlyName() : "Off";
+        } catch (Exception ignored) {
+            // Settings unavailable for this guild — fall back to the defaults above.
+        }
+
+        JLabel metaLabel = Widgets.muted(channelText + "  ·  " + queueSize + " queued  ·  vol "
+                + volume + "%  ·  repeat " + repeatText);
+        metaLabel.setAlignmentX(LEFT_ALIGNMENT);
+
+        middle.add(titleLabel);
+        middle.add(Box.createVerticalStrut(Tokens.SPACE_XS));
+        middle.add(metaLabel);
+
+        card.add(top, BorderLayout.NORTH);
+        card.add(middle, BorderLayout.CENTER);
+        return card;
+    }
+
+    private Component buildEmptyState() {
+        Widgets.Card card = new Widgets.Card();
+        card.setLayout(new BorderLayout());
+        card.setBorder(BorderFactory.createEmptyBorder(
+                Tokens.SPACE_XL, Tokens.SPACE_MD, Tokens.SPACE_XL, Tokens.SPACE_MD));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+        card.setAlignmentX(LEFT_ALIGNMENT);
+
+        JLabel message = new JLabel("No servers connected yet.", JLabel.CENTER);
+        message.setFont(Tokens.fontBody());
+        message.setForeground(Tokens.textMuted());
+
+        card.add(message, BorderLayout.CENTER);
+        return card;
     }
 }

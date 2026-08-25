@@ -23,14 +23,14 @@ import com.jagrosh.jmusicbot.audio.PerformanceMetrics.*;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor.HealthSample;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor.HealthSnapshot;
+import com.jagrosh.jmusicbot.gui.components.Widgets;
+import com.jagrosh.jmusicbot.gui.theme.Tokens;
 import net.dv8tion.jda.api.entities.Guild;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import com.jagrosh.jmusicbot.gui.components.StyledComponents;
-import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
@@ -44,90 +44,87 @@ import java.util.List;
 
 /**
  * Panel for visualizing audio processing performance.
- * Uses JSplitPane for resizable graphs vs stats/events.
+ *
+ * <p>Rebuilt on the shared card design system ({@link Widgets}, {@link Tokens}) so it reads as
+ * part of the same window as the Overview tab rather than a separate diagnostics utility.
  *
  * @author Arif Banai (arif-banai)
  */
 public class PerformancePanel extends JPanel {
-    
-    private static final Color GOOD_COLOR = new Color(46, 204, 113);
-    private static final Color WARNING_COLOR = new Color(241, 196, 15);
-    private static final Color CRITICAL_COLOR = new Color(231, 76, 60);
-    private static final Color GRAPH_BG = new Color(25, 25, 30);
-    private static final Color DRIFT_COLOR = new Color(241, 196, 15); // Yellow/amber for drift
-    
+
     private final Bot bot;
     private final JComboBox<GuildItem> guildSelector;
     private final JComboBox<WindowOption> windowSelector;
-    
+
     // Visualization panels
     private final EnhancedTimelinePanel enhancedTimeline;
     private final LatencyGraphPanel latencyGraph;
     private final SchedulerDriftPanel driftChart;
-    
+
     // Guild overview table
     private final JTable guildOverviewTable;
     private final DefaultTableModel guildOverviewModel;
-    
-    // Stats labels
-    private final JLabel healthLabel;
-    private final JLabel qualityScoreLabel;
-    private final JLabel durationLabel;
-    private final JLabel framesLabel;
-    private final JLabel missedLabel;
-    private final JLabel missRateLabel;
-    private final JLabel latencyLabel;
-    private final JLabel fpsLabel;
-    private final JLabel stuttersLabel;
-    private final JLabel stuckLabel;
-    private final JLabel gcCountLabel;
-    private final JLabel ttffLabel;
-    private final JLabel missRateWindowsLabel;
-    
+
+    // Health indicator
+    private final Widgets.Badge healthBadge = new Widgets.Badge("NO DATA", Tokens.textMuted());
+
+    // Stat tiles
+    private final Widgets.StatTile qualityTile = new Widgets.StatTile("quality score");
+    private final Widgets.StatTile durationTile = new Widgets.StatTile("duration");
+    private final Widgets.StatTile framesTile = new Widgets.StatTile("frames");
+    private final Widgets.StatTile missedTile = new Widgets.StatTile("missed frames");
+    private final Widgets.StatTile missRateTile = new Widgets.StatTile("miss rate");
+    private final Widgets.StatTile missRateWindowTile = new Widgets.StatTile("miss rate 10s / 60s");
+    private final Widgets.StatTile latencyTile = new Widgets.StatTile("latency avg (p95)");
+    private final Widgets.StatTile fpsTile = new Widgets.StatTile("frame rate");
+    private final Widgets.StatTile stutterTile = new Widgets.StatTile("stutters");
+    private final Widgets.StatTile stuckTile = new Widgets.StatTile("stuck events");
+    private final Widgets.StatTile gcTile = new Widgets.StatTile("gc events");
+    private final Widgets.StatTile ttffTile = new Widgets.StatTile("time to first frame");
+
     // Event table
     private final JTable eventTable;
     private final DefaultTableModel eventTableModel;
-    
+
     private MetricsSnapshot currentSnapshot;
     private HealthSnapshot healthSnapshot;
     private int selectedWindowSeconds = 30;
-    
+
     private enum WindowOption {
         SECONDS_10(10, "10 seconds"),
         SECONDS_30(30, "30 seconds"),
         MINUTE_1(60, "1 minute"),
         MINUTE_2(120, "2 minutes");
-        
+
         private final int seconds;
         private final String display;
-        
+
         WindowOption(int seconds, String display) {
             this.seconds = seconds;
             this.display = display;
         }
-        
+
         public int getSeconds() { return seconds; }
-        
+
         @Override
         public String toString() { return display; }
     }
-    
+
     public PerformancePanel(Bot bot) {
-        super(new BorderLayout(4, 4));
-        setBorder(new EmptyBorder(4, 4, 4, 4));
         this.bot = bot;
-        
-        // === TOP: Controls ===
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        
-        topPanel.add(new JLabel("Guild:"));
+
+        setLayout(new BorderLayout(0, Tokens.SPACE_MD));
+        setOpaque(false);
+        setBorder(BorderFactory.createEmptyBorder(
+                Tokens.SPACE_LG, Tokens.SPACE_LG, Tokens.SPACE_LG, Tokens.SPACE_LG));
+
         guildSelector = new JComboBox<>();
-        guildSelector.setPreferredSize(new Dimension(130, 22));
+        guildSelector.setFont(Tokens.fontBody());
+        guildSelector.setPreferredSize(new Dimension(160, 26));
         guildSelector.addActionListener(e -> refreshMetrics());
-        topPanel.add(guildSelector);
-        
-        topPanel.add(new JLabel("Window:"));
+
         windowSelector = new JComboBox<>(WindowOption.values());
+        windowSelector.setFont(Tokens.fontBody());
         windowSelector.setSelectedItem(WindowOption.SECONDS_30);
         windowSelector.addActionListener(e -> {
             WindowOption sel = (WindowOption) windowSelector.getSelectedItem();
@@ -136,52 +133,24 @@ public class PerformancePanel extends JPanel {
                 refreshMetrics();
             }
         });
-        topPanel.add(windowSelector);
-        
-        JButton refreshBtn = new JButton("Refresh");
-        refreshBtn.addActionListener(e -> refreshGuildList());
-        topPanel.add(refreshBtn);
-        
-        topPanel.add(Box.createHorizontalStrut(8));
-        healthLabel = new JLabel("●");
-        healthLabel.setFont(healthLabel.getFont().deriveFont(Font.BOLD, 16f));
-        topPanel.add(healthLabel);
-        
-        qualityScoreLabel = new JLabel("Quality: --%");
-        qualityScoreLabel.setFont(qualityScoreLabel.getFont().deriveFont(Font.BOLD, 12f));
-        topPanel.add(qualityScoreLabel);
-        
-        topPanel.add(Box.createHorizontalStrut(12));
-        
-        JButton exportJsonBtn = new JButton("Export JSON");
-        exportJsonBtn.setToolTipText("Export diagnostics to JSON file");
-        exportJsonBtn.addActionListener(e -> exportToJson());
-        topPanel.add(exportJsonBtn);
-        
-        JButton copySummaryBtn = new JButton("Copy Summary");
-        copySummaryBtn.setToolTipText("Copy summary to clipboard for Discord");
-        copySummaryBtn.addActionListener(e -> copyToClipboard());
-        topPanel.add(copySummaryBtn);
-        
-        add(topPanel, BorderLayout.NORTH);
-        
-        // === GUILD OVERVIEW TABLE (Collapsible) ===
+
+        // === Guild overview table ===
         String[] overviewCols = {"Guild", "Status", "Quality", "Miss Rate", "Stutters", "Stuck", "TTFF"};
         guildOverviewModel = new DefaultTableModel(overviewCols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
         };
         guildOverviewTable = new JTable(guildOverviewModel);
-        guildOverviewTable.setRowHeight(18);
+        styleTable(guildOverviewTable);
         guildOverviewTable.setFillsViewportHeight(true);
-        guildOverviewTable.getColumnModel().getColumn(0).setPreferredWidth(100);
-        guildOverviewTable.getColumnModel().getColumn(1).setPreferredWidth(60);
-        guildOverviewTable.getColumnModel().getColumn(2).setPreferredWidth(55);
-        guildOverviewTable.getColumnModel().getColumn(3).setPreferredWidth(65);
-        guildOverviewTable.getColumnModel().getColumn(4).setPreferredWidth(55);
-        guildOverviewTable.getColumnModel().getColumn(5).setPreferredWidth(45);
-        guildOverviewTable.getColumnModel().getColumn(6).setPreferredWidth(50);
-        
+        guildOverviewTable.getColumnModel().getColumn(0).setPreferredWidth(140);
+        guildOverviewTable.getColumnModel().getColumn(1).setPreferredWidth(70);
+        guildOverviewTable.getColumnModel().getColumn(2).setPreferredWidth(60);
+        guildOverviewTable.getColumnModel().getColumn(3).setPreferredWidth(70);
+        guildOverviewTable.getColumnModel().getColumn(4).setPreferredWidth(60);
+        guildOverviewTable.getColumnModel().getColumn(5).setPreferredWidth(50);
+        guildOverviewTable.getColumnModel().getColumn(6).setPreferredWidth(55);
+
         // Select guild when row is clicked
         guildOverviewTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -191,186 +160,209 @@ public class PerformancePanel extends JPanel {
                 }
             }
         });
-        
-        JScrollPane overviewScroll = new JScrollPane(guildOverviewTable);
-        overviewScroll.setBorder(StyledComponents.createSectionBorder("Guild Overview (click to select)"));
-        overviewScroll.setPreferredSize(new Dimension(600, 55)); // More compact
-        overviewScroll.setMinimumSize(new Dimension(300, 45));
-        overviewScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
-        
-        // === GRAPHS PANEL (GridBagLayout for weighted rows) ===
-        JPanel graphsContent = new JPanel(new GridBagLayout());
-        graphsContent.setMinimumSize(new Dimension(500, 200));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(2, 0, 2, 0);
-        
-        // Row 0: Enhanced Timeline (weight 2.0 - primary visualization)
+
+        // === Graphs ===
         enhancedTimeline = new EnhancedTimelinePanel();
-        gbc.gridx = 0; gbc.gridy = 0;
-        gbc.weightx = 1.0; gbc.weighty = 2.0;
-        graphsContent.add(enhancedTimeline, gbc);
-        
-        // Row 1: Latency Graph (full width, weight 1.0)
         latencyGraph = new LatencyGraphPanel();
-        JPanel latencyContainer = createGraphContainer("Latency", latencyGraph);
-        gbc.gridy = 1;
-        gbc.weighty = 1.0;
-        graphsContent.add(latencyContainer, gbc);
-        
-        // Row 2: Scheduler Drift (full width, weight 1.0)
         driftChart = new SchedulerDriftPanel();
-        JPanel driftContainer = createGraphContainer("Scheduler Drift", driftChart);
-        gbc.gridy = 2;
-        gbc.weighty = 1.0;
-        graphsContent.add(driftContainer, gbc);
-        
-        JScrollPane graphScroll = new JScrollPane(graphsContent);
-        graphScroll.setBorder(null);
-        graphScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        graphScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        graphScroll.getHorizontalScrollBar().setUnitIncrement(16);
-        graphScroll.getVerticalScrollBar().setUnitIncrement(16);
-        graphScroll.setMinimumSize(new Dimension(200, 150));
-        
-        // === BOTTOM: Stats + Events with resizable split ===
-        
-        // Stats - 6 rows x 4 columns inside single border
-        JPanel statsInner = new JPanel(new GridLayout(6, 4, 8, 2));
-        
-        durationLabel = createStatLabel("--");
-        framesLabel = createStatLabel("--");
-        missedLabel = createStatLabel("--");
-        missRateLabel = createStatLabel("--%");
-        latencyLabel = createStatLabel("-- ms");
-        fpsLabel = createStatLabel("-- fps");
-        stuttersLabel = createStatLabel("--");
-        stuckLabel = createStatLabel("--");
-        gcCountLabel = createStatLabel("--");
-        ttffLabel = createStatLabel("--");
-        missRateWindowsLabel = createStatLabel("--");
-        
-        // Row 1
-        statsInner.add(createFixedLabel("Duration:"));
-        statsInner.add(durationLabel);
-        statsInner.add(createFixedLabel("Latency:"));
-        statsInner.add(latencyLabel);
-        // Row 2
-        statsInner.add(createFixedLabel("Frames:"));
-        statsInner.add(framesLabel);
-        statsInner.add(createFixedLabel("Miss Rate:"));
-        statsInner.add(missRateLabel);
-        // Row 3
-        statsInner.add(createFixedLabel("Missed:"));
-        statsInner.add(missedLabel);
-        statsInner.add(createFixedLabel("Stutters:"));
-        statsInner.add(stuttersLabel);
-        // Row 4
-        statsInner.add(createFixedLabel("Rate:"));
-        statsInner.add(fpsLabel);
-        statsInner.add(createFixedLabel("Stuck:"));
-        statsInner.add(stuckLabel);
-        // Row 5
-        statsInner.add(createFixedLabel("GC Events:"));
-        statsInner.add(gcCountLabel);
-        statsInner.add(createFixedLabel("TTFF:"));
-        statsInner.add(ttffLabel);
-        // Row 6
-        statsInner.add(createFixedLabel("Miss 10s/60s:"));
-        statsInner.add(missRateWindowsLabel);
-        statsInner.add(new JLabel()); // Empty cell
-        statsInner.add(new JLabel()); // Empty cell
-        
-        JPanel statsPanel = new JPanel(new BorderLayout());
-        statsPanel.setBorder(StyledComponents.createSectionBorder("Statistics"));
-        statsPanel.add(statsInner, BorderLayout.CENTER);
-        statsPanel.setMinimumSize(new Dimension(200, 80));
-        statsPanel.setPreferredSize(new Dimension(280, 100));
-        
-        // Events table
+
+        // === Events table ===
         String[] cols = {"Time", "Type", "Details", "Sev"};
         eventTableModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
         };
         eventTable = new JTable(eventTableModel);
+        styleTable(eventTable);
         eventTable.setFillsViewportHeight(true);
-        eventTable.setRowHeight(16);
-        eventTable.getColumnModel().getColumn(0).setPreferredWidth(55);
-        eventTable.getColumnModel().getColumn(1).setPreferredWidth(35);
-        eventTable.getColumnModel().getColumn(2).setPreferredWidth(120);
-        eventTable.getColumnModel().getColumn(3).setPreferredWidth(35);
-        
+        eventTable.getColumnModel().getColumn(0).setPreferredWidth(70);
+        eventTable.getColumnModel().getColumn(1).setPreferredWidth(50);
+        eventTable.getColumnModel().getColumn(2).setPreferredWidth(220);
+        eventTable.getColumnModel().getColumn(3).setPreferredWidth(45);
+
+        add(buildHeader(), BorderLayout.NORTH);
+        add(buildBody(), BorderLayout.CENTER);
+    }
+
+    private Component buildHeader() {
+        JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
+        header.add(Widgets.pageTitle("Performance"), BorderLayout.NORTH);
+        header.add(Widgets.muted("Per-guild audio pipeline diagnostics — frame timing, latency and stability"),
+                BorderLayout.SOUTH);
+        return header;
+    }
+
+    private Component buildBody() {
+        JPanel content = Widgets.transparent(null);
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
+        content.add(buildControlsCard());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(buildOverviewCard());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(buildStatsSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(buildTimelineCard());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+
+        Widgets.Card latencyCard = Widgets.titledCard("Latency", latencyGraph);
+        latencyCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 220));
+        latencyCard.setPreferredSize(new Dimension(600, 220));
+        content.add(latencyCard);
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+
+        Widgets.Card driftCard = Widgets.titledCard("Scheduler Drift", driftChart);
+        driftCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
+        driftCard.setPreferredSize(new Dimension(600, 200));
+        content.add(driftCard);
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+
+        content.add(buildEventsCard());
+
+        JScrollPane scroll = new JScrollPane(content);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        return scroll;
+    }
+
+    private Component buildControlsCard() {
+        Widgets.Card card = new Widgets.Card();
+        card.setLayout(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, Tokens.SPACE_XS));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+
+        card.add(Widgets.muted("Guild"));
+        card.add(guildSelector);
+        card.add(Box.createHorizontalStrut(Tokens.SPACE_SM));
+        card.add(Widgets.muted("Window"));
+        card.add(windowSelector);
+
+        JButton refreshBtn = new JButton("Refresh");
+        refreshBtn.setFont(Tokens.fontBody());
+        refreshBtn.addActionListener(e -> refreshGuildList());
+        card.add(refreshBtn);
+
+        card.add(Box.createHorizontalStrut(Tokens.SPACE_MD));
+        card.add(healthBadge);
+
+        card.add(Box.createHorizontalStrut(Tokens.SPACE_MD));
+        JButton exportJsonBtn = new JButton("Export JSON");
+        exportJsonBtn.setFont(Tokens.fontBody());
+        exportJsonBtn.setToolTipText("Export diagnostics to JSON file");
+        exportJsonBtn.addActionListener(e -> exportToJson());
+        card.add(exportJsonBtn);
+
+        JButton copySummaryBtn = new JButton("Copy Summary");
+        copySummaryBtn.setFont(Tokens.fontBody());
+        copySummaryBtn.setToolTipText("Copy summary to clipboard for Discord");
+        copySummaryBtn.addActionListener(e -> copyToClipboard());
+        card.add(copySummaryBtn);
+
+        return card;
+    }
+
+    private Component buildOverviewCard() {
+        JScrollPane overviewScroll = new JScrollPane(guildOverviewTable);
+        overviewScroll.setBorder(BorderFactory.createEmptyBorder());
+        overviewScroll.setOpaque(false);
+        overviewScroll.getViewport().setOpaque(false);
+        overviewScroll.getVerticalScrollBar().setUnitIncrement(16);
+        overviewScroll.setPreferredSize(new Dimension(600, 140));
+
+        Widgets.Card card = Widgets.titledCard("Guild Overview (click a row to select)", overviewScroll);
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
+        return card;
+    }
+
+    private Component buildStatsSection() {
+        JPanel section = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_SM));
+
+        JLabel heading = new JLabel("Statistics");
+        heading.setFont(Tokens.fontHeading());
+        heading.setForeground(Tokens.text());
+        section.add(heading, BorderLayout.NORTH);
+
+        JPanel grid = Widgets.transparent(new GridLayout(3, 4, Tokens.SPACE_SM, Tokens.SPACE_SM));
+        grid.add(qualityTile);
+        grid.add(durationTile);
+        grid.add(framesTile);
+        grid.add(missedTile);
+        grid.add(missRateTile);
+        grid.add(missRateWindowTile);
+        grid.add(latencyTile);
+        grid.add(fpsTile);
+        grid.add(stutterTile);
+        grid.add(stuckTile);
+        grid.add(gcTile);
+        grid.add(ttffTile);
+        grid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 260));
+
+        section.add(grid, BorderLayout.CENTER);
+        section.setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
+        return section;
+    }
+
+    private Component buildTimelineCard() {
+        Widgets.Card card = new Widgets.Card();
+        card.setLayout(new BorderLayout());
+        card.add(enhancedTimeline, BorderLayout.CENTER);
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 220));
+        card.setPreferredSize(new Dimension(600, 220));
+        return card;
+    }
+
+    private Component buildEventsCard() {
         JScrollPane tableScroll = new JScrollPane(eventTable);
-        tableScroll.setBorder(StyledComponents.createSectionBorder("Events"));
-        tableScroll.setMinimumSize(new Dimension(150, 80));
-        tableScroll.setPreferredSize(new Dimension(300, 100));
-        
-        // Horizontal split between Stats and Events
-        JSplitPane bottomSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, statsPanel, tableScroll);
-        bottomSplit.setResizeWeight(0.4); // Stats gets 40%, Events gets 60%
-        bottomSplit.setDividerSize(5);
-        bottomSplit.setContinuousLayout(true);
-        bottomSplit.setBorder(null);
-        bottomSplit.setMinimumSize(new Dimension(200, 80));
-        bottomSplit.setPreferredSize(new Dimension(600, 100));
-        
-        // === SPLIT PANE: Graphs (middle, more space) vs Stats/Events (bottom, less space) ===
-        JSplitPane graphsAndStatsSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, graphScroll, bottomSplit);
-        graphsAndStatsSplit.setResizeWeight(0.75); // Graphs get 75% of space
-        graphsAndStatsSplit.setDividerSize(5);
-        graphsAndStatsSplit.setContinuousLayout(true);
-        graphsAndStatsSplit.setBorder(null);
-        
-        // === MAIN SPLIT: Guild Overview (top, small) vs Graphs+Stats (bottom, large) ===
-        JSplitPane mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, overviewScroll, graphsAndStatsSplit);
-        mainSplit.setResizeWeight(0.1); // Guild overview gets 10% of space
-        mainSplit.setDividerSize(5);
-        mainSplit.setContinuousLayout(true);
-        mainSplit.setBorder(null);
-        
-        add(mainSplit, BorderLayout.CENTER);
+        tableScroll.setBorder(BorderFactory.createEmptyBorder());
+        tableScroll.setOpaque(false);
+        tableScroll.getViewport().setOpaque(false);
+        tableScroll.getVerticalScrollBar().setUnitIncrement(16);
+        tableScroll.setPreferredSize(new Dimension(600, 180));
+
+        Widgets.Card card = Widgets.titledCard("Events", tableScroll);
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 240));
+        return card;
     }
-    
-    private JPanel createGraphContainer(String title, JPanel graph) {
-        JPanel container = new JPanel(new BorderLayout());
-        container.setBorder(StyledComponents.createSectionBorder(title));
-        container.add(graph, BorderLayout.CENTER);
-        return container;
+
+    private void styleTable(JTable table) {
+        table.setShowGrid(false);
+        table.setRowHeight(Tokens.SPACE_LG + 4);
+        table.setBackground(Tokens.surfaceRaised());
+        table.setForeground(Tokens.text());
+        table.setFont(Tokens.fontBody());
+        table.setSelectionBackground(Tokens.accent());
+        table.setSelectionForeground(Color.WHITE);
+        table.setBorder(BorderFactory.createEmptyBorder());
+        table.setIntercellSpacing(new Dimension(0, 0));
+
+        JTableHeader header = table.getTableHeader();
+        header.setFont(Tokens.fontSmall());
+        header.setBackground(Tokens.surfaceRaised());
+        header.setForeground(Tokens.textMuted());
+        header.setBorder(BorderFactory.createEmptyBorder());
     }
-    
-    private JLabel createStatLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setFont(label.getFont().deriveFont(10f));
-        return label;
-    }
-    
-    private JLabel createFixedLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setFont(label.getFont().deriveFont(Font.BOLD, 10f));
-        label.setForeground(Color.GRAY);
-        return label;
-    }
-    
+
     public void refreshGuildList() {
         guildSelector.removeAllItems();
         guildOverviewModel.setRowCount(0);
-        
+
         if (bot == null || bot.getJDA() == null) return;
-        
+
         List<Guild> guilds = bot.getJDA().getGuilds();
         for (Guild g : guilds) {
             if (g.getAudioManager().isConnected()) {
                 guildSelector.addItem(new GuildItem(g));
-                
+
                 // Add to overview table
                 var handler = g.getAudioManager().getSendingHandler();
                 if (handler instanceof AudioHandler ah) {
                     MetricsSnapshot snap = ah.getPerformanceMetrics().getSnapshot(selectedWindowSeconds);
-                    String status = ah.getPlayer().getPlayingTrack() != null 
-                        ? (ah.getPlayer().isPaused() ? "Paused" : "Playing") 
+                    String status = ah.getPlayer().getPlayingTrack() != null
+                        ? (ah.getPlayer().isPaused() ? "Paused" : "Playing")
                         : "Idle";
-                    
+
                     guildOverviewModel.addRow(new Object[]{
                         g.getName(),
                         status,
@@ -387,11 +379,11 @@ public class PerformancePanel extends JPanel {
             guildSelector.addItem(new GuildItem(null));
         }
     }
-    
+
     private void refreshMetrics() {
         // Always get health snapshot (system-wide, not guild-specific)
         healthSnapshot = SystemHealthMonitor.getInstance().getSnapshot(selectedWindowSeconds);
-        
+
         GuildItem sel = (GuildItem) guildSelector.getSelectedItem();
         if (sel == null || sel.guild() == null) {
             currentSnapshot = null;
@@ -399,7 +391,7 @@ public class PerformancePanel extends JPanel {
             updateDisplay();
             return;
         }
-        
+
         var handler = sel.guild().getAudioManager().getSendingHandler();
         if (!(handler instanceof AudioHandler ah)) {
             currentSnapshot = null;
@@ -407,100 +399,106 @@ public class PerformancePanel extends JPanel {
             updateDisplay();
             return;
         }
-        
+
         currentSnapshot = ah.getPerformanceMetrics().getSnapshot(selectedWindowSeconds);
         enhancedTimeline.updateSnapshot(currentSnapshot, sel.guild().getIdLong(), selectedWindowSeconds);
         updateDisplay();
     }
-    
+
     private void updateDisplay() {
         if (currentSnapshot == null) {
-            healthLabel.setForeground(Color.GRAY);
-            qualityScoreLabel.setText("Quality: --%");
-            durationLabel.setText("--");
-            framesLabel.setText("--");
-            missedLabel.setText("--");
-            missRateLabel.setText("--%");
-            latencyLabel.setText("-- ms");
-            fpsLabel.setText("-- fps");
-            stuttersLabel.setText("--");
-            stuckLabel.setText("--");
-            gcCountLabel.setText("--");
-            ttffLabel.setText("--");
-            missRateWindowsLabel.setText("--");
+            healthBadge.set("NO DATA", Tokens.textMuted());
+            qualityTile.setValue("—");
+            qualityTile.setValueColor(Tokens.text());
+            durationTile.setValue("—");
+            framesTile.setValue("—");
+            missedTile.setValue("—");
+            missedTile.setValueColor(Tokens.text());
+            missRateTile.setValue("—");
+            missRateWindowTile.setValue("—");
+            latencyTile.setValue("—");
+            fpsTile.setValue("—");
+            stutterTile.setValue("—");
+            stutterTile.setValueColor(Tokens.text());
+            stuckTile.setValue("—");
+            stuckTile.setValueColor(Tokens.text());
+            gcTile.setValue("—");
+            ttffTile.setValue("—");
+            ttffTile.setValueColor(Tokens.text());
             eventTableModel.setRowCount(0);
             repaintGraphs();
             return;
         }
-        
+
         HealthStatus health = currentSnapshot.healthStatus();
-        healthLabel.setForeground(switch (health) {
-            case GOOD -> GOOD_COLOR;
-            case WARNING -> WARNING_COLOR;
-            case CRITICAL -> CRITICAL_COLOR;
-        });
-        
+        healthBadge.set(health.name(), colorFor(health));
+
         int score = currentSnapshot.qualityScore();
-        qualityScoreLabel.setText("Quality: " + score + "%");
-        qualityScoreLabel.setForeground(score >= 90 ? GOOD_COLOR : score >= 70 ? WARNING_COLOR : CRITICAL_COLOR);
-        
-        durationLabel.setText(currentSnapshot.formattedDuration());
-        framesLabel.setText(formatNum(currentSnapshot.totalFramesProvided()));
-        missedLabel.setText(String.valueOf(currentSnapshot.totalFramesMissed()));
-        missedLabel.setForeground(currentSnapshot.totalFramesMissed() > 0 ? CRITICAL_COLOR : null);
-        missRateLabel.setText(String.format("%.2f%%", currentSnapshot.missRatePercent()));
+        qualityTile.setValue(score + "%");
+        qualityTile.setValueColor(score >= 90 ? Tokens.success() : score >= 70 ? Tokens.warning() : Tokens.danger());
+
+        durationTile.setValue(currentSnapshot.formattedDuration());
+        framesTile.setValue(formatNum(currentSnapshot.totalFramesProvided()));
+        missedTile.setValue(String.valueOf(currentSnapshot.totalFramesMissed()));
+        missedTile.setValueColor(currentSnapshot.totalFramesMissed() > 0 ? Tokens.danger() : Tokens.text());
+        missRateTile.setValue(String.format("%.2f%%", currentSnapshot.missRatePercent()));
+
         // Show avg latency with p95 - use microseconds for sub-millisecond values
         double avgLat = currentSnapshot.avgLatencyMs();
         double p95Lat = currentSnapshot.p95LatencyMs();
         boolean useMicroseconds = avgLat < 0.5 && p95Lat < 0.5;
-        
+
         if (useMicroseconds) {
-            // Convert to microseconds for better readability
             double avgUs = avgLat * 1000;
             double p95Us = p95Lat * 1000;
-            if (p95Lat > 0) {
-                latencyLabel.setText(String.format("%.0f (p95: %.0f) μs", avgUs, p95Us));
-            } else {
-                latencyLabel.setText(String.format("%.0f μs", avgUs));
-            }
+            latencyTile.setValue(p95Lat > 0
+                    ? String.format("%.0f (%.0f) μs", avgUs, p95Us)
+                    : String.format("%.0f μs", avgUs));
         } else {
-            if (p95Lat > 0) {
-                latencyLabel.setText(String.format("%.2f (p95: %.2f) ms", avgLat, p95Lat));
-            } else {
-                latencyLabel.setText(String.format("%.2f ms", avgLat));
-            }
+            latencyTile.setValue(p95Lat > 0
+                    ? String.format("%.2f (%.2f) ms", avgLat, p95Lat)
+                    : String.format("%.2f ms", avgLat));
         }
-        fpsLabel.setText(String.format("%.1f fps", currentSnapshot.framesPerSecond()));
-        stuttersLabel.setText(String.valueOf(currentSnapshot.stutterCount()));
-        stuttersLabel.setForeground(currentSnapshot.stutterCount() > 0 ? WARNING_COLOR : null);
-        stuckLabel.setText(String.valueOf(currentSnapshot.stuckCount()));
-        stuckLabel.setForeground(currentSnapshot.stuckCount() > 0 ? CRITICAL_COLOR : null);
-        gcCountLabel.setText(String.valueOf(currentSnapshot.gcEvents().length));
-        
+
+        fpsTile.setValue(String.format("%.1f fps", currentSnapshot.framesPerSecond()));
+        stutterTile.setValue(String.valueOf(currentSnapshot.stutterCount()));
+        stutterTile.setValueColor(currentSnapshot.stutterCount() > 0 ? Tokens.warning() : Tokens.text());
+        stuckTile.setValue(String.valueOf(currentSnapshot.stuckCount()));
+        stuckTile.setValueColor(currentSnapshot.stuckCount() > 0 ? Tokens.danger() : Tokens.text());
+        gcTile.setValue(String.valueOf(currentSnapshot.gcEvents().length));
+
         // TTFF (Time to First Frame)
         long ttff = currentSnapshot.timeToFirstFrameMs();
         if (ttff > 0) {
-            ttffLabel.setText(ttff + "ms");
-            ttffLabel.setForeground(ttff > 500 ? WARNING_COLOR : ttff > 1000 ? CRITICAL_COLOR : null);
+            ttffTile.setValue(ttff + "ms");
+            ttffTile.setValueColor(ttff > 1000 ? Tokens.danger() : ttff > 500 ? Tokens.warning() : Tokens.text());
         } else {
-            ttffLabel.setText("--");
-            ttffLabel.setForeground(null);
+            ttffTile.setValue("—");
+            ttffTile.setValueColor(Tokens.text());
         }
-        
+
         // Miss rate windows (10s / 60s)
-        missRateWindowsLabel.setText(String.format("%.2f%% / %.2f%%", 
+        missRateWindowTile.setValue(String.format("%.2f%% / %.2f%%",
             currentSnapshot.missRate10s(), currentSnapshot.missRate60s()));
-        
+
         updateEventTable();
         repaintGraphs();
     }
-    
+
+    private Color colorFor(HealthStatus health) {
+        return switch (health) {
+            case GOOD -> Tokens.success();
+            case WARNING -> Tokens.warning();
+            case CRITICAL -> Tokens.danger();
+        };
+    }
+
     private void updateEventTable() {
         eventTableModel.setRowCount(0);
         if (currentSnapshot == null) return;
-        
+
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        
+
         for (StutterEvent e : currentSnapshot.stutterEvents()) {
             eventTableModel.addRow(new Object[]{
                 sdf.format(new Date(e.timestamp())),
@@ -509,9 +507,9 @@ public class PerformancePanel extends JPanel {
                 e.severity().name().substring(0, 3)
             });
         }
-        
+
         for (PerformanceMetrics.StuckEvent e : currentSnapshot.stuckEvents()) {
-            String details = e.trackTitle() != null 
+            String details = e.trackTitle() != null
                 ? truncate(e.trackTitle(), 20) + " (" + e.thresholdMs() + "ms)"
                 : "Track stuck (" + e.thresholdMs() + "ms)";
             eventTableModel.addRow(new Object[]{
@@ -521,7 +519,7 @@ public class PerformancePanel extends JPanel {
                 e.severity().name().substring(0, 3)
             });
         }
-        
+
         for (GCMonitor.GCEvent e : currentSnapshot.gcEvents()) {
             eventTableModel.addRow(new Object[]{
                 sdf.format(new Date(e.timestamp())),
@@ -531,53 +529,53 @@ public class PerformancePanel extends JPanel {
             });
         }
     }
-    
+
     private String truncate(String s, int maxLen) {
         if (s == null) return "";
         return s.length() > maxLen ? s.substring(0, maxLen - 2) + ".." : s;
     }
-    
+
     private void repaintGraphs() {
         enhancedTimeline.repaint();
         latencyGraph.repaint();
         driftChart.repaint();
     }
-    
+
     private String formatNum(long n) {
         if (n >= 1_000_000) return String.format("%.1fM", n / 1_000_000.0);
         if (n >= 1_000) return String.format("%.1fK", n / 1_000.0);
         return String.valueOf(n);
     }
-    
+
     public void updateMetrics() {
         refreshMetrics();
     }
-    
+
     /**
      * Exports current metrics to a JSON file.
      */
     private void exportToJson() {
         if (currentSnapshot == null) {
-            JOptionPane.showMessageDialog(this, 
+            JOptionPane.showMessageDialog(this,
                 "No metrics data available. Select a guild with active voice first.",
                 "Export Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Export Diagnostics");
         chooser.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
-        
+
         // Generate default filename with timestamp
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         chooser.setSelectedFile(new File("jmusicbot_diagnostics_" + timestamp + ".json"));
-        
+
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
             if (!file.getName().endsWith(".json")) {
                 file = new File(file.getAbsolutePath() + ".json");
             }
-            
+
             try {
                 String json = currentSnapshot.toJson();
                 Files.writeString(file.toPath(), json);
@@ -591,7 +589,7 @@ public class PerformancePanel extends JPanel {
             }
         }
     }
-    
+
     /**
      * Copies a summary to the clipboard for sharing on Discord.
      */
@@ -602,70 +600,72 @@ public class PerformancePanel extends JPanel {
                 "Copy Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         String summary = currentSnapshot.toDiscordSummary();
         StringSelection selection = new StringSelection(summary);
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
-        
+
         JOptionPane.showMessageDialog(this,
             "Summary copied to clipboard!",
             "Copied", JOptionPane.INFORMATION_MESSAGE);
     }
-    
+
+    /** Alpha-blended variant of a token colour, for shaded chart fills. */
+    private static Color withAlpha(Color base, int alpha) {
+        return new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
+    }
+
     // ===== Graph Panels =====
-    
+
     private class LatencyGraphPanel extends JPanel {
-        private static final Color GRID_COLOR = new Color(50, 50, 55);
-        private static final Color P95_COLOR = new Color(255, 140, 0); // Orange
-        
+
+        LatencyGraphPanel() {
+            setOpaque(false);
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            
+
             int w = getWidth(), h = getHeight();
             if (w < 40 || h < 20) { g2.dispose(); return; }
-            
+
             int margin = 35; // Increased for microsecond labels
             int graphW = w - margin - 15;
             int graphH = h - 20; // More bottom margin for time labels
             int graphTop = 5;
-            
-            g2.setColor(GRAPH_BG);
+
+            g2.setColor(Tokens.surfaceSunken());
             g2.fillRect(margin, graphTop, graphW, graphH);
-            
+
             if (currentSnapshot == null || currentSnapshot.latencyBuckets().length == 0) {
                 drawCentered(g2, "No data", w, h);
                 g2.dispose();
                 return;
             }
-            
+
             LatencyBucket[] buckets = currentSnapshot.latencyBuckets();
             double p95Latency = currentSnapshot.p95LatencyMs();
-            
+
             // Find max data latency
             double maxDataLat = 0;
             for (LatencyBucket b : buckets) {
                 maxDataLat = Math.max(maxDataLat, b.max());
             }
-            
+
             // Determine if we should use microsecond scale
-            // Use microseconds when max latency is below 0.5ms (500μs)
             boolean useMicroseconds = maxDataLat < 0.5 && p95Latency < 0.5;
-            
-            // Scale factor: 1.0 for ms, 1000.0 for μs
+
             double scaleFactor = useMicroseconds ? 1000.0 : 1.0;
             String unit = useMicroseconds ? "μs" : "ms";
-            
-            // Convert to display units
+
             double maxDataDisplay = maxDataLat * scaleFactor;
             double p95Display = p95Latency * scaleFactor;
-            
-            // Determine scale max in display units
+
             double scaleMax;
             if (useMicroseconds) {
-                // Microsecond scales: 10μs, 25μs, 50μs, 100μs, 250μs, 500μs
                 if (maxDataDisplay <= 10) scaleMax = 10;
                 else if (maxDataDisplay <= 25) scaleMax = 25;
                 else if (maxDataDisplay <= 50) scaleMax = 50;
@@ -673,7 +673,6 @@ public class PerformancePanel extends JPanel {
                 else if (maxDataDisplay <= 250) scaleMax = 250;
                 else scaleMax = 500;
             } else {
-                // Millisecond scales: 1ms, 2ms, 5ms, 10ms, 20ms, etc.
                 if (maxDataDisplay <= 1) scaleMax = 1;
                 else if (maxDataDisplay <= 2) scaleMax = 2;
                 else if (maxDataDisplay <= 5) scaleMax = 5;
@@ -681,35 +680,33 @@ public class PerformancePanel extends JPanel {
                 else if (maxDataDisplay <= 20) scaleMax = 20;
                 else scaleMax = Math.ceil(maxDataDisplay * 1.2);
             }
-            
-            g2.setFont(g2.getFont().deriveFont(9f));
-            
+
+            g2.setFont(Tokens.fontSmall());
+
             // Draw horizontal grid lines at appropriate intervals
             double gridStep;
             if (useMicroseconds) {
-                // Microsecond grid steps
                 gridStep = scaleMax <= 25 ? 5 : scaleMax <= 50 ? 10 : scaleMax <= 100 ? 25 : scaleMax <= 250 ? 50 : 100;
             } else {
-                // Millisecond grid steps
                 gridStep = scaleMax <= 2 ? 0.5 : scaleMax <= 5 ? 1.0 : scaleMax <= 10 ? 2.0 : 5.0;
             }
-            
+
             for (double val = gridStep; val < scaleMax; val += gridStep) {
                 int y = graphTop + graphH - (int) (val / scaleMax * graphH);
-                g2.setColor(GRID_COLOR);
+                g2.setColor(Tokens.border());
                 g2.drawLine(margin, y, margin + graphW, y);
-                g2.setColor(Color.GRAY);
+                g2.setColor(Tokens.textMuted());
                 String label = val == (int) val ? String.format("%.0f", val) : String.format("%.1f", val);
                 g2.drawString(label, 2, y + 4);
             }
-            
+
             // Y-axis labels with unit
-            g2.setColor(Color.GRAY);
+            g2.setColor(Tokens.textMuted());
             g2.drawString(String.format("%.0f%s", scaleMax, unit), 2, graphTop + 10);
             g2.drawString("0", 2, graphTop + graphH - 2);
-            
-            // Draw min-max range as shaded area (convert ms to display units)
-            g2.setColor(new Color(70, 130, 180, 40));
+
+            // Draw min-max range as shaded area
+            g2.setColor(withAlpha(Tokens.accent(), 40));
             for (int i = 0; i < buckets.length - 1; i++) {
                 int x1 = margin + i * graphW / buckets.length;
                 int x2 = margin + (i + 1) * graphW / buckets.length;
@@ -723,20 +720,20 @@ public class PerformancePanel extends JPanel {
                 int y2max = graphTop + graphH - (int) (Math.min(max2, scaleMax) / scaleMax * graphH);
                 g2.fillPolygon(new int[]{x1, x2, x2, x1}, new int[]{y1max, y2max, y2min, y1min}, 4);
             }
-            
+
             // Draw p95 horizontal reference line (dashed)
             if (p95Display > 0 && p95Display <= scaleMax) {
                 int p95Y = graphTop + graphH - (int) (p95Display / scaleMax * graphH);
-                g2.setColor(P95_COLOR);
-                g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 
+                g2.setColor(Tokens.warning());
+                g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
                     10, new float[]{4, 4}, 0));
                 g2.drawLine(margin, p95Y, margin + graphW, p95Y);
                 g2.setStroke(new BasicStroke(1));
                 g2.drawString("p95", margin + graphW + 2, p95Y + 4);
             }
-            
-            // Draw average latency line (solid blue)
-            g2.setColor(new Color(70, 130, 180));
+
+            // Draw average latency line
+            g2.setColor(Tokens.accent());
             g2.setStroke(new BasicStroke(2f));
             for (int i = 0; i < buckets.length - 1; i++) {
                 int x1 = margin + i * graphW / buckets.length;
@@ -747,66 +744,69 @@ public class PerformancePanel extends JPanel {
                 int y2 = graphTop + graphH - (int) (Math.min(avg2, scaleMax) / scaleMax * graphH);
                 g2.drawLine(x1, y1, x2, y2);
             }
-            
+
             // Draw time axis labels
             g2.setStroke(new BasicStroke(1));
-            g2.setFont(g2.getFont().deriveFont(8f));
-            g2.setColor(Color.GRAY);
+            g2.setFont(Tokens.fontSmall());
+            g2.setColor(Tokens.textMuted());
             int timeInterval = selectedWindowSeconds <= 30 ? 10 : selectedWindowSeconds <= 60 ? 15 : 30;
             for (int sec = 0; sec <= selectedWindowSeconds; sec += timeInterval) {
                 int x = margin + (int) ((double) sec / selectedWindowSeconds * graphW);
-                g2.setColor(GRID_COLOR);
+                g2.setColor(Tokens.border());
                 g2.drawLine(x, graphTop, x, graphTop + graphH);
-                g2.setColor(Color.GRAY);
+                g2.setColor(Tokens.textMuted());
                 g2.drawString("-" + (selectedWindowSeconds - sec) + "s", x - 8, h - 3);
             }
-            
+
             // Border
-            g2.setColor(Color.GRAY);
+            g2.setColor(Tokens.border());
             g2.drawRect(margin, graphTop, graphW, graphH);
             g2.dispose();
         }
     }
-    
+
     private class SchedulerDriftPanel extends JPanel {
-        private static final Color GRID_COLOR = new Color(50, 50, 55);
-        
+
+        SchedulerDriftPanel() {
+            setOpaque(false);
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            
+
             int w = getWidth(), h = getHeight();
             if (w < 40 || h < 20) { g2.dispose(); return; }
-            
+
             int margin = 35;
             int graphW = w - margin - 10;
             int graphH = h - 20;
             int graphTop = 5;
-            
-            g2.setColor(GRAPH_BG);
+
+            g2.setColor(Tokens.surfaceSunken());
             g2.fillRect(margin, graphTop, graphW, graphH);
-            
+
             if (healthSnapshot == null || healthSnapshot.isEmpty()) {
                 drawCentered(g2, "No data", w, h);
                 g2.dispose();
                 return;
             }
-            
+
             HealthSample[] samples = healthSnapshot.samples();
             if (samples.length < 2) {
                 drawCentered(g2, "Collecting...", w, h);
                 g2.dispose();
                 return;
             }
-            
+
             // Find max drift for scaling - use adaptive scale
             long maxDrift = 10;
             for (HealthSample s : samples) {
                 maxDrift = Math.max(maxDrift, s.schedulerDriftMs());
             }
-            
+
             // Adaptive scaling: 25ms, 50ms, 100ms, 200ms, 500ms
             long scaleMax;
             if (maxDrift <= 25) scaleMax = 25;
@@ -815,70 +815,70 @@ public class PerformancePanel extends JPanel {
             else if (maxDrift <= 200) scaleMax = 200;
             else if (maxDrift <= 500) scaleMax = 500;
             else scaleMax = ((maxDrift / 100) + 1) * 100;
-            
-            g2.setFont(g2.getFont().deriveFont(9f));
-            
+
+            g2.setFont(Tokens.fontSmall());
+
             // Draw horizontal grid lines
             long gridStep = scaleMax <= 50 ? 10 : scaleMax <= 100 ? 25 : scaleMax <= 200 ? 50 : 100;
             for (long ms = gridStep; ms < scaleMax; ms += gridStep) {
                 int y = graphTop + graphH - (int) ((double) ms / scaleMax * graphH);
-                g2.setColor(GRID_COLOR);
+                g2.setColor(Tokens.border());
                 g2.drawLine(margin, y, margin + graphW, y);
-                g2.setColor(Color.GRAY);
+                g2.setColor(Tokens.textMuted());
                 g2.drawString(ms + "", 2, y + 4);
             }
-            
+
             // Y-axis labels
-            g2.setColor(Color.GRAY);
+            g2.setColor(Tokens.textMuted());
             g2.drawString(scaleMax + "ms", 2, graphTop + 10);
             g2.drawString("0", 2, graphTop + graphH - 2);
-            
+
             // Draw drift bars
             int barWidth = Math.max(2, graphW / samples.length - 1);
             for (int i = 0; i < samples.length; i++) {
                 long drift = samples[i].schedulerDriftMs();
                 if (drift <= 0) continue;
-                
+
                 int x = margin + (i * graphW / samples.length);
                 int barHeight = (int) ((double) drift / scaleMax * graphH);
                 barHeight = Math.min(barHeight, graphH); // Clamp to graph height
-                
+
                 // Color based on severity
                 if (drift > 100) {
-                    g2.setColor(CRITICAL_COLOR);
+                    g2.setColor(Tokens.danger());
                 } else if (drift > 50) {
-                    g2.setColor(WARNING_COLOR);
+                    g2.setColor(Tokens.warning());
                 } else {
-                    g2.setColor(DRIFT_COLOR);
+                    g2.setColor(Tokens.success());
                 }
-                
+
                 g2.fillRect(x, graphTop + graphH - barHeight, barWidth, barHeight);
             }
-            
+
             // Draw time axis labels
-            g2.setFont(g2.getFont().deriveFont(8f));
+            g2.setFont(Tokens.fontSmall());
             int timeInterval = selectedWindowSeconds <= 30 ? 10 : selectedWindowSeconds <= 60 ? 15 : 30;
             for (int sec = 0; sec <= selectedWindowSeconds; sec += timeInterval) {
                 int x = margin + (int) ((double) sec / selectedWindowSeconds * graphW);
-                g2.setColor(GRID_COLOR);
+                g2.setColor(Tokens.border());
                 g2.drawLine(x, graphTop, x, graphTop + graphH);
-                g2.setColor(Color.GRAY);
+                g2.setColor(Tokens.textMuted());
                 g2.drawString("-" + (selectedWindowSeconds - sec) + "s", x - 8, h - 3);
             }
-            
+
             // Border
-            g2.setColor(Color.GRAY);
+            g2.setColor(Tokens.border());
             g2.drawRect(margin, graphTop, graphW, graphH);
             g2.dispose();
         }
     }
-    
+
     private void drawCentered(Graphics2D g2, String text, int w, int h) {
-        g2.setColor(Color.GRAY);
+        g2.setColor(Tokens.textMuted());
         int tw = g2.getFontMetrics().stringWidth(text);
         g2.drawString(text, w / 2 - tw / 2, h / 2 + 4);
     }
-    
+
     private record GuildItem(Guild guild) {
         @Override
         public String toString() {

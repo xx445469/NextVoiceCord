@@ -35,7 +35,8 @@
       "noPlayerInServer": "There is no player in this server!",
       "noMusicPlaying": "There is no music playing!",
       "noMusicPlayingToUse": "There must be music playing to use that!"
-    }
+    },
+    "andMoreSuffix": "\n**And {0} more...**"
   },
   "permissions": {
     "errors": {
@@ -171,6 +172,7 @@
       "mode": "Mode",
       "pageFooter": "Page {0} of {1}"
     },
+    "paginatorTitle": "Current Queue | {0} entries | `{1}` | {2}",
     "button": {
       "remove": "Remove",
       "playNext": "Play Next",
@@ -323,6 +325,8 @@
     "playlistLoadedAdditional": "\nLoaded **{0}** additional tracks!",
     "playlistFoundAdded": "Found {0} with `{1}` entries; added to the queue!",
     "playlistOmittedSuffix": "\nTracks longer than the allowed maximum (`{0}`) have been omitted.",
+    "playlistNameGeneric": "a playlist",
+    "playlistNameLabeled": "playlist **{0}**",
     "selectMenu": {
       "placeholder": "Select a track to play",
       "optionDescriptionDuration": "Duration: {0}"
@@ -411,7 +415,10 @@
       "current": "The bot language for this server is **{0}**.",
       "set": "Language for this server set to **{0}**.",
       "invalid": "Unknown language `{0}`. Available: {1}",
-      "optionDescription": "{0} ({1})"
+      "optionDescription": "{0} ({1})",
+      "setPersonal": "Your language is now **{0}**. This follows you into every server this bot is in.",
+      "currentPersonal": "Your language is **{0}**.",
+      "currentInherited": "You have not chosen a language, so you see this server's: **{0}**."
     },
     "prefix": {
       "cleared": "Prefix cleared.",
@@ -427,21 +434,24 @@
       "cleared": "DJ role cleared; Only Admins can use the DJ commands.",
       "set": "DJ commands can now be used by users with the **{0}** role.",
       "missingArg": "Please include a role name or NONE",
-      "notFound": "No Roles found matching \"{0}\""
+      "notFound": "No Roles found matching \"{0}\"",
+      "multipleFound": " Multiple roles found matching \"{0}\":"
     },
     "textChannel": {
       "set": "Music commands can now only be used in {0}",
       "cleared": "Music commands can now be used in any channel",
       "mustBeText": "Please select a text channel!",
       "missingArg": "Please include a text channel or NONE",
-      "notFound": "No Text Channels found matching \"{0}\""
+      "notFound": "No Text Channels found matching \"{0}\"",
+      "multipleFound": " Multiple text channels found matching \"{0}\":"
     },
     "voiceChannel": {
       "set": "Music can now only be played in {0}",
       "cleared": "Music can now be played in any channel",
       "mustBeVoice": "Please select a voice channel!",
       "missingArg": "Please include a voice channel or NONE",
-      "notFound": "No Voice Channels found matching \"{0}\""
+      "notFound": "No Voice Channels found matching \"{0}\"",
+      "multipleFound": " Multiple voice channels found matching \"{0}\":"
     },
     "skipRatio": {
       "set": "Skip percentage has been set to `{0}%` of listeners on *{1}*",

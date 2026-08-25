@@ -58,20 +58,20 @@ public class MessageFormatter {
         String rawAuthor = info.track.getInfo().author;
         String author = rawAuthor == null ? null : FormatUtil.filter(rawAuthor);
         if (author != null && (!author.isEmpty() && !author.equalsIgnoreCase("unknown artist"))) {
-            eb.addField("Author", author, false);
+            eb.addField(bot.msg(info.guild, "nowplaying.embed.author"), author, false);
         }
 
-        eb.addField("Duration", TimeUtil.formatTime(info.duration), true);
-        eb.addField("Queue", String.valueOf(info.queueSize), true);
-        eb.addField("Volume", info.volume + "%", true);
+        eb.addField(bot.msg(info.guild, "nowplaying.embed.duration"), TimeUtil.formatTime(info.duration), true);
+        eb.addField(bot.msg(info.guild, "nowplaying.embed.queue"), String.valueOf(info.queueSize), true);
+        eb.addField(bot.msg(info.guild, "nowplaying.embed.volume"), info.volume + "%", true);
 
         if (repeatMode != RepeatMode.OFF) {
-            eb.addField("Repeat", repeatMode.getEmoji() + " " + repeatMode.getUserFriendlyName(), true);
+            eb.addField(bot.msg(info.guild, "nowplaying.embed.repeat"), repeatMode.getEmoji() + " " + repeatMode.getUserFriendlyName(), true);
         }
 
         String requesterDetails = buildRequesterDetails(info);
         if (requesterDetails != null) {
-            eb.addField("Requester", requesterDetails, false);
+            eb.addField(bot.msg(info.guild, "nowplaying.embed.requester"), requesterDetails, false);
         }
 
         String artworkUrl = resolveArtworkUrl(bot, info);
@@ -91,7 +91,8 @@ public class MessageFormatter {
 
     private static MessageCreateData buildMinimalNowPlayingMessage(Bot bot, NowPlayingInfo info, boolean showButtons) {
         MessageCreateBuilder mb = new MessageCreateBuilder();
-        mb.setContent(FormatUtil.filter(bot.getConfig().getSuccess() + " **Now Playing in** " + getNowPlayingLocationName(info)));
+        mb.setContent(FormatUtil.filter(bot.getConfig().getSuccess() + " "
+                + bot.msg(info.guild, "nowplaying.contentMinimal", getNowPlayingLocationName(info))));
 
         EmbedBuilder eb = new EmbedBuilder();
         eb.setColor(info.guild.getSelfMember().getColors().getPrimary());
@@ -125,9 +126,9 @@ public class MessageFormatter {
                 : AudioHandler.STOP_EMOJI + " " + FormatUtil.volumeIcon(info.volume);
 
         return new MessageCreateBuilder()
-                .setContent(FormatUtil.filter(bot.getConfig().getSuccess() + " **Now Playing...**"))
+                .setContent(FormatUtil.filter(bot.getConfig().getSuccess() + " " + bot.msg(info.guild, "nowplaying.contentFull")))
                 .setEmbeds(new EmbedBuilder()
-                        .setTitle("No music playing")
+                        .setTitle(bot.msg(info.guild, "nowplaying.embed.noMusicTitle"))
                         .setDescription(descriptionText)
                         .setColor(info.guild.getSelfMember().getColors().getPrimary())
                         .build())
@@ -140,9 +141,10 @@ public class MessageFormatter {
                 : AudioHandler.STOP_EMOJI + " " + FormatUtil.volumeIcon(info.volume);
 
         return new MessageCreateBuilder()
-                .setContent(FormatUtil.filter(bot.getConfig().getSuccess() + " **Now Playing in** " + getNowPlayingLocationName(info)))
+                .setContent(FormatUtil.filter(bot.getConfig().getSuccess() + " "
+                        + bot.msg(info.guild, "nowplaying.contentMinimal", getNowPlayingLocationName(info))))
                 .setEmbeds(new EmbedBuilder()
-                        .setTitle("No music playing")
+                        .setTitle(bot.msg(info.guild, "nowplaying.embed.noMusicTitle"))
                         .setDescription(descriptionText)
                         .setColor(info.guild.getSelfMember().getColors().getPrimary())
                         .build())
@@ -159,32 +161,34 @@ public class MessageFormatter {
         return statusEmoji + " " + timeDisplay + " " + FormatUtil.volumeIcon(info.volume);
     }
 
-    private static String buildMetadataSummaryLine(NowPlayingInfo info, RepeatMode repeatMode, boolean minimalLayout) {
-        StringBuilder summary = new StringBuilder("**Source:** ").append(sourceNameForTrack(info));
+    private static String buildMetadataSummaryLine(Bot bot, NowPlayingInfo info, RepeatMode repeatMode, boolean minimalLayout) {
+        StringBuilder summary = new StringBuilder(bot.msg(info.guild, "nowplaying.source", sourceNameForTrack(bot, info)));
         if (!minimalLayout) {
             return summary.toString();
         }
 
-        String queuedLabel = formatQueuedLabel(info.queueSize);
+        String queuedLabel = formatQueuedLabel(bot, info.guild, info.queueSize);
         if (queuedLabel != null) {
             summary.append(" • ").append(queuedLabel);
         }
-        summary.append("\n**Volume:** ").append(info.volume).append("%");
+        summary.append("\n").append(bot.msg(info.guild, "nowplaying.volumeLine", info.volume));
         if (repeatMode == RepeatMode.ALL || repeatMode == RepeatMode.SINGLE) {
-            summary.append(" • **Repeat:** ").append(repeatMode.getUserFriendlyName());
+            summary.append(" • ").append(bot.msg(info.guild, "nowplaying.repeatLine", repeatMode.getUserFriendlyName()));
         }
         return summary.toString();
     }
 
     private static String buildPlaybackStatusDescription(Bot bot, NowPlayingInfo info, RepeatMode repeatMode, boolean minimalLayout) {
-        return buildPlaybackStatusLine(bot, info) + "\n" + buildMetadataSummaryLine(info, repeatMode, minimalLayout);
+        return buildPlaybackStatusLine(bot, info) + "\n" + buildMetadataSummaryLine(bot, info, repeatMode, minimalLayout);
     }
 
-    private static String formatQueuedLabel(int queueSize) {
+    private static String formatQueuedLabel(Bot bot, Guild guild, int queueSize) {
         if (queueSize <= 0) {
             return null;
         }
-        return queueSize == 1 ? "1 song queued" : queueSize + " songs queued";
+        return queueSize == 1
+                ? bot.msg(guild, "nowplaying.queuedLabelOne")
+                : bot.msg(guild, "nowplaying.queuedLabelMany", queueSize);
     }
 
     private static String getNowPlayingLocationName(NowPlayingInfo info) {
@@ -196,11 +200,11 @@ public class MessageFormatter {
         return info.guild.getName();
     }
 
-    private static String sourceNameForTrack(NowPlayingInfo info)
+    private static String sourceNameForTrack(Bot bot, NowPlayingInfo info)
     {
         return info.track.getSourceManager() != null
                 ? info.track.getSourceManager().getSourceName()
-                : "Unknown";
+                : bot.msg(info.guild, "nowplaying.sourceUnknown");
     }
 
     private static String resolveArtworkUrl(Bot bot, NowPlayingInfo info)
