@@ -611,7 +611,7 @@
         <youtube-source.version>f45bbb7aebfcbc1c553769e04af6cd43afa8b7c3-SNAPSHOT</youtube-source.version>
         <logback.version>1.5.25</logback.version>
         <typesafe-config.version>1.4.3</typesafe-config.version>
-        <jsoup.version>1.22.1</jsoup.version>
+        <jsoup.version>1.23.1</jsoup.version>
         <mockito.version>5.21.0</mockito.version>
         <hamcrest.version>3.0</hamcrest.version>
         <flatlaf.version>3.7</flatlaf.version>
