@@ -148,22 +148,92 @@ public final class ThemeManager {
      * Configures FlatLaf global settings before initialization.
      */
     private static void configureFlatLaf() {
-        // Enable rounded corners for components
-        UIManager.put("Button.arc", 8);
-        UIManager.put("Component.arc", 8);
-        UIManager.put("ProgressBar.arc", 8);
-        UIManager.put("TextComponent.arc", 8);
-        
-        // Enable menu bar embedding on macOS
+        // --- Shape -------------------------------------------------------------
+        // A single radius across every component is what makes a set of controls read as
+        // one design rather than several. 10 rather than 8: at small sizes a smaller
+        // radius is barely distinguishable from a square corner.
+        UIManager.put("Button.arc", 10);
+        UIManager.put("Component.arc", 10);
+        UIManager.put("ProgressBar.arc", 10);
+        UIManager.put("TextComponent.arc", 10);
+        UIManager.put("CheckBox.arc", 6);
+
+        // --- Type --------------------------------------------------------------
+        // The platform UI font, not Font.SANS_SERIF. The generic family resolves to
+        // whatever the JDK picks — on macOS that is not the system font, and a window in
+        // the wrong typeface reads as foreign no matter what else is done to it.
+        UIManager.put("defaultFont", resolveUiFont(baseFontSize));
+
+        // --- Spacing -----------------------------------------------------------
+        // Swing defaults are cramped by modern standards. Most of the impression of a
+        // "dated" interface is density rather than colour.
+        UIManager.put("Button.margin", new Insets(6, 14, 6, 14));
+        UIManager.put("Component.focusWidth", 1);
+        UIManager.put("Component.innerFocusWidth", 1);
+        UIManager.put("TextComponent.margin", new Insets(4, 8, 4, 8));
+        UIManager.put("Table.rowHeight", baseFontSize + 14);
+        UIManager.put("List.cellHeight", baseFontSize + 12);
+
+        // --- Tabs --------------------------------------------------------------
+        // Card tabs with an underline, which is the current convention. Separators are
+        // dropped: with cards they draw a second boundary around something already bounded.
+        UIManager.put("TabbedPane.showTabSeparators", false);
+        UIManager.put("TabbedPane.tabType", "card");
+        UIManager.put("TabbedPane.tabHeight", baseFontSize + 22);
+        UIManager.put("TabbedPane.tabInsets", new Insets(6, 14, 6, 14));
+        UIManager.put("TabbedPane.selectedBackground", null);
+        UIManager.put("TabbedPane.tabSeparatorsFullHeight", false);
+
+        // --- Scrollbars --------------------------------------------------------
+        // Stepper arrows were removed from every major platform years ago; keeping them
+        // is one of the strongest "old Java application" signals a window can send.
+        UIManager.put("ScrollBar.showButtons", false);
+        UIManager.put("ScrollBar.width", 12);
+        UIManager.put("ScrollBar.thumbArc", 999);
+        UIManager.put("ScrollBar.thumbInsets", new Insets(2, 2, 2, 2));
+        UIManager.put("ScrollPane.smoothScrolling", true);
+
+        // --- Titled borders ----------------------------------------------------
+        // The etched groove is the single most dated thing in a Swing window. Flattened to
+        // a hairline so existing TitledBorder use reads as a modern section rule without
+        // having to rewrite every panel.
+        UIManager.put("TitledBorder.titleColor", UIManager.getColor("Label.foreground"));
+
+        // --- Separators and popups ---------------------------------------------
+        UIManager.put("Separator.stripeWidth", 1);
+        UIManager.put("PopupMenu.borderInsets", new Insets(4, 2, 4, 2));
+        UIManager.put("MenuItem.selectionArc", 6);
+
+        // --- Platform ----------------------------------------------------------
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         System.setProperty("apple.awt.application.name", "NextVoiceCord");
-        
-        // Enable FlatLaf extras
-        UIManager.put("TabbedPane.showTabSeparators", true);
-        UIManager.put("ScrollBar.showButtons", true);
-        
-        // Set default font size using UIManager
-        UIManager.put("defaultFont", new Font(Font.SANS_SERIF, Font.PLAIN, baseFontSize));
+        // Lets the title bar adopt the theme instead of staying light above a dark window.
+        System.setProperty("apple.awt.application.appearance", "system");
+    }
+
+    /**
+     * Picks the platform's UI font, falling back only when nothing suitable exists.
+     *
+     * <p>Asking for {@code Font.SANS_SERIF} yields a generic family that is not what the
+     * rest of the desktop uses. Matching the platform font is the cheapest single change
+     * that stops a Swing window looking out of place.
+     */
+    private static Font resolveUiFont(int size) {
+        String[] preferred = {
+            "SF Pro Text", ".AppleSystemUIFont", "Helvetica Neue",   // macOS
+            "Segoe UI Variable Text", "Segoe UI",                    // Windows
+            "Inter", "Ubuntu", "Cantarell", "Noto Sans"              // Linux
+        };
+
+        java.util.Set<String> available = new java.util.HashSet<>(java.util.Arrays.asList(
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
+
+        for (String family : preferred) {
+            if (available.contains(family)) {
+                return new Font(family, Font.PLAIN, size);
+            }
+        }
+        return new Font(Font.SANS_SERIF, Font.PLAIN, size);
     }
     
     /**

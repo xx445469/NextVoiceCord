@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import com.jagrosh.jmusicbot.gui.components.StyledComponents;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.IOException;
@@ -159,7 +160,7 @@ public class ConfigPanel extends JPanel {
      */
     private JPanel createCommandsSection() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("Commands"));
+        panel.setBorder(StyledComponents.createSectionBorder("Commands"));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -193,7 +194,7 @@ public class ConfigPanel extends JPanel {
      */
     private JPanel createPresenceSection() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("Presence"));
+        panel.setBorder(StyledComponents.createSectionBorder("Presence"));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -229,7 +230,7 @@ public class ConfigPanel extends JPanel {
      */
     private JPanel createVoiceSection() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("Voice"));
+        panel.setBorder(StyledComponents.createSectionBorder("Voice"));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -257,7 +258,7 @@ public class ConfigPanel extends JPanel {
      */
     private JPanel createPlaybackSection() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("Playback"));
+        panel.setBorder(StyledComponents.createSectionBorder("Playback"));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -296,7 +297,7 @@ public class ConfigPanel extends JPanel {
      */
     private JPanel createEmojisSection() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("UI / Emojis"));
+        panel.setBorder(StyledComponents.createSectionBorder("UI / Emojis"));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -340,7 +341,7 @@ public class ConfigPanel extends JPanel {
      */
     private JPanel createOtherSection() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(new TitledBorder("Other"));
+        panel.setBorder(StyledComponents.createSectionBorder("Other"));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
         
         GridBagConstraints gbc = new GridBagConstraints();

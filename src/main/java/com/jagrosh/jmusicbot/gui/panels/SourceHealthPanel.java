@@ -20,6 +20,7 @@ import com.jagrosh.jmusicbot.audio.TrackLoadingMonitor.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import com.jagrosh.jmusicbot.gui.components.StyledComponents;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -120,7 +121,7 @@ public class SourceHealthPanel extends JPanel {
         
         // Summary stats row
         JPanel statsRow = new JPanel(new GridLayout(1, 5, 8, 0));
-        statsRow.setBorder(new TitledBorder("Summary"));
+        statsRow.setBorder(StyledComponents.createSectionBorder("Summary"));
         
         totalLoadsLabel = createStatLabel("Total: --");
         successRateLabel = createStatLabel("Success: --%");
@@ -145,13 +146,13 @@ public class SourceHealthPanel extends JPanel {
         
         loadTimeChart = new LoadTimeChartPanel();
         JPanel chartContainer = new JPanel(new BorderLayout());
-        chartContainer.setBorder(new TitledBorder("Load Time by Source"));
+        chartContainer.setBorder(StyledComponents.createSectionBorder("Load Time by Source"));
         chartContainer.add(loadTimeChart, BorderLayout.CENTER);
         chartsPanel.add(chartContainer);
         
         successPie = new SuccessPiePanel();
         JPanel pieContainer = new JPanel(new BorderLayout());
-        pieContainer.setBorder(new TitledBorder("Success Rate by Source"));
+        pieContainer.setBorder(StyledComponents.createSectionBorder("Success Rate by Source"));
         pieContainer.add(successPie, BorderLayout.CENTER);
         chartsPanel.add(pieContainer);
         
@@ -193,7 +194,7 @@ public class SourceHealthPanel extends JPanel {
         });
         
         JScrollPane sourceScroll = new JScrollPane(sourceTable);
-        sourceScroll.setBorder(new TitledBorder("Sources"));
+        sourceScroll.setBorder(StyledComponents.createSectionBorder("Sources"));
         tablesPanel.add(sourceScroll);
         
         // Recent loads table
@@ -226,7 +227,7 @@ public class SourceHealthPanel extends JPanel {
         });
         
         JScrollPane recentScroll = new JScrollPane(recentLoadsTable);
-        recentScroll.setBorder(new TitledBorder("Recent Loads"));
+        recentScroll.setBorder(StyledComponents.createSectionBorder("Recent Loads"));
         tablesPanel.add(recentScroll);
         
         centerPanel.add(tablesPanel);

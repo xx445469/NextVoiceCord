@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.entities.Guild;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import com.jagrosh.jmusicbot.gui.components.StyledComponents;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -192,7 +193,7 @@ public class PerformancePanel extends JPanel {
         });
         
         JScrollPane overviewScroll = new JScrollPane(guildOverviewTable);
-        overviewScroll.setBorder(new TitledBorder("Guild Overview (click to select)"));
+        overviewScroll.setBorder(StyledComponents.createSectionBorder("Guild Overview (click to select)"));
         overviewScroll.setPreferredSize(new Dimension(600, 55)); // More compact
         overviewScroll.setMinimumSize(new Dimension(300, 45));
         overviewScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
@@ -281,7 +282,7 @@ public class PerformancePanel extends JPanel {
         statsInner.add(new JLabel()); // Empty cell
         
         JPanel statsPanel = new JPanel(new BorderLayout());
-        statsPanel.setBorder(new TitledBorder("Statistics"));
+        statsPanel.setBorder(StyledComponents.createSectionBorder("Statistics"));
         statsPanel.add(statsInner, BorderLayout.CENTER);
         statsPanel.setMinimumSize(new Dimension(200, 80));
         statsPanel.setPreferredSize(new Dimension(280, 100));
@@ -301,7 +302,7 @@ public class PerformancePanel extends JPanel {
         eventTable.getColumnModel().getColumn(3).setPreferredWidth(35);
         
         JScrollPane tableScroll = new JScrollPane(eventTable);
-        tableScroll.setBorder(new TitledBorder("Events"));
+        tableScroll.setBorder(StyledComponents.createSectionBorder("Events"));
         tableScroll.setMinimumSize(new Dimension(150, 80));
         tableScroll.setPreferredSize(new Dimension(300, 100));
         
@@ -333,7 +334,7 @@ public class PerformancePanel extends JPanel {
     
     private JPanel createGraphContainer(String title, JPanel graph) {
         JPanel container = new JPanel(new BorderLayout());
-        container.setBorder(new TitledBorder(title));
+        container.setBorder(StyledComponents.createSectionBorder(title));
         container.add(graph, BorderLayout.CENTER);
         return container;
     }

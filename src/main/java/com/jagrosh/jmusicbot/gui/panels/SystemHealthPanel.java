@@ -22,6 +22,7 @@ import com.jagrosh.jmusicbot.audio.SystemHealthMonitor.HealthSnapshot;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import com.jagrosh.jmusicbot.gui.components.StyledComponents;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
@@ -132,7 +133,7 @@ public class SystemHealthPanel extends JPanel {
         
         // === STATS BAR (3 rows x 4 columns for more info) ===
         JPanel statsPanel = new JPanel(new GridLayout(3, 4, 8, 2));
-        statsPanel.setBorder(new TitledBorder("Current Stats"));
+        statsPanel.setBorder(StyledComponents.createSectionBorder("Current Stats"));
         
         cpuLabel = createStatLabel("--%");
         heapLabel = createStatLabel("--");
@@ -170,7 +171,7 @@ public class SystemHealthPanel extends JPanel {
     
     private JPanel createChartContainer(String title, JPanel chart) {
         JPanel container = new JPanel(new BorderLayout());
-        container.setBorder(new TitledBorder(title));
+        container.setBorder(StyledComponents.createSectionBorder(title));
         container.add(chart, BorderLayout.CENTER);
         return container;
     }

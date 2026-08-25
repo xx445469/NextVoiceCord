@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -97,7 +98,9 @@ public class MainFrame extends JFrame {
      */
     private void initializeFrame() {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        setMinimumSize(new Dimension(600, 400));
+        // Raised from 600x400: at that size the tab strip wraps to two rows and the
+        // performance tables have no usable width.
+        setMinimumSize(new Dimension(820, 560));
         setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
         
         // Create menu bar
@@ -107,7 +110,10 @@ public class MainFrame extends JFrame {
         setupTabbedPane();
         
         // Main layout
-        JPanel mainPanel = new JPanel(new BorderLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout(0, 6));
+        // Content sat flush against the window edge, which reads as unfinished regardless of
+        // how the panels themselves are styled.
+        mainPanel.setBorder(new EmptyBorder(8, 10, 8, 10));
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
         mainPanel.add(statusBar, BorderLayout.SOUTH);
         
