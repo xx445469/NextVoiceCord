@@ -970,5 +970,83 @@
       "refusedPrefix": "已拒绝：{0}"
     },
     "footer": "播放控制会立即作用于正在运行的机器人。此页面上的其他内容均为只读，直到你按下保存。"
+  },
+  "help": {
+    "buttons": {
+      "github": "GitHub"
+    },
+    "dm": {
+      "sent": "📬 已私信你帮助菜单！",
+      "blocked": "我无法私信你帮助菜单 — 请确认你允许接收此服务器成员的私信。"
+    },
+    "selectMenu": {
+      "placeholder": "选择分类！",
+      "news": {
+        "label": "最新动态",
+        "description": "NextVoiceCord 能做什么。"
+      },
+      "tutorial": {
+        "label": "使用教程",
+        "description": "如何使用 NextVoiceCord。"
+      },
+      "general": {
+        "label": "通用指令",
+        "description": "任何人都能使用的指令。"
+      },
+      "music": {
+        "label": "音乐指令",
+        "description": "播放、加入队列、搜索歌曲。"
+      },
+      "dj": {
+        "label": "DJ 指令",
+        "description": "需要 DJ 身份组或“管理服务器”权限。"
+      },
+      "admin": {
+        "label": "管理员指令",
+        "description": "需要“管理服务器”权限。"
+      },
+      "owner": {
+        "label": "所有者指令",
+        "description": "仅机器人所有者可以使用。"
+      }
+    },
+    "category": {
+      "label": {
+        "news": "最新动态",
+        "tutorial": "使用教程",
+        "general": "通用",
+        "music": "音乐",
+        "dj": "DJ",
+        "admin": "管理员",
+        "owner": "所有者"
+      },
+      "title": "分类：{0}",
+      "info": {
+        "general": "所有人都能使用的指令，无论是否在语音频道中。",
+        "music": "播放相关指令。服务器中任何人都能使用。",
+        "dj": "需要 DJ 身份组、“管理服务器”权限，或机器人所有者。",
+        "admin": "需要“管理服务器”权限，或机器人所有者。",
+        "owner": "仅机器人所有者可以使用。"
+      }
+    },
+    "fields": {
+      "categories": "分类：[{0}]",
+      "information": "📰 信息",
+      "commands": "{0} 指令：[{1}]",
+      "getStarted": "快速开始",
+      "tutorialSteps": "使用方法"
+    },
+    "news": {
+      "title": "NextVoiceCord 帮助菜单",
+      "information": "NextVoiceCord 是一个自托管的 Discord 音乐机器人，可以播放 YouTube 和 SoundCloud 的音乐，保留队列和历史记录，并为每个服务器单独记住设置。",
+      "getStarted": "```\n加入语音频道，然后运行 /play <歌曲名或链接>。\n名称、链接、播放列表链接都可以使用。\n```"
+    },
+    "tutorial": {
+      "information": "按顺序排列的基本用法。",
+      "steps": "```\n1. 加入语音频道。\n2. 运行 /play <歌曲名或链接>（文字前缀则使用 !play）。\n3. 使用 /queue 查看接下来播放的内容，/skip 发起投票跳过，/volume 调整音量。\n4. DJ 和管理员拥有更多控制选项 — 请查看 DJ 和管理员分类。\n```"
+    },
+    "command": {
+      "aliasesSuffix": "（别名：{0}）"
+    }
   }
 }

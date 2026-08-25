@@ -970,5 +970,83 @@
       "refusedPrefix": "Rechazado: {0}"
     },
     "footer": "Los controles de reproducción actúan de inmediato sobre el bot en vivo. Todo lo demás aquí es de solo lectura hasta que presiones Guardar."
+  },
+  "help": {
+    "buttons": {
+      "github": "GitHub"
+    },
+    "dm": {
+      "sent": "📬 ¡Te envié el menú de ayuda por MD!",
+      "blocked": "No pude enviarte el menú de ayuda por MD — comprueba que permites mensajes directos de miembros del servidor."
+    },
+    "selectMenu": {
+      "placeholder": "¡Elige una categoría!",
+      "news": {
+        "label": "Novedades",
+        "description": "Lo que puede hacer NextVoiceCord."
+      },
+      "tutorial": {
+        "label": "Tutorial",
+        "description": "Cómo usar NextVoiceCord."
+      },
+      "general": {
+        "label": "Comandos generales",
+        "description": "Comandos que cualquiera puede usar."
+      },
+      "music": {
+        "label": "Comandos de música",
+        "description": "Reproducir, encolar y buscar canciones."
+      },
+      "dj": {
+        "label": "Comandos de DJ",
+        "description": "Requiere el rol de DJ o el permiso Administrar servidor."
+      },
+      "admin": {
+        "label": "Comandos de administrador",
+        "description": "Requiere el permiso Administrar servidor."
+      },
+      "owner": {
+        "label": "Comandos de dueño",
+        "description": "Solo el dueño del bot puede usarlos."
+      }
+    },
+    "category": {
+      "label": {
+        "news": "Novedades",
+        "tutorial": "Tutorial",
+        "general": "General",
+        "music": "Música",
+        "dj": "DJ",
+        "admin": "Administrador",
+        "owner": "Dueño"
+      },
+      "title": "Categoría: {0}",
+      "info": {
+        "general": "Comandos disponibles para todos, estés o no en un canal de voz.",
+        "music": "Comandos de reproducción. Cualquiera en el servidor puede usarlos.",
+        "dj": "Requiere el rol de DJ, el permiso Administrar servidor o el dueño del bot.",
+        "admin": "Requiere el permiso Administrar servidor o el dueño del bot.",
+        "owner": "Solo el dueño del bot puede usarlos."
+      }
+    },
+    "fields": {
+      "categories": "Categorías: [{0}]",
+      "information": "📰 Información",
+      "commands": "Comandos de {0}: [{1}]",
+      "getStarted": "Primeros pasos",
+      "tutorialSteps": "Cómo usarlo"
+    },
+    "news": {
+      "title": "Menú de ayuda de NextVoiceCord",
+      "information": "NextVoiceCord es un bot de música de Discord autoalojado. Reproduce desde YouTube y SoundCloud, mantiene una cola y un historial, y recuerda la configuración de cada servidor.",
+      "getStarted": "```\nÚnete a un canal de voz y luego ejecuta /play <canción o URL>.\nFuncionan nombres, enlaces y enlaces de listas de reproducción.\n```"
+    },
+    "tutorial": {
+      "information": "Lo esencial, en orden.",
+      "steps": "```\n1. Únete a un canal de voz.\n2. Ejecuta /play <canción o URL> (o !play con el prefijo de texto).\n3. Usa /queue para ver lo que sigue, /skip para votar por saltar, /volume para ajustar el volumen.\n4. Los DJ y administradores tienen controles adicionales — revisa las pestañas de DJ y Administrador.\n```"
+    },
+    "command": {
+      "aliasesSuffix": " (alias: {0})"
+    }
   }
 }

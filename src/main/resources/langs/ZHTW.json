@@ -970,5 +970,83 @@
       "refusedPrefix": "已拒絕：{0}"
     },
     "footer": "播放控制會立即作用於正在執行的機器人。此頁面上的其他內容都是唯讀的，直到你按下儲存為止。"
+  },
+  "help": {
+    "buttons": {
+      "github": "GitHub"
+    },
+    "dm": {
+      "sent": "📬 已私訊你說明選單！",
+      "blocked": "我無法私訊你說明選單 — 請確認你允許接收這個伺服器成員的私訊。"
+    },
+    "selectMenu": {
+      "placeholder": "選擇分類！",
+      "news": {
+        "label": "最新消息",
+        "description": "NextVoiceCord 能做什麼。"
+      },
+      "tutorial": {
+        "label": "使用教學",
+        "description": "如何使用 NextVoiceCord。"
+      },
+      "general": {
+        "label": "一般指令",
+        "description": "任何人都能使用的指令。"
+      },
+      "music": {
+        "label": "音樂指令",
+        "description": "播放、排入佇列、搜尋歌曲。"
+      },
+      "dj": {
+        "label": "DJ 指令",
+        "description": "需要 DJ 身分組或「管理伺服器」權限。"
+      },
+      "admin": {
+        "label": "管理員指令",
+        "description": "需要「管理伺服器」權限。"
+      },
+      "owner": {
+        "label": "擁有者指令",
+        "description": "僅機器人擁有者可以使用。"
+      }
+    },
+    "category": {
+      "label": {
+        "news": "最新消息",
+        "tutorial": "使用教學",
+        "general": "一般",
+        "music": "音樂",
+        "dj": "DJ",
+        "admin": "管理員",
+        "owner": "擁有者"
+      },
+      "title": "分類：{0}",
+      "info": {
+        "general": "所有人都能使用的指令，無論是否在語音頻道中。",
+        "music": "播放相關指令。伺服器中任何人都能使用。",
+        "dj": "需要 DJ 身分組、「管理伺服器」權限，或是機器人擁有者。",
+        "admin": "需要「管理伺服器」權限，或是機器人擁有者。",
+        "owner": "僅機器人擁有者可以使用。"
+      }
+    },
+    "fields": {
+      "categories": "分類：[{0}]",
+      "information": "📰 資訊",
+      "commands": "{0} 指令：[{1}]",
+      "getStarted": "開始使用",
+      "tutorialSteps": "使用方式"
+    },
+    "news": {
+      "title": "NextVoiceCord 說明選單",
+      "information": "NextVoiceCord 是一個自架的 Discord 音樂機器人，可以播放 YouTube 與 SoundCloud 的音樂，保留佇列與播放紀錄，並記住每個伺服器各自的設定。",
+      "getStarted": "```\n加入語音頻道，然後執行 /play <歌曲名稱或網址>。\n名稱、連結、播放清單連結都可以使用。\n```"
+    },
+    "tutorial": {
+      "information": "依序列出的基本操作。",
+      "steps": "```\n1. 加入語音頻道。\n2. 執行 /play <歌曲名稱或網址>（文字前綴則使用 !play）。\n3. 使用 /queue 查看接下來的歌曲、/skip 發起投票跳過、/volume 調整音量。\n4. DJ 與管理員有額外的控制選項 — 請查看 DJ 與管理員分頁。\n```"
+    },
+    "command": {
+      "aliasesSuffix": "（別名：{0}）"
+    }
   }
 }

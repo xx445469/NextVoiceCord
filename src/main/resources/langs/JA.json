@@ -970,5 +970,83 @@
       "refusedPrefix": "拒否されました: {0}"
     },
     "footer": "再生コントロールは稼働中のボットに即座に反映されます。それ以外はすべて、保存を押すまでは読み取り専用です。"
+  },
+  "help": {
+    "buttons": {
+      "github": "GitHub"
+    },
+    "dm": {
+      "sent": "📬 ヘルプメニューをDMで送信しました！",
+      "blocked": "ヘルプメニューをDMで送信できませんでした — サーバーメンバーからのDMを許可しているか確認してください。"
+    },
+    "selectMenu": {
+      "placeholder": "カテゴリーを選択！",
+      "news": {
+        "label": "お知らせ",
+        "description": "NextVoiceCordでできること"
+      },
+      "tutorial": {
+        "label": "チュートリアル",
+        "description": "NextVoiceCordの使い方"
+      },
+      "general": {
+        "label": "一般コマンド",
+        "description": "誰でも使えるコマンド"
+      },
+      "music": {
+        "label": "音楽コマンド",
+        "description": "再生・キュー追加・曲検索"
+      },
+      "dj": {
+        "label": "DJコマンド",
+        "description": "DJロールまたは「サーバー管理」権限が必要"
+      },
+      "admin": {
+        "label": "管理者コマンド",
+        "description": "「サーバー管理」権限が必要"
+      },
+      "owner": {
+        "label": "オーナーコマンド",
+        "description": "Botオーナーのみ使用可能"
+      }
+    },
+    "category": {
+      "label": {
+        "news": "お知らせ",
+        "tutorial": "チュートリアル",
+        "general": "一般",
+        "music": "音楽",
+        "dj": "DJ",
+        "admin": "管理者",
+        "owner": "オーナー"
+      },
+      "title": "カテゴリー: {0}",
+      "info": {
+        "general": "ボイスチャンネルの内外を問わず、誰でも使えるコマンドです。",
+        "music": "再生関連のコマンドです。サーバー内の誰でも使用できます。",
+        "dj": "DJロール、「サーバー管理」権限、またはBotオーナーである必要があります。",
+        "admin": "「サーバー管理」権限、またはBotオーナーである必要があります。",
+        "owner": "Botオーナーのみ使用できます。"
+      }
+    },
+    "fields": {
+      "categories": "カテゴリー: [{0}]",
+      "information": "📰 情報",
+      "commands": "{0}コマンド: [{1}]",
+      "getStarted": "はじめに",
+      "tutorialSteps": "使い方"
+    },
+    "news": {
+      "title": "NextVoiceCord ヘルプメニュー",
+      "information": "NextVoiceCordはセルフホスト型のDiscord音楽Botです。YouTubeとSoundCloudから再生でき、キューと履歴を保持し、サーバーごとの設定を記憶します。",
+      "getStarted": "```\nボイスチャンネルに参加してから /play <曲名またはURL> を実行してください。\n曲名、リンク、プレイリストのリンクにも対応しています。\n```"
+    },
+    "tutorial": {
+      "information": "順番に並んだ基本操作です。",
+      "steps": "```\n1. ボイスチャンネルに参加します。\n2. /play <曲名またはURL> を実行します（テキストプレフィックスの場合は !play）。\n3. /queue で次の曲を確認、/skip で投票スキップ、/volume で音量調整ができます。\n4. DJと管理者には追加の操作があります — DJタブと管理者タブを確認してください。\n```"
+    },
+    "command": {
+      "aliasesSuffix": "（エイリアス: {0}）"
+    }
   }
 }

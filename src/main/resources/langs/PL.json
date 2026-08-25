@@ -970,5 +970,83 @@
       "refusedPrefix": "Odrzucono: {0}"
     },
     "footer": "Sterowanie odtwarzaniem działa natychmiast na żywym bocie. Wszystko inne tutaj jest tylko do odczytu, dopóki nie naciśniesz Zapisz."
+  },
+  "help": {
+    "buttons": {
+      "github": "GitHub"
+    },
+    "dm": {
+      "sent": "📬 Wysłałem ci menu pomocy na DM!",
+      "blocked": "Nie udało mi się wysłać ci menu pomocy na DM — sprawdź, czy zezwalasz na wiadomości prywatne od członków serwera."
+    },
+    "selectMenu": {
+      "placeholder": "Wybierz kategorię!",
+      "news": {
+        "label": "Nowości",
+        "description": "Co potrafi NextVoiceCord."
+      },
+      "tutorial": {
+        "label": "Poradnik",
+        "description": "Jak korzystać z NextVoiceCord."
+      },
+      "general": {
+        "label": "Komendy ogólne",
+        "description": "Komendy dostępne dla każdego."
+      },
+      "music": {
+        "label": "Komendy muzyczne",
+        "description": "Odtwarzanie, kolejka i wyszukiwanie utworów."
+      },
+      "dj": {
+        "label": "Komendy DJ",
+        "description": "Wymaga roli DJ lub uprawnienia Zarządzanie serwerem."
+      },
+      "admin": {
+        "label": "Komendy administratora",
+        "description": "Wymaga uprawnienia Zarządzanie serwerem."
+      },
+      "owner": {
+        "label": "Komendy właściciela",
+        "description": "Może ich używać tylko właściciel bota."
+      }
+    },
+    "category": {
+      "label": {
+        "news": "Nowości",
+        "tutorial": "Poradnik",
+        "general": "Ogólne",
+        "music": "Muzyka",
+        "dj": "DJ",
+        "admin": "Administrator",
+        "owner": "Właściciel"
+      },
+      "title": "Kategoria: {0}",
+      "info": {
+        "general": "Komendy dostępne dla każdego, niezależnie od tego, czy jest na kanale głosowym.",
+        "music": "Komendy odtwarzania. Może ich używać każdy na serwerze.",
+        "dj": "Wymaga roli DJ, uprawnienia Zarządzanie serwerem lub bycia właścicielem bota.",
+        "admin": "Wymaga uprawnienia Zarządzanie serwerem lub bycia właścicielem bota.",
+        "owner": "Może ich używać tylko właściciel bota."
+      }
+    },
+    "fields": {
+      "categories": "Kategorie: [{0}]",
+      "information": "📰 Informacje",
+      "commands": "Komendy ({0}): [{1}]",
+      "getStarted": "Pierwsze kroki",
+      "tutorialSteps": "Jak korzystać"
+    },
+    "news": {
+      "title": "Menu pomocy NextVoiceCord",
+      "information": "NextVoiceCord to samodzielnie hostowany bot muzyczny Discorda. Odtwarza z YouTube i SoundCloud, prowadzi kolejkę i historię oraz zapamiętuje ustawienia dla każdego serwera.",
+      "getStarted": "```\nDołącz do kanału głosowego, a następnie użyj /play <utwór lub URL>.\nDziałają nazwy, linki i linki do playlist.\n```"
+    },
+    "tutorial": {
+      "information": "Najważniejsze rzeczy, po kolei.",
+      "steps": "```\n1. Dołącz do kanału głosowego.\n2. Użyj /play <utwór lub URL> (lub !play z prefiksem tekstowym).\n3. Użyj /queue, aby zobaczyć, co dalej, /skip, aby zagłosować za pominięciem, /volume, aby zmienić głośność.\n4. DJ-e i administratorzy mają dodatkowe funkcje — sprawdź zakładki DJ i Administrator.\n```"
+    },
+    "command": {
+      "aliasesSuffix": " (aliasy: {0})"
+    }
   }
 }

@@ -84,6 +84,18 @@ public final class TestTranslations
                         : new Object[0];
                 return LANGUAGES.get(Language.EN, key, params);
             }
+            // msgFor(guild, user, key, args...) — the key sits one argument further along than
+            // msg(guild, key, args...). Resolved the same way; a per-user language preference
+            // is not something a mock has, so this always answers in English like msg does.
+            if ("msgFor".equals(invocation.getMethod().getName()))
+            {
+                Object[] args = invocation.getArguments();
+                String key = (String) args[2];
+                Object[] params = args.length > 3
+                        ? flatten(Arrays.copyOfRange(args, 3, args.length))
+                        : new Object[0];
+                return LANGUAGES.get(Language.EN, key, params);
+            }
             if ("getLanguages".equals(invocation.getMethod().getName()))
             {
                 return LANGUAGES;

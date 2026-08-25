@@ -501,6 +501,84 @@
       "multipleFound": " Multiple voice channels found matching \"{0}\":"
     }
   },
+  "help": {
+    "buttons": {
+      "github": "GitHub"
+    },
+    "dm": {
+      "sent": "📬 Sent you a DM with the help menu!",
+      "blocked": "I couldn't DM you the help menu — check that you allow direct messages from server members."
+    },
+    "selectMenu": {
+      "placeholder": "Select Category!",
+      "news": {
+        "label": "News",
+        "description": "What NextVoiceCord can do."
+      },
+      "tutorial": {
+        "label": "Tutorial",
+        "description": "How to use NextVoiceCord."
+      },
+      "general": {
+        "label": "General Commands",
+        "description": "Commands anyone can use."
+      },
+      "music": {
+        "label": "Music Commands",
+        "description": "Play, queue, and search for tracks."
+      },
+      "dj": {
+        "label": "DJ Commands",
+        "description": "Requires the DJ role or Manage Server."
+      },
+      "admin": {
+        "label": "Admin Commands",
+        "description": "Requires the Manage Server permission."
+      },
+      "owner": {
+        "label": "Owner Commands",
+        "description": "Only the bot owner can use these."
+      }
+    },
+    "category": {
+      "label": {
+        "news": "News",
+        "tutorial": "Tutorial",
+        "general": "General",
+        "music": "Music",
+        "dj": "DJ",
+        "admin": "Admin",
+        "owner": "Owner"
+      },
+      "title": "Category: {0}",
+      "info": {
+        "general": "Commands available to everyone, in or out of a voice channel.",
+        "music": "Playback commands. Anyone in the server can use these.",
+        "dj": "Requires the DJ role, the Manage Server permission, or the bot owner.",
+        "admin": "Requires the Manage Server permission, or the bot owner.",
+        "owner": "Only the bot owner can use these."
+      }
+    },
+    "fields": {
+      "categories": "Categories: [{0}]",
+      "information": "📰 Information",
+      "commands": "{0} Commands: [{1}]",
+      "getStarted": "Get Started",
+      "tutorialSteps": "How To Use"
+    },
+    "news": {
+      "title": "NextVoiceCord Help Menu",
+      "information": "NextVoiceCord is a self-hosted Discord music bot. It plays from YouTube and SoundCloud, keeps a queue and history, and remembers per-server settings.",
+      "getStarted": "```\nJoin a voice channel, then run /play <song or URL>.\nNames, links, and playlist links all work.\n```"
+    },
+    "tutorial": {
+      "information": "The essentials, in order.",
+      "steps": "```\n1. Join a voice channel.\n2. Run /play <song or URL> (or !play with the text prefix).\n3. Use /queue to see what's up next, /skip to vote-skip, /volume to adjust volume.\n4. DJs and admins get extra controls — check the DJ and Admin tabs.\n```"
+    },
+    "command": {
+      "aliasesSuffix": " (aliases: {0})"
+    }
+  },
   "clearchannel": {
     "clearing": "Clearing channel...",
     "cleared": "Cleared {0} messages.",

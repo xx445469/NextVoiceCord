@@ -9,6 +9,7 @@ import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.commands.v1.admin.*;
 import com.jagrosh.jmusicbot.commands.v1.dj.*;
+import com.jagrosh.jmusicbot.commands.v1.general.HelpTextConsumer;
 import com.jagrosh.jmusicbot.commands.v1.general.SettingsCmd;
 import com.jagrosh.jmusicbot.commands.v1.music.*;
 import com.jagrosh.jmusicbot.commands.v1.owner.*;
@@ -23,6 +24,7 @@ import com.jagrosh.jmusicbot.commands.v2.admin.SettingsSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.admin.SettcSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.admin.SetvcSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.admin.SkipratioSlashCmd;
+import com.jagrosh.jmusicbot.commands.v2.general.HelpSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.dj.ForceskipSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.dj.ForceremoveSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.dj.MovetrackSlashCmd;
@@ -61,6 +63,9 @@ public class CommandFactory {
             .setOwnerId(Long.toString(config.getOwnerId()))
             .setEmojis(config.getSuccess(), config.getWarning(), config.getError())
             .setHelpWord(config.getHelp())
+            // Replaces the built-in help consumer's flat plain-text dump of every command with
+            // the same category menu /help shows, so !help and /help agree on what help looks like.
+            .setHelpConsumer(new HelpTextConsumer(bot))
             .setLinkedCacheSize(200)
             .setGuildSettingsManager(settings)
             .addCommands(aboutCommand,
@@ -110,6 +115,9 @@ public class CommandFactory {
                     new ShutdownCmd(bot),
                     new ClearchannelCmd(bot)
             ).addSlashCommands(
+                    // General
+                    new HelpSlashCmd(bot),
+
                     // Music commands
                     new NowPlayingSlashCmd(bot),
                     new NpSlashCmd(bot),

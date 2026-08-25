@@ -970,5 +970,83 @@
       "refusedPrefix": "Đã từ chối: {0}"
     },
     "footer": "Điều khiển phát nhạc tác động ngay lập tức lên bot đang chạy. Mọi thứ khác ở đây chỉ để xem cho đến khi bạn nhấn Lưu."
+  },
+  "help": {
+    "buttons": {
+      "github": "GitHub"
+    },
+    "dm": {
+      "sent": "📬 Đã gửi cho bạn menu trợ giúp qua tin nhắn riêng!",
+      "blocked": "Không thể gửi cho bạn menu trợ giúp qua tin nhắn riêng — hãy kiểm tra xem bạn có cho phép tin nhắn riêng từ thành viên máy chủ không."
+    },
+    "selectMenu": {
+      "placeholder": "Chọn danh mục!",
+      "news": {
+        "label": "Tin tức",
+        "description": "NextVoiceCord có thể làm gì."
+      },
+      "tutorial": {
+        "label": "Hướng dẫn",
+        "description": "Cách dùng NextVoiceCord."
+      },
+      "general": {
+        "label": "Lệnh chung",
+        "description": "Lệnh mà ai cũng có thể dùng."
+      },
+      "music": {
+        "label": "Lệnh nhạc",
+        "description": "Phát nhạc, xếp hàng đợi và tìm bài hát."
+      },
+      "dj": {
+        "label": "Lệnh DJ",
+        "description": "Cần vai trò DJ hoặc quyền Quản lý Máy chủ."
+      },
+      "admin": {
+        "label": "Lệnh Quản trị viên",
+        "description": "Cần quyền Quản lý Máy chủ."
+      },
+      "owner": {
+        "label": "Lệnh Chủ sở hữu",
+        "description": "Chỉ chủ sở hữu bot mới có thể dùng."
+      }
+    },
+    "category": {
+      "label": {
+        "news": "Tin tức",
+        "tutorial": "Hướng dẫn",
+        "general": "Chung",
+        "music": "Nhạc",
+        "dj": "DJ",
+        "admin": "Quản trị viên",
+        "owner": "Chủ sở hữu"
+      },
+      "title": "Danh mục: {0}",
+      "info": {
+        "general": "Lệnh dành cho mọi người, dù ở trong hay ngoài kênh thoại.",
+        "music": "Lệnh phát nhạc. Bất kỳ ai trong máy chủ cũng có thể dùng.",
+        "dj": "Cần vai trò DJ, quyền Quản lý Máy chủ, hoặc là chủ sở hữu bot.",
+        "admin": "Cần quyền Quản lý Máy chủ, hoặc là chủ sở hữu bot.",
+        "owner": "Chỉ chủ sở hữu bot mới có thể dùng."
+      }
+    },
+    "fields": {
+      "categories": "Danh mục: [{0}]",
+      "information": "📰 Thông tin",
+      "commands": "Lệnh {0}: [{1}]",
+      "getStarted": "Bắt đầu",
+      "tutorialSteps": "Cách sử dụng"
+    },
+    "news": {
+      "title": "Menu Trợ giúp NextVoiceCord",
+      "information": "NextVoiceCord là bot nhạc Discord tự lưu trữ. Nó phát nhạc từ YouTube và SoundCloud, giữ hàng đợi và lịch sử, đồng thời ghi nhớ cài đặt riêng cho từng máy chủ.",
+      "getStarted": "```\nTham gia một kênh thoại, sau đó chạy /play <tên bài hát hoặc URL>.\nTên bài hát, liên kết và liên kết danh sách phát đều dùng được.\n```"
+    },
+    "tutorial": {
+      "information": "Những điều cơ bản, theo thứ tự.",
+      "steps": "```\n1. Tham gia một kênh thoại.\n2. Chạy /play <tên bài hát hoặc URL> (hoặc !play với tiền tố văn bản).\n3. Dùng /queue để xem bài tiếp theo, /skip để bỏ phiếu bỏ qua, /volume để chỉnh âm lượng.\n4. DJ và quản trị viên có thêm quyền điều khiển — hãy xem tab DJ và Quản trị.\n```"
+    },
+    "command": {
+      "aliasesSuffix": " (bí danh: {0})"
+    }
   }
 }

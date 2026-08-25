@@ -970,5 +970,83 @@
       "refusedPrefix": "거부됨: {0}"
     },
     "footer": "재생 컨트롤은 실행 중인 봇에 즉시 적용돼요. 그 외 항목은 저장을 누르기 전까지 읽기 전용이에요."
+  },
+  "help": {
+    "buttons": {
+      "github": "GitHub"
+    },
+    "dm": {
+      "sent": "📬 도움말 메뉴를 DM으로 보내드렸어요!",
+      "blocked": "도움말 메뉴를 DM으로 보내지 못했어요 — 서버 멤버의 DM을 허용하고 있는지 확인해 주세요."
+    },
+    "selectMenu": {
+      "placeholder": "카테고리를 선택하세요!",
+      "news": {
+        "label": "소식",
+        "description": "NextVoiceCord가 할 수 있는 일이에요."
+      },
+      "tutorial": {
+        "label": "튜토리얼",
+        "description": "NextVoiceCord 사용법이에요."
+      },
+      "general": {
+        "label": "일반 명령어",
+        "description": "누구나 사용할 수 있는 명령어예요."
+      },
+      "music": {
+        "label": "음악 명령어",
+        "description": "재생, 대기열 추가, 곡 검색이에요."
+      },
+      "dj": {
+        "label": "DJ 명령어",
+        "description": "DJ 역할 또는 서버 관리 권한이 필요해요."
+      },
+      "admin": {
+        "label": "관리자 명령어",
+        "description": "서버 관리 권한이 필요해요."
+      },
+      "owner": {
+        "label": "소유자 명령어",
+        "description": "봇 소유자만 사용할 수 있어요."
+      }
+    },
+    "category": {
+      "label": {
+        "news": "소식",
+        "tutorial": "튜토리얼",
+        "general": "일반",
+        "music": "음악",
+        "dj": "DJ",
+        "admin": "관리자",
+        "owner": "소유자"
+      },
+      "title": "카테고리: {0}",
+      "info": {
+        "general": "음성 채널 안팎에 상관없이 누구나 사용할 수 있는 명령어예요.",
+        "music": "재생 관련 명령어예요. 서버 내 누구나 사용할 수 있어요.",
+        "dj": "DJ 역할, 서버 관리 권한, 또는 봇 소유자만 사용할 수 있어요.",
+        "admin": "서버 관리 권한, 또는 봇 소유자만 사용할 수 있어요.",
+        "owner": "봇 소유자만 사용할 수 있어요."
+      }
+    },
+    "fields": {
+      "categories": "카테고리: [{0}]",
+      "information": "📰 정보",
+      "commands": "{0} 명령어: [{1}]",
+      "getStarted": "시작하기",
+      "tutorialSteps": "사용 방법"
+    },
+    "news": {
+      "title": "NextVoiceCord 도움말 메뉴",
+      "information": "NextVoiceCord는 셀프 호스팅되는 디스코드 음악 봇이에요. YouTube와 SoundCloud에서 재생하고, 대기열과 기록을 유지하며, 서버별 설정을 기억해요.",
+      "getStarted": "```\n음성 채널에 참여한 뒤 /play <곡 이름 또는 URL>을 실행하세요.\n곡 이름, 링크, 재생목록 링크 모두 사용할 수 있어요.\n```"
+    },
+    "tutorial": {
+      "information": "순서대로 정리한 필수 사용법이에요.",
+      "steps": "```\n1. 음성 채널에 참여하세요.\n2. /play <곡 이름 또는 URL>을 실행하세요 (텍스트 접두사를 쓴다면 !play).\n3. /queue로 다음 곡을 확인하고, /skip으로 건너뛰기 투표를 하고, /volume으로 음량을 조절하세요.\n4. DJ와 관리자는 추가 기능을 사용할 수 있어요 — DJ와 관리자 탭을 확인해 보세요.\n```"
+    },
+    "command": {
+      "aliasesSuffix": " (별칭: {0})"
+    }
   }
 }
