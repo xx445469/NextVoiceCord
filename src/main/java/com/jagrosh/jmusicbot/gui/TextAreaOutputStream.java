@@ -15,6 +15,7 @@
  */
 package com.jagrosh.jmusicbot.gui;
 
+import com.jagrosh.jmusicbot.gui.components.LogView;
 import javax.swing.*;
 import java.awt.*;
 import java.io.OutputStream;
@@ -35,11 +36,11 @@ public class TextAreaOutputStream extends OutputStream {
 private byte[]                          oneByte;                                                    // array for write(int val);
 private Appender                        appender;                                                   // most recent action
 
-public TextAreaOutputStream(JTextArea txtara) {
+public TextAreaOutputStream(LogView txtara) {
     this(txtara,1000);
     }
 
-public TextAreaOutputStream(JTextArea txtara, int maxlin) {
+public TextAreaOutputStream(LogView txtara, int maxlin) {
     if(maxlin<1) { throw new IllegalArgumentException("TextAreaOutputStream maximum lines must be positive (value="+maxlin+")"); }
     oneByte=new byte[1];
     appender=new Appender(txtara,maxlin);
@@ -95,7 +96,7 @@ static private String bytesToString(byte[] ba, int str, int len) {
     static private final String         EOL1="\n";
     static private final String         EOL2=System.getProperty("line.separator",EOL1);
     
-    private final JTextArea             textArea;
+    private final LogView             textArea;
     private final int                   maxLines;                                                   // maximum lines allowed in text area
     private final LinkedList<Integer>   lengths;                                                    // length of lines within text area
     private final List<String>          values;                                                     // values waiting to be appended
@@ -104,7 +105,7 @@ static private String bytesToString(byte[] ba, int str, int len) {
     private boolean                     clear;
     private boolean                     queue;
 
-    Appender(JTextArea txtara, int maxlin) {
+    Appender(LogView txtara, int maxlin) {
         textArea =txtara;
         maxLines =maxlin;
         lengths  =new LinkedList<>();
@@ -139,7 +140,7 @@ static private String bytesToString(byte[] ba, int str, int len) {
     public synchronized void run() {
         try {
             if (clear) {
-                textArea.setText("");
+                textArea.clearLog();
             }
             values.stream().map((val) -> {
                 curLength += val.length();
@@ -147,14 +148,15 @@ static private String bytesToString(byte[] ba, int str, int len) {
             }).map((val) -> {
                 if (val.endsWith(EOL1) || val.endsWith(EOL2)) {
                     if (lengths.size() >= maxLines) {
-                        textArea.replaceRange("", 0, lengths.removeFirst());
+                        lengths.removeFirst();
+                        textArea.trimTo(maxLines);
                     }
                     lengths.addLast(curLength);
                     curLength = 0;
                 }
                 return val;
             }).forEach((val) -> {
-                textArea.append(val);
+                textArea.appendLog(val);
             });
             values.clear();
             clear = false;
