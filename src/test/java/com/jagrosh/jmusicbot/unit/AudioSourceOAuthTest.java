@@ -262,17 +262,22 @@ class AudioSourceOAuthTest {
             // Without OAuth
             Object[] nonOauthClients = (Object[]) buildClients.invoke(null, false);
             assertNotNull(nonOauthClients, "Should return clients for non-OAuth mode");
-            assertEquals(4, nonOauthClients.length, "Non-OAuth mode should use 4 clients");
-            
-            // Verify client types
-            assertEquals("AndroidVrWithThumbnail", nonOauthClients[0].getClass().getSimpleName(),
-                "First non-OAuth client should be <AndroidVrWithThumbnail>");
-            assertEquals("MWebWithThumbnail", nonOauthClients[1].getClass().getSimpleName(),
-                "Second non-OAuth client should be <MWebWithThumbnail>");
-            assertEquals("WebWithThumbnail", nonOauthClients[2].getClass().getSimpleName(),
-                "Third non-OAuth client should be <WebWithThumbnail>");
-            assertEquals("TvHtml5SimplyWithThumbnail", nonOauthClients[3].getClass().getSimpleName(),
-                "Fourth non-OAuth client should be <TvHtml5SimplyWithThumbnail>");
+            assertEquals(5, nonOauthClients.length, "Non-OAuth mode should use 5 clients");
+
+            // ANDROID and IOS lead deliberately: measured on five videos from a residential
+            // connection, both play every one, while the previous head of this list —
+            // AndroidVr — could not load any of them. The order is the fix, not an
+            // incidental detail, so it is asserted rather than left to drift.
+            assertEquals("AndroidWithThumbnail", nonOauthClients[0].getClass().getSimpleName(),
+                "First non-OAuth client should be <AndroidWithThumbnail>");
+            assertEquals("IosWithThumbnail", nonOauthClients[1].getClass().getSimpleName(),
+                "Second non-OAuth client should be <IosWithThumbnail>");
+            assertEquals("MusicWithThumbnail", nonOauthClients[2].getClass().getSimpleName(),
+                "Third non-OAuth client should be <MusicWithThumbnail>");
+            assertEquals("WebWithThumbnail", nonOauthClients[3].getClass().getSimpleName(),
+                "Fourth non-OAuth client should be <WebWithThumbnail>");
+            assertEquals("TvHtml5SimplyWithThumbnail", nonOauthClients[4].getClass().getSimpleName(),
+                "Fifth non-OAuth client should be <TvHtml5SimplyWithThumbnail>");
         }
 
         @Test
