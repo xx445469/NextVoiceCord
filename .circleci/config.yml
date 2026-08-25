@@ -1,0 +1,56 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/openjdk:25.0
+    working_directory: ~/repo
+    environment:
+      MAVEN_OPTS: -Xmx3200m
+    steps:
+      - checkout
+
+      # Restore Maven cache
+      - restore_cache:
+          keys:
+            - v2-m2-{{ checksum "pom.xml" }}
+            - v2-m2-
+
+      # Download deps (good for warm cache; safe to keep)
+      - run:
+          name: Maven go-offline
+          command: mvn -B -ntp dependency:go-offline
+
+      # Build + run unit tests + integration tests (Failsafe) if configured
+      - run:
+          name: Maven verify
+          command: mvn -B -ntp verify
+
+      # Save Maven cache
+      - save_cache:
+          key: v2-m2-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+
+      # Collect test reports if present (doesn't fail if empty)
+      # Note: failsafe-reports contains failsafe-summary.xml which is not JUnit format,
+      # so we copy only the actual test result files (TEST-*.xml) to a clean directory
+      - run:
+          name: Uploading test results
+          when: always
+          command: |
+            mkdir -p target/test-results/surefire target/test-results/failsafe
+            cp target/surefire-reports/TEST-*.xml target/test-results/surefire/ 2>/dev/null || true
+            cp target/failsafe-reports/TEST-*.xml target/test-results/failsafe/ 2>/dev/null || true
+      - store_test_results:
+          path: target/test-results
+
+workflows:
+  build:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore:
+                - gh-pages
+                - gh-pages-generated

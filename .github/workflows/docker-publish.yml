@@ -1,0 +1,120 @@
+name: Publish Docker Image
+
+# Docker publishing workflow - gated by successful build-and-test completion
+# This ensures images are only published after tests pass on master
+on:
+  # Triggered after successful build-and-test on master
+  # Note: The branches filter checks workflow_run.head_branch, which is the source branch
+  # of the triggering workflow. For PRs targeting master, head_branch is the PR source
+  # branch (not master), so this filter already excludes PR-triggered builds. Only direct
+  # pushes to master will have head_branch == 'master' and trigger this workflow.
+  workflow_run:
+    workflows: ["Build and Test"]
+    types:
+      - completed
+    branches:
+      - master
+  # Also trigger on version tags (v*) for releases
+  push:
+    tags:
+      - 'v*'
+
+# Cancel in-progress runs for the same workflow and ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: arif-banai/musicbot
+
+jobs:
+  publish:
+    name: Publish Docker Image
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Only run if the triggering workflow succeeded (for workflow_run events)
+    # For tag pushes, always run
+    if: |
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+    
+    permissions:
+      contents: read
+      packages: write  # Required for pushing to GHCR
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        # For workflow_run events, checkout the commit that triggered the original workflow
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+          fetch-depth: 0  # Full history needed for git commands
+
+      - name: Extract metadata
+        id: metadata
+        run: |
+          # Extract project version from pom.xml
+          POM_VERSION=$(grep -m 1 '<version>' pom.xml | sed 's/.*<version>\([^<]*\)<\/version>.*/\1/' | tr -d ' ')
+          SHA_SHORT=$(git rev-parse --short HEAD)
+          TIMESTAMP=$(git log -1 --format=%cI)
+          
+          # Determine if this is a tag build or master branch build
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_type }}" == "tag" ]]; then
+            # For tag builds, use the git tag version (strip 'v' prefix)
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            IS_TAG_BUILD="true"
+          else
+            # For master builds, use pom.xml version
+            VERSION="$POM_VERSION"
+            IS_TAG_BUILD="false"
+          fi
+          
+          # Check if version is a SNAPSHOT
+          if [[ "$VERSION" =~ -SNAPSHOT$ ]]; then
+            IS_SNAPSHOT="true"
+          else
+            IS_SNAPSHOT="false"
+          fi
+          
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "pom_version=$POM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA_SHORT" >> "$GITHUB_OUTPUT"
+          echo "timestamp=$TIMESTAMP" >> "$GITHUB_OUTPUT"
+          echo "is_tag_build=$IS_TAG_BUILD" >> "$GITHUB_OUTPUT"
+          echo "is_snapshot=$IS_SNAPSHOT" >> "$GITHUB_OUTPUT"
+          echo "Extracted version: $VERSION (pom: $POM_VERSION), SHA: $SHA_SHORT, is_tag: $IS_TAG_BUILD, is_snapshot: $IS_SNAPSHOT"
+
+      - name: Generate Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        env:
+          # For multi-arch images, annotations must be attached to the image index
+          # GitHub Packages reads annotations from the index level for multi-arch images
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Tag rules:
+          # - For tag builds: version tag (from git tag) + sha tag
+          # - For master builds: latest + sha + version (if not SNAPSHOT)
+          tags: |
+            type=raw,value=${{ steps.metadata.outputs.version }},enable=${{ steps.metadata.outputs.is_tag_build == 'true' }}
+            type=raw,value=latest,enable=${{ steps.metadata.outputs.is_tag_build == 'false' }}
+            type=raw,value=${{ steps.metadata.outputs.version }},enable=${{ steps.metadata.outputs.is_tag_build == 'false' && steps.metadata.outputs.is_snapshot == 'false' }}
+            type=raw,value=sha-${{ steps.metadata.outputs.sha }}
+          # Labels are automatically generated from git context by metadata-action
+          # No need to specify them - metadata-action will create standard OCI labels
+
+      - name: Build and push Docker image
+        id: build
+        uses: ./.github/actions/docker-build
+        with:
+          tags: ${{ steps.meta.outputs.tags }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          timestamp: ${{ steps.metadata.outputs.timestamp }}
+          registry: ${{ env.REGISTRY }}
+          image-name: ${{ env.IMAGE_NAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image digest
+        run: echo "Image pushed with digest ${{ steps.build.outputs.digest }}"

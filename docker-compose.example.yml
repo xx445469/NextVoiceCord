@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  jmusicbot:
+    image: ghcr.io/arif-banai/musicbot:latest # or ghcr.io/arif-banai/musicbot:0.6.1 for a specific version
+    container_name: jmusicbot
+    # The container runs as non-root user 'jmusicbot' (UID 10001) for security.
+    # Ensure the mounted volume directory is readable/writable by UID 10001,
+    # or uncomment the user line below to run as your host user.
+    # user: "${UID:-10001}:${GID:-10001}"
+    environment:
+      # JVM options. Image defaults to ZGC + AlwaysPreTouch; set JAVA_OPTS for heap or other flags:
+      # - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseZGC -XX:+AlwaysPreTouch
+      {}
+    volumes:
+      # Mount your config directory. Ensure UID 10001 has read/write access:
+      #   mkdir -p /your/path/to/musicbot && chown 10001:10001 /your/path/to/musicbot
+      - /your/path/to/musicbot:/musicbot
+    restart: unless-stopped

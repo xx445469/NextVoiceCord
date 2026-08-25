@@ -1,0 +1,63 @@
+name: Build and Test
+
+# Build and test on PRs and master pushes
+# This workflow does NOT publish Docker images - that's handled by docker-publish.yml
+on:
+  pull_request:
+    branches:
+      - master  # PRs targeting trunk
+  push:
+    branches:
+      - master  # Direct pushes to master
+    paths-ignore:
+      - '.github/**'  # Ignore GitHub config changes (workflows, actions, templates, etc.)
+      - 'README.md'
+      - 'LICENSE'
+      - 'CNAME'
+      - 'docs/**'
+      - '*.example.yml'
+      - '*.example.yaml'
+      - '.circleci/**'  # If not using CircleCI, ignore its config
+
+# Cancel in-progress runs for the same workflow and branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read  # Only need to checkout repository
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java Environment
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and Test with Coverage
+        run: |
+          COMMIT_TIME=$(git log -1 --format=%cI)
+          mvn --batch-mode verify -Pcoverage -Dproject.build.outputTimestamp=$COMMIT_TIME
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          report_type: coverage
+          files: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+      
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          report_type: test_results
+          token: ${{ secrets.CODECOV_TOKEN }}
