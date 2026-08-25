@@ -62,7 +62,7 @@ public class SettcCmd extends AdminCommand
             if(list.isEmpty())
                 event.reply(event.getClient().getWarning()+" " + bot.msg(event.getGuild(), "settings.textChannel.notFound", event.getArgs()));
             else if (list.size()>1)
-                event.reply(event.getClient().getWarning()+FormatUtil.listOfTChannels(list, event.getArgs()));
+                event.reply(event.getClient().getWarning()+FormatUtil.listOfTChannels(bot, event.getGuild(), list, event.getArgs()));
             else
             {
                 s.setTextChannel(list.get(0));

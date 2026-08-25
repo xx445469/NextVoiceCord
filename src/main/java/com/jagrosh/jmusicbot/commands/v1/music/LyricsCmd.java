@@ -48,7 +48,7 @@ public class LyricsCmd extends MusicCommand
     public void doCommand(CommandEvent event)
     {
         // Lyrics functionality removed - JLyrics dependency removed
-        event.replyError("Lyrics functionality has been removed.");
+        event.replyError(bot.msg(event.getGuild(), "lyrics.errors.removed"));
         
         /* Original implementation commented out:
         String title;

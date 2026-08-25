@@ -39,7 +39,7 @@ public class ShutdownCmd extends OwnerCommand
     @Override
     protected void execute(CommandEvent event)
     {
-        event.replyWarning("Shutting down...");
+        event.replyWarning(bot.msg(event.getChannelType() != net.dv8tion.jda.api.entities.channel.ChannelType.PRIVATE ? event.getGuild() : null, "owner.shutdown.message"));
         bot.shutdown();
     }
 }

@@ -19,7 +19,9 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.v1.OwnerCommand;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Icon;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,20 +30,24 @@ import java.io.InputStream;
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class SetavatarCmd extends OwnerCommand 
+public class SetavatarCmd extends OwnerCommand
 {
+    private final Bot bot;
+
     public SetavatarCmd(Bot bot)
     {
+        this.bot = bot;
         this.name = "setavatar";
         this.help = "sets the avatar of the bot";
         this.arguments = "<url>";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.guildOnly = false;
     }
-    
+
     @Override
-    protected void execute(CommandEvent event) 
+    protected void execute(CommandEvent event)
     {
+        Guild guild = event.getChannelType() != ChannelType.PRIVATE ? event.getGuild() : null;
         String url;
         if(event.getArgs().isEmpty())
             if(!event.getMessage().getAttachments().isEmpty() && event.getMessage().getAttachments().get(0).isImage())
@@ -53,16 +59,16 @@ public class SetavatarCmd extends OwnerCommand
         InputStream s = OtherUtil.imageFromUrl(url);
         if(s==null)
         {
-            event.reply(event.getClient().getError()+" Invalid or missing URL");
+            event.reply(event.getClient().getError()+" " + bot.msg(guild, "owner.setavatar.errors.invalidUrl"));
         }
         else
         {
             try {
             event.getSelfUser().getManager().setAvatar(Icon.from(s)).queue(
-                    v -> event.reply(event.getClient().getSuccess()+" Successfully changed avatar."), 
-                    t -> event.reply(event.getClient().getError()+" Failed to set avatar."));
+                    v -> event.reply(event.getClient().getSuccess()+" " + bot.msg(guild, "owner.setavatar.success")),
+                    t -> event.reply(event.getClient().getError()+" " + bot.msg(guild, "owner.setavatar.errors.setFailed")));
             } catch(IOException e) {
-                event.reply(event.getClient().getError()+" Could not load from provided URL.");
+                event.reply(event.getClient().getError()+" " + bot.msg(guild, "owner.setavatar.errors.loadFailed"));
             }
         }
     }

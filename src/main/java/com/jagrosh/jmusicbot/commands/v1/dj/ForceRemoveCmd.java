@@ -55,7 +55,7 @@ public class ForceRemoveCmd extends DJCommand
     {
         if (event.getArgs().isEmpty())
         {
-            event.replyError("You need to mention a user!");
+            event.replyError(bot.msg(event.getGuild(), "queue.errors.mentionUser"));
             return;
         }
 
@@ -69,7 +69,7 @@ public class ForceRemoveCmd extends DJCommand
 
         if (found.isEmpty())
         {
-            event.replyError("Unable to find the user!");
+            event.replyError(bot.msg(event.getGuild(), "queue.errors.userNotFound"));
             return;
         }
         else if (found.size() > 1)
@@ -83,7 +83,7 @@ public class ForceRemoveCmd extends DJCommand
 
             builder
                     .setSelection((msg, i) -> removeAllEntries(found.get(i - 1).getUser(), event))
-                    .setText("Found multiple users:")
+                    .setText(bot.msg(event.getGuild(), "queue.errors.multipleUsersFound"))
                     .setColor(event.getSelfMember().getColor())
                     .useNumbers()
                     .setUsers(event.getAuthor())

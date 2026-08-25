@@ -15,6 +15,8 @@
  */
 package com.jagrosh.jmusicbot.unit.commands.v2.music;
 
+import com.jagrosh.jmusicbot.testutil.TestTranslations;
+import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.v2.music.PlaylistsSlashCmd;
 import com.jagrosh.jmusicbot.service.MusicService;
 import com.jagrosh.jmusicbot.testutil.commands.SlashCommandTestFixture;
@@ -36,6 +38,16 @@ import static org.mockito.Mockito.when;
 
 class PlaylistsSlashCmdTest
 {
+    /**
+     * A Bot that resolves real English translations.
+     *
+     * <p>These builders now take one so their text can follow the guild's language.
+     * Using the real translations keeps the assertions below checking the words a user
+     * actually sees; a stub returning null would turn them into null checks that pass
+     * while proving nothing.
+     */
+    private static final Bot i18nBot = TestTranslations.mockBot();
+
     private SlashCommandTestFixture fixture;
     private PlaylistsSlashCmd command;
     private MusicService musicService;
@@ -103,7 +115,7 @@ class PlaylistsSlashCmdTest
     @Test
     void buildPlaylistsComponents_sparseButtonsForPartialPage()
     {
-        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistsComponents(1, 1, 3, 0, 42L);
+        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistsComponents(i18nBot, null, 1, 1, 3, 0, 42L);
         assertEquals(2, rows.size());
         ActionRow selectRow = rows.get(0);
         assertEquals(3, selectRow.getComponents().size());
@@ -114,7 +126,7 @@ class PlaylistsSlashCmdTest
     @Test
     void buildPlaylistsComponents_pageTwoUsesAbsoluteLabels()
     {
-        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistsComponents(2, 3, 10, 0, 42L);
+        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistsComponents(i18nBot, null, 2, 3, 10, 0, 42L);
         assertEquals(4, rows.size());
         ActionRow row1 = rows.get(0);
         ActionRow row2 = rows.get(1);
@@ -125,7 +137,7 @@ class PlaylistsSlashCmdTest
     @Test
     void buildPlaylistsEmbed_formatsFavoritesWithStars()
     {
-        MessageEmbed embed = PlaylistsSlashCmd.buildPlaylistsEmbed(
+        MessageEmbed embed = PlaylistsSlashCmd.buildPlaylistsEmbed(i18nBot, null, 
                 List.of("favorites", "night_drive"),
                 1,
                 1,
@@ -141,7 +153,7 @@ class PlaylistsSlashCmdTest
     @Test
     void buildPlaylistDetailsComponents_selectedMode_dirty_hasFinalRowWithUnselectSaveDiscard()
     {
-        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistDetailsComponents(
+        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistDetailsComponents(i18nBot, null, 
                 2, 1, 1, 3, 10, 4, 42L, true, true);
 
         assertEquals(5, rows.size());
@@ -172,7 +184,7 @@ class PlaylistsSlashCmdTest
     @Test
     void buildPlaylistDetailsComponents_selectedMode_clean_hasOnlyUnselectOnFinalRow()
     {
-        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistDetailsComponents(
+        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistDetailsComponents(i18nBot, null, 
                 2, 1, 1, 3, 10, 4, 42L, true, false);
         assertEquals(5, rows.size());
         ActionRow backRow = rows.get(rows.size() - 1);
@@ -183,7 +195,7 @@ class PlaylistsSlashCmdTest
     @Test
     void buildPlaylistDetailsComponents_unselectedMode_dirty_hasBackSaveDiscardOnFinalRow()
     {
-        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistDetailsComponents(
+        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistDetailsComponents(i18nBot, null, 
                 2, 1, 1, 3, 10, 0, 42L, true, true);
         assertFalse(rows.isEmpty());
         ActionRow playlistRow = rows.get(rows.size() - 2);
@@ -199,7 +211,7 @@ class PlaylistsSlashCmdTest
     @Test
     void buildPlaylistDetailsComponents_unselectedMode_clean_hasBackOnlyOnFinalRow()
     {
-        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistDetailsComponents(
+        List<ActionRow> rows = PlaylistsSlashCmd.buildPlaylistDetailsComponents(i18nBot, null, 
                 2, 1, 1, 3, 10, 0, 42L, true, false);
         ActionRow backRow = rows.get(rows.size() - 1);
         assertEquals(1, backRow.getComponents().size());

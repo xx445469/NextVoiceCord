@@ -569,9 +569,9 @@ public class PlaylistsInteractionListener extends ListenerAdapter
                                       int page, int totalPages, int selectedIndex, long userId)
     {
         int playlistsOnPage = PlaylistsSlashCmd.getPlaylistsOnPage(page, playlists.size());
-        MessageEmbed embed = PlaylistsSlashCmd.buildPlaylistsEmbed(playlists, page, totalPages, selectedIndex,
+        MessageEmbed embed = PlaylistsSlashCmd.buildPlaylistsEmbed(bot, event.getGuild(), playlists, page, totalPages, selectedIndex,
                 event.getMember().getColor());
-        List<ActionRow> components = PlaylistsSlashCmd.buildPlaylistsComponents(page, totalPages, playlistsOnPage, selectedIndex, userId);
+        List<ActionRow> components = PlaylistsSlashCmd.buildPlaylistsComponents(bot, event.getGuild(), page, totalPages, playlistsOnPage, selectedIndex, userId);
         event.editMessageEmbeds(embed).setComponents(components).queue();
     }
 
@@ -666,13 +666,13 @@ public class PlaylistsInteractionListener extends ListenerAdapter
                             ? member.getColor()
                             : null;
                     MessageEmbed embed = PlaylistsSlashCmd.buildPlaylistTracksEmbed(
-                            result.playlistName, result.totalItems, safePage, totalPages, result.formattedLines,
+                            bot, guild, result.playlistName, result.totalItems, safePage, totalPages, result.formattedLines,
                             safeSelected, result.dirty, color);
                     boolean canEdit = guild != null
                             && member != null
                             && musicService.canEditPlaylistEntries(guild, member);
                     List<ActionRow> components = PlaylistsSlashCmd.buildPlaylistDetailsComponents(
-                            playlistIndex, listPage, safePage, totalPages, tracksOnPage, safeSelected, userId,
+                            bot, guild, playlistIndex, listPage, safePage, totalPages, tracksOnPage, safeSelected, userId,
                             canEdit, result.dirty);
                     renderTarget.accept(new PlaylistDetailsRenderResult(embed, components));
                 });
@@ -698,6 +698,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
                     int safeSelected = (selectedTrack >= firstOnPage && selectedTrack <= lastOnPage) ? selectedTrack : 0;
 
                     MessageEmbed embed = PlaylistsSlashCmd.buildPlaylistTracksEmbed(
+                            bot, event.getGuild(),
                             result.playlistName,
                             result.totalItems,
                             safePage,

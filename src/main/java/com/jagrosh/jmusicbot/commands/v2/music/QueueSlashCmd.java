@@ -99,8 +99,8 @@ public class QueueSlashCmd extends MusicSlashCommand
         long userId = event.getUser().getIdLong();
         int tracksOnPage = getTracksOnPage(page, queueInfo.tracks.length);
 
-        MessageEmbed embed = buildQueueEmbed(queueInfo, page, totalPages, 0, event.getMember().getColor());
-        List<ActionRow> components = buildQueueComponents(page, totalPages, tracksOnPage, 0, userId);
+        MessageEmbed embed = buildQueueEmbed(bot, event.getGuild(), queueInfo, page, totalPages, 0, event.getMember().getColor());
+        List<ActionRow> components = buildQueueComponents(bot, event.getGuild(), page, totalPages, tracksOnPage, 0, userId);
 
         event.replyEmbeds(embed).setComponents(components).queue();
     }
@@ -108,7 +108,8 @@ public class QueueSlashCmd extends MusicSlashCommand
     /**
      * Builds the queue embed with all relevant information.
      */
-    public static MessageEmbed buildQueueEmbed(MusicService.QueueInfo queueInfo, int page, int totalPages,
+    public static MessageEmbed buildQueueEmbed(Bot bot, net.dv8tion.jda.api.entities.Guild guild,
+                                               MusicService.QueueInfo queueInfo, int page, int totalPages,
                                                int selectedTrack, java.awt.Color memberColor)
     {
         int startIndex = (page - 1) * TRACKS_PER_PAGE;
@@ -121,19 +122,19 @@ public class QueueSlashCmd extends MusicSlashCommand
             sb.append(queueInfo.statusEmoji).append(" **").append(queueInfo.nowPlayingTitle).append("**\n\n");
         }
         sb.append(PaginatedListEmbedUtil.buildNumberedListSection(
-                "**Up Next** *(select a track below)*", pageLines, selectedTrack, startIndex + 1));
+                bot.msg(guild, "queue.embed.upNextSection"), pageLines, selectedTrack, startIndex + 1));
 
         EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("Current Queue")
+                .setTitle(bot.msg(guild, "queue.embed.title"))
                 .setDescription(sb.toString())
-                .addField("Entries", String.valueOf(queueInfo.tracks.length), true)
-                .addField("Duration", TimeUtil.formatTime(queueInfo.totalDuration), true)
-                .addField("Mode", queueInfo.queueType.getEmoji() + " " + queueInfo.queueType.getUserFriendlyName(), true);
-        PaginatedListEmbedUtil.applyStandardEmbedOptions(embed, "Page " + page + " of " + totalPages, memberColor);
+                .addField(bot.msg(guild, "queue.embed.entries"), String.valueOf(queueInfo.tracks.length), true)
+                .addField(bot.msg(guild, "nowplaying.embed.duration"), TimeUtil.formatTime(queueInfo.totalDuration), true)
+                .addField(bot.msg(guild, "queue.embed.mode"), queueInfo.queueType.getEmoji() + " " + queueInfo.queueType.getUserFriendlyName(), true);
+        PaginatedListEmbedUtil.applyStandardEmbedOptions(embed, bot.msg(guild, "queue.embed.pageFooter", page, totalPages), memberColor);
 
         if (queueInfo.repeatMode != RepeatMode.OFF)
         {
-            embed.addField("Repeat", queueInfo.repeatMode.getEmoji() + " " + queueInfo.repeatMode.getUserFriendlyName(), true);
+            embed.addField(bot.msg(guild, "nowplaying.embed.repeat"), queueInfo.repeatMode.getEmoji() + " " + queueInfo.repeatMode.getUserFriendlyName(), true);
         }
 
         return embed.build();
@@ -149,7 +150,8 @@ public class QueueSlashCmd extends MusicSlashCommand
      * @param userId User ID who initiated the command
      * @return List of ActionRows containing the buttons
      */
-    public static List<ActionRow> buildQueueComponents(int page, int totalPages, int tracksOnPage,
+    public static List<ActionRow> buildQueueComponents(Bot bot, net.dv8tion.jda.api.entities.Guild guild,
+                                                       int page, int totalPages, int tracksOnPage,
                                                        int selectedTrack, long userId)
     {
         List<ActionRow> rows = new ArrayList<>();
@@ -157,7 +159,7 @@ public class QueueSlashCmd extends MusicSlashCommand
         rows.addAll(PaginatedListComponents.buildSelectRows(baseId, page, TRACKS_PER_PAGE, tracksOnPage, selectedTrack));
 
         // Row 3: Pagination and Shuffle
-        Button shuffleBtn = Button.secondary(String.format(baseId, "shuffle"), "Shuffle").withEmoji(Emoji.fromUnicode("🔀"));
+        Button shuffleBtn = Button.secondary(String.format(baseId, "shuffle"), bot.msg(guild, "nowplaying.button.shuffle")).withEmoji(Emoji.fromUnicode("🔀"));
         ActionRow paginationRow = PaginatedListComponents.buildPaginationRow(baseId, page, totalPages, shuffleBtn);
         if (paginationRow != null)
         {
@@ -167,10 +169,10 @@ public class QueueSlashCmd extends MusicSlashCommand
         // Row 4: Track actions (only shown when a track is selected)
         if (selectedTrack > 0)
         {
-            Button removeBtn = Button.danger(String.format(baseId, "remove"), "Remove").withEmoji(Emoji.fromUnicode("🗑️"));
-            Button playNextBtn = Button.primary(String.format(baseId, "playnext"), "Play Next").withEmoji(Emoji.fromUnicode("⏭️"));
-            Button moveBtn = Button.secondary(String.format(baseId, "move"), "Move").withEmoji(Emoji.fromUnicode("↕️"));
-            Button playNowBtn = Button.success(String.format(baseId, "playnow"), "Play Now").withEmoji(Emoji.fromUnicode("▶️"));
+            Button removeBtn = Button.danger(String.format(baseId, "remove"), bot.msg(guild, "queue.button.remove")).withEmoji(Emoji.fromUnicode("🗑️"));
+            Button playNextBtn = Button.primary(String.format(baseId, "playnext"), bot.msg(guild, "queue.button.playNext")).withEmoji(Emoji.fromUnicode("⏭️"));
+            Button moveBtn = Button.secondary(String.format(baseId, "move"), bot.msg(guild, "queue.button.move")).withEmoji(Emoji.fromUnicode("↕️"));
+            Button playNowBtn = Button.success(String.format(baseId, "playnow"), bot.msg(guild, "queue.button.playNow")).withEmoji(Emoji.fromUnicode("▶️"));
 
             rows.add(ActionRow.of(removeBtn, playNextBtn, moveBtn, playNowBtn));
         }

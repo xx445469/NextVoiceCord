@@ -61,8 +61,6 @@ import java.util.regex.Pattern;
  */
 public class MusicService
 {
-    public static final String HISTORY_DISABLED_MESSAGE =
-            "Playback history is disabled by config (playback.maxHistorySize = 0).";
     private static final String FAVORITES_PLAYLIST_NAME = "favorites";
     private static final Pattern WINDOWS_DRIVE_ABSOLUTE_PATH = Pattern.compile("^[A-Za-z]:[\\\\/].*");
     private static final boolean WINDOWS_RUNTIME =
@@ -263,7 +261,7 @@ public class MusicService
         if (args == null || args.isEmpty())
         {
             LOG.debug("PlayNext rejected: empty query");
-            output.replyWarning("Please include a song title or URL!");
+            output.replyWarning(bot.msg(guild, "search.errors.missingSongOrUrl"));
             return;
         }
 
@@ -1263,7 +1261,7 @@ public class MusicService
         );
     }
 
-    public String formatQueueTitle(QueueInfo info, String successEmoji)
+    public String formatQueueTitle(Guild guild, QueueInfo info, String successEmoji)
     {
         StringBuilder sb = new StringBuilder();
         if (info.nowPlayingTitle != null)
@@ -1271,10 +1269,15 @@ public class MusicService
             sb.append(info.statusEmoji).append(" **").append(info.nowPlayingTitle).append("**\n");
         }
 
-        return FormatUtil.filter(sb.append(successEmoji).append(" Current Queue | ").append(info.tracks.length)
-                .append(" entries | `").append(TimeUtil.formatTime(info.totalDuration)).append("` ")
-                .append("| ").append(info.queueType.getEmoji()).append(" `").append(info.queueType.getUserFriendlyName()).append('`')
-                .append(info.repeatMode.getEmoji() != null ? " | " + info.repeatMode.getEmoji() : "").toString());
+        String queueTypeDisplay = info.queueType.getEmoji() + " `" + info.queueType.getUserFriendlyName() + "`";
+        sb.append(successEmoji).append(" ").append(bot.msg(guild, "queue.paginatorTitle",
+                info.tracks.length, TimeUtil.formatTime(info.totalDuration), queueTypeDisplay));
+        if (info.repeatMode.getEmoji() != null)
+        {
+            sb.append(" | ").append(info.repeatMode.getEmoji());
+        }
+
+        return FormatUtil.filter(sb.toString());
     }
 
     // ========== History Info ==========
@@ -1329,7 +1332,7 @@ public class MusicService
         }
 
         var history = handler.getQueue().getHistory();
-        if (!requireHistoryEnabled(history, output))
+        if (!requireHistoryEnabled(guild, history, output))
         {
             return;
         }
@@ -1384,7 +1387,7 @@ public class MusicService
         }
 
         var history = handler.getQueue().getHistory();
-        if (!requireHistoryEnabled(history, output))
+        if (!requireHistoryEnabled(guild, history, output))
         {
             return;
         }
@@ -1455,7 +1458,7 @@ public class MusicService
         }
 
         var history = handler.getQueue().getHistory();
-        if (!requireHistoryEnabled(history, output))
+        if (!requireHistoryEnabled(guild, history, output))
         {
             return;
         }
@@ -2141,7 +2144,7 @@ public class MusicService
         }
 
         var history = handler.getQueue().getHistory();
-        if (!requireHistoryEnabled(history, output))
+        if (!requireHistoryEnabled(guild, history, output))
         {
             return;
         }
@@ -2212,11 +2215,11 @@ public class MusicService
         return position < 1 || position > queue.size();
     }
 
-    private boolean requireHistoryEnabled(PlaybackHistory<QueuedTrack> history, OutputAdapter output)
+    private boolean requireHistoryEnabled(Guild guild, PlaybackHistory<QueuedTrack> history, OutputAdapter output)
     {
         if (history.getMaxSize() == 0)
         {
-            output.replyError(HISTORY_DISABLED_MESSAGE);
+            output.replyError(bot.msg(guild, "history.disabled"));
             return false;
         }
         return true;

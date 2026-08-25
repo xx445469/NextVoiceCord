@@ -15,6 +15,8 @@
  */
 package com.jagrosh.jmusicbot.unit.commands.v2.music;
 
+import com.jagrosh.jmusicbot.testutil.TestTranslations;
+import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.v2.music.QueueSlashCmd;
 import com.jagrosh.jmusicbot.service.MusicService;
 import com.jagrosh.jmusicbot.settings.QueueType;
@@ -44,6 +46,16 @@ import static org.mockito.Mockito.*;
  */
 public class QueueSlashCmdTest
 {
+    /**
+     * A Bot that resolves real English translations.
+     *
+     * <p>These builders now take one so their text can follow the guild's language.
+     * Using the real translations keeps the assertions below checking the words a user
+     * actually sees; a stub returning null would turn them into null checks that pass
+     * while proving nothing.
+     */
+    private static final Bot i18nBot = TestTranslations.mockBot();
+
     private SlashCommandTestFixture fixture;
     private QueueSlashCmd command;
 
@@ -273,7 +285,7 @@ public class QueueSlashCmdTest
         long userId = 123456789L;
 
         // When
-        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(page, totalPages, tracksOnPage, selectedTrack, userId);
+        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(i18nBot, null, page, totalPages, tracksOnPage, selectedTrack, userId);
 
         // Then
         assertEquals(3, components.size()); // Track row 1-5, Track row 6-10, Pagination+Shuffle
@@ -290,7 +302,7 @@ public class QueueSlashCmdTest
         long userId = 123456789L;
 
         // When
-        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(page, totalPages, tracksOnPage, selectedTrack, userId);
+        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(i18nBot, null, page, totalPages, tracksOnPage, selectedTrack, userId);
 
         // Then
         assertEquals(4, components.size()); // Track row 1-5, Track row 6-10, Pagination+Shuffle, Actions
@@ -307,7 +319,7 @@ public class QueueSlashCmdTest
         long userId = 123456789L;
 
         // When
-        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(page, totalPages, tracksOnPage, selectedTrack, userId);
+        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(i18nBot, null, page, totalPages, tracksOnPage, selectedTrack, userId);
 
         // Then
         assertEquals(2, components.size());
@@ -323,7 +335,7 @@ public class QueueSlashCmdTest
     @Test
     void testBuildQueueComponents_PageTwo_UsesAbsoluteButtonLabels()
     {
-        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(2, 3, 10, 0, 123456789L);
+        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(i18nBot, null, 2, 3, 10, 0, 123456789L);
         assertEquals(3, components.size());
         ActionRow row1 = components.get(0);
         ActionRow row2 = components.get(1);

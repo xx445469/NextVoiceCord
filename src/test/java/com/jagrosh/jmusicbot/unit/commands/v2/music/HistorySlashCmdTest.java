@@ -15,6 +15,8 @@
  */
 package com.jagrosh.jmusicbot.unit.commands.v2.music;
 
+import com.jagrosh.jmusicbot.testutil.TestTranslations;
+import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.v2.music.HistorySlashCmd;
 import com.jagrosh.jmusicbot.service.MusicService;
 import com.jagrosh.jmusicbot.testutil.commands.SlashCommandTestFixture;
@@ -38,6 +40,16 @@ import static org.mockito.Mockito.when;
  */
 public class HistorySlashCmdTest
 {
+    /**
+     * A Bot that resolves real English translations.
+     *
+     * <p>These builders now take one so their text can follow the guild's language.
+     * Using the real translations keeps the assertions below checking the words a user
+     * actually sees; a stub returning null would turn them into null checks that pass
+     * while proving nothing.
+     */
+    private static final Bot i18nBot = TestTranslations.mockBot();
+
     private SlashCommandTestFixture fixture;
     private HistorySlashCmd command;
 
@@ -132,7 +144,7 @@ public class HistorySlashCmdTest
     @Test
     void testBuildHistoryComponents_NoSelection_ReturnsFourRowsWithAddAllAndSaveButtons()
     {
-        List<ActionRow> rows = HistorySlashCmd.buildHistoryComponents(1, 2, 10, 0, 12345L);
+        List<ActionRow> rows = HistorySlashCmd.buildHistoryComponents(i18nBot, null, 1, 2, 10, 0, 12345L);
         assertEquals(4, rows.size());
         // Row 4 is action row: "Add all to queue" and "Save as playlist" when no track selected
         ActionRow actionRow = rows.get(3);
@@ -144,14 +156,14 @@ public class HistorySlashCmdTest
     @Test
     void testBuildHistoryComponents_WithSelection_ReturnsFourRows()
     {
-        List<ActionRow> rows = HistorySlashCmd.buildHistoryComponents(1, 2, 10, 5, 12345L);
+        List<ActionRow> rows = HistorySlashCmd.buildHistoryComponents(i18nBot, null, 1, 2, 10, 5, 12345L);
         assertEquals(4, rows.size());
     }
 
     @Test
     void testBuildHistoryComponents_FewerTracks_UsesSparseButtons()
     {
-        List<ActionRow> rows = HistorySlashCmd.buildHistoryComponents(1, 1, 3, 0, 12345L);
+        List<ActionRow> rows = HistorySlashCmd.buildHistoryComponents(i18nBot, null, 1, 1, 3, 0, 12345L);
         assertEquals(2, rows.size());
         ActionRow selectRow = rows.get(0);
         assertEquals(3, selectRow.getComponents().size());
@@ -162,7 +174,7 @@ public class HistorySlashCmdTest
     @Test
     void testBuildHistoryComponents_PageTwo_UsesAbsoluteButtonLabels()
     {
-        List<ActionRow> rows = HistorySlashCmd.buildHistoryComponents(2, 3, 10, 0, 12345L);
+        List<ActionRow> rows = HistorySlashCmd.buildHistoryComponents(i18nBot, null, 2, 3, 10, 0, 12345L);
         assertEquals(4, rows.size());
         ActionRow row1 = rows.get(0);
         ActionRow row2 = rows.get(1);

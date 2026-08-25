@@ -68,7 +68,7 @@ public class HistoryCmd extends MusicCommand
         }
         if (historyInfo.isDisabled())
         {
-            event.reply(event.getClient().getWarning() + " " + MusicService.HISTORY_DISABLED_MESSAGE);
+            event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "history.disabled"));
             return;
         }
         if (historyInfo.isEmpty())
@@ -92,9 +92,9 @@ public class HistoryCmd extends MusicCommand
 
         var member = event.getMember();
         var color = member != null ? member.getColor() : event.getSelfMember().getColor();
-        var embed = HistorySlashCmd.buildHistoryEmbed(historyInfo, page, totalPages, 0, color);
+        var embed = HistorySlashCmd.buildHistoryEmbed(bot, event.getGuild(), historyInfo, page, totalPages, 0, color);
         List<net.dv8tion.jda.api.components.actionrow.ActionRow> components =
-                HistorySlashCmd.buildHistoryComponents(page, totalPages, tracksOnPage, 0, userId);
+                HistorySlashCmd.buildHistoryComponents(bot, event.getGuild(), page, totalPages, tracksOnPage, 0, userId);
 
         MessageCreateData message = new MessageCreateBuilder()
                 .addEmbeds(embed)

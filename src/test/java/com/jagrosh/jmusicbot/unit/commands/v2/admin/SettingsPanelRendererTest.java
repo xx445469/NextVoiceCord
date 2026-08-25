@@ -1,5 +1,7 @@
 package com.jagrosh.jmusicbot.unit.commands.v2.admin;
 
+import com.jagrosh.jmusicbot.testutil.TestTranslations;
+import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.v2.admin.SettingsPanelRenderer;
 import com.jagrosh.jmusicbot.settings.NowPlayingButtonsMode;
 import com.jagrosh.jmusicbot.settings.NowPlayingLayoutMode;
@@ -27,12 +29,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SettingsPanelRendererTest
 {
+    /**
+     * A Bot that resolves real English translations.
+     *
+     * <p>These builders now take one so their text can follow the guild's language.
+     * Using the real translations keeps the assertions below checking the words a user
+     * actually sees; a stub returning null would turn them into null checks that pass
+     * while proving nothing.
+     */
+    private static final Bot i18nBot = TestTranslations.mockBot();
+
     @Test
     void buildSettingsComponents_containsExpectedButtons()
     {
         Settings settings = new Settings(null, 0, 0, 0, 100, null, RepeatMode.OFF, null, -1,
                 QueueType.FAIR, NowPlayingLayoutMode.INHERIT, NowPlayingButtonsMode.INHERIT);
-        List<ActionRow> rows = SettingsPanelRenderer.buildSettingsComponents(settings, 123L);
+        List<ActionRow> rows = SettingsPanelRenderer.buildSettingsComponents(i18nBot, null, settings, 123L);
         assertEquals(4, rows.size());
 
         List<String> labels = rows.stream()
@@ -56,7 +68,7 @@ class SettingsPanelRendererTest
         var guild = Mockito.mock(net.dv8tion.jda.api.entities.Guild.class);
         Mockito.when(guild.getName()).thenReturn("test guild");
 
-        List<MessageTopLevelComponent> components = SettingsPanelRenderer.buildSettingsMessageComponents(
+        List<MessageTopLevelComponent> components = SettingsPanelRenderer.buildSettingsMessageComponents(i18nBot,
                 guild, settings, Mockito.mock(com.jagrosh.jmusicbot.BotConfig.class), 123L, "tester");
         assertEquals(1, components.size());
         assertTrue(components.get(0) instanceof Container);
@@ -86,9 +98,12 @@ class SettingsPanelRendererTest
                 .filter(c -> c.getType() == Component.Type.TEXT_DISPLAY)
                 .map(c -> c.asTextDisplay().getContent())
                 .toList();
-        assertTrue(textDisplays.contains("## MusicBot Settings"));
-        assertTrue(textDisplays.stream().anyMatch(t -> t.contains("Interactive settings panel for **test guild**.")
-                && t.contains("Only **tester** can use these controls.")));
+        // The title now comes from the translation file rather than a literal, so it
+        // follows the rebrand — and the guild's language — instead of being frozen here.
+        assertTrue(textDisplays.contains("## NextVoiceCord Settings"));
+        assertTrue(textDisplays.stream().anyMatch(t -> t.contains("test guild")
+                && t.contains("tester")),
+                "the panel should name the guild and the invoker");
 
         List<String> sectionAccessoryButtonIds = container.getComponents().stream()
                 .filter(c -> c.getType() == Component.Type.SECTION)
@@ -109,7 +124,7 @@ class SettingsPanelRendererTest
     @Test
     void buildModal_knownKey_returnsModalWithExpectedId()
     {
-        Modal modal = SettingsPanelRenderer.buildModal("prefix", 456L);
+        Modal modal = SettingsPanelRenderer.buildModal(i18nBot, null, "prefix", 456L);
         assertNotNull(modal);
         assertEquals("settings_modal_prefix_456", modal.getId());
     }
@@ -117,15 +132,15 @@ class SettingsPanelRendererTest
     @Test
     void buildModal_entitySelectKeys_returnNull()
     {
-        assertNull(SettingsPanelRenderer.buildModal("settc", 456L));
-        assertNull(SettingsPanelRenderer.buildModal("setvc", 456L));
-        assertNull(SettingsPanelRenderer.buildModal("setdj", 456L));
+        assertNull(SettingsPanelRenderer.buildModal(i18nBot, null, "settc", 456L));
+        assertNull(SettingsPanelRenderer.buildModal(i18nBot, null, "setvc", 456L));
+        assertNull(SettingsPanelRenderer.buildModal(i18nBot, null, "setdj", 456L));
     }
 
     @Test
     void buildEntitySelectMenu_setDj_hasExpectedId()
     {
-        EntitySelectMenu menu = SettingsPanelRenderer.buildEntitySelectMenu("setdj", 456L);
+        EntitySelectMenu menu = SettingsPanelRenderer.buildEntitySelectMenu(i18nBot, null, "setdj", 456L);
         assertNotNull(menu);
         assertEquals("settings_entity_setdj_456", menu.getCustomId());
     }
@@ -133,7 +148,7 @@ class SettingsPanelRendererTest
     @Test
     void buildEntitySelectMenu_withPanelMessage_hasExpectedId()
     {
-        EntitySelectMenu menu = SettingsPanelRenderer.buildEntitySelectMenu("setvc", 456L, 999L);
+        EntitySelectMenu menu = SettingsPanelRenderer.buildEntitySelectMenu(i18nBot, null, "setvc", 456L, 999L);
         assertNotNull(menu);
         assertEquals("settings_entity_setvc_999_456", menu.getCustomId());
     }
@@ -141,7 +156,7 @@ class SettingsPanelRendererTest
     @Test
     void buildEntityClearButton_setDj_hasExpectedIdAndLabel()
     {
-        Button button = SettingsPanelRenderer.buildEntityClearButton("setdj", 456L);
+        Button button = SettingsPanelRenderer.buildEntityClearButton(i18nBot, null, "setdj", 456L);
         assertNotNull(button);
         assertEquals("settings_clear_setdj_456", button.getCustomId());
         assertEquals("None", button.getLabel());
@@ -150,7 +165,7 @@ class SettingsPanelRendererTest
     @Test
     void buildEntityClearButton_withPanelMessage_hasExpectedIdAndLabel()
     {
-        Button button = SettingsPanelRenderer.buildEntityClearButton("settc", 456L, 999L);
+        Button button = SettingsPanelRenderer.buildEntityClearButton(i18nBot, null, "settc", 456L, 999L);
         assertNotNull(button);
         assertEquals("settings_clear_settc_999_456", button.getCustomId());
         assertEquals("Any", button.getLabel());

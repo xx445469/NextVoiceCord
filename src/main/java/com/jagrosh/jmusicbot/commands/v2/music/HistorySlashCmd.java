@@ -71,7 +71,7 @@ public class HistorySlashCmd extends MusicSlashCommand
         }
         if (historyInfo.isDisabled())
         {
-            event.reply(event.getClient().getWarning() + " " + MusicService.HISTORY_DISABLED_MESSAGE).setEphemeral(true).queue();
+            event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "history.disabled")).setEphemeral(true).queue();
             return;
         }
         if (historyInfo.isEmpty())
@@ -89,8 +89,8 @@ public class HistorySlashCmd extends MusicSlashCommand
         long userId = event.getUser().getIdLong();
         int tracksOnPage = getTracksOnPage(page, historyInfo.tracks.length);
 
-        MessageEmbed embed = buildHistoryEmbed(historyInfo, page, totalPages, 0, event.getMember().getColor());
-        List<ActionRow> components = buildHistoryComponents(page, totalPages, tracksOnPage, 0, userId);
+        MessageEmbed embed = buildHistoryEmbed(bot, event.getGuild(), historyInfo, page, totalPages, 0, event.getMember().getColor());
+        List<ActionRow> components = buildHistoryComponents(bot, event.getGuild(), page, totalPages, tracksOnPage, 0, userId);
 
         event.replyEmbeds(embed).setComponents(components).queue();
     }
@@ -98,7 +98,8 @@ public class HistorySlashCmd extends MusicSlashCommand
     /**
      * Builds the history embed with paginated track list.
      */
-    public static MessageEmbed buildHistoryEmbed(MusicService.HistoryInfo historyInfo, int page, int totalPages,
+    public static MessageEmbed buildHistoryEmbed(Bot bot, net.dv8tion.jda.api.entities.Guild guild,
+                                                 MusicService.HistoryInfo historyInfo, int page, int totalPages,
                                                  int selectedTrack, Color memberColor)
     {
         int startIndex = (page - 1) * TRACKS_PER_PAGE;
@@ -106,16 +107,16 @@ public class HistorySlashCmd extends MusicSlashCommand
         List<String> pageLines = Arrays.asList(historyInfo.tracks).subList(startIndex, endIndex);
 
         String description = PaginatedListEmbedUtil.buildNumberedListSection(
-                "**Recently played** *(select a track below to queue or play)*", pageLines, selectedTrack, startIndex + 1);
+                bot.msg(guild, "history.embed.section"), pageLines, selectedTrack, startIndex + 1);
 
         EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("History Queue")
+                .setTitle(bot.msg(guild, "history.embed.title"))
                 .setDescription(description)
-                .addField("Entries", String.valueOf(historyInfo.tracks.length), true)
-                .addField("Duration", TimeUtil.formatTime(historyInfo.totalDuration), true)
-                .addField("Max history", String.valueOf(historyInfo.maxSize), true);
+                .addField(bot.msg(guild, "queue.embed.entries"), String.valueOf(historyInfo.tracks.length), true)
+                .addField(bot.msg(guild, "nowplaying.embed.duration"), TimeUtil.formatTime(historyInfo.totalDuration), true)
+                .addField(bot.msg(guild, "history.embed.maxHistory"), String.valueOf(historyInfo.maxSize), true);
         PaginatedListEmbedUtil.applyStandardEmbedOptions(embed,
-                "Page " + page + " of " + totalPages + " | 1 = most recent", memberColor);
+                bot.msg(guild, "history.embed.pageFooter", page, totalPages), memberColor);
 
         return embed.build();
     }
@@ -124,7 +125,8 @@ public class HistorySlashCmd extends MusicSlashCommand
      * Builds the interactive button components for history.
      * Component ID format: history_{action}_{page}_{selectedTrack}_{userId}
      */
-    public static List<ActionRow> buildHistoryComponents(int page, int totalPages, int tracksOnPage,
+    public static List<ActionRow> buildHistoryComponents(Bot bot, net.dv8tion.jda.api.entities.Guild guild,
+                                                         int page, int totalPages, int tracksOnPage,
                                                          int selectedTrack, long userId)
     {
         List<ActionRow> rows = new ArrayList<>();
@@ -139,16 +141,16 @@ public class HistorySlashCmd extends MusicSlashCommand
         }
 
         // Row 4: Save as playlist always; Queue and Play Now only when a track is selected; Add all to queue only when no track selected
-        Button saveBtn = Button.primary(String.format(baseId, "save"), "Save as playlist").withEmoji(Emoji.fromUnicode("💾"));
+        Button saveBtn = Button.primary(String.format(baseId, "save"), bot.msg(guild, "history.button.save")).withEmoji(Emoji.fromUnicode("💾"));
         if (selectedTrack > 0)
         {
-            Button queueBtn = Button.secondary(String.format(baseId, "queue"), "Queue").withEmoji(Emoji.fromUnicode("➕"));
-            Button playNowBtn = Button.success(String.format(baseId, "playnow"), "Play Now").withEmoji(Emoji.fromUnicode("▶️"));
+            Button queueBtn = Button.secondary(String.format(baseId, "queue"), bot.msg(guild, "history.button.queue")).withEmoji(Emoji.fromUnicode("➕"));
+            Button playNowBtn = Button.success(String.format(baseId, "playnow"), bot.msg(guild, "queue.button.playNow")).withEmoji(Emoji.fromUnicode("▶️"));
             rows.add(ActionRow.of(queueBtn, playNowBtn, saveBtn));
         }
         else
         {
-            Button queueAllBtn = Button.secondary(String.format(baseId, "queueall"), "Add all to queue").withEmoji(Emoji.fromUnicode("📋"));
+            Button queueAllBtn = Button.secondary(String.format(baseId, "queueall"), bot.msg(guild, "history.button.queueAll")).withEmoji(Emoji.fromUnicode("📋"));
             rows.add(ActionRow.of(queueAllBtn, saveBtn));
         }
 
