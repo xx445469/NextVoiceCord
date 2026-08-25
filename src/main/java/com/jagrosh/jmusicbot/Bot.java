@@ -66,6 +66,8 @@ public class Bot
     private final AudioLoadWrapper audioLoadWrapper;
     private final LanguageManager languages;
     private SelfUpdater updater;
+    /** Set when --web is used, so the window can offer a link to it. */
+    private com.jagrosh.jmusicbot.web.WebPanel webPanel;
     
     private boolean shuttingDown = false;
     private JDA jda;
@@ -105,6 +107,17 @@ public class Bot
     public BotConfig getConfig()
     {
         return config;
+    }
+
+    /** The web panel, if --web was given. */
+    public com.jagrosh.jmusicbot.web.WebPanel getWebPanel()
+    {
+        return webPanel;
+    }
+
+    public void setWebPanel(com.jagrosh.jmusicbot.web.WebPanel webPanel)
+    {
+        this.webPanel = webPanel;
     }
 
     /** Update checker, or null before JDA is connected. */

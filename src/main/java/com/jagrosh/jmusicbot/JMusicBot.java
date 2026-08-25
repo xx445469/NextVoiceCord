@@ -251,6 +251,7 @@ public class JMusicBot
             options.webPort().ifPresent(port -> {
                 WebPanel panel = new WebPanel(bot, port);
                 panel.start();
+                bot.setWebPanel(panel);
                 Runtime.getRuntime().addShutdownHook(new Thread(panel::stop, "web-panel-shutdown"));
             });
         }
