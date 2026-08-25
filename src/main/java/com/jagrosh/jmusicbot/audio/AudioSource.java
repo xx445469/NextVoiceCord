@@ -1,6 +1,10 @@
 /*
  * Copyright 2026 Arif Banai (arif-banai)
  *
+ * Modifications copyright 2026 adan (xx445469) - NextVoiceCord.
+ * Changes: exposed buildYoutubeClients() so the YouTube smoke check can
+ * exercise the exact same client list the bot uses at runtime.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -278,8 +282,13 @@ public enum AudioSource
      * </ul>
      * 
      * <p>
+     *
+     * <p><b>NextVoiceCord:</b> visibility widened from {@code private} to {@code public}
+     * so {@code com.jagrosh.jmusicbot.diagnostics.YoutubeSmokeCheck} can verify this exact
+     * client list. Keeping a single definition matters: a smoke check that duplicated the
+     * list could pass while real playback fails.
      */
-    private static Client[] buildYoutubeClients(boolean useOauth)
+    public static Client[] buildYoutubeClients(boolean useOauth)
     {
         if (useOauth)
         {
