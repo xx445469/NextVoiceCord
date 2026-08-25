@@ -355,8 +355,31 @@ public enum AudioSource
             return buildYoutubeClients(useOauth);
         }
 
+        // Under OAuth, most clients are registered for metadata only — they cannot stream
+        // while authenticated. If the configured list contains none that can, every playback
+        // attempt fails and the only clue is a warning from deep inside youtube-source that
+        // never mentions which setting caused it. Appending a capable client is better than
+        // honouring a list that cannot work.
+        if (useOauth && clients.stream().noneMatch(AudioSource::canStreamWithOauth))
+        {
+            clients.add(new Tv());
+            logger.warn("playback.youtube.clients contains no OAuth-capable streaming client, "
+                        + "so TV was added. Add TV or TVHTML5SIMPLY to the list to silence this.");
+        }
+
         logger.info("YouTube clients: {}", names);
         return clients.toArray(new Client[0]);
+    }
+
+    /**
+     * Whether a client can stream while OAuth is active.
+     *
+     * <p>The rest are registered with playback disabled under OAuth: they still resolve track
+     * information, but YouTube will not serve them a stream for an authenticated session.
+     */
+    private static boolean canStreamWithOauth(Client client)
+    {
+        return client instanceof Tv || client instanceof TvHtml5SimplyWithThumbnail;
     }
 
     /** Maps a configured name to a client, or null if the name is not recognised. */
