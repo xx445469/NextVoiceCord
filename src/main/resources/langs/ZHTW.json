@@ -1,0 +1,442 @@
+{
+  "common": {
+    "errors": {
+      "serverOnly": "這個功能只能在伺服器中使用！",
+      "sameVoiceChannel": "你必須在同一個語音頻道才能使用！",
+      "needVoiceChannel": "你需要先加入語音頻道才能使用！",
+      "cannotConnectVoice": "我無法連線到 {0}！請檢查我的權限。",
+      "voiceConnectFailed": "我無法連線到 {0}！",
+      "mustBeInChannel": "這個指令只能在 {0} 使用！",
+      "mustBeListening": "你必須在 {0} 收聽才能使用！",
+      "afkChannel": "無法在閒置（AFK）頻道使用這個指令！",
+      "invalidButtonState": "按鈕狀態無效。",
+      "invalidSelectionState": "選單狀態無效。",
+      "invalidModalState": "對話框狀態無效。",
+      "invalidTrackSelection": "選取的曲目無效。",
+      "invalidPlaylistSelection": "選取的播放清單無效。",
+      "invalidPositionSelected": "選取的位置無效。",
+      "trackNotOnPage": "這首歌不在這一頁！",
+      "playlistNotOnPage": "這個播放清單不在這一頁！",
+      "trackNoLongerExists": "這首歌已經不存在了！",
+      "playlistNoLongerExists": "這個播放清單已經不存在了！",
+      "noTrackSelected": "尚未選取曲目！",
+      "noPlaylistSelected": "尚未選取播放清單！",
+      "notCommandInvokerButtons": "只有執行指令的人可以使用這些按鈕！",
+      "notCommandInvokerThis": "只有執行指令的人可以使用！",
+      "notPanelOwner": "只有開啟這個設定面板的人可以操作。",
+      "notModalOwner": "只有開啟這個設定對話框的人可以送出。",
+      "notSaveDialogOwner": "只有開啟儲存對話框的人可以送出！",
+      "noPlayerInServer": "這個伺服器目前沒有播放器！",
+      "noMusicPlaying": "目前沒有在播放音樂！",
+      "noMusicPlayingToUse": "必須有音樂正在播放才能使用！"
+    }
+  },
+
+  "permissions": {
+    "errors": {
+      "needManageServer": "你需要「管理伺服器」權限才能變更設定。",
+      "needManageServerCommand": "你需要「管理伺服器」權限才能使用這個指令！",
+      "ownerOnly": "只有機器人擁有者可以使用這個指令！",
+      "needDj": "你需要 DJ 身分才能使用這個指令！",
+      "needDjOrRequesterSkip": "你需要是 DJ 或點歌者才能跳過！",
+      "needDjOrRequesterPrevious": "你需要是 DJ 或點歌者才能回到上一首！",
+      "needDjUnpause": "只有 DJ 可以繼續播放！",
+      "needDjOrOwnerEditPlaylist": "你需要是 DJ 或機器人擁有者才能編輯播放清單！",
+      "needDjOrOwnerSaveHistory": "你需要是 DJ 或機器人擁有者才能把歷史紀錄存成播放清單！",
+      "needDjToUseButton": "你需要 DJ 身分才能使用這個按鈕！",
+      "needDjToMoveTracks": "你需要 DJ 身分才能調整曲目順序！",
+      "needDjToPlayImmediately": "你需要 DJ 身分才能立即播放曲目！",
+      "needDjToFavorite": "你需要 DJ 身分才能把目前曲目加入最愛！",
+      "needDjToSkipToPosition": "你需要 DJ 身分才能跳到指定位置！",
+      "noManageMessages": "我沒有在該頻道管理訊息的權限。"
+    }
+  },
+
+  "player": {
+    "resumed": "已繼續播放 **{0}**。",
+    "restarted": "已重新播放 **{0}**",
+    "wentBack": "已回到 **{0}**",
+    "skipped": "已跳過！",
+    "skippedTrack": "已跳過 **{0}**",
+    "forceSkipped": "已跳過 **{0}** {1}",
+    "nowPlayingSet": "正在播放 **{0}**",
+    "paused": "已暫停 **{0}**。使用 `{1}` 繼續播放！",
+    "pauseAlready": "播放器已經是暫停狀態！使用 `{0}` 繼續播放！",
+    "stopped": "播放器已停止，佇列已清空。",
+    "volumeCurrent": "目前音量為 `{0}`",
+    "volumeChanged": "音量已從 `{0}` 調整為 `{1}`",
+    "repeatModeSet": "循環模式已設為 `{0}`",
+    "favoriteAdded": "已將 {0} 加入最愛",
+    "favoriteAlready": "這首歌已經在最愛中了",
+    "seekSuccess": "已跳轉至 `{0}/{1}`！",
+    "requesterAutoplay": "（自動播放）",
+    "requesterUser": "（由 **{0}** 點播）",
+    "repeatMode": {
+      "off": "關閉",
+      "all": "全部循環",
+      "single": "單曲循環"
+    },
+    "errors": {
+      "noPreviousTracks": "沒有上一首歌！",
+      "nothingPlaying": "目前沒有播放任何內容！",
+      "noTrackCurrentlyPlaying": "目前沒有曲目正在播放！",
+      "favoriteInvalidUri": "目前曲目沒有可儲存的有效網址或絕對路徑。",
+      "favoriteUnsupported": "只有網址或本系統的絕對檔案路徑可以加入最愛。",
+      "notSeekable": "這首歌無法跳轉。",
+      "seekNotOwner": "你無法跳轉 **{0}**，因為不是你點的！",
+      "invalidSeekFormat": "跳轉格式錯誤！預期格式：[+ | -] <HH:MM:SS | MM:SS | SS> 或 <0h0m0s>\n範例：`1:02:23` `+1:10` `-90`、`1h10m`、`+90s`",
+      "seekPastDuration": "無法跳轉到 `{0}`，因為這首歌長度只有 `{1}`！",
+      "seekGeneric": "跳轉時發生錯誤：{0}",
+      "trackTooLong": "這首歌（**{0}**）超過允許的最大長度：`{1}` > `{2}`",
+      "volumeInvalid": "音量必須是 0 到 150 之間的整數！",
+      "repeatInvalidChoice": "可用選項為 `off`、`all` 或 `single`",
+      "playlistEntryLoadFailed": "這個播放清單項目無法載入。",
+      "playlistEntryNoMatches": "找不到符合這個播放清單項目的內容。",
+      "playlistEntryLoadError": "載入播放清單項目時發生錯誤：{0}"
+    }
+  },
+
+  "nowplaying": {
+    "contentFull": "**正在播放⋯**",
+    "contentMinimal": "**正在 {0} 播放**",
+    "source": "**來源：**{0}",
+    "sourceUnknown": "未知",
+    "volumeLine": "**音量：**{0}%",
+    "repeatLine": "**循環：**{0}",
+    "queuedLabelOne": "佇列中還有 1 首",
+    "queuedLabelMany": "佇列中還有 {0} 首",
+    "embed": {
+      "author": "演出者",
+      "duration": "長度",
+      "queue": "佇列",
+      "volume": "音量",
+      "repeat": "循環",
+      "requester": "點歌者",
+      "noMusicTitle": "目前沒有播放音樂"
+    },
+    "button": {
+      "prev": "上一首",
+      "resume": "繼續",
+      "pause": "暫停",
+      "skip": "下一首",
+      "stop": "停止",
+      "shuffle": "隨機",
+      "repeat": "循環",
+      "repeatAll": "全部循環",
+      "repeatOne": "單曲循環",
+      "volumeUp": "音量 +",
+      "volumeDown": "音量 -",
+      "favorite": "最愛"
+    },
+    "footer": {
+      "addedQueue": "{0} 加入了佇列。",
+      "addedFront": "{0} 插隊到佇列最前面。",
+      "skippedForward": "{0} 跳過了這首歌。",
+      "addedFromHistory": "{0} 從歷史紀錄加入。",
+      "addedAllHistory": "{0} 將整份歷史紀錄加入佇列。",
+      "playingFromHistory": "{0} 從歷史紀錄播放。",
+      "addedPlaylist": "{0} 加入了一個播放清單。",
+      "repeatingQueue": "正在循環整個佇列。",
+      "repeatingSong": "正在單曲循環。",
+      "playingNextSong": "播放下一首。"
+    },
+    "errors": {
+      "noMusicInServer": "這個伺服器目前沒有播放音樂。"
+    }
+  },
+
+  "queue": {
+    "trackAddedNow": "已加入 **{0}**（`{1}`），將立即播放",
+    "trackAddedAtPosition": "已加入 **{0}**（`{1}`）到佇列第 {2} 位",
+    "removed": "已從佇列移除 **{0}**",
+    "removedByDJ": "已從佇列移除 **{0}**（由 {1} 點播）",
+    "removedBySomeone": "某人",
+    "removedAllMine": "已成功移除你的 {0} 個項目。",
+    "removedAllByUser": "已成功移除 {1} 的 `{0}` 個項目。",
+    "moved": "已將 **{0}** 從第 `{1}` 位移動到第 `{2}` 位。",
+    "skippedTo": "已跳至 **{0}**",
+    "shuffledSuccess": "已成功隨機排序你的 {0} 個項目。",
+    "shuffledButton": "已隨機排序 {0} 首歌！",
+    "nowEmpty": "佇列已清空！",
+    "type": {
+      "linear": "循序",
+      "fair": "公平"
+    },
+    "embed": {
+      "title": "目前佇列",
+      "upNextSection": "**接下來** *（在下方選擇曲目）*",
+      "entries": "項目數",
+      "mode": "模式",
+      "pageFooter": "第 {0} / {1} 頁"
+    },
+    "button": {
+      "remove": "移除",
+      "playNext": "下一首播放",
+      "move": "移動",
+      "playNow": "立即播放"
+    },
+    "moveSelect": {
+      "placeholder": "選擇新位置",
+      "optionLabel": "第 {0} 位"
+    },
+    "errors": {
+      "empty": "佇列中沒有任何內容！",
+      "noMusicInQueue": "佇列中沒有音樂！",
+      "noSongsToRemove": "你在佇列中沒有任何歌曲！",
+      "userNoSongs": "**{0}** 在佇列中沒有任何歌曲！",
+      "removeNotOwner": "你無法移除 **{0}**，因為不是你加入的！",
+      "cannotMoveSamePosition": "無法把曲目移動到相同位置。",
+      "alreadyNext": "這首歌已經是下一首了！",
+      "invalidQueuePosition": "`{0}` 不是佇列中的有效位置！",
+      "invalidPositionRange": "位置必須是 1 到 {0} 之間的有效整數！",
+      "invalidPositionNotInteger": "`{0}` 不是有效的整數！",
+      "invalidPositionOrAll": "請提供有效的位置數字或 'all'。",
+      "emptyToShuffle": "你在佇列中沒有可以隨機排序的音樂！",
+      "onlyOneToShuffle": "你在佇列中只有一首歌！"
+    }
+  },
+
+  "history": {
+    "disabled": "播放歷史紀錄已在設定中停用（playback.maxHistorySize = 0）。",
+    "nowEmpty": "播放歷史紀錄已清空！",
+    "queueAllSuccess": "已將 **{0}** 首歌加入佇列。",
+    "queueAllSkippedSuffix": " 已略過 {0} 首（長度超過限制）。",
+    "savedAsPlaylist": "已將歷史紀錄中的 {0} 首歌儲存為播放清單 `{1}`！",
+    "embed": {
+      "title": "歷史佇列",
+      "section": "**最近播放** *（在下方選擇曲目以加入佇列或播放）*",
+      "maxHistory": "紀錄上限",
+      "pageFooter": "第 {0} / {1} 頁｜1 = 最近播放"
+    },
+    "button": {
+      "save": "存成播放清單",
+      "queue": "加入佇列",
+      "queueAll": "全部加入佇列"
+    },
+    "modal": {
+      "title": "將歷史紀錄存成播放清單",
+      "labelPlaylistName": "播放清單名稱",
+      "playlistNamePlaceholder": "例如：my-history"
+    },
+    "errors": {
+      "empty": "播放歷史紀錄是空的！",
+      "positionRange": "位置必須介於 1 到 {0} 之間！",
+      "allTooLong": "全部 {0} 首歌都因為太長而無法加入。",
+      "noValidUrls": "歷史紀錄中沒有可儲存的有效曲目網址（只會儲存 http(s) 來源）。",
+      "emptyPlaylistName": "請輸入播放清單名稱！"
+    }
+  },
+
+  "playlist": {
+    "favoritesLabel": "⭐ 最愛 ⭐",
+    "queuedFromPlaylist": "已從播放清單 `{1}` 加入 **{0}** 首歌到佇列。",
+    "queuedFailedSuffix": " 有 {0} 個項目載入失敗。",
+    "nowPlayingReplaced": "正在播放播放清單 `{0}`（佇列已取代）。{1}",
+    "couldNotLoadLine": "`[?:??]` **無法載入**",
+    "embed": {
+      "title": "播放清單",
+      "section": "**可用的播放清單** *（在下方選擇以加入佇列或立即播放）*",
+      "detailsTitle": "播放清單：{0}",
+      "previewSection": "**預覽** *（前 {0} 個項目）*",
+      "previewFooter": "預覽：前 {0} 個項目",
+      "tracksSection": "**曲目** *（在下方選擇）*",
+      "unsavedSuffix": " • 有未儲存的變更",
+      "linkLabel": "連結"
+    },
+    "button": {
+      "refresh": "重新整理",
+      "details": "詳細資料",
+      "save": "儲存",
+      "discard": "捨棄",
+      "moveTop": "移到最前",
+      "moveBottom": "移到最後",
+      "up1": "上移一位",
+      "down1": "下移一位",
+      "moveTo": "移動到",
+      "queueTrack": "加入此曲",
+      "queuePlaylist": "加入整份清單",
+      "playPlaylist": "播放整份清單",
+      "unselect": "取消選取",
+      "back": "返回"
+    },
+    "errors": {
+      "storageUnavailable": "播放清單儲存空間無法使用。",
+      "misconfigured": "播放清單儲存設定錯誤（`{0}`）。{1}",
+      "storageUnavailableWithPath": "播放清單儲存空間無法使用（`{0}`）。{1}",
+      "pathNotConfigured": "（未設定）",
+      "noneInFolder": "Playlists 資料夾中沒有任何播放清單！",
+      "noTracksLoaded": "播放清單 `{0}` 沒有載入任何曲目！",
+      "notFoundShort": "播放清單已不存在。",
+      "notFoundRefresh": "播放清單已不存在。請點「返回」再「重新整理」。",
+      "notFoundRefreshShort": "播放清單已不存在。請點「重新整理」。",
+      "positionRange": "位置必須介於 1 到 {0} 之間。",
+      "positionsRange": "位置必須介於 1 到 {0} 之間。",
+      "noUnsavedChanges": "沒有未儲存的變更。",
+      "alreadyExistsChooseOther": "播放清單 `{0}` 已存在！請換一個名稱。",
+      "invalidName": "請提供有效的播放清單名稱！"
+    }
+  },
+
+  "search": {
+    "loading": "載入中⋯ `[{0}]`",
+    "searching": "正在 {0} 搜尋 `{1}`⋯",
+    "resultsHeader": "`{0}` 的搜尋結果：",
+    "timedOut": "搜尋逾時。",
+    "playlistFoundPrompt": "\n這首歌附帶一個含 **{0}** 首歌的播放清單。點選 📥 載入整份清單。",
+    "playlistLoadedAdditional": "\n已額外載入 **{0}** 首歌！",
+    "playlistFoundAdded": "找到 {0}，共 `{1}` 個項目，已加入佇列！",
+    "playlistOmittedSuffix": "\n超過允許最大長度（`{0}`）的曲目已被略過。",
+    "selectMenu": {
+      "placeholder": "選擇要播放的曲目",
+      "optionDescriptionDuration": "長度：{0}"
+    },
+    "embed": {
+      "title": "「{0}」的搜尋結果",
+      "footer": "請從下方選單選擇曲目"
+    },
+    "button": {
+      "loadPlaylist": "載入播放清單",
+      "cancel": "取消"
+    },
+    "errors": {
+      "missingQuery": "請輸入搜尋關鍵字。",
+      "noResults": "找不到 `{0}` 的搜尋結果。",
+      "loadFailed": "載入時發生錯誤：{0}",
+      "loadFailedGeneric": "載入曲目時發生錯誤。",
+      "playlistLoadFailedOrEmpty": "播放清單 {0} 無法載入，或內容為空",
+      "playlistAllTooLong": "這份播放清單 {0}中所有項目都超過允許的最大長度（`{1}`）"
+    }
+  },
+
+  "voting": {
+    "status": "[{0} 票，需要 {1}/{2}]",
+    "alreadyVoted": "你已經投過跳過這首歌的票了 `{0}`",
+    "voteRegistered": "你投票跳過這首歌 `{0}`",
+    "voteSkipSuccess": "你投票跳過這首歌 `{0}`\n已跳過 **{1}** {2}"
+  },
+
+  "settings": {
+    "updated": "設定已更新。",
+    "closeFailed": "關閉設定面板失敗。",
+    "refreshFailed": "重新整理設定面板失敗。請重新執行 `/settings`。",
+    "panel": {
+      "title": "NextVoiceCord 設定",
+      "description": "**{0}** 的設定面板。\n請使用下方按鈕調整設定值。",
+      "valueNone": "無",
+      "valueAny": "不限",
+      "skipDefault": "預設（`55%`）",
+      "footerNamed": "只有 {0} 可以操作這些控制項。",
+      "footerGeneric": "只有執行指令的人可以操作這些控制項。",
+      "field": {
+        "textChannel": "文字頻道",
+        "voiceChannel": "語音頻道",
+        "djRole": "DJ 身分組",
+        "prefix": "指令前綴",
+        "skipRatio": "跳過門檻",
+        "queueType": "佇列類型",
+        "nowPlaying": "播放中面板",
+        "layout": "版面",
+        "buttons": "按鈕"
+      },
+      "button": {
+        "toggleQueue": "切換佇列類型",
+        "toggleLayout": "切換版面",
+        "toggleButtons": "切換按鈕",
+        "setTextChannel": "設定文字頻道",
+        "setVoiceChannel": "設定語音頻道",
+        "setDjRole": "設定 DJ 身分組",
+        "setPrefix": "設定前綴",
+        "setSkip": "設定跳過門檻",
+        "clearText": "清除文字頻道",
+        "clearVoice": "清除語音頻道",
+        "clearDj": "清除 DJ",
+        "close": "關閉"
+      },
+      "select": {
+        "textChannelPlaceholder": "選擇文字頻道",
+        "voiceChannelPlaceholder": "選擇語音頻道",
+        "djRolePlaceholder": "選擇 DJ 身分組"
+      }
+    },
+    "modal": {
+      "setPrefixTitle": "設定前綴",
+      "setPrefixPlaceholder": "自訂前綴（留空則清除）",
+      "setSkipTitle": "設定跳過百分比",
+      "setSkipPlaceholder": "0 到 100 的整數",
+      "labelValue": "數值"
+    },
+    "prompt": {
+      "textChannel": "選擇文字頻道：",
+      "voiceChannel": "選擇語音頻道：",
+      "djRole": "選擇 DJ 身分組："
+    },
+    "language": {
+      "current": "這個伺服器的機器人語言是 **{0}**。",
+      "set": "這個伺服器的語言已設為 **{0}**。",
+      "invalid": "未知的語言 `{0}`。可用語言：{1}",
+      "optionDescription": "{0}（{1}）"
+    },
+    "prefix": {
+      "cleared": "前綴已清除。",
+      "set": "已將 *{1}* 的自訂前綴設為 `{0}`",
+      "missing": "請輸入前綴或 NONE"
+    },
+    "queueType": {
+      "current": "目前的佇列類型為：`{0}`。",
+      "set": "佇列類型已設為 `{0}`。",
+      "invalid": "無效的佇列類型。可用類型：[{0}]"
+    },
+    "dj": {
+      "cleared": "DJ 身分組已清除；只有管理員可以使用 DJ 指令。",
+      "set": "擁有 **{0}** 身分組的成員現在可以使用 DJ 指令。",
+      "missingArg": "請輸入身分組名稱或 NONE",
+      "notFound": "找不到符合「{0}」的身分組"
+    },
+    "textChannel": {
+      "set": "音樂指令現在只能在 {0} 使用",
+      "cleared": "音樂指令現在可以在任何頻道使用",
+      "mustBeText": "請選擇文字頻道！",
+      "missingArg": "請輸入文字頻道或 NONE",
+      "notFound": "找不到符合「{0}」的文字頻道"
+    },
+    "voiceChannel": {
+      "set": "音樂現在只能在 {0} 播放",
+      "cleared": "音樂現在可以在任何頻道播放",
+      "mustBeVoice": "請選擇語音頻道！",
+      "missingArg": "請輸入語音頻道或 NONE",
+      "notFound": "找不到符合「{0}」的語音頻道"
+    },
+    "skipRatio": {
+      "set": "已將 *{1}* 的跳過門檻設為聽眾的 `{0}%`",
+      "range": "輸入值必須介於 0 到 100 之間！",
+      "invalidNumber": "請輸入 0 到 100 之間的整數（預設為 55）。這個數字代表需要多少比例的聽眾投票才能跳過歌曲。",
+      "emptyError": "請輸入 0 到 100 之間的整數。",
+      "rangeError": "跳過百分比必須介於 0 到 100 之間。"
+    },
+    "npLayout": {
+      "current": "播放中版面模式為 `{0}`（實際生效：`{1}`）。",
+      "set": "播放中版面模式已設為 `{0}`（實際生效：`{1}`）。",
+      "invalid": "可用數值為 `full`、`minimal` 或 `inherit`。"
+    },
+    "npButtons": {
+      "current": "播放中按鈕模式為 `{0}`（實際生效：`{1}`）。",
+      "set": "播放中按鈕模式已設為 `{0}`（實際生效：`{1}`）。",
+      "invalid": "可用數值為 `on`、`off` 或 `inherit`。"
+    },
+    "errors": {
+      "panelExpired": "這個設定面板已過期。請重新執行 `/settings`。",
+      "chooseTextChannel": "請選擇文字頻道。",
+      "chooseVoiceChannel": "請選擇語音頻道。",
+      "chooseRole": "請選擇身分組。"
+    }
+  },
+
+  "clearchannel": {
+    "clearing": "正在清除頻道⋯",
+    "cleared": "已清除 {0} 則訊息。",
+    "error": "錯誤：{0}",
+    "errors": {
+      "noChannelConfigured": "這個伺服器尚未設定文字頻道。管理員可以用 `{0}` 設定。"
+    }
+  }
+}
