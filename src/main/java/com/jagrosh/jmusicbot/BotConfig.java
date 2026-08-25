@@ -68,6 +68,8 @@ public class BotConfig {
     private long clearChannelAgeDays;
     private int maxYTPlaylistPages, maxHistorySize, guiFontSize, nasBufferMs, frameBufferMs, proxyPort, clearChannelDeleteLimit;
     private String proxyHost, proxyUsername, proxyPassword;
+    private String youtubePoToken, youtubeVisitorData;
+    private java.util.List<String> youtubeClients;
     private boolean proxyLavaplayer, proxyJda, proxyGithub;
     private double skipratio;
     private Language defaultLanguage;
@@ -250,6 +252,9 @@ public class BotConfig {
         // set values using ConfigOption enum for type safety and standardization
         token = TOKEN.getString(config);
         prefix = PREFIX.getString(config);
+        youtubePoToken = YOUTUBE_PO_TOKEN.getString(config);
+        youtubeVisitorData = YOUTUBE_VISITOR_DATA.getString(config);
+        youtubeClients = YOUTUBE_CLIENTS.getStringList(config);
         proxyUsername = PROXY_USERNAME.getString(config);
         proxyPassword = PROXY_PASSWORD.getString(config);
         updateRepository = UPDATE_REPOSITORY.getString(config);
@@ -445,6 +450,27 @@ public class BotConfig {
     /** Proxy password, or empty when the proxy needs no authentication. */
     public String getProxyPassword() {
         return proxyPassword;
+    }
+
+    /** Proof-of-origin token, or empty if none is configured. */
+    public String getYoutubePoToken() {
+        return youtubePoToken;
+    }
+
+    /** Visitor id the poToken was minted for. */
+    public String getYoutubeVisitorData() {
+        return youtubeVisitorData;
+    }
+
+    /** InnerTube clients to try, in order. */
+    public java.util.List<String> getYoutubeClients() {
+        return youtubeClients;
+    }
+
+    /** Whether a usable poToken pair is configured. */
+    public boolean hasYoutubePoToken() {
+        return youtubePoToken != null && !youtubePoToken.isBlank()
+                && youtubeVisitorData != null && !youtubeVisitorData.isBlank();
     }
 
     public String getPrefix() {

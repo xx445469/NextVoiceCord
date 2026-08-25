@@ -62,6 +62,9 @@ public enum ConfigOption {
     UPDATE_ALERTS("updates.alerts", ConfigType.BOOLEAN, false, "Whether to alert owner about updates"),
     USE_EVAL("dangerous.eval", ConfigType.BOOLEAN, false, "Whether to enable eval command (DANGEROUS)"),
     USE_YOUTUBE_OAUTH("playback.youtube.useOAuth", ConfigType.BOOLEAN, false, "Whether to use YouTube OAuth2 for playback"),
+    YOUTUBE_PO_TOKEN("playback.youtube.poToken", ConfigType.STRING, false, "YouTube proof-of-origin token"),
+    YOUTUBE_VISITOR_DATA("playback.youtube.visitorData", ConfigType.STRING, false, "Visitor data the poToken was minted for"),
+    YOUTUBE_CLIENTS("playback.youtube.clients", ConfigType.STRING_LIST, false, "InnerTube clients to try, in order"),
     
     // Numeric options
     MAX_SECONDS("playback.maxTrackSeconds", ConfigType.LONG, false, "Maximum track length in seconds (0 = no limit)"),
