@@ -60,23 +60,23 @@ public class QueueInteractionListener extends ListenerAdapter {
     }
 
     private void handleQueueButton(ButtonInteractionEvent event) {
-        if (!InteractionGuards.requireGuildAndMember(event)) {
+        if (!InteractionGuards.requireGuildAndMember(event, bot)) {
             return;
         }
 
         Optional<ComponentIdParsers.PaginatedButtonId> parsed = ComponentIdParsers.parseQueueButtonId(event.getComponentId());
         if (parsed.isEmpty()) {
-            event.reply("Invalid button state.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.invalidButtonState")).setEphemeral(true).queue();
             return;
         }
         ComponentIdParsers.PaginatedButtonId id = parsed.get();
 
         if (event.getUser().getIdLong() != id.userId()) {
-            event.reply("Only the user who ran the command can use these buttons!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.notCommandInvokerButtons")).setEphemeral(true).queue();
             return;
         }
 
-        if (!InteractionGuards.requireSameVoiceChannel(event)) {
+        if (!InteractionGuards.requireSameVoiceChannel(event, bot)) {
             return;
         }
 
@@ -89,7 +89,7 @@ public class QueueInteractionListener extends ListenerAdapter {
         MusicService.QueueInfo queueInfo = musicService.getQueueInfo(event.getGuild(), event.getJDA());
 
         if (queueInfo == null || queueInfo.isEmpty()) {
-            event.editMessage("The queue is now empty!").setEmbeds().setComponents().queue();
+            event.editMessage(bot.msg(event.getGuild(), "queue.nowEmpty")).setEmbeds().setComponents().queue();
             return;
         }
 
@@ -101,21 +101,21 @@ public class QueueInteractionListener extends ListenerAdapter {
             try {
                 newSelectedTrack = Integer.parseInt(action.substring(6));
             } catch (NumberFormatException e) {
-                event.reply("Invalid track selection.").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.invalidTrackSelection")).setEphemeral(true).queue();
                 return;
             }
             int tracksOnPage = QueueSlashCmd.getTracksOnPage(page, queueInfo.tracks.length);
             int firstOnPage = (page - 1) * QueueSlashCmd.TRACKS_PER_PAGE + 1;
             int lastOnPage = firstOnPage + tracksOnPage - 1;
             if (newSelectedTrack < firstOnPage || newSelectedTrack > lastOnPage) {
-                event.reply("That track isn't on this page!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.trackNotOnPage")).setEphemeral(true).queue();
                 return;
             }
             if (newSelectedTrack == selectedTrack) {
                 newSelectedTrack = 0;
             }
             if (newSelectedTrack > queueInfo.tracks.length) {
-                event.reply("That track doesn't exist!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.trackNoLongerExists")).setEphemeral(true).queue();
                 return;
             }
             updateQueueEmbed(event, queueInfo, page, totalPages, newSelectedTrack, userId);
@@ -136,14 +136,14 @@ public class QueueInteractionListener extends ListenerAdapter {
             }
         } else if (action.equals("remove")) {
             if (selectedTrack <= 0 || selectedTrack > queueInfo.tracks.length) {
-                event.reply("No track selected!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.noTrackSelected")).setEphemeral(true).queue();
                 return;
             }
             MusicService.OutputAdapter adapter = OutputAdapters.forQueueEmbed(event);
             musicService.removeTrack(event.getGuild(), event.getMember(), selectedTrack, adapter);
             MusicService.QueueInfo newQueueInfo = musicService.getQueueInfo(event.getGuild(), event.getJDA());
             if (newQueueInfo == null || newQueueInfo.isEmpty()) {
-                event.editMessage("The queue is now empty!").setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "queue.nowEmpty")).setEmbeds().setComponents().queue();
             } else {
                 int newTotalPages = QueueSlashCmd.getTotalPages(newQueueInfo.tracks.length);
                 int safePage = Math.min(page, newTotalPages);
@@ -151,7 +151,7 @@ public class QueueInteractionListener extends ListenerAdapter {
             }
         } else if (action.equals("playnext")) {
             if (selectedTrack <= 0 || selectedTrack > queueInfo.tracks.length) {
-                event.reply("No track selected!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.noTrackSelected")).setEphemeral(true).queue();
                 return;
             }
             MusicService.OutputAdapter adapter = OutputAdapters.forQueueEmbed(event);
@@ -163,17 +163,17 @@ public class QueueInteractionListener extends ListenerAdapter {
             }
         } else if (action.equals("move")) {
             if (selectedTrack <= 0 || selectedTrack > queueInfo.tracks.length) {
-                event.reply("No track selected!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.noTrackSelected")).setEphemeral(true).queue();
                 return;
             }
             StringSelectMenu.Builder menuBuilder = StringSelectMenu.create("queue_move_select_" + selectedTrack + "_" + page + "_" + userId)
-                    .setPlaceholder("Select new position")
+                    .setPlaceholder(bot.msg(event.getGuild(), "queue.moveSelect.placeholder"))
                     .setMinValues(1)
                     .setMaxValues(1);
             int maxOptions = Math.min(queueInfo.tracks.length, 25);
             for (int i = 1; i <= maxOptions; i++) {
                 if (i != selectedTrack) {
-                    menuBuilder.addOption("Position " + i, String.valueOf(i));
+                    menuBuilder.addOption(bot.msg(event.getGuild(), "queue.moveSelect.optionLabel", i), String.valueOf(i));
                 }
             }
             MessageEmbed embed = QueueSlashCmd.buildQueueEmbed(queueInfo, page, totalPages, selectedTrack,
@@ -183,14 +183,14 @@ public class QueueInteractionListener extends ListenerAdapter {
                     .queue();
         } else if (action.equals("playnow")) {
             if (selectedTrack <= 0 || selectedTrack > queueInfo.tracks.length) {
-                event.reply("No track selected!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.noTrackSelected")).setEphemeral(true).queue();
                 return;
             }
             MusicService.OutputAdapter adapter = OutputAdapters.forQueueEmbed(event);
             musicService.playNow(event.getGuild(), event.getMember(), selectedTrack, adapter);
             MusicService.QueueInfo newQueueInfo = musicService.getQueueInfo(event.getGuild(), event.getJDA());
             if (newQueueInfo == null || newQueueInfo.isEmpty()) {
-                event.editMessage("The queue is now empty!").setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "queue.nowEmpty")).setEmbeds().setComponents().queue();
             } else {
                 int newTotalPages = QueueSlashCmd.getTotalPages(newQueueInfo.tracks.length);
                 updateQueueEmbed(event, newQueueInfo, 1, newTotalPages, 0, userId);
@@ -199,23 +199,23 @@ public class QueueInteractionListener extends ListenerAdapter {
     }
 
     private void handleQueueMoveSelect(StringSelectInteractionEvent event) {
-        if (!InteractionGuards.requireGuildAndMember(event)) {
+        if (!InteractionGuards.requireGuildAndMember(event, bot)) {
             return;
         }
 
         Optional<ComponentIdParsers.QueueMoveSelectId> parsed = ComponentIdParsers.parseQueueMoveSelectId(event.getComponentId());
         if (parsed.isEmpty()) {
-            event.reply("Invalid selection state.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.invalidSelectionState")).setEphemeral(true).queue();
             return;
         }
         ComponentIdParsers.QueueMoveSelectId id = parsed.get();
 
         if (event.getUser().getIdLong() != id.userId()) {
-            event.reply("Only the user who ran the command can use this!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.notCommandInvokerThis")).setEphemeral(true).queue();
             return;
         }
 
-        if (!InteractionGuards.requireSameVoiceChannel(event)) {
+        if (!InteractionGuards.requireSameVoiceChannel(event, bot)) {
             return;
         }
 
@@ -227,7 +227,7 @@ public class QueueInteractionListener extends ListenerAdapter {
         try {
             toPosition = Integer.parseInt(event.getValues().get(0));
         } catch (NumberFormatException e) {
-            event.reply("Invalid position selected.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.invalidPositionSelected")).setEphemeral(true).queue();
             return;
         }
 
@@ -238,7 +238,7 @@ public class QueueInteractionListener extends ListenerAdapter {
 
         MusicService.QueueInfo queueInfo = musicService.getQueueInfo(event.getGuild(), event.getJDA());
         if (queueInfo == null || queueInfo.isEmpty()) {
-            event.editMessage("The queue is now empty!").setEmbeds().setComponents().queue();
+            event.editMessage(bot.msg(event.getGuild(), "queue.nowEmpty")).setEmbeds().setComponents().queue();
             return;
         }
 

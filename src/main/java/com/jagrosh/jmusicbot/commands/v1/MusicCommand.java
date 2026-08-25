@@ -67,32 +67,32 @@ public abstract class MusicCommand extends Command
                             event.getMessage().delete().queue();
                         }
                         catch (PermissionException ignore) {}
-                        event.replyInDm(errorEmoji + " You can only use that command in " + requiredChannel.getAsMention() + "!");
+                        event.replyInDm(errorEmoji + " " + bot.msg(event.getGuild(), "common.errors.mustBeInChannel", requiredChannel.getAsMention()));
                     }
 
                     @Override
                     public void onNotPlayingError()
                     {
-                        event.reply(errorEmoji + " There must be music playing to use that!");
+                        event.reply(errorEmoji + " " + bot.msg(event.getGuild(), "common.errors.noMusicPlayingToUse"));
                     }
 
                     @Override
                     public void onNotListeningError(AudioChannel requiredChannel)
                     {
                         String channelName = requiredChannel == null ? "a voice channel" : requiredChannel.getAsMention();
-                        event.replyError("You must be listening in " + channelName + " to use that!");
+                        event.replyError(bot.msg(event.getGuild(), "common.errors.mustBeListening", channelName));
                     }
 
                     @Override
                     public void onAfkChannelError()
                     {
-                        event.replyError("You cannot use that command in an AFK channel!");
+                        event.replyError(bot.msg(event.getGuild(), "common.errors.afkChannel"));
                     }
 
                     @Override
                     public void onVoiceConnectError(AudioChannel channel)
                     {
-                        event.reply(errorEmoji + " I am unable to connect to " + channel.getAsMention() + "!");
+                        event.reply(errorEmoji + " " + bot.msg(event.getGuild(), "common.errors.voiceConnectFailed", channel.getAsMention()));
                     }
                 }
         );

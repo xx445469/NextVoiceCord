@@ -44,7 +44,7 @@ public abstract class AdminSlashCommand extends SlashCommand
 
         if (!isOwner && !hasPermission)
         {
-            event.reply(event.getClient().getError() + " You need the Manage Server permission to use this command!")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "permissions.errors.needManageServerCommand"))
                     .setEphemeral(true).queue();
             return;
         }

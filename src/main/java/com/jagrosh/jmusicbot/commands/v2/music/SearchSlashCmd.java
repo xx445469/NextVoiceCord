@@ -64,7 +64,7 @@ public class SearchSlashCmd extends MusicSlashCommand
     {
         String query = event.getOption("query").getAsString();
 
-        event.reply(searchingEmoji + " Searching " + searchPlatform + " for `" + query + "`...").queue(hook ->
+        event.reply(searchingEmoji + " " + bot.msg(event.getGuild(), "search.searching", searchPlatform, query)).queue(hook ->
         {
             bot.getSearchService().search(event.getGuild(), event.getMember(), query, searchPrefix,
                     event.getTextChannel(), new SearchService.SearchCallback()
@@ -80,13 +80,13 @@ public class SearchSlashCmd extends MusicSlashCommand
                         {
                             if (playlist.getTracks().isEmpty())
                             {
-                                hook.editOriginal(event.getClient().getWarning() + " No results found for `" + query + "`.").queue();
+                                hook.editOriginal(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "search.errors.noResults", query)).queue();
                                 return;
                             }
 
                             // Build select menu for search results
                             StringSelectMenu.Builder menuBuilder = StringSelectMenu.create("search_select_" + event.getUser().getId())
-                                    .setPlaceholder("Select a track to play")
+                                    .setPlaceholder(bot.msg(event.getGuild(), "search.selectMenu.placeholder"))
                                     .setMinValues(1)
                                     .setMaxValues(1);
 
@@ -106,7 +106,7 @@ public class SearchSlashCmd extends MusicSlashCommand
                                 menuBuilder.addOption(
                                         title,
                                         track.getInfo().uri,
-                                        "Duration: " + TimeUtil.formatTime(track.getDuration())
+                                        bot.msg(event.getGuild(), "search.selectMenu.optionDescriptionDuration", TimeUtil.formatTime(track.getDuration()))
                                 );
                                 description.append("`").append(i + 1).append(".` ")
                                         .append("[**").append(FormatUtil.filter(title)).append("**](")
@@ -115,10 +115,10 @@ public class SearchSlashCmd extends MusicSlashCommand
                             }
 
                             EmbedBuilder embed = new EmbedBuilder()
-                                    .setTitle("Search Results for: " + query)
+                                    .setTitle(bot.msg(event.getGuild(), "search.embed.title", query))
                                     .setDescription(description.toString())
                                     .setColor(event.getMember().getColor())
-                                    .setFooter("Select a track from the menu below");
+                                    .setFooter(bot.msg(event.getGuild(), "search.embed.footer"));
 
                             hook.editOriginalEmbeds(embed.build())
                                     .setContent("")
@@ -173,7 +173,7 @@ public class SearchSlashCmd extends MusicSlashCommand
                                                     }
                                                 },
                                                 1, TimeUnit.MINUTES,
-                                                () -> hook.editOriginal("Search timed out.")
+                                                () -> hook.editOriginal(bot.msg(event.getGuild(), "search.timedOut"))
                                                         .setEmbeds()
                                                         .setComponents()
                                                         .queue()
@@ -184,7 +184,7 @@ public class SearchSlashCmd extends MusicSlashCommand
                         @Override
                         public void onNoMatches(String searchQuery)
                         {
-                            hook.editOriginal(event.getClient().getWarning() + " No results found for `" + searchQuery + "`.").queue();
+                            hook.editOriginal(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "search.errors.noResults", searchQuery)).queue();
                         }
 
                         @Override

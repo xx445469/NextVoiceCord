@@ -37,6 +37,6 @@ public class StopSlashCmd extends DJSlashCommand
     public void doDJCommand(SlashCommandEvent event)
     {
         bot.getMusicService().stopAndClear(event.getGuild());
-        event.reply(event.getClient().getSuccess() + " The player has stopped and the queue has been cleared.").queue();
+        event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "player.stopped")).queue();
     }
 }

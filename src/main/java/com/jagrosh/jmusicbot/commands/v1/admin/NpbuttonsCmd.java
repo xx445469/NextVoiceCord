@@ -27,21 +27,21 @@ public class NpbuttonsCmd extends AdminCommand
         {
             NowPlayingButtonsMode current = settings.getNowPlayingButtonsMode();
             boolean effectiveButtons = settings.showNowPlayingButtons(bot.getConfig());
-            event.replySuccess("Now-playing buttons mode is `" + current.getUserInputValue()
-                    + "` (effective: `" + (effectiveButtons ? "on" : "off") + "`).");
+            event.replySuccess(bot.msg(event.getGuild(), "settings.npButtons.current",
+                    current.getUserInputValue(), effectiveButtons ? "on" : "off"));
             return;
         }
 
         NowPlayingButtonsMode mode = NowPlayingButtonsMode.fromInput(event.getArgs());
         if (mode == null)
         {
-            event.replyError("Please provide one of: `on`, `off`, or `inherit`.");
+            event.replyError(bot.msg(event.getGuild(), "settings.npButtons.invalid"));
             return;
         }
 
         settings.setNowPlayingButtonsMode(mode);
         boolean effectiveButtons = settings.showNowPlayingButtons(bot.getConfig());
-        event.replySuccess("Now-playing buttons mode set to `" + mode.getUserInputValue()
-                + "` (effective: `" + (effectiveButtons ? "on" : "off") + "`).");
+        event.replySuccess(bot.msg(event.getGuild(), "settings.npButtons.set",
+                mode.getUserInputValue(), effectiveButtons ? "on" : "off"));
     }
 }

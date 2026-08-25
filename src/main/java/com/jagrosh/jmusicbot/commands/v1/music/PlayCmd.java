@@ -63,7 +63,7 @@ public class PlayCmd extends MusicCommand
             return;
         }
 
-        event.reply(loadingEmoji + " Loading... `[" + args + "]`", m -> {
+        event.reply(loadingEmoji + " " + bot.msg(event.getGuild(), "search.loading", args), m -> {
             musicService.play(event.getGuild(), event.getMember(), args, event.getTextChannel(),
                     new MessageEditOutputAdapter(m));
         });

@@ -31,7 +31,6 @@
       "noMusicPlayingToUse": "There must be music playing to use that!"
     }
   },
-
   "permissions": {
     "errors": {
       "needManageServer": "You need the Manage Server permission to change settings.",
@@ -51,7 +50,6 @@
       "noManageMessages": "I don't have permission to manage messages in that channel."
     }
   },
-
   "player": {
     "resumed": "Resumed **{0}**.",
     "restarted": "Restarted **{0}**",
@@ -95,7 +93,6 @@
       "playlistEntryLoadError": "Error loading playlist entry: {0}"
     }
   },
-
   "nowplaying": {
     "contentFull": "**Now Playing...**",
     "contentMinimal": "**Now Playing in** {0}",
@@ -144,7 +141,6 @@
       "noMusicInServer": "There is no music playing in this server."
     }
   },
-
   "queue": {
     "trackAddedNow": "Added **{0}** (`{1}`) to begin playing",
     "trackAddedAtPosition": "Added **{0}** (`{1}`) to the queue at position {2}",
@@ -192,10 +188,13 @@
       "invalidPositionNotInteger": "`{0}` is not a valid integer!",
       "invalidPositionOrAll": "Please provide a valid position number or 'all'.",
       "emptyToShuffle": "You don't have any music in the queue to shuffle!",
-      "onlyOneToShuffle": "You only have one song in the queue!"
+      "onlyOneToShuffle": "You only have one song in the queue!",
+      "mentionUser": "You need to mention a user!",
+      "userNotFound": "Unable to find the user!",
+      "multipleUsersFound": "Found multiple users:",
+      "twoValidIndexes": "Please include two valid indexes."
     }
   },
-
   "history": {
     "disabled": "Playback history is disabled by config (playback.maxHistorySize = 0).",
     "nowEmpty": "Playback history is now empty!",
@@ -226,7 +225,6 @@
       "emptyPlaylistName": "Please enter a playlist name!"
     }
   },
-
   "playlist": {
     "favoritesLabel": "⭐ favorites ⭐",
     "queuedFromPlaylist": "Queued **{0}** track(s) from playlist `{1}`.",
@@ -274,9 +272,42 @@
       "noUnsavedChanges": "There are no unsaved changes.",
       "alreadyExistsChooseOther": "Playlist `{0}` already exists! Choose a different name.",
       "invalidName": "Please provide a valid playlist name!"
+    },
+    "owner": {
+      "helpTitle": "Playlist Management Commands:",
+      "created": "Successfully created playlist `{0}`!",
+      "deleted": "Successfully deleted playlist `{0}`!",
+      "appended": "Successfully added {0} items to playlist `{1}`!",
+      "availableList": "Available playlists:",
+      "errors": {
+        "noName": "Please provide a name for the playlist!",
+        "createFailed": "I was unable to create the playlist: {0}",
+        "deleteFailed": "I was unable to delete the playlist: {0}",
+        "appendFailed": "I was unable to append to the playlist: {0}",
+        "alreadyExists": "Playlist `{0}` already exists!",
+        "doesNotExist": "Playlist `{0}` doesn't exist!",
+        "appendMissingArgs": "Please include a playlist name and URLs to add!",
+        "folderMissing": "Playlists folder does not exist and could not be created!",
+        "loadFailed": "Failed to load available playlists!"
+      }
+    },
+    "autoplaylist": {
+      "cleared": "Cleared the default playlist for **{0}**",
+      "set": "The default playlist for **{0}** is now `{1}`",
+      "errors": {
+        "missingArg": "Please include a playlist name or NONE",
+        "notFound": "Could not find `{0}.txt`!"
+      }
+    },
+    "load": {
+      "missingName": "Please include a playlist name.",
+      "notFound": "I could not find `{0}.txt` in the Playlists folder.",
+      "loading": "Loading playlist **{0}**... ({1} items)",
+      "noTracksLoaded": "No tracks were loaded!",
+      "loadedTracks": "Loaded **{0}** tracks!",
+      "failedHeader": "The following tracks failed to load:"
     }
   },
-
   "search": {
     "loading": "Loading... `[{0}]`",
     "searching": "Searching {0} for `{1}`...",
@@ -304,17 +335,17 @@
       "loadFailed": "Error loading: {0}",
       "loadFailedGeneric": "Error loading track.",
       "playlistLoadFailedOrEmpty": "The playlist {0} could not be loaded or contained 0 entries",
-      "playlistAllTooLong": "All entries in this playlist {0}were longer than the allowed maximum (`{1}`)"
-    }
+      "playlistAllTooLong": "All entries in this playlist {0}were longer than the allowed maximum (`{1}`)",
+      "missingSongOrUrl": "Please include a song title or URL!"
+    },
+    "searchingSimple": "Searching... `[{0}]`"
   },
-
   "voting": {
     "status": "[{0} votes, {1}/{2} needed]",
     "alreadyVoted": "You already voted to skip this song `{0}`",
     "voteRegistered": "You voted to skip the song `{0}`",
     "voteSkipSuccess": "You voted to skip the song `{0}`\nSkipped **{1}** {2}"
   },
-
   "settings": {
     "updated": "Settings updated.",
     "closeFailed": "Failed to close settings panel.",
@@ -428,15 +459,77 @@
       "chooseTextChannel": "Please choose a text channel.",
       "chooseVoiceChannel": "Please choose a voice channel.",
       "chooseRole": "Please choose a role."
+    },
+    "summary": {
+      "header": "{0} settings:",
+      "textChannel": "Text Channel: {0}",
+      "voiceChannel": "Voice Channel: {0}",
+      "djRole": "DJ Role: {0}",
+      "prefix": "Custom Prefix: {0}",
+      "repeatMode": "Repeat Mode: {0}",
+      "queueType": "Queue Type: {0}",
+      "defaultPlaylist": "Default Playlist: {0}",
+      "footer": "{0} servers | {1} audio connections"
     }
   },
-
   "clearchannel": {
     "clearing": "Clearing channel...",
     "cleared": "Cleared {0} messages.",
     "error": "Error: {0}",
     "errors": {
       "noChannelConfigured": "No text channel is configured for this server. An admin can set one with `{0}`."
+    }
+  },
+  "lyrics": {
+    "errors": {
+      "removed": "Lyrics functionality has been removed."
+    }
+  },
+  "owner": {
+    "setname": {
+      "changed": "Name changed from `{0}` to `{1}`",
+      "errors": {
+        "rateLimited": "Name can only be changed twice per hour!",
+        "invalid": "That name is not valid!"
+      }
+    },
+    "setavatar": {
+      "success": "Successfully changed avatar.",
+      "errors": {
+        "invalidUrl": "Invalid or missing URL",
+        "setFailed": "Failed to set avatar.",
+        "loadFailed": "Could not load from provided URL."
+      }
+    },
+    "setgame": {
+      "playingSet": "**{0}** is now playing `{1}`",
+      "playingCleared": "**{0}** is no longer playing anything.",
+      "streamSet": "**{0}** is now streaming `{1}`",
+      "listenSet": "**{0}** is now listening to `{1}`",
+      "watchSet": "**{0}** is now watching `{1}`",
+      "errors": {
+        "setFailed": "The game could not be set!",
+        "streamMissingArgs": "Please include a twitch username and the name of the game to 'stream'",
+        "listenMissingTitle": "Please include a title to listen to!",
+        "watchMissingTitle": "Please include a title to watch!"
+      }
+    },
+    "setstatus": {
+      "set": "Set the status to `{0}`",
+      "errors": {
+        "invalid": "Please include one of the following statuses: `ONLINE`, `IDLE`, `DND`, `INVISIBLE`",
+        "setFailed": "The status could not be set!"
+      }
+    },
+    "shutdown": {
+      "message": "Shutting down..."
+    },
+    "eval": {
+      "success": "Evaluated Successfully:\n```\n{0} ```",
+      "exceptionThrown": "An exception was thrown:\n```\n{0} ```",
+      "errors": {
+        "engineMissing": "The eval engine provided in the config (`{0}`) doesn't exist. This could be due to an invalid engine name, or the engine not existing in your version of java (`{1}`)."
+      }
     }
   }
 }

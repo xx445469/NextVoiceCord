@@ -51,7 +51,7 @@ public class ForceremoveSlashCmd extends DJSlashCommand
     {
         if (musicService.isQueueEmpty(event.getGuild()))
         {
-            event.reply(event.getClient().getError() + " There is nothing in the queue!")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "queue.errors.empty"))
                     .setEphemeral(true).queue();
             return;
         }
@@ -61,12 +61,12 @@ public class ForceremoveSlashCmd extends DJSlashCommand
 
         if (count == 0)
         {
-            event.reply(event.getClient().getWarning() + " **" + target.getName() + "** doesn't have any songs in the queue!")
+            event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "queue.errors.userNoSongs", target.getName()))
                     .setEphemeral(true).queue();
         }
         else
         {
-            event.reply(event.getClient().getSuccess() + " Successfully removed `" + count + "` entries from " + FormatUtil.formatUsername(target) + ".")
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "queue.removedAllByUser", count, FormatUtil.formatUsername(target)))
                     .queue();
         }
     }

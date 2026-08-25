@@ -52,7 +52,7 @@ public class QueuetypeSlashCmd extends AdminSlashCommand
         if (event.getOption("type") == null)
         {
             QueueType currentType = settings.getQueueType();
-            event.reply(currentType.getEmoji() + " Current queue type is: `" + currentType.getUserFriendlyName() + "`.").queue();
+            event.reply(currentType.getEmoji() + " " + bot.msg(event.getGuild(), "settings.queueType.current", currentType.getUserFriendlyName())).queue();
             return;
         }
 
@@ -64,7 +64,7 @@ public class QueuetypeSlashCmd extends AdminSlashCommand
         }
         catch (IllegalArgumentException e)
         {
-            event.reply(event.getClient().getError() + " Invalid queue type. Valid types are: linear, fair")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "settings.queueType.invalid", "linear, fair"))
                     .setEphemeral(true).queue();
             return;
         }
@@ -78,6 +78,6 @@ public class QueuetypeSlashCmd extends AdminSlashCommand
                 handler.setQueueType(value);
         }
 
-        event.reply(value.getEmoji() + " Queue type was set to `" + value.getUserFriendlyName() + "`.").queue();
+        event.reply(value.getEmoji() + " " + bot.msg(event.getGuild(), "settings.queueType.set", value.getUserFriendlyName())).queue();
     }
 }

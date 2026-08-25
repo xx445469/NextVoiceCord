@@ -54,7 +54,7 @@ public class RemoveSlashCmd extends MusicSlashCommand
 
         if (musicService.isQueueEmpty(event.getGuild()))
         {
-            output.replyError("There is nothing in the queue!");
+            output.replyError(bot.msg(event.getGuild(), "queue.errors.empty"));
             return;
         }
 
@@ -71,7 +71,7 @@ public class RemoveSlashCmd extends MusicSlashCommand
         }
         catch (NumberFormatException e)
         {
-            output.replyError("Please provide a valid position number or 'all'.");
+            output.replyError(bot.msg(event.getGuild(), "queue.errors.invalidPositionOrAll"));
             return;
         }
 

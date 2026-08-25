@@ -39,7 +39,7 @@ public abstract class OwnerSlashCommand extends SlashCommand
     {
         if (!event.getUser().getId().equals(event.getClient().getOwnerId()))
         {
-            event.reply(event.getClient().getError() + " Only the bot owner can use this command!")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "permissions.errors.ownerOnly"))
                     .setEphemeral(true).queue();
             return;
         }

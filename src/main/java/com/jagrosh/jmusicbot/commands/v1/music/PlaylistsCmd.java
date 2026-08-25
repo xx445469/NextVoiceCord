@@ -48,7 +48,7 @@ public class PlaylistsCmd extends MusicCommand
         if(playlistNamesInfo.hasError())
             event.reply(event.getClient().getError()+" " + playlistNamesInfo.errorMessage);
         else if(playlistNamesInfo.names.isEmpty())
-            event.reply(event.getClient().getWarning()+" There are no playlists in the Playlists folder!");
+            event.reply(event.getClient().getWarning()+" " + bot.msg(event.getGuild(), "playlist.errors.noneInFolder"));
         else
         {
             List<String> list = playlistNamesInfo.names;

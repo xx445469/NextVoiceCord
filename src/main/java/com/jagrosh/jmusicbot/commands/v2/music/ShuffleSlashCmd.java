@@ -45,15 +45,15 @@ public class ShuffleSlashCmd extends MusicSlashCommand
         switch (shuffled)
         {
             case 0:
-                event.reply(event.getClient().getError() + " You don't have any music in the queue to shuffle!")
+                event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "queue.errors.emptyToShuffle"))
                         .setEphemeral(true).queue();
                 break;
             case 1:
-                event.reply(event.getClient().getWarning() + " You only have one song in the queue!")
+                event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "queue.errors.onlyOneToShuffle"))
                         .setEphemeral(true).queue();
                 break;
             default:
-                event.reply(event.getClient().getSuccess() + " You successfully shuffled your " + shuffled + " entries.")
+                event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "queue.shuffledSuccess", shuffled))
                         .queue();
                 break;
         }

@@ -47,14 +47,14 @@ public class ClearchannelSlashCmd extends OwnerSlashCommand
 
         if (channel == null)
         {
-            event.reply(event.getClient().getError() + " No text channel is configured for this server. An admin can set one with `/settc`.")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "clearchannel.errors.noChannelConfigured", "/settc"))
                     .setEphemeral(true).queue();
             return;
         }
 
         if (!event.getGuild().getSelfMember().hasPermission(channel, Permission.MESSAGE_MANAGE))
         {
-            event.reply(event.getClient().getError() + " I don't have permission to manage messages in that channel.")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "permissions.errors.noManageMessages"))
                     .setEphemeral(true).queue();
             return;
         }
@@ -65,14 +65,14 @@ public class ClearchannelSlashCmd extends OwnerSlashCommand
                     @Override
                     public void onCleared(int count)
                     {
-                        hook.editOriginal("Cleared " + count + " messages.").queue();
+                        hook.editOriginal(bot.msg(event.getGuild(), "clearchannel.cleared", count)).queue();
                     }
 
                     @Override
                     public void onError(Throwable t)
                     {
                         String msg = t.getMessage() != null ? t.getMessage() : t.toString();
-                        hook.editOriginal(event.getClient().getError() + " Error: " + msg).queue();
+                        hook.editOriginal(event.getClient().getError() + " " + bot.msg(event.getGuild(), "clearchannel.error", msg)).queue();
                     }
                 }, clearPolicy));
     }

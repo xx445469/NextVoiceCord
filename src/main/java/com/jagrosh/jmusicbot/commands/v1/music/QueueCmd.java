@@ -87,7 +87,7 @@ public class QueueCmd extends MusicCommand
             if (embed != null)
             {
                 MessageCreateData built = new MessageCreateBuilder()
-                        .setContent(event.getClient().getWarning() + " There is no music in the queue!")
+                        .setContent(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "queue.errors.noMusicInQueue"))
                         .setEmbeds(embed.getEmbeds().get(0)).build();
                 event.reply(built, m ->
                 {
@@ -97,7 +97,7 @@ public class QueueCmd extends MusicCommand
             }
             else
             {
-                event.replyWarning("There is no music in the queue!");
+                event.replyWarning(bot.msg(event.getGuild(), "queue.errors.noMusicInQueue"));
             }
             return;
         }

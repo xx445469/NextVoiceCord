@@ -50,6 +50,6 @@ public class SkipratioSlashCmd extends AdminSlashCommand
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
         settings.setSkipRatio(value / 100.0);
 
-        event.reply(event.getClient().getSuccess() + " Skip percentage has been set to `" + value + "%` of listeners on *" + event.getGuild().getName() + "*").queue();
+        event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.skipRatio.set", value, event.getGuild().getName())).queue();
     }
 }

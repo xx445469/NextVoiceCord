@@ -50,20 +50,20 @@ public class SettcSlashCmd extends AdminSlashCommand
         if (event.getOption("channel") == null)
         {
             settings.setTextChannel(null);
-            event.reply(event.getClient().getSuccess() + " Music commands can now be used in any channel").queue();
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.textChannel.cleared")).queue();
         }
         else
         {
             GuildChannel channel = event.getOption("channel").getAsChannel();
             if (!(channel instanceof TextChannel))
             {
-                event.reply(event.getClient().getError() + " Please select a text channel!")
+                event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "settings.textChannel.mustBeText"))
                         .setEphemeral(true).queue();
                 return;
             }
             TextChannel textChannel = (TextChannel) channel;
             settings.setTextChannel(textChannel);
-            event.reply(event.getClient().getSuccess() + " Music commands can now only be used in " + textChannel.getAsMention()).queue();
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.textChannel.set", textChannel.getAsMention())).queue();
         }
     }
 }

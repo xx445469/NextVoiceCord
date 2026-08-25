@@ -63,7 +63,7 @@ public class HistoryCmd extends MusicCommand
         MusicService.HistoryInfo historyInfo = musicService.getHistoryInfo(event.getGuild(), event.getJDA());
         if (historyInfo == null)
         {
-            event.reply(event.getClient().getWarning() + " Playback history is empty!");
+            event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "history.errors.empty"));
             return;
         }
         if (historyInfo.isDisabled())
@@ -73,7 +73,7 @@ public class HistoryCmd extends MusicCommand
         }
         if (historyInfo.isEmpty())
         {
-            event.reply(event.getClient().getWarning() + " Playback history is empty!");
+            event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "history.errors.empty"));
             return;
         }
 

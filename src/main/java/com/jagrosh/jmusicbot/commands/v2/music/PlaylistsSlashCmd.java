@@ -64,7 +64,7 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
         }
         else if (playlistNamesInfo.names.isEmpty())
         {
-            event.reply(event.getClient().getWarning() + " There are no playlists in the Playlists folder!")
+            event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "playlist.errors.noneInFolder"))
                     .setEphemeral(true).queue();
         }
         else

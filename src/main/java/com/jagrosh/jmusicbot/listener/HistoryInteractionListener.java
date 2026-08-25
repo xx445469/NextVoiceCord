@@ -64,19 +64,19 @@ public class HistoryInteractionListener extends ListenerAdapter {
     }
 
     private void handleHistoryButton(ButtonInteractionEvent event) {
-        if (!InteractionGuards.requireGuildAndMember(event)) {
+        if (!InteractionGuards.requireGuildAndMember(event, bot)) {
             return;
         }
 
         Optional<ComponentIdParsers.PaginatedButtonId> parsed = ComponentIdParsers.parseHistoryButtonId(event.getComponentId());
         if (parsed.isEmpty()) {
-            event.reply("Invalid button state.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.invalidButtonState")).setEphemeral(true).queue();
             return;
         }
         ComponentIdParsers.PaginatedButtonId id = parsed.get();
 
         if (event.getUser().getIdLong() != id.userId()) {
-            event.reply("Only the user who ran the command can use these buttons!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.notCommandInvokerButtons")).setEphemeral(true).queue();
             return;
         }
 
@@ -89,7 +89,7 @@ public class HistoryInteractionListener extends ListenerAdapter {
         MusicService.HistoryInfo historyInfo = musicService.getHistoryInfo(event.getGuild(), event.getJDA());
 
         if (historyInfo == null) {
-            event.editMessage("Playback history is now empty!").setEmbeds().setComponents().queue();
+            event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             return;
         }
         if (historyInfo.isDisabled()) {
@@ -97,7 +97,7 @@ public class HistoryInteractionListener extends ListenerAdapter {
             return;
         }
         if (historyInfo.isEmpty()) {
-            event.editMessage("Playback history is now empty!").setEmbeds().setComponents().queue();
+            event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             return;
         }
 
@@ -109,21 +109,21 @@ public class HistoryInteractionListener extends ListenerAdapter {
             try {
                 newSelectedTrack = Integer.parseInt(action.substring(6));
             } catch (NumberFormatException e) {
-                event.reply("Invalid track selection.").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.invalidTrackSelection")).setEphemeral(true).queue();
                 return;
             }
             int tracksOnPage = HistorySlashCmd.getTracksOnPage(page, historyInfo.tracks.length);
             int firstOnPage = (page - 1) * HistorySlashCmd.TRACKS_PER_PAGE + 1;
             int lastOnPage = firstOnPage + tracksOnPage - 1;
             if (newSelectedTrack < firstOnPage || newSelectedTrack > lastOnPage) {
-                event.reply("That track isn't on this page!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.trackNotOnPage")).setEphemeral(true).queue();
                 return;
             }
             if (newSelectedTrack == selectedTrack) {
                 newSelectedTrack = 0;
             }
             if (newSelectedTrack > historyInfo.tracks.length) {
-                event.reply("That track doesn't exist!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.trackNoLongerExists")).setEphemeral(true).queue();
                 return;
             }
             updateHistoryEmbed(event, historyInfo, page, totalPages, newSelectedTrack, userId);
@@ -135,7 +135,7 @@ public class HistoryInteractionListener extends ListenerAdapter {
             updateHistoryEmbed(event, historyInfo, newPage, totalPages, 0, userId);
         } else if (action.equals("queue")) {
             if (selectedTrack <= 0 || selectedTrack > historyInfo.tracks.length) {
-                event.reply("No track selected!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.noTrackSelected")).setEphemeral(true).queue();
                 return;
             }
             if (!InteractionGuards.ensureBotInUserVoiceChannel(event, bot)) {
@@ -146,11 +146,11 @@ public class HistoryInteractionListener extends ListenerAdapter {
             musicService.queueFromHistory(event.getGuild(), event.getMember(), selectedTrack, channel, adapter);
             MusicService.HistoryInfo newInfo = musicService.getHistoryInfo(event.getGuild(), event.getJDA());
             if (newInfo == null) {
-                event.editMessage("Playback history is now empty!").setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else if (newInfo.isDisabled()) {
                 event.editMessage(MusicService.HISTORY_DISABLED_MESSAGE).setEmbeds().setComponents().queue();
             } else if (newInfo.isEmpty()) {
-                event.editMessage("Playback history is now empty!").setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else {
                 int newTotalPages = HistorySlashCmd.getTotalPages(newInfo.tracks.length);
                 int safePage = Math.min(page, newTotalPages);
@@ -158,7 +158,7 @@ public class HistoryInteractionListener extends ListenerAdapter {
             }
         } else if (action.equals("playnow")) {
             if (selectedTrack <= 0 || selectedTrack > historyInfo.tracks.length) {
-                event.reply("No track selected!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.noTrackSelected")).setEphemeral(true).queue();
                 return;
             }
             if (!InteractionGuards.ensureBotInUserVoiceChannel(event, bot)) {
@@ -169,11 +169,11 @@ public class HistoryInteractionListener extends ListenerAdapter {
             musicService.playFromHistoryNow(event.getGuild(), event.getMember(), selectedTrack, channel, adapter);
             MusicService.HistoryInfo newInfo = musicService.getHistoryInfo(event.getGuild(), event.getJDA());
             if (newInfo == null) {
-                event.editMessage("Playback history is now empty!").setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else if (newInfo.isDisabled()) {
                 event.editMessage(MusicService.HISTORY_DISABLED_MESSAGE).setEmbeds().setComponents().queue();
             } else if (newInfo.isEmpty()) {
-                event.editMessage("Playback history is now empty!").setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else {
                 int newTotalPages = HistorySlashCmd.getTotalPages(newInfo.tracks.length);
                 updateHistoryEmbed(event, newInfo, 1, newTotalPages, 0, userId);
@@ -187,11 +187,11 @@ public class HistoryInteractionListener extends ListenerAdapter {
             musicService.queueAllFromHistory(event.getGuild(), event.getMember(), channel, adapter);
             MusicService.HistoryInfo newInfo = musicService.getHistoryInfo(event.getGuild(), event.getJDA());
             if (newInfo == null) {
-                event.editMessage("Playback history is now empty!").setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else if (newInfo.isDisabled()) {
                 event.editMessage(MusicService.HISTORY_DISABLED_MESSAGE).setEmbeds().setComponents().queue();
             } else if (newInfo.isEmpty()) {
-                event.editMessage("Playback history is now empty!").setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else {
                 int newTotalPages = HistorySlashCmd.getTotalPages(newInfo.tracks.length);
                 int safePage = Math.min(page, newTotalPages);
@@ -199,32 +199,32 @@ public class HistoryInteractionListener extends ListenerAdapter {
             }
         } else if (action.equals("save")) {
             TextInput input = TextInput.create("playlist_name", TextInputStyle.SHORT)
-                    .setPlaceholder("e.g. my-history")
+                    .setPlaceholder(bot.msg(event.getGuild(), "history.modal.playlistNamePlaceholder"))
                     .setMinLength(1)
                     .setMaxLength(100)
                     .setRequired(true)
                     .build();
-            Modal modal = Modal.create("history_save_" + userId, "Save history as playlist")
-                    .addComponents(Label.of("Playlist name", input))
+            Modal modal = Modal.create("history_save_" + userId, bot.msg(event.getGuild(), "history.modal.title"))
+                    .addComponents(Label.of(bot.msg(event.getGuild(), "history.modal.labelPlaylistName"), input))
                     .build();
             event.replyModal(modal).queue();
         }
     }
 
     private void handleHistorySaveModal(ModalInteractionEvent event) {
-        if (!InteractionGuards.requireGuildAndMember(event)) {
+        if (!InteractionGuards.requireGuildAndMember(event, bot)) {
             return;
         }
 
         Optional<Long> userIdOpt = ComponentIdParsers.parseHistorySaveModalUserId(event.getModalId());
         if (userIdOpt.isEmpty()) {
-            event.reply("Invalid modal state.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.invalidModalState")).setEphemeral(true).queue();
             return;
         }
         long userId = userIdOpt.get();
 
         if (event.getUser().getIdLong() != userId) {
-            event.reply("Only the user who opened the save dialog can submit it!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.notSaveDialogOwner")).setEphemeral(true).queue();
             return;
         }
 
@@ -236,7 +236,7 @@ public class HistoryInteractionListener extends ListenerAdapter {
                 .trim();
 
         if (playlistName.isEmpty()) {
-            event.reply("Please enter a playlist name!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "history.errors.emptyPlaylistName")).setEphemeral(true).queue();
             return;
         }
 

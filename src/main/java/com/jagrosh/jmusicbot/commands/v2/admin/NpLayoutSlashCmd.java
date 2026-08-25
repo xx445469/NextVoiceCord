@@ -33,7 +33,7 @@ public class NpLayoutSlashCmd extends AdminSlashCommand
         NowPlayingLayoutMode mode = NowPlayingLayoutMode.fromInput(value);
         if (mode == null)
         {
-            event.reply(event.getClient().getError() + " Valid values are `full`, `minimal`, or `inherit`.")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "settings.npLayout.invalid"))
                     .setEphemeral(true).queue();
             return;
         }
@@ -41,7 +41,7 @@ public class NpLayoutSlashCmd extends AdminSlashCommand
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
         settings.setNowPlayingLayoutMode(mode);
         boolean effectiveMinimal = settings.useMinimalNowPlayingMessage(bot.getConfig());
-        event.reply(event.getClient().getSuccess() + " Now-playing layout mode set to `"
-                + mode.getUserInputValue() + "` (effective: `" + (effectiveMinimal ? "minimal" : "full") + "`)").queue();
+        event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.npLayout.set",
+                mode.getUserInputValue(), effectiveMinimal ? "minimal" : "full")).queue();
     }
 }

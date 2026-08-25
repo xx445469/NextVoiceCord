@@ -46,7 +46,7 @@ public class VolumeCmd extends DJCommand
 
         if (event.getArgs().isEmpty())
         {
-            event.reply(FormatUtil.volumeIcon(currentVolume) + " Current volume is `" + currentVolume + "`");
+            event.reply(FormatUtil.volumeIcon(currentVolume) + " " + bot.msg(event.getGuild(), "player.volumeCurrent", currentVolume));
         }
         else
         {
@@ -63,11 +63,11 @@ public class VolumeCmd extends DJCommand
             MusicService.VolumeResult result = musicService.setVolume(event.getGuild(), newVolume);
             if (result == null)
             {
-                event.replyError("Volume must be a valid integer between 0 and 150!");
+                event.replyError(bot.msg(event.getGuild(), "player.errors.volumeInvalid"));
             }
             else
             {
-                event.reply(FormatUtil.volumeIcon(result.newVolume) + " Volume changed from `" + result.oldVolume + "` to `" + result.newVolume + "`");
+                event.reply(FormatUtil.volumeIcon(result.newVolume) + " " + bot.msg(event.getGuild(), "player.volumeChanged", result.oldVolume, result.newVolume));
             }
         }
     }

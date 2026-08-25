@@ -73,13 +73,13 @@ public class RepeatSlashCmd extends DJSlashCommand
                     newMode = RepeatMode.SINGLE;
                     break;
                 default:
-                    event.reply(event.getClient().getError() + " Valid options are `off`, `all` or `single`")
+                    event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "player.errors.repeatInvalidChoice"))
                             .setEphemeral(true).queue();
                     return;
             }
         }
 
         musicService.setRepeatMode(event.getGuild(), newMode);
-        event.reply(event.getClient().getSuccess() + " Repeat mode is now `" + newMode.getUserFriendlyName() + "`").queue();
+        event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "player.repeatModeSet", newMode.getUserFriendlyName())).queue();
     }
 }

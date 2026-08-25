@@ -36,29 +36,29 @@ public final class InteractionGuards {
     /**
      * Ensures the interaction is from a guild with a non-null member. If not, replies with an error and returns false.
      */
-    public static boolean requireGuildAndMember(ButtonInteractionEvent event) {
-        return requireGuildAndMemberImpl(event.getGuild(), event.getMember(), () -> event.reply("This can only be used in a server!").setEphemeral(true).queue());
+    public static boolean requireGuildAndMember(ButtonInteractionEvent event, Bot bot) {
+        return requireGuildAndMemberImpl(event.getGuild(), event.getMember(), () -> event.reply(bot.msg(event.getGuild(), "common.errors.serverOnly")).setEphemeral(true).queue());
     }
 
     /**
      * Ensures the interaction is from a guild with a non-null member. If not, replies with an error and returns false.
      */
-    public static boolean requireGuildAndMember(StringSelectInteractionEvent event) {
-        return requireGuildAndMemberImpl(event.getGuild(), event.getMember(), () -> event.reply("This can only be used in a server!").setEphemeral(true).queue());
+    public static boolean requireGuildAndMember(StringSelectInteractionEvent event, Bot bot) {
+        return requireGuildAndMemberImpl(event.getGuild(), event.getMember(), () -> event.reply(bot.msg(event.getGuild(), "common.errors.serverOnly")).setEphemeral(true).queue());
     }
 
     /**
      * Ensures the interaction is from a guild with a non-null member. If not, replies with an error and returns false.
      */
-    public static boolean requireGuildAndMember(ModalInteractionEvent event) {
-        return requireGuildAndMemberImpl(event.getGuild(), event.getMember(), () -> event.reply("This can only be used in a server!").setEphemeral(true).queue());
+    public static boolean requireGuildAndMember(ModalInteractionEvent event, Bot bot) {
+        return requireGuildAndMemberImpl(event.getGuild(), event.getMember(), () -> event.reply(bot.msg(event.getGuild(), "common.errors.serverOnly")).setEphemeral(true).queue());
     }
 
     /**
      * Ensures the interaction is from a guild with a non-null member. If not, replies with an error and returns false.
      */
-    public static boolean requireGuildAndMember(EntitySelectInteractionEvent event) {
-        return requireGuildAndMemberImpl(event.getGuild(), event.getMember(), () -> event.reply("This can only be used in a server!").setEphemeral(true).queue());
+    public static boolean requireGuildAndMember(EntitySelectInteractionEvent event, Bot bot) {
+        return requireGuildAndMemberImpl(event.getGuild(), event.getMember(), () -> event.reply(bot.msg(event.getGuild(), "common.errors.serverOnly")).setEphemeral(true).queue());
     }
 
     private static boolean requireGuildAndMemberImpl(net.dv8tion.jda.api.entities.Guild guild, net.dv8tion.jda.api.entities.Member member, Runnable sendError) {
@@ -73,16 +73,16 @@ public final class InteractionGuards {
      * Ensures the user is in the same voice channel as the bot. If not, replies with an error and returns false.
      * Assumes guild and member are non-null.
      */
-    public static boolean requireSameVoiceChannel(ButtonInteractionEvent event) {
-        return requireSameVoiceChannelImpl(event.getGuild(), event.getMember(), () -> event.reply("You must be in the same voice channel to use this!").setEphemeral(true).queue());
+    public static boolean requireSameVoiceChannel(ButtonInteractionEvent event, Bot bot) {
+        return requireSameVoiceChannelImpl(event.getGuild(), event.getMember(), () -> event.reply(bot.msg(event.getGuild(), "common.errors.sameVoiceChannel")).setEphemeral(true).queue());
     }
 
     /**
      * Ensures the user is in the same voice channel as the bot. If not, replies with an error and returns false.
      * Assumes guild and member are non-null.
      */
-    public static boolean requireSameVoiceChannel(StringSelectInteractionEvent event) {
-        return requireSameVoiceChannelImpl(event.getGuild(), event.getMember(), () -> event.reply("You must be in the same voice channel to use this!").setEphemeral(true).queue());
+    public static boolean requireSameVoiceChannel(StringSelectInteractionEvent event, Bot bot) {
+        return requireSameVoiceChannelImpl(event.getGuild(), event.getMember(), () -> event.reply(bot.msg(event.getGuild(), "common.errors.sameVoiceChannel")).setEphemeral(true).queue());
     }
 
     private static boolean requireSameVoiceChannelImpl(net.dv8tion.jda.api.entities.Guild guild, net.dv8tion.jda.api.entities.Member member, Runnable sendError) {
@@ -111,7 +111,7 @@ public final class InteractionGuards {
         assert member != null;
 
         if (!member.getVoiceState().inAudioChannel()) {
-            event.reply("You need to be in a voice channel to use this!").setEphemeral(true).queue();
+            event.reply(bot.msg(guild, "common.errors.needVoiceChannel")).setEphemeral(true).queue();
             return false;
         }
 
@@ -120,7 +120,7 @@ public final class InteractionGuards {
 
         if (botChannel != null) {
             if (!userChannel.equals(botChannel)) {
-                event.reply("You must be in the same voice channel to use this!").setEphemeral(true).queue();
+                event.reply(bot.msg(guild, "common.errors.sameVoiceChannel")).setEphemeral(true).queue();
                 return false;
             }
             return true;
@@ -131,7 +131,7 @@ public final class InteractionGuards {
             guild.getAudioManager().openAudioConnection(userChannel);
             return true;
         } catch (PermissionException ex) {
-            event.reply("I cannot connect to " + userChannel.getName() + "! Check my permissions.").setEphemeral(true).queue();
+            event.reply(bot.msg(guild, "common.errors.cannotConnectVoice", userChannel.getName())).setEphemeral(true).queue();
             return false;
         }
     }

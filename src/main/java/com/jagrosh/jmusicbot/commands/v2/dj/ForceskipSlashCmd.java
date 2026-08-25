@@ -43,11 +43,11 @@ public class ForceskipSlashCmd extends DJSlashCommand
         MusicService.ForceSkipResult result = musicService.forceSkip(event.getGuild());
         if (result != null)
         {
-            event.reply(event.getClient().getSuccess() + " Skipped **" + result.trackTitle + "** " + result.requesterInfo).queue();
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "player.forceSkipped", result.trackTitle, result.requesterInfo)).queue();
         }
         else
         {
-            event.reply(event.getClient().getWarning() + " Nothing is currently playing!").setEphemeral(true).queue();
+            event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "player.errors.nothingPlaying")).setEphemeral(true).queue();
         }
     }
 }
