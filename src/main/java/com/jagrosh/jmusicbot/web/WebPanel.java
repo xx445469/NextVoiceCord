@@ -146,11 +146,55 @@ public final class WebPanel
         {
             return;
         }
-        send(exchange, 200, "application/json; charset=utf-8", MAPPER.writeValueAsString(buildStatus()));
+        send(exchange, 200, "application/json; charset=utf-8",
+             MAPPER.writeValueAsString(buildStatus(languageFor(exchange))));
     }
 
     /** The status payload. Deliberately flat — the page renders it directly. */
-    private Map<String, Object> buildStatus()
+    /**
+     * Picks the language for one request.
+     *
+     * <p>An explicit {@code ?lang=} wins, then the browser's own Accept-Language, then the
+     * bot's default. Honouring the browser means the panel arrives already readable for most
+     * people without anyone configuring anything.
+     */
+    private com.jagrosh.jmusicbot.i18n.Language languageFor(HttpExchange exchange)
+    {
+        String query = exchange.getRequestURI().getQuery();
+        if (query != null)
+        {
+            for (String pair : query.split("&"))
+            {
+                if (pair.startsWith("lang="))
+                {
+                    var explicit = com.jagrosh.jmusicbot.i18n.Language.fromCode(pair.substring(5));
+                    if (explicit.isPresent())
+                    {
+                        return explicit.get();
+                    }
+                }
+            }
+        }
+
+        List<String> header = exchange.getRequestHeaders().get("Accept-Language");
+        if (header != null && !header.isEmpty())
+        {
+            // "zh-TW,zh;q=0.9,en;q=0.8" — take tags in order and use the first one that maps.
+            for (String tag : header.get(0).split(","))
+            {
+                String code = tag.split(";")[0].trim();
+                var matched = com.jagrosh.jmusicbot.i18n.Language.fromCode(code);
+                if (matched.isPresent())
+                {
+                    return matched.get();
+                }
+            }
+        }
+
+        return bot.getConfig().getDefaultLanguage();
+    }
+
+    private Map<String, Object> buildStatus(com.jagrosh.jmusicbot.i18n.Language language)
     {
         var guilds = new java.util.ArrayList<Map<String, Object>>();
         long listeners = 0;
@@ -203,7 +247,20 @@ public final class WebPanel
                 Boolean.TRUE.equals(b.get("playing")), Boolean.TRUE.equals(a.get("playing"))));
 
         var runtime = Runtime.getRuntime();
-        return Map.of(
+        // Labels travel with the data rather than being duplicated in the page, so the panel
+        // and the bot cannot drift into saying different things in the same language.
+        var labels = new java.util.LinkedHashMap<String, String>();
+        for (String key : new String[] { "playingNow", "servers", "listeners", "uptime",
+                                         "memory", "nothingPlaying", "connecting",
+                                         "playing", "paused", "subtitle" })
+        {
+            labels.put(key, bot.getLanguages().get(language, "gui.overview." + key));
+        }
+
+        var payload = new java.util.LinkedHashMap<String, Object>();
+        payload.put("labels", labels);
+        payload.put("language", language.name());
+        payload.putAll(Map.of(
                 "version", OtherUtil.getCurrentVersion(),
                 "guilds", guilds,
                 "guildCount", guilds.size(),
@@ -211,7 +268,8 @@ public final class WebPanel
                 "listeners", listeners,
                 "memoryUsedMb", (runtime.totalMemory() - runtime.freeMemory()) / 1048576,
                 "memoryMaxMb", runtime.maxMemory() / 1048576,
-                "uptime", formatUptime());
+                "uptime", formatUptime()));
+        return payload;
     }
 
     /** Uptime as a short human string, computed here so Bot keeps exposing only the instant. */

@@ -15,6 +15,8 @@
  */
 package com.jagrosh.jmusicbot.gui.panels;
 
+import com.jagrosh.jmusicbot.gui.GuiLanguage;
+import com.jagrosh.jmusicbot.i18n.Language;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
@@ -87,6 +89,46 @@ public class SettingsPanel extends JPanel {
     /**
      * Creates the appearance settings section.
      */
+    /**
+     * The window's own language.
+     *
+     * <p>Rendered from the language's name in itself — 日本語 rather than Japanese — because
+     * someone changing away from a language they cannot read has to recognise their own to
+     * find it.
+     */
+    private JComponent buildLanguageBox() {
+        JComboBox<Language> box = new JComboBox<>(GuiLanguage.available().toArray(new Language[0]));
+        box.setSelectedItem(GuiLanguage.get());
+        box.setFont(Tokens.fontBody());
+        box.setRenderer(new javax.swing.DefaultListCellRenderer() {
+            @Override
+            public java.awt.Component getListCellRendererComponent(javax.swing.JList<?> list,
+                    Object value, int index, boolean selected, boolean focused) {
+                super.getListCellRendererComponent(list, value, index, selected, focused);
+                if (value instanceof Language language) {
+                    setText(language.getNativeName() + "  ·  " + language.getEnglishName());
+                }
+                return this;
+            }
+        });
+
+        box.addActionListener(e -> {
+            Language chosen = (Language) box.getSelectedItem();
+            if (chosen == null || chosen == GuiLanguage.get()) {
+                return;
+            }
+            GuiLanguage.set(chosen);
+            // Labels created before the change keep the old text, and rebuilding the whole
+            // window mid-session risks more than it fixes. Saying so is more honest than a
+            // half-translated window with no explanation.
+            JOptionPane.showMessageDialog(this,
+                    GuiLanguage.msg("gui.language.restartNotice"),
+                    GuiLanguage.msg("gui.language.label"),
+                    JOptionPane.INFORMATION_MESSAGE);
+        });
+        return box;
+    }
+
     private JPanel createAppearanceSection() {
         JPanel body = Widgets.transparent(null);
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
@@ -111,6 +153,12 @@ public class SettingsPanel extends JPanel {
             ThemeManager.setBaseFontSize(size);
         });
 
+        body.add(preferenceRow(GuiLanguage.msg("gui.language.label"), buildLanguageBox()));
+        body.add(javax.swing.Box.createVerticalStrut(Tokens.SPACE_XS));
+        // The distinction is worth stating outright: someone changing this expects it to
+        // affect what the bot says in Discord, and it does not.
+        body.add(Widgets.muted(GuiLanguage.msg("gui.language.hint")));
+        body.add(javax.swing.Box.createVerticalStrut(Tokens.SPACE_MD));
         body.add(preferenceRow("Theme", themeBox));
         body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
         body.add(preferenceRow("Font size", fontSpinner));

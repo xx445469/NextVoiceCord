@@ -81,6 +81,10 @@ public class MainFrame extends JFrame {
     public MainFrame(Bot bot) {
         super(TITLE);
 
+        // Initialised before any panel is built, so the first labels are already in the
+        // right language rather than being written in English and corrected a moment later.
+        GuiLanguage.initialise(bot.getLanguages(), bot.getConfig().getDefaultLanguage());
+
         // Without this the window shows the generic Java coffee cup in the taskbar,
         // the dock and the Alt-Tab switcher — the three places a user actually looks
         // for a running application.
@@ -213,29 +217,29 @@ public class MainFrame extends JFrame {
         register("settings", settingsPanel);
         register("config", configPanel);
 
-        sidebar.addItem("dashboard", "Overview", IconFactory.getIcon(IconFactory.IconType.STATUS, 16));
-        sidebar.addItem("console", "Console", IconFactory.getIcon(IconFactory.IconType.CONSOLE, 16));
-        sidebar.addItem("status", "Servers", IconFactory.getIcon(IconFactory.IconType.CONNECTED, 16));
+        sidebar.addItem("dashboard", GuiLanguage.msg("gui.nav.overview"), IconFactory.getIcon(IconFactory.IconType.STATUS, 16));
+        sidebar.addItem("console", GuiLanguage.msg("gui.nav.console"), IconFactory.getIcon(IconFactory.IconType.CONSOLE, 16));
+        sidebar.addItem("status", GuiLanguage.msg("gui.nav.servers"), IconFactory.getIcon(IconFactory.IconType.CONNECTED, 16));
 
-        sidebar.addSection("Diagnostics");
-        sidebar.addItem("performance", "Performance", IconFactory.getIcon(IconFactory.IconType.PLAY, 16));
-        sidebar.addItem("system", "System", IconFactory.getIcon(IconFactory.IconType.REFRESH, 16));
-        sidebar.addItem("sources", "Sources", IconFactory.getIcon(IconFactory.IconType.SEARCH, 16));
+        sidebar.addSection(GuiLanguage.msg("gui.section.diagnostics"));
+        sidebar.addItem("performance", GuiLanguage.msg("gui.nav.performance"), IconFactory.getIcon(IconFactory.IconType.PLAY, 16));
+        sidebar.addItem("system", GuiLanguage.msg("gui.nav.system"), IconFactory.getIcon(IconFactory.IconType.REFRESH, 16));
+        sidebar.addItem("sources", GuiLanguage.msg("gui.nav.sources"), IconFactory.getIcon(IconFactory.IconType.SEARCH, 16));
 
         // Offered only when --web is actually serving. A permanently visible button that
         // sometimes does nothing is worse than no button.
         if (bot.getWebPanel() != null && bot.getWebPanel().getUrl().isPresent())
         {
-            sidebar.addSection("Web panel");
-            sidebar.addAction("Open in browser",
+            sidebar.addSection(GuiLanguage.msg("gui.section.webPanel"));
+            sidebar.addAction(GuiLanguage.msg("gui.action.openInBrowser"),
                               IconFactory.getIcon(IconFactory.IconType.SEARCH, 16),
                               this::openWebPanel);
         }
 
         sidebar.addSpacer();
-        sidebar.addSection("Configure");
-        sidebar.addItem("settings", "Preferences", IconFactory.getIcon(IconFactory.IconType.SETTINGS, 16));
-        sidebar.addItem("config", "Bot config", IconFactory.getIcon(IconFactory.IconType.COPY, 16));
+        sidebar.addSection(GuiLanguage.msg("gui.section.configure"));
+        sidebar.addItem("settings", GuiLanguage.msg("gui.nav.preferences"), IconFactory.getIcon(IconFactory.IconType.SETTINGS, 16));
+        sidebar.addItem("config", GuiLanguage.msg("gui.nav.botConfig"), IconFactory.getIcon(IconFactory.IconType.COPY, 16));
     }
 
     /**
@@ -256,9 +260,8 @@ public class MainFrame extends JFrame {
                 // Putting the URL on the clipboard still saves the retyping.
                 copyToClipboard(url);
                 JOptionPane.showMessageDialog(this,
-                        "This desktop cannot open a browser automatically.\n"
-                        + "The panel address has been copied to the clipboard.",
-                        "Web panel", JOptionPane.INFORMATION_MESSAGE);
+                        GuiLanguage.msg("gui.webPanel.cannotOpen"),
+                        GuiLanguage.msg("gui.webPanel.title"), JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
                 LOG.warn("Could not open the web panel: {}", ex.toString());
                 copyToClipboard(url);
