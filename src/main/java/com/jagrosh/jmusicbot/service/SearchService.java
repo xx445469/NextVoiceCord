@@ -66,7 +66,7 @@ public class SearchService
         if (query == null || query.isEmpty())
         {
             LOG.debug("Search rejected: empty query");
-            callback.onError("Please include a query.");
+            callback.onError(bot.msg(guild, "search.errors.missingQuery"));
             return;
         }
 
@@ -194,13 +194,13 @@ public class SearchService
             {
                 LOG.warn("Search load failed (common): guild={}, query=\"{}\", error={}",
                         guild.getId(), query, throwable.getMessage());
-                callback.onLoadFailed("Error loading: " + throwable.getMessage());
+                callback.onLoadFailed(bot.msg(guild, "search.errors.loadFailed", throwable.getMessage()));
             }
             else
             {
                 LOG.error("Search load failed (severe): guild={}, query=\"{}\"",
                         guild.getId(), query, throwable);
-                callback.onLoadFailed("Error loading track.");
+                callback.onLoadFailed(bot.msg(guild, "search.errors.loadFailedGeneric"));
             }
         }
     }
