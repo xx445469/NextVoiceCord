@@ -48,7 +48,7 @@ import com.jagrosh.jmusicbot.BotConfig;
  */
 public class OtherUtil
 {
-    public final static String NEW_VERSION_AVAILABLE = "There is a new version of JMusicBot available!\n"
+    public final static String NEW_VERSION_AVAILABLE = "There is a new version of NextVoiceCord available!\n"
                     + "Current version: %s\n"
                     + "New Version: %s\n\n"
                     + "Please visit https://github.com/arif-banai/MusicBot/releases/latest to get the latest release.";
@@ -327,7 +327,7 @@ public class OtherUtil
 
         if(latestVersion != null && isNewerVersion(version, latestVersion))
         {
-            userInteraction.alert(Level.WARNING, "JMusicBot Version", String.format(NEW_VERSION_AVAILABLE, version, latestVersion));
+            userInteraction.alert(Level.WARNING, "NextVoiceCord Version", String.format(NEW_VERSION_AVAILABLE, version, latestVersion));
         }
     }
 
@@ -358,11 +358,11 @@ public class OtherUtil
     public static String getUnsupportedBotReason(JDA jda) 
     {
         if (jda.getSelfUser().getFlags().contains(User.UserFlag.VERIFIED_BOT))
-            return "The bot is verified. Using JMusicBot in a verified bot is not supported.";
+            return "The bot is verified. Using NextVoiceCord in a verified bot is not supported.";
 
         ApplicationInfo info = jda.retrieveApplicationInfo().complete();
         if (info.isBotPublic())
-            return "\"Public Bot\" is enabled. Using JMusicBot as a public bot is not supported. Please disable it in the "
+            return "\"Public Bot\" is enabled. Using NextVoiceCord as a public bot is not supported. Please disable it in the "
                     + "Developer Dashboard at https://discord.com/developers/applications/" + jda.getSelfUser().getId() + "/bot ."
                     + "You may also need to disable all Installation Contexts at https://discord.com/developers/applications/" 
                     + jda.getSelfUser().getId() + "/installation .";

@@ -958,7 +958,7 @@ public class PerformanceMetrics implements AudioMetricsListener {
          */
         public String toDiscordSummary() {
             StringBuilder sb = new StringBuilder();
-            sb.append("**JMusicBot Audio Diagnostics**\n");
+            sb.append("**NextVoiceCord Audio Diagnostics**\n");
             sb.append("```\n");
             sb.append("Health: ").append(healthStatus().name())
               .append(" | Quality: ").append(qualityScore()).append("%\n");

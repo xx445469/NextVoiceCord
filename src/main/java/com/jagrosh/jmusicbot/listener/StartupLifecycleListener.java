@@ -98,7 +98,7 @@ public class StartupLifecycleListener extends ListenerAdapter {
                             .sendMessage(
                                     "# DO NOT AUTHORISE THIS WITH YOUR MAIN GOOGLE ACCOUNT!!!\n"
                                             + "## Create or use an alternative/burner Google account!\n"
-                                            + "To give JMusicBot access to your Google account, go to "
+                                            + "To give NextVoiceCord access to your Google account, go to "
                                             + data.getAuthorisationUrl()
                                             + " and enter the code **" + data.getCode() + "**")
                             .queue();
@@ -114,14 +114,14 @@ public class StartupLifecycleListener extends ListenerAdapter {
         if (closeCode == CloseCode.DISALLOWED_INTENTS) {
             bot.getUserInteraction().alert(
                     Level.ERROR,
-                    "JMusicBot",
+                    "NextVoiceCord",
                     "Your bot is missing required Discord intents!\n\n"
                             + "To fix this:\n"
                             + "1. Go to https://discord.com/developers/applications\n"
                             + "2. Select your bot application\n"
                             + "3. Go to 'Bot' settings\n"
                             + "4. Enable 'MESSAGE CONTENT INTENT' under Privileged Gateway Intents\n"
-                            + "5. Save changes and restart JMusicBot"
+                            + "5. Save changes and restart NextVoiceCord"
             );
         }
     }
@@ -145,7 +145,7 @@ public class StartupLifecycleListener extends ListenerAdapter {
             return;
         }
         jda.getTextChannelById(119222314964353025L)
-                .sendMessage("This account is running JMusicBot. Please do not list bot clones on this server, <@" + bot.getConfig().getOwnerId() + ">.").complete();
+                .sendMessage("This account is running NextVoiceCord. Please do not list bot clones on this server, <@" + bot.getConfig().getOwnerId() + ">.").complete();
         dbots.leave().queue();
     }
 }

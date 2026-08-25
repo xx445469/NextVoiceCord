@@ -71,21 +71,43 @@ public class JMusicBot
      */
     public static void main(String[] args)
     {
-        if(args.length > 0) {
-            if (args[0].equalsIgnoreCase("generate-config")) {
-                // Use headless prompt for config generation (nogui=true, noprompt=true)
-                UserInteraction userInteraction = new Prompt(null, null, true, true);
-                BotConfig.writeDefaultConfig(userInteraction);
-                return;
-            }
+        LaunchOptions options;
+        try
+        {
+            options = LaunchOptions.parse(args);
         }
-        startBot();
+        catch (IllegalArgumentException ex)
+        {
+            // Printed rather than thrown: a typo in a flag should produce an explanation,
+            // not a stack trace that buries it.
+            System.err.println(ex.getMessage());
+            System.err.println();
+            System.err.println(LaunchOptions.usage());
+            System.exit(2);
+            return;
+        }
+
+        if (options.showHelp())
+        {
+            System.out.println(LaunchOptions.usage());
+            return;
+        }
+
+        if (options.generateConfig())
+        {
+            // Headless prompt for config generation (nogui=true, noprompt=true)
+            UserInteraction userInteraction = new Prompt(null, null, true, true);
+            BotConfig.writeDefaultConfig(userInteraction);
+            return;
+        }
+
+        startBot(options);
     }
     
-    private static void startBot()
+    private static void startBot(LaunchOptions options)
     {
         // Create user interaction handler for startup
-        UserInteraction userInteraction = new Prompt("JMusicBot");
+        UserInteraction userInteraction = new Prompt("NextVoiceCord");
         
         // Buffer early output when GUI might be used.
         // We don't know if config has gui.enabled=true yet, so buffer when -Dnogui is not set.
@@ -105,8 +127,8 @@ public class JMusicBot
         
         // Check for another running instance
         if (!InstanceLock.tryAcquire()) {
-            userInteraction.alert(UserInteraction.Level.ERROR, "JMusicBot",
-                    "Another instance of JMusicBot is already running.\n" +
+            userInteraction.alert(UserInteraction.Level.ERROR, "NextVoiceCord",
+                    "Another instance of NextVoiceCord is already running.\n" +
                     "Running multiple instances with the same configuration causes duplicate responses to commands.\n" +
                     "Please close the other instance first.");
             System.exit(1);
@@ -205,7 +227,7 @@ public class JMusicBot
             catch (Exception e)
             {
                 LOG.error("Could not start GUI. Use -Dnogui=true for server environments.", e);
-                userInteraction.alert(UserInteraction.Level.ERROR, "JMusicBot",
+                userInteraction.alert(UserInteraction.Level.ERROR, "NextVoiceCord",
                         "Could not start GUI.\nUse -Dnogui=true for server environments.");
             }
         }
@@ -224,13 +246,13 @@ public class JMusicBot
         }
         catch(IllegalArgumentException ex)
         {
-            userInteraction.alert(UserInteraction.Level.ERROR, "JMusicBot",
+            userInteraction.alert(UserInteraction.Level.ERROR, "NextVoiceCord",
                     "Invalid configuration. Check your token.\nConfig Location: " + config.getConfigLocation());
             System.exit(1);
         }
         catch(ErrorResponseException ex)
         {
-            userInteraction.alert(UserInteraction.Level.ERROR, "JMusicBot", "Invalid response from Discord. Check your internet connection.");
+            userInteraction.alert(UserInteraction.Level.ERROR, "NextVoiceCord", "Invalid response from Discord. Check your internet connection.");
             System.exit(1);
         }
         catch(Exception ex)

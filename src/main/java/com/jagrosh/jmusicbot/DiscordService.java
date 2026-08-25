@@ -78,7 +78,7 @@ public class DiscordService {
         // Perform post-startup validation
         String unsupportedReason = OtherUtil.getUnsupportedBotReason(jda);
         if (unsupportedReason != null) {
-            userInteraction.alert(Level.ERROR, "JMusicBot", "JMusicBot cannot be run on this Discord bot: " + unsupportedReason);
+            userInteraction.alert(Level.ERROR, "NextVoiceCord", "NextVoiceCord cannot be run on this Discord bot: " + unsupportedReason);
             jda.shutdown();
             System.exit(1);
         }

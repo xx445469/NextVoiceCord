@@ -156,7 +156,7 @@ public final class ThemeManager {
         
         // Enable menu bar embedding on macOS
         System.setProperty("apple.laf.useScreenMenuBar", "true");
-        System.setProperty("apple.awt.application.name", "JMusicBot");
+        System.setProperty("apple.awt.application.name", "NextVoiceCord");
         
         // Enable FlatLaf extras
         UIManager.put("TabbedPane.showTabSeparators", true);

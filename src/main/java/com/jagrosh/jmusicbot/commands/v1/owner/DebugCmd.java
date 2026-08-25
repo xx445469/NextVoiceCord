@@ -103,7 +103,7 @@ public class DebugCmd extends OwnerCommand
     
     private void appendJMusicBotSection(StringBuilder sb)
     {
-        appendSectionHeader(sb, "JMUSICBOT");
+        appendSectionHeader(sb, "NEXTVOICECORD");
         
         String currentVersion = OtherUtil.getCurrentVersion();
         // Use proxy-aware version check if proxy is configured for GitHub
