@@ -193,6 +193,7 @@ public class OtherUtil
         Proxy proxy = null;
         if (config != null && config.proxyGithub() && config.hasProxy()) {
             proxy = ProxyUtil.createProxy(config);
+            ProxyUtil.installJvmAuthenticator(config);
         }
         return getLatestVersion("https://api.github.com/repos/arif-banai/MusicBot", proxy);
     }

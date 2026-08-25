@@ -105,6 +105,9 @@ public final class YoutubeSmokeCheck
     /** Enables remote signature decoding, the same path {@code sources.youtube.useOAuth} takes. */
     public static final String REMOTE_CIPHER_FLAG = "--remote-cipher";
 
+    /** Routes every request through a proxy: {@code --proxy host:port[:user:pass]}. */
+    public static final String PROXY_FLAG = "--proxy";
+
     /** Third-party cipher service the bot uses when OAuth is enabled. */
     private static final String REMOTE_CIPHER_URL = "https://cipher.kikkia.dev/";
 
@@ -152,9 +155,32 @@ public final class YoutubeSmokeCheck
         // Having it as a switch is what makes "is local extraction broken, or is the whole
         // chain broken?" answerable in one run instead of by guesswork.
         boolean remoteCipher = List.of(args).contains(REMOTE_CIPHER_FLAG);
-        List<String> videoIds = List.of(args).stream()
-                                    .filter(arg -> !arg.startsWith("--"))
-                                    .toList();
+
+        // Whether YouTube serves a ciphered or a direct URL depends on the requesting IP, so
+        // "does this work from somewhere else?" cannot be answered without actually asking
+        // from somewhere else.
+        String proxySpec = null;
+        for (int i = 0; i < args.length - 1; i++)
+        {
+            if (PROXY_FLAG.equals(args[i]))
+            {
+                proxySpec = args[i + 1];
+            }
+        }
+        final String proxy = proxySpec;
+        List<String> videoIds = new ArrayList<>();
+        for (int i = 0; i < args.length; i++)
+        {
+            if (args[i].startsWith("--"))
+            {
+                if (PROXY_FLAG.equals(args[i]))
+                {
+                    i++; // its value, not a video id
+                }
+                continue;
+            }
+            videoIds.add(args[i]);
+        }
         if (videoIds.isEmpty())
         {
             videoIds = List.of(DEFAULT_VIDEO_IDS);
@@ -164,13 +190,14 @@ public final class YoutubeSmokeCheck
         System.out.println("NextVoiceCord — YouTube extraction smoke check");
         System.out.println("youtube-source: " + detectYoutubeSourceVersion());
         System.out.println("cipher:         " + (remoteCipher ? "remote (" + REMOTE_CIPHER_URL + ")" : "local"));
+        System.out.println("proxy:          " + (proxy == null ? "none (direct)" : redact(proxy)));
         System.out.println("videos:         " + String.join(", ", videoIds));
         System.out.println("=".repeat(72));
 
         List<Result> results = new ArrayList<>();
         for (String videoId : videoIds)
         {
-            Result result = check(videoId, remoteCipher);
+            Result result = check(videoId, remoteCipher, proxy);
             results.add(result);
             System.out.printf("%n[%s] %s — %s%n", result.status, videoId, result.detail);
 
@@ -239,7 +266,7 @@ public final class YoutubeSmokeCheck
         return EXIT_INCONCLUSIVE;
     }
 
-    private static Result check(String videoId, boolean remoteCipher)
+    private static Result check(String videoId, boolean remoteCipher, String proxy)
     {
         System.out.printf("%n--- checking %s ---%n", videoId);
 
@@ -264,6 +291,11 @@ public final class YoutubeSmokeCheck
             // drift and let this check pass while real playback fails.
             Client[] clients = AudioSource.buildYoutubeClients(false);
             System.out.println("clients: " + describeClients(clients));
+
+            if (proxy != null)
+            {
+                applyProxy(manager, proxy);
+            }
 
             manager.registerSourceManager(new YoutubeAudioSourceManager(options, clients));
 
@@ -466,6 +498,52 @@ public final class YoutubeSmokeCheck
         }
 
         return new Result(Status.FAIL, videoId + ": unrecognised failure — " + message);
+    }
+
+    /**
+     * Routes Lavaplayer's HTTP client through {@code host:port[:user:pass]}.
+     *
+     * <p>Credentials are scoped to the proxy host, so they are never offered to YouTube.
+     */
+    private static void applyProxy(DefaultAudioPlayerManager manager, String spec)
+    {
+        String[] parts = spec.split(":");
+        if (parts.length < 2)
+        {
+            throw new IllegalArgumentException("--proxy expects host:port[:user:pass], got: " + spec);
+        }
+
+        String host = parts[0];
+        int port = Integer.parseInt(parts[1]);
+        org.apache.http.HttpHost proxyHost = new org.apache.http.HttpHost(host, port);
+
+        org.apache.http.client.CredentialsProvider credentials = null;
+        if (parts.length >= 4)
+        {
+            org.apache.http.impl.client.BasicCredentialsProvider provider =
+                    new org.apache.http.impl.client.BasicCredentialsProvider();
+            provider.setCredentials(
+                    new org.apache.http.auth.AuthScope(host, port),
+                    new org.apache.http.auth.UsernamePasswordCredentials(parts[2], parts[3]));
+            credentials = provider;
+        }
+
+        final org.apache.http.client.CredentialsProvider finalCredentials = credentials;
+        manager.setHttpBuilderConfigurator(builder ->
+        {
+            builder.setProxy(proxyHost);
+            if (finalCredentials != null)
+            {
+                builder.setDefaultCredentialsProvider(finalCredentials);
+            }
+        });
+    }
+
+    /** Hides the password so a pasted diagnostic run does not leak it. */
+    private static String redact(String spec)
+    {
+        String[] parts = spec.split(":");
+        return parts.length >= 4 ? parts[0] + ":" + parts[1] + ":" + parts[2] + ":***" : spec;
     }
 
     private static String rootMessage(Throwable ex)

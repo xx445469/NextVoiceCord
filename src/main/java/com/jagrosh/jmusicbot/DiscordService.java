@@ -69,8 +69,9 @@ public class DiscordService {
         // Configure proxy for JDA HTTP requests if enabled
         if (config.proxyJda() && config.hasProxy()) {
             Proxy proxy = ProxyUtil.createProxy(config);
-            jdaBuilder.setHttpClientBuilder(new OkHttpClient.Builder().proxy(proxy));
-            LOG.info("JDA configured to use proxy: {}:{}", config.getProxyHost(), config.getProxyPort());
+            jdaBuilder.setHttpClientBuilder(
+                    ProxyUtil.applyOkHttpCredentials(new OkHttpClient.Builder().proxy(proxy), config));
+            LOG.info("JDA configured to use proxy: {}", ProxyUtil.describe(config));
         }
         
         JDA jda = jdaBuilder.build();

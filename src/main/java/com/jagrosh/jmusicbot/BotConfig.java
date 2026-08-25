@@ -67,7 +67,7 @@ public class BotConfig {
     private long owner, maxSeconds, aloneTimeUntilStop;
     private long clearChannelAgeDays;
     private int maxYTPlaylistPages, maxHistorySize, guiFontSize, nasBufferMs, frameBufferMs, proxyPort, clearChannelDeleteLimit;
-    private String proxyHost;
+    private String proxyHost, proxyUsername, proxyPassword;
     private boolean proxyLavaplayer, proxyJda, proxyGithub;
     private double skipratio;
     private Language defaultLanguage;
@@ -250,6 +250,8 @@ public class BotConfig {
         // set values using ConfigOption enum for type safety and standardization
         token = TOKEN.getString(config);
         prefix = PREFIX.getString(config);
+        proxyUsername = PROXY_USERNAME.getString(config);
+        proxyPassword = PROXY_PASSWORD.getString(config);
         updateRepository = UPDATE_REPOSITORY.getString(config);
         updateGithubToken = UPDATE_GITHUB_TOKEN.getString(config);
         autoUpdate = UPDATE_AUTO.getBoolean(config);
@@ -433,6 +435,16 @@ public class BotConfig {
     /** Hours between update checks. */
     public int getUpdateIntervalHours() {
         return updateIntervalHours;
+    }
+
+    /** Proxy username, or empty when the proxy needs no authentication. */
+    public String getProxyUsername() {
+        return proxyUsername;
+    }
+
+    /** Proxy password, or empty when the proxy needs no authentication. */
+    public String getProxyPassword() {
+        return proxyPassword;
     }
 
     public String getPrefix() {
