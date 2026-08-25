@@ -1,0 +1,541 @@
+{
+  "_meta": {
+    "language": "JA",
+    "englishName": "Japanese",
+    "reviewed": false,
+    "note": "Machine-generated, not yet reviewed by a native speaker. Corrections welcome."
+  },
+  "common": {
+    "errors": {
+      "serverOnly": "この機能はサーバー内でのみ使用できます！",
+      "sameVoiceChannel": "これを使うには同じボイスチャンネルにいる必要があります！",
+      "needVoiceChannel": "これを使うにはボイスチャンネルに参加している必要があります！",
+      "cannotConnectVoice": "{0} に接続できません！権限を確認してください。",
+      "voiceConnectFailed": "{0} に接続できません！",
+      "mustBeInChannel": "そのコマンドは {0} でのみ使用できます！",
+      "mustBeListening": "それを使うには {0} で聴いている必要があります！",
+      "afkChannel": "AFKチャンネルではそのコマンドを使用できません！",
+      "invalidButtonState": "無効なボタンの状態です。",
+      "invalidSelectionState": "無効な選択状態です。",
+      "invalidModalState": "無効なダイアログの状態です。",
+      "invalidTrackSelection": "無効な曲の選択です。",
+      "invalidPlaylistSelection": "無効なプレイリストの選択です。",
+      "invalidPositionSelected": "無効な位置が選択されました。",
+      "trackNotOnPage": "その曲はこのページにありません！",
+      "playlistNotOnPage": "そのプレイリストはこのページにありません！",
+      "trackNoLongerExists": "その曲はもう存在しません！",
+      "playlistNoLongerExists": "そのプレイリストはもう存在しません！",
+      "noTrackSelected": "曲が選択されていません！",
+      "noPlaylistSelected": "プレイリストが選択されていません！",
+      "notCommandInvokerButtons": "コマンドを実行した本人のみこれらのボタンを使用できます！",
+      "notCommandInvokerThis": "コマンドを実行した本人のみ使用できます！",
+      "notPanelOwner": "この設定パネルを開いた本人のみ操作できます。",
+      "notModalOwner": "この設定ダイアログを開いた本人のみ送信できます。",
+      "notSaveDialogOwner": "保存ダイアログを開いた本人のみ送信できます！",
+      "noPlayerInServer": "このサーバーにはプレイヤーがありません！",
+      "noMusicPlaying": "音楽が再生されていません！",
+      "noMusicPlayingToUse": "それを使うには音楽が再生されている必要があります！"
+    }
+  },
+  "permissions": {
+    "errors": {
+      "needManageServer": "設定を変更するには「サーバー管理」権限が必要です。",
+      "needManageServerCommand": "このコマンドを使うには「サーバー管理」権限が必要です！",
+      "ownerOnly": "このコマンドはBotオーナーのみ使用できます！",
+      "needDj": "このコマンドを使うにはDJである必要があります！",
+      "needDjOrRequesterSkip": "スキップするにはDJかリクエストした本人である必要があります！",
+      "needDjOrRequesterPrevious": "前の曲に戻るにはDJかリクエストした本人である必要があります！",
+      "needDjUnpause": "再生を再開できるのはDJのみです！",
+      "needDjOrOwnerEditPlaylist": "プレイリストを編集するにはDJかBotオーナーである必要があります！",
+      "needDjOrOwnerSaveHistory": "履歴をプレイリストとして保存するにはDJかBotオーナーである必要があります！",
+      "needDjToUseButton": "このボタンを使うにはDJである必要があります！",
+      "needDjToMoveTracks": "曲の順番を変更するにはDJである必要があります！",
+      "needDjToPlayImmediately": "曲をすぐに再生するにはDJである必要があります！",
+      "needDjToFavorite": "現在の曲をお気に入りに追加するにはDJである必要があります！",
+      "needDjToSkipToPosition": "特定の位置にスキップするにはDJである必要があります！",
+      "noManageMessages": "そのチャンネルでメッセージを管理する権限がありません。"
+    }
+  },
+  "player": {
+    "resumed": "**{0}** の再生を再開しました。",
+    "restarted": "**{0}** を再スタートしました",
+    "wentBack": "**{0}** に戻りました",
+    "skipped": "スキップしました！",
+    "skippedTrack": "**{0}** をスキップしました",
+    "forceSkipped": "**{0}** をスキップしました {1}",
+    "nowPlayingSet": "現在再生中: **{0}**",
+    "paused": "**{0}** を一時停止しました。再開するには `{1}` を使ってください！",
+    "pauseAlready": "プレイヤーはすでに一時停止しています！再開するには `{0}` を使ってください！",
+    "stopped": "プレイヤーを停止し、キューをクリアしました。",
+    "volumeCurrent": "現在の音量は `{0}` です",
+    "volumeChanged": "音量を `{0}` から `{1}` に変更しました",
+    "repeatModeSet": "リピートモードを `{0}` に設定しました",
+    "favoriteAdded": "{0} をお気に入りに追加しました",
+    "favoriteAlready": "この曲はすでにお気に入りに追加されています",
+    "seekSuccess": "`{0}/{1}` にシークしました！",
+    "requesterAutoplay": "（自動再生）",
+    "requesterUser": "（**{0}** がリクエスト）",
+    "repeatMode": {
+      "off": "オフ",
+      "all": "全曲",
+      "single": "1曲"
+    },
+    "errors": {
+      "noPreviousTracks": "前の曲がありません！",
+      "nothingPlaying": "現在何も再生されていません！",
+      "noTrackCurrentlyPlaying": "現在再生中の曲がありません！",
+      "favoriteInvalidUri": "現在の曲には保存できる有効なURIまたは絶対パスがありません。",
+      "favoriteUnsupported": "お気に入りに追加できるのは、URI参照かこのOSの絶対ファイルパスのみです。",
+      "notSeekable": "この曲はシークできません。",
+      "seekNotOwner": "**{0}** はあなたが追加した曲ではないためシークできません！",
+      "invalidSeekFormat": "無効なシーク形式です！期待される形式: [+ | -] <HH:MM:SS | MM:SS | SS> または <0h0m0s>\n例: `1:02:23` `+1:10` `-90`、`1h10m`、`+90s`",
+      "seekPastDuration": "現在の曲の長さは `{1}` のため、`{0}` にシークできません！",
+      "seekGeneric": "シーク中にエラーが発生しました: {0}",
+      "trackTooLong": "この曲（**{0}**）は許容される最大長を超えています: `{1}` > `{2}`",
+      "volumeInvalid": "音量は0から150の間の整数で指定してください！",
+      "repeatInvalidChoice": "有効な選択肢は `off`、`all`、`single` です",
+      "playlistEntryLoadFailed": "そのプレイリスト項目を読み込めませんでした。",
+      "playlistEntryNoMatches": "そのプレイリスト項目に一致するものが見つかりませんでした。",
+      "playlistEntryLoadError": "プレイリスト項目の読み込みエラー: {0}"
+    }
+  },
+  "nowplaying": {
+    "contentFull": "**再生中...**",
+    "contentMinimal": "**{0} で再生中**",
+    "source": "**ソース:** {0}",
+    "sourceUnknown": "不明",
+    "volumeLine": "**音量:** {0}%",
+    "repeatLine": "**リピート:** {0}",
+    "queuedLabelOne": "1曲がキューにあります",
+    "queuedLabelMany": "{0}曲がキューにあります",
+    "embed": {
+      "author": "アーティスト",
+      "duration": "長さ",
+      "queue": "キュー",
+      "volume": "音量",
+      "repeat": "リピート",
+      "requester": "リクエスト",
+      "noMusicTitle": "音楽が再生されていません"
+    },
+    "button": {
+      "prev": "戻る",
+      "resume": "再開",
+      "pause": "一時停止",
+      "skip": "スキップ",
+      "stop": "停止",
+      "shuffle": "シャッフル",
+      "repeat": "リピート",
+      "repeatAll": "全曲リピート",
+      "repeatOne": "1曲リピート",
+      "volumeUp": "音量 +",
+      "volumeDown": "音量 -",
+      "favorite": "お気に入り"
+    },
+    "footer": {
+      "addedQueue": "{0} をキューに追加しました。",
+      "addedFront": "{0} をキューの先頭に追加しました。",
+      "skippedForward": "{0} をスキップしました。",
+      "addedFromHistory": "{0} を履歴から追加しました。",
+      "addedAllHistory": "{0} が履歴全体をキューに追加しました。",
+      "playingFromHistory": "{0} が履歴から再生しています。",
+      "addedPlaylist": "{0} がプレイリストを追加しました。",
+      "repeatingQueue": "キューをリピートしています。",
+      "repeatingSong": "この曲をリピートしています。",
+      "playingNextSong": "次の曲を再生しています。"
+    },
+    "errors": {
+      "noMusicInServer": "このサーバーでは音楽が再生されていません。"
+    }
+  },
+  "queue": {
+    "trackAddedNow": "**{0}**（`{1}`）を追加し、再生を開始します",
+    "trackAddedAtPosition": "**{0}**（`{1}`）をキューの {2} 番目に追加しました",
+    "removed": "**{0}** をキューから削除しました",
+    "removedByDJ": "**{0}** をキューから削除しました（{1} がリクエスト）",
+    "removedBySomeone": "誰か",
+    "removedAllMine": "あなたの {0} 件を削除しました。",
+    "removedAllByUser": "{1} の `{0}` 件を削除しました。",
+    "moved": "**{0}** を `{1}` 番目から `{2}` 番目に移動しました。",
+    "skippedTo": "**{0}** にスキップしました",
+    "shuffledSuccess": "あなたの {0} 件をシャッフルしました。",
+    "shuffledButton": "{0} 曲をシャッフルしました！",
+    "nowEmpty": "キューが空になりました！",
+    "type": {
+      "linear": "順番",
+      "fair": "公平"
+    },
+    "embed": {
+      "title": "現在のキュー",
+      "upNextSection": "**次の曲** *（下から曲を選択）*",
+      "entries": "件数",
+      "mode": "モード",
+      "pageFooter": "{1} ページ中 {0} ページ目"
+    },
+    "button": {
+      "remove": "削除",
+      "playNext": "次に再生",
+      "move": "移動",
+      "playNow": "今すぐ再生"
+    },
+    "moveSelect": {
+      "placeholder": "新しい位置を選択",
+      "optionLabel": "位置 {0}"
+    },
+    "errors": {
+      "empty": "キューには何もありません！",
+      "noMusicInQueue": "キューに音楽がありません！",
+      "noSongsToRemove": "あなたの曲はキューにありません！",
+      "userNoSongs": "**{0}** の曲はキューにありません！",
+      "removeNotOwner": "**{0}** はあなたが追加した曲ではないため削除できません！",
+      "cannotMoveSamePosition": "同じ位置には移動できません。",
+      "alreadyNext": "この曲はすでに次に再生される曲です！",
+      "invalidQueuePosition": "`{0}` はキュー内の有効な位置ではありません！",
+      "invalidPositionRange": "位置は1から{0}の間の整数で指定してください！",
+      "invalidPositionNotInteger": "`{0}` は有効な整数ではありません！",
+      "invalidPositionOrAll": "有効な位置の数字か 'all' を指定してください。",
+      "emptyToShuffle": "シャッフルできる曲がキューにありません！",
+      "onlyOneToShuffle": "キューには1曲しかありません！",
+      "mentionUser": "ユーザーをメンションしてください！",
+      "userNotFound": "そのユーザーが見つかりません！",
+      "multipleUsersFound": "複数のユーザーが見つかりました:",
+      "twoValidIndexes": "有効な番号を2つ指定してください。"
+    }
+  },
+  "history": {
+    "disabled": "再生履歴は設定で無効になっています（playback.maxHistorySize = 0）。",
+    "nowEmpty": "再生履歴が空になりました！",
+    "queueAllSuccess": "**{0}** 曲をキューに追加しました。",
+    "queueAllSkippedSuffix": " {0} 曲をスキップしました（長すぎるため）。",
+    "savedAsPlaylist": "履歴から {0} 曲をプレイリスト `{1}` に保存しました！",
+    "embed": {
+      "title": "履歴キュー",
+      "section": "**最近再生した曲** *（下から曲を選んでキューに追加、または再生）*",
+      "maxHistory": "履歴の上限",
+      "pageFooter": "{1} ページ中 {0} ページ目 | 1 = 最新"
+    },
+    "button": {
+      "save": "プレイリストとして保存",
+      "queue": "キューに追加",
+      "queueAll": "すべてキューに追加"
+    },
+    "modal": {
+      "title": "履歴をプレイリストとして保存",
+      "labelPlaylistName": "プレイリスト名",
+      "playlistNamePlaceholder": "例: my-history"
+    },
+    "errors": {
+      "empty": "再生履歴が空です！",
+      "positionRange": "位置は1から{0}の間で指定してください！",
+      "allTooLong": "{0} 曲すべてが長すぎて追加できませんでした。",
+      "noValidUrls": "保存できる有効な曲のURLが履歴にありません（http(s) のソースのみ保存されます）。",
+      "emptyPlaylistName": "プレイリスト名を入力してください！"
+    }
+  },
+  "playlist": {
+    "favoritesLabel": "⭐ お気に入り ⭐",
+    "queuedFromPlaylist": "プレイリスト `{1}` から **{0}** 曲をキューに追加しました。",
+    "queuedFailedSuffix": " {0} 件の読み込みに失敗しました。",
+    "nowPlayingReplaced": "プレイリスト `{0}` を再生中（キューを置き換えました）。{1}",
+    "couldNotLoadLine": "`[?:??]` **読み込めませんでした**",
+    "embed": {
+      "title": "プレイリスト",
+      "section": "**利用可能なプレイリスト** *（下から選んでキューに追加、または再生）*",
+      "detailsTitle": "プレイリスト: {0}",
+      "previewSection": "**プレビュー** *（最初の{0}件）*",
+      "previewFooter": "プレビュー: 最初の{0}件",
+      "tracksSection": "**曲一覧** *（下から選択）*",
+      "unsavedSuffix": " • 未保存の変更",
+      "linkLabel": "リンク"
+    },
+    "button": {
+      "refresh": "更新",
+      "details": "詳細",
+      "save": "保存",
+      "discard": "破棄",
+      "moveTop": "先頭へ",
+      "moveBottom": "末尾へ",
+      "up1": "1つ上へ",
+      "down1": "1つ下へ",
+      "moveTo": "移動先",
+      "queueTrack": "曲を追加",
+      "queuePlaylist": "全曲を追加",
+      "playPlaylist": "全曲を再生",
+      "unselect": "選択解除",
+      "back": "戻る"
+    },
+    "errors": {
+      "storageUnavailable": "プレイリストの保存領域が使用できません。",
+      "misconfigured": "プレイリストの保存設定に誤りがあります（`{0}`）。{1}",
+      "storageUnavailableWithPath": "プレイリストの保存領域が使用できません（`{0}`）。{1}",
+      "pathNotConfigured": "（未設定）",
+      "noneInFolder": "Playlists フォルダにプレイリストがありません！",
+      "noTracksLoaded": "プレイリスト `{0}` から曲が読み込まれませんでした！",
+      "notFoundShort": "プレイリストはもう存在しません。",
+      "notFoundRefresh": "プレイリストはもう存在しません。「戻る」を押してから「更新」してください。",
+      "notFoundRefreshShort": "プレイリストはもう存在しません。「更新」を押してください。",
+      "positionRange": "位置は1から{0}の間で指定してください。",
+      "positionsRange": "位置は1から{0}の間で指定してください。",
+      "noUnsavedChanges": "未保存の変更はありません。",
+      "alreadyExistsChooseOther": "プレイリスト `{0}` はすでに存在します！別の名前を選んでください。",
+      "invalidName": "有効なプレイリスト名を指定してください！"
+    },
+    "owner": {
+      "helpTitle": "プレイリスト管理コマンド:",
+      "created": "プレイリスト `{0}` を作成しました！",
+      "deleted": "プレイリスト `{0}` を削除しました！",
+      "appended": "プレイリスト `{1}` に {0} 件を追加しました！",
+      "availableList": "利用可能なプレイリスト:",
+      "errors": {
+        "noName": "プレイリストの名前を指定してください！",
+        "createFailed": "プレイリストを作成できませんでした: {0}",
+        "deleteFailed": "プレイリストを削除できませんでした: {0}",
+        "appendFailed": "プレイリストに追加できませんでした: {0}",
+        "alreadyExists": "プレイリスト `{0}` はすでに存在します！",
+        "doesNotExist": "プレイリスト `{0}` は存在しません！",
+        "appendMissingArgs": "プレイリスト名と追加するURLを指定してください！",
+        "folderMissing": "Playlists フォルダが存在せず、作成もできませんでした！",
+        "loadFailed": "利用可能なプレイリストの読み込みに失敗しました！"
+      }
+    },
+    "autoplaylist": {
+      "cleared": "**{0}** のデフォルトプレイリストをクリアしました",
+      "set": "**{0}** のデフォルトプレイリストを `{1}` に設定しました",
+      "errors": {
+        "missingArg": "プレイリスト名または NONE を指定してください",
+        "notFound": "`{0}.txt` が見つかりません！"
+      }
+    },
+    "load": {
+      "missingName": "プレイリスト名を指定してください。",
+      "notFound": "Playlists フォルダに `{0}.txt` が見つかりません。",
+      "loading": "プレイリスト **{0}** を読み込み中...（{1} 件）",
+      "noTracksLoaded": "曲が読み込まれませんでした！",
+      "loadedTracks": "**{0}** 曲を読み込みました！",
+      "failedHeader": "以下の曲は読み込みに失敗しました:"
+    }
+  },
+  "search": {
+    "loading": "読み込み中... `[{0}]`",
+    "searching": "{0} で `{1}` を検索中...",
+    "resultsHeader": "`{0}` の検索結果:",
+    "timedOut": "検索がタイムアウトしました。",
+    "playlistFoundPrompt": "\nこの曲には **{0}** 曲のプレイリストが付いています。プレイリストを読み込むには 📥 を選択してください。",
+    "playlistLoadedAdditional": "\n追加で **{0}** 曲を読み込みました！",
+    "playlistFoundAdded": "{0} を見つけました（`{1}` 件）。キューに追加しました！",
+    "playlistOmittedSuffix": "\n許容される最大長（`{0}`）を超える曲は除外されました。",
+    "selectMenu": {
+      "placeholder": "再生する曲を選択",
+      "optionDescriptionDuration": "長さ: {0}"
+    },
+    "embed": {
+      "title": "「{0}」の検索結果",
+      "footer": "下のメニューから曲を選択してください"
+    },
+    "button": {
+      "loadPlaylist": "プレイリストを読込",
+      "cancel": "キャンセル"
+    },
+    "errors": {
+      "missingQuery": "検索キーワードを指定してください。",
+      "noResults": "`{0}` の検索結果が見つかりませんでした。",
+      "loadFailed": "読み込みエラー: {0}",
+      "loadFailedGeneric": "曲の読み込みでエラーが発生しました。",
+      "playlistLoadFailedOrEmpty": "プレイリスト {0} を読み込めなかったか、項目が0件でした",
+      "playlistAllTooLong": "このプレイリスト {0}のすべての項目が許容される最大長（`{1}`）を超えていました",
+      "missingSongOrUrl": "曲名またはURLを指定してください！"
+    },
+    "searchingSimple": "検索中... `[{0}]`"
+  },
+  "voting": {
+    "status": "[{0} 票、必要数 {1}/{2}]",
+    "alreadyVoted": "この曲のスキップにはすでに投票済みです `{0}`",
+    "voteRegistered": "この曲のスキップに投票しました `{0}`",
+    "voteSkipSuccess": "この曲のスキップに投票しました `{0}`\n**{1}** をスキップしました {2}"
+  },
+  "settings": {
+    "updated": "設定を更新しました。",
+    "closeFailed": "設定パネルを閉じられませんでした。",
+    "refreshFailed": "設定パネルの更新に失敗しました。もう一度 `/settings` を実行してください。",
+    "panel": {
+      "title": "NextVoiceCord 設定",
+      "description": "**{0}** の設定パネルです。\n下のボタンで設定値を変更してください。",
+      "valueNone": "なし",
+      "valueAny": "指定なし",
+      "skipDefault": "デフォルト（`55%`）",
+      "footerNamed": "これらの操作は {0} のみ行えます。",
+      "footerGeneric": "これらの操作はコマンドを実行した本人のみ行えます。",
+      "field": {
+        "textChannel": "テキストチャンネル",
+        "voiceChannel": "ボイスチャンネル",
+        "djRole": "DJロール",
+        "prefix": "プレフィックス",
+        "skipRatio": "スキップ割合",
+        "queueType": "キュータイプ",
+        "nowPlaying": "再生中パネル",
+        "layout": "レイアウト",
+        "buttons": "ボタン"
+      },
+      "button": {
+        "toggleQueue": "キュー切替",
+        "toggleLayout": "レイアウト切替",
+        "toggleButtons": "ボタン切替",
+        "setTextChannel": "テキストch設定",
+        "setVoiceChannel": "ボイスch設定",
+        "setDjRole": "DJロール設定",
+        "setPrefix": "プレフィックス設定",
+        "setSkip": "スキップ%設定",
+        "clearText": "テキストch解除",
+        "clearVoice": "ボイスch解除",
+        "clearDj": "DJ解除",
+        "close": "閉じる"
+      },
+      "select": {
+        "textChannelPlaceholder": "テキストチャンネルを選択",
+        "voiceChannelPlaceholder": "ボイスチャンネルを選択",
+        "djRolePlaceholder": "DJロールを選択"
+      }
+    },
+    "modal": {
+      "setPrefixTitle": "プレフィックスを設定",
+      "setPrefixPlaceholder": "カスタムプレフィックス（空にするとクリア）",
+      "setSkipTitle": "スキップ割合を設定",
+      "setSkipPlaceholder": "0から100の整数",
+      "labelValue": "値"
+    },
+    "prompt": {
+      "textChannel": "テキストチャンネルを選択:",
+      "voiceChannel": "ボイスチャンネルを選択:",
+      "djRole": "DJロールを選択:"
+    },
+    "language": {
+      "current": "このサーバーのBot言語は **{0}** です。",
+      "set": "このサーバーの言語を **{0}** に設定しました。",
+      "invalid": "不明な言語です `{0}`。利用可能: {1}",
+      "optionDescription": "{0}（{1}）"
+    },
+    "prefix": {
+      "cleared": "プレフィックスをクリアしました。",
+      "set": "*{1}* のカスタムプレフィックスを `{0}` に設定しました",
+      "missing": "プレフィックスまたは NONE を指定してください"
+    },
+    "queueType": {
+      "current": "現在のキュータイプ: `{0}`。",
+      "set": "キュータイプを `{0}` に設定しました。",
+      "invalid": "無効なキュータイプです。有効なタイプ: [{0}]"
+    },
+    "dj": {
+      "cleared": "DJロールをクリアしました。DJコマンドは管理者のみ使用できます。",
+      "set": "**{0}** ロールを持つユーザーがDJコマンドを使用できるようになりました。",
+      "missingArg": "ロール名または NONE を指定してください",
+      "notFound": "「{0}」に一致するロールが見つかりません"
+    },
+    "textChannel": {
+      "set": "音楽コマンドは {0} でのみ使用できるようになりました",
+      "cleared": "音楽コマンドはどのチャンネルでも使用できるようになりました",
+      "mustBeText": "テキストチャンネルを選択してください！",
+      "missingArg": "テキストチャンネルまたは NONE を指定してください",
+      "notFound": "「{0}」に一致するテキストチャンネルが見つかりません"
+    },
+    "voiceChannel": {
+      "set": "音楽は {0} でのみ再生できるようになりました",
+      "cleared": "音楽はどのチャンネルでも再生できるようになりました",
+      "mustBeVoice": "ボイスチャンネルを選択してください！",
+      "missingArg": "ボイスチャンネルまたは NONE を指定してください",
+      "notFound": "「{0}」に一致するボイスチャンネルが見つかりません"
+    },
+    "skipRatio": {
+      "set": "*{1}* のスキップ割合をリスナーの `{0}%` に設定しました",
+      "range": "指定した値は0から100の間である必要があります！",
+      "invalidNumber": "0から100の整数を指定してください（デフォルトは55）。この数値は曲をスキップするために投票が必要なリスナーの割合です。",
+      "emptyError": "0から100の整数を入力してください。",
+      "rangeError": "スキップ割合は0から100の間である必要があります。"
+    },
+    "npLayout": {
+      "current": "再生中パネルのレイアウトモードは `{0}` です（実際の適用値: `{1}`）。",
+      "set": "再生中パネルのレイアウトモードを `{0}` に設定しました（実際の適用値: `{1}`）。",
+      "invalid": "有効な値は `full`、`minimal`、`inherit` です。"
+    },
+    "npButtons": {
+      "current": "再生中パネルのボタンモードは `{0}` です（実際の適用値: `{1}`）。",
+      "set": "再生中パネルのボタンモードを `{0}` に設定しました（実際の適用値: `{1}`）。",
+      "invalid": "有効な値は `on`、`off`、`inherit` です。"
+    },
+    "errors": {
+      "panelExpired": "この設定パネルは期限切れです。もう一度 `/settings` を実行してください。",
+      "chooseTextChannel": "テキストチャンネルを選択してください。",
+      "chooseVoiceChannel": "ボイスチャンネルを選択してください。",
+      "chooseRole": "ロールを選択してください。"
+    },
+    "summary": {
+      "header": "{0} の設定:",
+      "textChannel": "テキストチャンネル: {0}",
+      "voiceChannel": "ボイスチャンネル: {0}",
+      "djRole": "DJロール: {0}",
+      "prefix": "カスタムプレフィックス: {0}",
+      "repeatMode": "リピートモード: {0}",
+      "queueType": "キュータイプ: {0}",
+      "defaultPlaylist": "デフォルトプレイリスト: {0}",
+      "footer": "{0} サーバー | {1} 音声接続"
+    }
+  },
+  "clearchannel": {
+    "clearing": "チャンネルをクリア中...",
+    "cleared": "{0} 件のメッセージを削除しました。",
+    "error": "エラー: {0}",
+    "errors": {
+      "noChannelConfigured": "このサーバーにはテキストチャンネルが設定されていません。管理者は `{0}` で設定できます。"
+    }
+  },
+  "lyrics": {
+    "errors": {
+      "removed": "歌詞機能は削除されました。"
+    }
+  },
+  "owner": {
+    "setname": {
+      "changed": "名前を `{0}` から `{1}` に変更しました",
+      "errors": {
+        "rateLimited": "名前は1時間に2回までしか変更できません！",
+        "invalid": "その名前は無効です！"
+      }
+    },
+    "setavatar": {
+      "success": "アバターを変更しました。",
+      "errors": {
+        "invalidUrl": "URLが無効か指定されていません",
+        "setFailed": "アバターの設定に失敗しました。",
+        "loadFailed": "指定されたURLから読み込めませんでした。"
+      }
+    },
+    "setgame": {
+      "playingSet": "**{0}** は現在 `{1}` をプレイ中です",
+      "playingCleared": "**{0}** は何もプレイしていません。",
+      "streamSet": "**{0}** は現在 `{1}` を配信中です",
+      "listenSet": "**{0}** は現在 `{1}` を再生中です",
+      "watchSet": "**{0}** は現在 `{1}` を視聴中です",
+      "errors": {
+        "setFailed": "ゲームを設定できませんでした！",
+        "streamMissingArgs": "Twitchのユーザー名と「配信」するゲーム名を指定してください",
+        "listenMissingTitle": "再生するタイトルを指定してください！",
+        "watchMissingTitle": "視聴するタイトルを指定してください！"
+      }
+    },
+    "setstatus": {
+      "set": "ステータスを `{0}` に設定しました",
+      "errors": {
+        "invalid": "次のいずれかのステータスを指定してください: `ONLINE`、`IDLE`、`DND`、`INVISIBLE`",
+        "setFailed": "ステータスを設定できませんでした！"
+      }
+    },
+    "shutdown": {
+      "message": "シャットダウン中..."
+    },
+    "eval": {
+      "success": "評価に成功しました:\n```\n{0} ```",
+      "exceptionThrown": "例外が発生しました:\n```\n{0} ```",
+      "errors": {
+        "engineMissing": "設定で指定されたevalエンジン（`{0}`）が存在しません。エンジン名が無効か、お使いのJavaのバージョン（`{1}`）にそのエンジンが存在しない可能性があります。"
+      }
+    }
+  }
+}

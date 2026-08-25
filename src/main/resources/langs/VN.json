@@ -1,0 +1,541 @@
+{
+  "_meta": {
+    "language": "VN",
+    "englishName": "Vietnamese",
+    "reviewed": false,
+    "note": "Machine-generated, not yet reviewed by a native speaker. Corrections welcome."
+  },
+  "common": {
+    "errors": {
+      "serverOnly": "Lệnh này chỉ có thể dùng trong máy chủ!",
+      "sameVoiceChannel": "Bạn phải ở cùng kênh thoại để sử dụng lệnh này!",
+      "needVoiceChannel": "Bạn cần vào kênh thoại để sử dụng lệnh này!",
+      "cannotConnectVoice": "Tôi không thể kết nối tới {0}! Hãy kiểm tra quyền của tôi.",
+      "voiceConnectFailed": "Tôi không thể kết nối tới {0}!",
+      "mustBeInChannel": "Bạn chỉ có thể dùng lệnh đó trong {0}!",
+      "mustBeListening": "Bạn phải đang nghe nhạc trong {0} để dùng lệnh đó!",
+      "afkChannel": "Bạn không thể dùng lệnh đó trong kênh AFK!",
+      "invalidButtonState": "Trạng thái nút không hợp lệ.",
+      "invalidSelectionState": "Trạng thái lựa chọn không hợp lệ.",
+      "invalidModalState": "Trạng thái hộp thoại không hợp lệ.",
+      "invalidTrackSelection": "Lựa chọn bài hát không hợp lệ.",
+      "invalidPlaylistSelection": "Lựa chọn danh sách phát không hợp lệ.",
+      "invalidPositionSelected": "Vị trí được chọn không hợp lệ.",
+      "trackNotOnPage": "Bài hát đó không có trên trang này!",
+      "playlistNotOnPage": "Danh sách phát đó không có trên trang này!",
+      "trackNoLongerExists": "Bài hát đó không còn tồn tại!",
+      "playlistNoLongerExists": "Danh sách phát đó không còn tồn tại!",
+      "noTrackSelected": "Chưa chọn bài hát nào!",
+      "noPlaylistSelected": "Chưa chọn danh sách phát nào!",
+      "notCommandInvokerButtons": "Chỉ người đã dùng lệnh này mới có thể sử dụng các nút này!",
+      "notCommandInvokerThis": "Chỉ người đã dùng lệnh này mới có thể sử dụng!",
+      "notPanelOwner": "Chỉ người đã mở bảng cài đặt này mới có thể sử dụng.",
+      "notModalOwner": "Chỉ người đã mở hộp thoại cài đặt này mới có thể gửi.",
+      "notSaveDialogOwner": "Chỉ người đã mở hộp thoại lưu mới có thể gửi!",
+      "noPlayerInServer": "Không có trình phát nào trong máy chủ này!",
+      "noMusicPlaying": "Không có nhạc nào đang phát!",
+      "noMusicPlayingToUse": "Phải có nhạc đang phát mới có thể dùng lệnh đó!"
+    }
+  },
+  "permissions": {
+    "errors": {
+      "needManageServer": "Bạn cần quyền Quản lý Máy chủ để thay đổi cài đặt.",
+      "needManageServerCommand": "Bạn cần quyền Quản lý Máy chủ để dùng lệnh này!",
+      "ownerOnly": "Chỉ chủ sở hữu bot mới có thể dùng lệnh này!",
+      "needDj": "Bạn cần là DJ để dùng lệnh này!",
+      "needDjOrRequesterSkip": "Bạn cần là DJ hoặc người yêu cầu bài hát để bỏ qua!",
+      "needDjOrRequesterPrevious": "Bạn cần là DJ hoặc người yêu cầu bài hát để quay lại!",
+      "needDjUnpause": "Chỉ DJ mới có thể tiếp tục phát trình phát!",
+      "needDjOrOwnerEditPlaylist": "Bạn cần là DJ hoặc chủ sở hữu bot để chỉnh sửa danh sách phát!",
+      "needDjOrOwnerSaveHistory": "Bạn cần là DJ hoặc chủ sở hữu bot để lưu lịch sử thành danh sách phát!",
+      "needDjToUseButton": "Bạn cần là DJ để dùng nút này!",
+      "needDjToMoveTracks": "Bạn cần là DJ để di chuyển bài hát!",
+      "needDjToPlayImmediately": "Bạn cần là DJ để phát ngay một bài hát!",
+      "needDjToFavorite": "Bạn cần là DJ để thêm bài hát hiện tại vào mục yêu thích!",
+      "needDjToSkipToPosition": "Bạn cần là DJ để nhảy đến một vị trí cụ thể!",
+      "noManageMessages": "Tôi không có quyền quản lý tin nhắn trong kênh đó."
+    }
+  },
+  "player": {
+    "resumed": "Đã tiếp tục phát **{0}**.",
+    "restarted": "Đã phát lại **{0}**",
+    "wentBack": "Đã quay lại **{0}**",
+    "skipped": "Đã bỏ qua!",
+    "skippedTrack": "Đã bỏ qua **{0}**",
+    "forceSkipped": "Đã bỏ qua **{0}** {1}",
+    "nowPlayingSet": "Đang phát **{0}**",
+    "paused": "Đã tạm dừng **{0}**. Dùng `{1}` để tiếp tục phát!",
+    "pauseAlready": "Trình phát đã đang tạm dừng! Dùng `{0}` để tiếp tục phát!",
+    "stopped": "Trình phát đã dừng và hàng đợi đã được xóa.",
+    "volumeCurrent": "Âm lượng hiện tại là `{0}`",
+    "volumeChanged": "Âm lượng đã đổi từ `{0}` thành `{1}`",
+    "repeatModeSet": "Chế độ lặp lại hiện là `{0}`",
+    "favoriteAdded": "Đã thêm {0} vào Mục yêu thích",
+    "favoriteAlready": "Bài hát này đã có trong mục yêu thích",
+    "seekSuccess": "Đã tua đến `{0}/{1}` thành công!",
+    "requesterAutoplay": "(tự động phát)",
+    "requesterUser": "(yêu cầu bởi **{0}**)",
+    "repeatMode": {
+      "off": "Tắt",
+      "all": "Tất cả",
+      "single": "Một bài"
+    },
+    "errors": {
+      "noPreviousTracks": "Không có bài hát trước đó!",
+      "nothingPlaying": "Hiện không có gì đang phát!",
+      "noTrackCurrentlyPlaying": "Hiện không có bài hát nào đang phát!",
+      "favoriteInvalidUri": "Bài hát hiện tại không có URI hoặc đường dẫn tuyệt đối hợp lệ để lưu.",
+      "favoriteUnsupported": "Chỉ có thể thêm vào mục yêu thích các URI hoặc đường dẫn tệp tuyệt đối phù hợp với hệ điều hành này.",
+      "notSeekable": "Bài hát này không thể tua.",
+      "seekNotOwner": "Bạn không thể tua **{0}** vì bạn không phải người thêm bài này!",
+      "invalidSeekFormat": "Tua không hợp lệ! Định dạng mong muốn: [+ | -] <HH:MM:SS | MM:SS | SS> hoặc <0h0m0s>\nVí dụ: `1:02:23` `+1:10` `-90`, `1h10m`, `+90s`",
+      "seekPastDuration": "Không thể tua đến `{0}` vì bài hát hiện tại chỉ dài `{1}`!",
+      "seekGeneric": "Đã xảy ra lỗi khi tua: {0}",
+      "trackTooLong": "Bài hát này (**{0}**) dài hơn mức tối đa cho phép: `{1}` > `{2}`",
+      "volumeInvalid": "Âm lượng phải là số nguyên hợp lệ từ 0 đến 150!",
+      "repeatInvalidChoice": "Các tùy chọn hợp lệ là `off`, `all` hoặc `single`",
+      "playlistEntryLoadFailed": "Không thể tải mục này trong danh sách phát.",
+      "playlistEntryNoMatches": "Không tìm thấy kết quả phù hợp cho mục này trong danh sách phát.",
+      "playlistEntryLoadError": "Lỗi khi tải mục trong danh sách phát: {0}"
+    }
+  },
+  "nowplaying": {
+    "contentFull": "**Đang phát...**",
+    "contentMinimal": "**Đang phát tại** {0}",
+    "source": "**Nguồn:** {0}",
+    "sourceUnknown": "Không rõ",
+    "volumeLine": "**Âm lượng:** {0}%",
+    "repeatLine": "**Lặp lại:** {0}",
+    "queuedLabelOne": "1 bài hát trong hàng đợi",
+    "queuedLabelMany": "{0} bài hát trong hàng đợi",
+    "embed": {
+      "author": "Tác giả",
+      "duration": "Thời lượng",
+      "queue": "Hàng đợi",
+      "volume": "Âm lượng",
+      "repeat": "Lặp lại",
+      "requester": "Người yêu cầu",
+      "noMusicTitle": "Không có nhạc đang phát"
+    },
+    "button": {
+      "prev": "Trước",
+      "resume": "Tiếp tục",
+      "pause": "Tạm dừng",
+      "skip": "Bỏ qua",
+      "stop": "Dừng",
+      "shuffle": "Xáo trộn",
+      "repeat": "Lặp lại",
+      "repeatAll": "Lặp tất cả",
+      "repeatOne": "Lặp một bài",
+      "volumeUp": "Âm +",
+      "volumeDown": "Âm -",
+      "favorite": "Yêu thích"
+    },
+    "footer": {
+      "addedQueue": "{0} đã thêm vào hàng đợi.",
+      "addedFront": "{0} đã thêm vào đầu hàng đợi.",
+      "skippedForward": "{0} đã bỏ qua bài hát.",
+      "addedFromHistory": "{0} đã thêm từ lịch sử.",
+      "addedAllHistory": "{0} đã thêm toàn bộ lịch sử vào hàng đợi.",
+      "playingFromHistory": "{0} đang phát từ lịch sử.",
+      "addedPlaylist": "{0} đã thêm một danh sách phát.",
+      "repeatingQueue": "Đang lặp lại hàng đợi.",
+      "repeatingSong": "Đang lặp lại bài hát.",
+      "playingNextSong": "Đang phát bài hát tiếp theo."
+    },
+    "errors": {
+      "noMusicInServer": "Không có nhạc đang phát trong máy chủ này."
+    }
+  },
+  "queue": {
+    "trackAddedNow": "Đã thêm **{0}** (`{1}`) và bắt đầu phát",
+    "trackAddedAtPosition": "Đã thêm **{0}** (`{1}`) vào hàng đợi tại vị trí {2}",
+    "removed": "Đã xóa **{0}** khỏi hàng đợi",
+    "removedByDJ": "Đã xóa **{0}** khỏi hàng đợi (yêu cầu bởi {1})",
+    "removedBySomeone": "ai đó",
+    "removedAllMine": "Đã xóa thành công {0} mục của bạn.",
+    "removedAllByUser": "Đã xóa thành công `{0}` mục của {1}.",
+    "moved": "Đã di chuyển **{0}** từ vị trí `{1}` đến `{2}`.",
+    "skippedTo": "Đã nhảy đến **{0}**",
+    "shuffledSuccess": "Bạn đã xáo trộn thành công {0} mục của mình.",
+    "shuffledButton": "Đã xáo trộn {0} bài hát!",
+    "nowEmpty": "Hàng đợi hiện đã trống!",
+    "type": {
+      "linear": "Tuần tự",
+      "fair": "Công bằng"
+    },
+    "embed": {
+      "title": "Hàng đợi hiện tại",
+      "upNextSection": "**Tiếp theo** *(chọn một bài hát bên dưới)*",
+      "entries": "Số mục",
+      "mode": "Chế độ",
+      "pageFooter": "Trang {0}/{1}"
+    },
+    "button": {
+      "remove": "Xóa",
+      "playNext": "Phát tiếp theo",
+      "move": "Di chuyển",
+      "playNow": "Phát ngay"
+    },
+    "moveSelect": {
+      "placeholder": "Chọn vị trí mới",
+      "optionLabel": "Vị trí {0}"
+    },
+    "errors": {
+      "empty": "Hàng đợi trống!",
+      "noMusicInQueue": "Không có nhạc nào trong hàng đợi!",
+      "noSongsToRemove": "Bạn không có bài hát nào trong hàng đợi!",
+      "userNoSongs": "**{0}** không có bài hát nào trong hàng đợi!",
+      "removeNotOwner": "Bạn không thể xóa **{0}** vì bạn không phải người thêm bài này!",
+      "cannotMoveSamePosition": "Không thể di chuyển bài hát đến cùng một vị trí.",
+      "alreadyNext": "Bài hát này đã là bài tiếp theo rồi!",
+      "invalidQueuePosition": "`{0}` không phải là vị trí hợp lệ trong hàng đợi!",
+      "invalidPositionRange": "Vị trí phải là số nguyên hợp lệ từ 1 đến {0}!",
+      "invalidPositionNotInteger": "`{0}` không phải là số nguyên hợp lệ!",
+      "invalidPositionOrAll": "Vui lòng cung cấp một số vị trí hợp lệ hoặc 'all'.",
+      "emptyToShuffle": "Bạn không có nhạc nào trong hàng đợi để xáo trộn!",
+      "onlyOneToShuffle": "Bạn chỉ có một bài hát trong hàng đợi!",
+      "mentionUser": "Bạn cần nhắc đến (mention) một người dùng!",
+      "userNotFound": "Không tìm thấy người dùng!",
+      "multipleUsersFound": "Tìm thấy nhiều người dùng:",
+      "twoValidIndexes": "Vui lòng cung cấp hai chỉ số hợp lệ."
+    }
+  },
+  "history": {
+    "disabled": "Lịch sử phát nhạc đã bị tắt trong cấu hình (playback.maxHistorySize = 0).",
+    "nowEmpty": "Lịch sử phát nhạc hiện đã trống!",
+    "queueAllSuccess": "Đã thêm **{0}** bài hát vào hàng đợi.",
+    "queueAllSkippedSuffix": " Đã bỏ qua {0} bài hát (quá dài).",
+    "savedAsPlaylist": "Đã lưu {0} bài hát từ lịch sử vào danh sách phát `{1}`!",
+    "embed": {
+      "title": "Hàng đợi lịch sử",
+      "section": "**Vừa phát gần đây** *(chọn một bài hát bên dưới để thêm vào hàng đợi hoặc phát)*",
+      "maxHistory": "Số lượng lịch sử tối đa",
+      "pageFooter": "Trang {0}/{1} | 1 = gần nhất"
+    },
+    "button": {
+      "save": "Lưu thành danh sách phát",
+      "queue": "Thêm vào hàng đợi",
+      "queueAll": "Thêm tất cả vào hàng đợi"
+    },
+    "modal": {
+      "title": "Lưu lịch sử thành danh sách phát",
+      "labelPlaylistName": "Tên danh sách phát",
+      "playlistNamePlaceholder": "ví dụ: my-history"
+    },
+    "errors": {
+      "empty": "Lịch sử phát nhạc trống!",
+      "positionRange": "Vị trí phải nằm trong khoảng từ 1 đến {0}!",
+      "allTooLong": "Tất cả {0} bài hát đều quá dài để thêm vào.",
+      "noValidUrls": "Không có URL bài hát hợp lệ nào trong lịch sử để lưu (chỉ nguồn http(s) mới được lưu trữ).",
+      "emptyPlaylistName": "Vui lòng nhập tên danh sách phát!"
+    }
+  },
+  "playlist": {
+    "favoritesLabel": "⭐ yêu thích ⭐",
+    "queuedFromPlaylist": "Đã thêm **{0}** bài hát từ danh sách phát `{1}` vào hàng đợi.",
+    "queuedFailedSuffix": " Không thể tải {0} mục.",
+    "nowPlayingReplaced": "Đang phát danh sách phát `{0}` (hàng đợi đã được thay thế). {1}",
+    "couldNotLoadLine": "`[?:??]` **Không thể tải**",
+    "embed": {
+      "title": "Danh sách phát",
+      "section": "**Danh sách phát khả dụng** *(chọn một danh sách bên dưới để thêm vào hàng đợi hoặc phát ngay)*",
+      "detailsTitle": "Danh sách phát: {0}",
+      "previewSection": "**Xem trước** *({0} mục đầu tiên)*",
+      "previewFooter": "Xem trước: {0} mục đầu tiên",
+      "tracksSection": "**Bài hát** *(chọn một bài bên dưới)*",
+      "unsavedSuffix": " • Có thay đổi chưa lưu",
+      "linkLabel": "Liên kết"
+    },
+    "button": {
+      "refresh": "Làm mới",
+      "details": "Chi tiết",
+      "save": "Lưu",
+      "discard": "Hủy bỏ",
+      "moveTop": "Lên đầu",
+      "moveBottom": "Xuống cuối",
+      "up1": "Lên 1",
+      "down1": "Xuống 1",
+      "moveTo": "Di chuyển đến",
+      "queueTrack": "Thêm bài hát",
+      "queuePlaylist": "Thêm cả danh sách",
+      "playPlaylist": "Phát danh sách",
+      "unselect": "Bỏ chọn bài hát",
+      "back": "Quay lại"
+    },
+    "errors": {
+      "storageUnavailable": "Không thể truy cập bộ nhớ lưu trữ danh sách phát.",
+      "misconfigured": "Bộ nhớ lưu trữ danh sách phát bị cấu hình sai (`{0}`). {1}",
+      "storageUnavailableWithPath": "Không thể truy cập bộ nhớ lưu trữ danh sách phát (`{0}`). {1}",
+      "pathNotConfigured": "(chưa cấu hình)",
+      "noneInFolder": "Không có danh sách phát nào trong thư mục Playlists!",
+      "noTracksLoaded": "Không có bài hát nào được tải từ danh sách phát `{0}`!",
+      "notFoundShort": "Danh sách phát không còn tồn tại.",
+      "notFoundRefresh": "Danh sách phát không còn tồn tại. Nhấn Quay lại rồi Làm mới.",
+      "notFoundRefreshShort": "Danh sách phát không còn tồn tại. Nhấn Làm mới.",
+      "positionRange": "Vị trí phải nằm trong khoảng từ 1 đến {0}.",
+      "positionsRange": "Các vị trí phải nằm trong khoảng từ 1 đến {0}.",
+      "noUnsavedChanges": "Không có thay đổi nào chưa được lưu.",
+      "alreadyExistsChooseOther": "Danh sách phát `{0}` đã tồn tại! Hãy chọn tên khác.",
+      "invalidName": "Vui lòng cung cấp tên danh sách phát hợp lệ!"
+    },
+    "owner": {
+      "helpTitle": "Các lệnh quản lý danh sách phát:",
+      "created": "Đã tạo thành công danh sách phát `{0}`!",
+      "deleted": "Đã xóa thành công danh sách phát `{0}`!",
+      "appended": "Đã thêm thành công {0} mục vào danh sách phát `{1}`!",
+      "availableList": "Các danh sách phát khả dụng:",
+      "errors": {
+        "noName": "Vui lòng cung cấp tên cho danh sách phát!",
+        "createFailed": "Tôi không thể tạo danh sách phát: {0}",
+        "deleteFailed": "Tôi không thể xóa danh sách phát: {0}",
+        "appendFailed": "Tôi không thể thêm vào danh sách phát: {0}",
+        "alreadyExists": "Danh sách phát `{0}` đã tồn tại!",
+        "doesNotExist": "Danh sách phát `{0}` không tồn tại!",
+        "appendMissingArgs": "Vui lòng cung cấp tên danh sách phát và các URL cần thêm!",
+        "folderMissing": "Thư mục Playlists không tồn tại và không thể tạo được!",
+        "loadFailed": "Không thể tải danh sách phát khả dụng!"
+      }
+    },
+    "autoplaylist": {
+      "cleared": "Đã xóa danh sách phát mặc định của **{0}**",
+      "set": "Danh sách phát mặc định của **{0}** hiện là `{1}`",
+      "errors": {
+        "missingArg": "Vui lòng cung cấp tên danh sách phát hoặc NONE",
+        "notFound": "Không tìm thấy `{0}.txt`!"
+      }
+    },
+    "load": {
+      "missingName": "Vui lòng cung cấp tên danh sách phát.",
+      "notFound": "Tôi không tìm thấy `{0}.txt` trong thư mục Playlists.",
+      "loading": "Đang tải danh sách phát **{0}**... ({1} mục)",
+      "noTracksLoaded": "Không có bài hát nào được tải!",
+      "loadedTracks": "Đã tải **{0}** bài hát!",
+      "failedHeader": "Các bài hát sau không thể tải:"
+    }
+  },
+  "search": {
+    "loading": "Đang tải... `[{0}]`",
+    "searching": "Đang tìm kiếm `{1}` trên {0}...",
+    "resultsHeader": "Kết quả tìm kiếm cho `{0}`:",
+    "timedOut": "Tìm kiếm đã hết thời gian chờ.",
+    "playlistFoundPrompt": "\nBài hát này có kèm một danh sách phát gồm **{0}** bài hát. Chọn 📥 để tải danh sách phát.",
+    "playlistLoadedAdditional": "\nĐã tải thêm **{0}** bài hát!",
+    "playlistFoundAdded": "Đã tìm thấy {0} với `{1}` mục; đã thêm vào hàng đợi!",
+    "playlistOmittedSuffix": "\nCác bài hát dài hơn mức tối đa cho phép (`{0}`) đã bị bỏ qua.",
+    "selectMenu": {
+      "placeholder": "Chọn một bài hát để phát",
+      "optionDescriptionDuration": "Thời lượng: {0}"
+    },
+    "embed": {
+      "title": "Kết quả tìm kiếm cho: {0}",
+      "footer": "Chọn một bài hát từ menu bên dưới"
+    },
+    "button": {
+      "loadPlaylist": "Tải danh sách phát",
+      "cancel": "Hủy"
+    },
+    "errors": {
+      "missingQuery": "Vui lòng nhập từ khóa tìm kiếm.",
+      "noResults": "Không tìm thấy kết quả cho `{0}`.",
+      "loadFailed": "Lỗi khi tải: {0}",
+      "loadFailedGeneric": "Lỗi khi tải bài hát.",
+      "playlistLoadFailedOrEmpty": "Danh sách phát {0} không thể tải hoặc không có mục nào",
+      "playlistAllTooLong": "Tất cả các mục trong danh sách phát {0} đều dài hơn mức tối đa cho phép (`{1}`)",
+      "missingSongOrUrl": "Vui lòng cung cấp tên bài hát hoặc URL!"
+    },
+    "searchingSimple": "Đang tìm kiếm... `[{0}]`"
+  },
+  "voting": {
+    "status": "[{0} phiếu, cần {1}/{2}]",
+    "alreadyVoted": "Bạn đã bỏ phiếu bỏ qua bài hát này `{0}`",
+    "voteRegistered": "Bạn đã bỏ phiếu bỏ qua bài hát `{0}`",
+    "voteSkipSuccess": "Bạn đã bỏ phiếu bỏ qua bài hát `{0}`\nĐã bỏ qua **{1}** {2}"
+  },
+  "settings": {
+    "updated": "Đã cập nhật cài đặt.",
+    "closeFailed": "Không thể đóng bảng cài đặt.",
+    "refreshFailed": "Không thể làm mới bảng cài đặt. Hãy chạy lại `/settings`.",
+    "panel": {
+      "title": "Cài đặt NextVoiceCord",
+      "description": "Bảng cài đặt cho **{0}**.\nDùng các nút bên dưới để cập nhật giá trị.",
+      "valueNone": "Không có",
+      "valueAny": "Bất kỳ",
+      "skipDefault": "Mặc định (`55%`)",
+      "footerNamed": "Chỉ {0} mới có thể sử dụng các điều khiển này.",
+      "footerGeneric": "Chỉ người đã dùng lệnh mới có thể sử dụng các điều khiển này.",
+      "field": {
+        "textChannel": "Kênh văn bản",
+        "voiceChannel": "Kênh thoại",
+        "djRole": "Vai trò DJ",
+        "prefix": "Tiền tố",
+        "skipRatio": "Tỷ lệ bỏ qua",
+        "queueType": "Loại hàng đợi",
+        "nowPlaying": "Đang phát",
+        "layout": "Bố cục",
+        "buttons": "Các nút"
+      },
+      "button": {
+        "toggleQueue": "Chuyển đổi loại hàng đợi",
+        "toggleLayout": "Chuyển đổi bố cục",
+        "toggleButtons": "Chuyển đổi nút bấm",
+        "setTextChannel": "Đặt kênh văn bản",
+        "setVoiceChannel": "Đặt kênh thoại",
+        "setDjRole": "Đặt vai trò DJ",
+        "setPrefix": "Đặt tiền tố",
+        "setSkip": "Đặt % bỏ qua",
+        "clearText": "Xóa kênh văn bản",
+        "clearVoice": "Xóa kênh thoại",
+        "clearDj": "Xóa DJ",
+        "close": "Đóng"
+      },
+      "select": {
+        "textChannelPlaceholder": "Chọn một kênh văn bản",
+        "voiceChannelPlaceholder": "Chọn một kênh thoại",
+        "djRolePlaceholder": "Chọn vai trò DJ"
+      }
+    },
+    "modal": {
+      "setPrefixTitle": "Đặt tiền tố",
+      "setPrefixPlaceholder": "Tiền tố tùy chỉnh (để trống để xóa)",
+      "setSkipTitle": "Đặt phần trăm bỏ qua",
+      "setSkipPlaceholder": "Số nguyên từ 0 đến 100",
+      "labelValue": "Giá trị"
+    },
+    "prompt": {
+      "textChannel": "Chọn một kênh văn bản:",
+      "voiceChannel": "Chọn một kênh thoại:",
+      "djRole": "Chọn vai trò DJ:"
+    },
+    "language": {
+      "current": "Ngôn ngữ bot cho máy chủ này là **{0}**.",
+      "set": "Ngôn ngữ cho máy chủ này đã được đặt thành **{0}**.",
+      "invalid": "Không rõ ngôn ngữ `{0}`. Các ngôn ngữ khả dụng: {1}",
+      "optionDescription": "{0} ({1})"
+    },
+    "prefix": {
+      "cleared": "Đã xóa tiền tố.",
+      "set": "Đã đặt tiền tố tùy chỉnh thành `{0}` trên *{1}*",
+      "missing": "Vui lòng cung cấp tiền tố hoặc NONE"
+    },
+    "queueType": {
+      "current": "Loại hàng đợi hiện tại là: `{0}`.",
+      "set": "Loại hàng đợi đã được đặt thành `{0}`.",
+      "invalid": "Loại hàng đợi không hợp lệ. Các loại hợp lệ là: [{0}]"
+    },
+    "dj": {
+      "cleared": "Đã xóa vai trò DJ; chỉ Quản trị viên mới có thể dùng các lệnh DJ.",
+      "set": "Người dùng có vai trò **{0}** hiện có thể dùng các lệnh DJ.",
+      "missingArg": "Vui lòng cung cấp tên vai trò hoặc NONE",
+      "notFound": "Không tìm thấy vai trò nào khớp với \"{0}\""
+    },
+    "textChannel": {
+      "set": "Các lệnh nhạc hiện chỉ có thể dùng trong {0}",
+      "cleared": "Các lệnh nhạc hiện có thể dùng trong mọi kênh",
+      "mustBeText": "Vui lòng chọn một kênh văn bản!",
+      "missingArg": "Vui lòng cung cấp một kênh văn bản hoặc NONE",
+      "notFound": "Không tìm thấy kênh văn bản nào khớp với \"{0}\""
+    },
+    "voiceChannel": {
+      "set": "Nhạc hiện chỉ có thể phát trong {0}",
+      "cleared": "Nhạc hiện có thể phát trong mọi kênh",
+      "mustBeVoice": "Vui lòng chọn một kênh thoại!",
+      "missingArg": "Vui lòng cung cấp một kênh thoại hoặc NONE",
+      "notFound": "Không tìm thấy kênh thoại nào khớp với \"{0}\""
+    },
+    "skipRatio": {
+      "set": "Tỷ lệ bỏ qua đã được đặt thành `{0}%` số người nghe trên *{1}*",
+      "range": "Giá trị cung cấp phải nằm trong khoảng từ 0 đến 100!",
+      "invalidNumber": "Vui lòng cung cấp một số nguyên từ 0 đến 100 (mặc định là 55). Con số này là tỷ lệ phần trăm người nghe cần bỏ phiếu để bỏ qua một bài hát.",
+      "emptyError": "Vui lòng nhập một số nguyên từ 0 đến 100.",
+      "rangeError": "Tỷ lệ bỏ qua phải nằm trong khoảng từ 0 đến 100."
+    },
+    "npLayout": {
+      "current": "Chế độ bố cục Đang phát là `{0}` (hiệu lực: `{1}`).",
+      "set": "Chế độ bố cục Đang phát đã được đặt thành `{0}` (hiệu lực: `{1}`).",
+      "invalid": "Các giá trị hợp lệ là `full`, `minimal`, hoặc `inherit`."
+    },
+    "npButtons": {
+      "current": "Chế độ nút Đang phát là `{0}` (hiệu lực: `{1}`).",
+      "set": "Chế độ nút Đang phát đã được đặt thành `{0}` (hiệu lực: `{1}`).",
+      "invalid": "Các giá trị hợp lệ là `on`, `off`, hoặc `inherit`."
+    },
+    "errors": {
+      "panelExpired": "Bảng cài đặt này đã hết hạn. Hãy chạy lại `/settings`.",
+      "chooseTextChannel": "Vui lòng chọn một kênh văn bản.",
+      "chooseVoiceChannel": "Vui lòng chọn một kênh thoại.",
+      "chooseRole": "Vui lòng chọn một vai trò."
+    },
+    "summary": {
+      "header": "Cài đặt của {0}:",
+      "textChannel": "Kênh văn bản: {0}",
+      "voiceChannel": "Kênh thoại: {0}",
+      "djRole": "Vai trò DJ: {0}",
+      "prefix": "Tiền tố tùy chỉnh: {0}",
+      "repeatMode": "Chế độ lặp lại: {0}",
+      "queueType": "Loại hàng đợi: {0}",
+      "defaultPlaylist": "Danh sách phát mặc định: {0}",
+      "footer": "{0} máy chủ | {1} kết nối âm thanh"
+    }
+  },
+  "clearchannel": {
+    "clearing": "Đang xóa kênh...",
+    "cleared": "Đã xóa {0} tin nhắn.",
+    "error": "Lỗi: {0}",
+    "errors": {
+      "noChannelConfigured": "Chưa có kênh văn bản nào được cấu hình cho máy chủ này. Quản trị viên có thể đặt một kênh bằng `{0}`."
+    }
+  },
+  "lyrics": {
+    "errors": {
+      "removed": "Tính năng lời bài hát đã bị gỡ bỏ."
+    }
+  },
+  "owner": {
+    "setname": {
+      "changed": "Đã đổi tên từ `{0}` thành `{1}`",
+      "errors": {
+        "rateLimited": "Tên chỉ có thể được đổi tối đa hai lần mỗi giờ!",
+        "invalid": "Tên đó không hợp lệ!"
+      }
+    },
+    "setavatar": {
+      "success": "Đã đổi ảnh đại diện thành công.",
+      "errors": {
+        "invalidUrl": "URL không hợp lệ hoặc bị thiếu",
+        "setFailed": "Không thể đặt ảnh đại diện.",
+        "loadFailed": "Không thể tải từ URL đã cung cấp."
+      }
+    },
+    "setgame": {
+      "playingSet": "**{0}** hiện đang chơi `{1}`",
+      "playingCleared": "**{0}** hiện không còn chơi gì nữa.",
+      "streamSet": "**{0}** hiện đang phát trực tiếp `{1}`",
+      "listenSet": "**{0}** hiện đang nghe `{1}`",
+      "watchSet": "**{0}** hiện đang xem `{1}`",
+      "errors": {
+        "setFailed": "Không thể đặt trạng thái trò chơi!",
+        "streamMissingArgs": "Vui lòng cung cấp tên người dùng Twitch và tên trò chơi để 'stream'",
+        "listenMissingTitle": "Vui lòng cung cấp tiêu đề để nghe!",
+        "watchMissingTitle": "Vui lòng cung cấp tiêu đề để xem!"
+      }
+    },
+    "setstatus": {
+      "set": "Đã đặt trạng thái thành `{0}`",
+      "errors": {
+        "invalid": "Vui lòng chọn một trong các trạng thái sau: `ONLINE`, `IDLE`, `DND`, `INVISIBLE`",
+        "setFailed": "Không thể đặt trạng thái!"
+      }
+    },
+    "shutdown": {
+      "message": "Đang tắt..."
+    },
+    "eval": {
+      "success": "Đã thực thi thành công:\n```\n{0} ```",
+      "exceptionThrown": "Đã xảy ra ngoại lệ:\n```\n{0} ```",
+      "errors": {
+        "engineMissing": "Công cụ eval được chỉ định trong cấu hình (`{0}`) không tồn tại. Điều này có thể do tên công cụ không hợp lệ, hoặc phiên bản Java của bạn không có công cụ này (`{1}`)."
+      }
+    }
+  }
+}

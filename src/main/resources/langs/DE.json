@@ -1,0 +1,541 @@
+{
+  "_meta": {
+    "language": "DE",
+    "englishName": "German",
+    "reviewed": false,
+    "note": "Machine-generated, not yet reviewed by a native speaker. Corrections welcome."
+  },
+  "common": {
+    "errors": {
+      "serverOnly": "Das kann nur auf einem Server verwendet werden!",
+      "sameVoiceChannel": "Du musst im selben Sprachkanal sein, um das zu nutzen!",
+      "needVoiceChannel": "Du musst in einem Sprachkanal sein, um das zu nutzen!",
+      "cannotConnectVoice": "Ich kann keine Verbindung zu {0} herstellen! Überprüfe meine Berechtigungen.",
+      "voiceConnectFailed": "Ich kann keine Verbindung zu {0} herstellen!",
+      "mustBeInChannel": "Diesen Befehl kannst du nur in {0} verwenden!",
+      "mustBeListening": "Du musst in {0} zuhören, um das zu nutzen!",
+      "afkChannel": "Diesen Befehl kannst du nicht in einem AFK-Kanal verwenden!",
+      "invalidButtonState": "Ungültiger Button-Status.",
+      "invalidSelectionState": "Ungültiger Auswahlstatus.",
+      "invalidModalState": "Ungültiger Dialogstatus.",
+      "invalidTrackSelection": "Ungültige Titelauswahl.",
+      "invalidPlaylistSelection": "Ungültige Playlist-Auswahl.",
+      "invalidPositionSelected": "Ungültige Position ausgewählt.",
+      "trackNotOnPage": "Dieser Titel ist nicht auf dieser Seite!",
+      "playlistNotOnPage": "Diese Playlist ist nicht auf dieser Seite!",
+      "trackNoLongerExists": "Dieser Titel existiert nicht!",
+      "playlistNoLongerExists": "Diese Playlist existiert nicht!",
+      "noTrackSelected": "Kein Titel ausgewählt!",
+      "noPlaylistSelected": "Keine Playlist ausgewählt!",
+      "notCommandInvokerButtons": "Nur die Person, die den Befehl ausgeführt hat, kann diese Buttons benutzen!",
+      "notCommandInvokerThis": "Nur die Person, die den Befehl ausgeführt hat, kann das benutzen!",
+      "notPanelOwner": "Nur die Person, die dieses Einstellungsfenster geöffnet hat, kann es benutzen.",
+      "notModalOwner": "Nur die Person, die diesen Einstellungsdialog geöffnet hat, kann ihn absenden.",
+      "notSaveDialogOwner": "Nur die Person, die den Speichern-Dialog geöffnet hat, kann ihn absenden!",
+      "noPlayerInServer": "Es gibt keinen Player auf diesem Server!",
+      "noMusicPlaying": "Es läuft gerade keine Musik!",
+      "noMusicPlayingToUse": "Dafür muss gerade Musik laufen!"
+    }
+  },
+  "permissions": {
+    "errors": {
+      "needManageServer": "Du brauchst die Berechtigung „Server verwalten“, um Einstellungen zu ändern.",
+      "needManageServerCommand": "Du brauchst die Berechtigung „Server verwalten“, um diesen Befehl zu nutzen!",
+      "ownerOnly": "Nur der Bot-Besitzer kann diesen Befehl nutzen!",
+      "needDj": "Du musst DJ sein, um diesen Befehl zu nutzen!",
+      "needDjOrRequesterSkip": "Du musst DJ sein oder den Titel angefragt haben, um zu skippen!",
+      "needDjOrRequesterPrevious": "Du musst DJ sein oder den Titel angefragt haben, um zurückzugehen!",
+      "needDjUnpause": "Nur DJs können den Player fortsetzen!",
+      "needDjOrOwnerEditPlaylist": "Du musst DJ oder Bot-Besitzer sein, um Playlists zu bearbeiten!",
+      "needDjOrOwnerSaveHistory": "Du musst DJ oder Bot-Besitzer sein, um den Verlauf als Playlist zu speichern!",
+      "needDjToUseButton": "Du musst DJ sein, um diesen Button zu nutzen!",
+      "needDjToMoveTracks": "Du musst DJ sein, um Titel zu verschieben!",
+      "needDjToPlayImmediately": "Du musst DJ sein, um einen Titel sofort abzuspielen!",
+      "needDjToFavorite": "Du musst DJ sein, um den aktuellen Titel zu den Favoriten hinzuzufügen!",
+      "needDjToSkipToPosition": "Du musst DJ sein, um zu einer bestimmten Position zu springen!",
+      "noManageMessages": "Ich habe keine Berechtigung, Nachrichten in diesem Kanal zu verwalten."
+    }
+  },
+  "player": {
+    "resumed": "**{0}** wird fortgesetzt.",
+    "restarted": "**{0}** neu gestartet",
+    "wentBack": "Zurück zu **{0}**",
+    "skipped": "Übersprungen!",
+    "skippedTrack": "**{0}** übersprungen",
+    "forceSkipped": "**{0}** übersprungen {1}",
+    "nowPlayingSet": "Läuft jetzt: **{0}**",
+    "paused": "**{0}** pausiert. Nutze `{1}`, um fortzusetzen!",
+    "pauseAlready": "Der Player ist bereits pausiert! Nutze `{0}`, um fortzusetzen!",
+    "stopped": "Der Player wurde gestoppt und die Warteschlange wurde geleert.",
+    "volumeCurrent": "Aktuelle Lautstärke: `{0}`",
+    "volumeChanged": "Lautstärke von `{0}` auf `{1}` geändert",
+    "repeatModeSet": "Wiederholungsmodus ist jetzt `{0}`",
+    "favoriteAdded": "{0} zu den Favoriten hinzugefügt",
+    "favoriteAlready": "Dieser Titel ist bereits favorisiert",
+    "seekSuccess": "Erfolgreich zu `{0}/{1}` gesprungen!",
+    "requesterAutoplay": "(Autoplay)",
+    "requesterUser": "(angefragt von **{0}**)",
+    "repeatMode": {
+      "off": "Aus",
+      "all": "Alle",
+      "single": "Einzeln"
+    },
+    "errors": {
+      "noPreviousTracks": "Es gibt keine vorherigen Titel!",
+      "nothingPlaying": "Es läuft gerade nichts!",
+      "noTrackCurrentlyPlaying": "Es wird gerade kein Titel abgespielt!",
+      "favoriteInvalidUri": "Der aktuelle Titel hat keine gültige URI oder keinen absoluten Pfad zum Speichern.",
+      "favoriteUnsupported": "Nur URI-Referenzen oder absolute Dateipfade für dieses Betriebssystem können zu den Favoriten hinzugefügt werden.",
+      "notSeekable": "Bei diesem Titel ist Spulen nicht möglich.",
+      "seekNotOwner": "Du kannst bei **{0}** nicht spulen, weil du es nicht hinzugefügt hast!",
+      "invalidSeekFormat": "Ungültiger Sprung! Erwartetes Format: [+ | -] <HH:MM:SS | MM:SS | SS> oder <0h0m0s>\nBeispiele: `1:02:23` `+1:10` `-90`, `1h10m`, `+90s`",
+      "seekPastDuration": "Kann nicht zu `{0}` springen, weil der aktuelle Titel nur `{1}` lang ist!",
+      "seekGeneric": "Beim Spulen ist ein Fehler aufgetreten: {0}",
+      "trackTooLong": "Dieser Titel (**{0}**) ist länger als das erlaubte Maximum: `{1}` > `{2}`",
+      "volumeInvalid": "Die Lautstärke muss eine ganze Zahl zwischen 0 und 150 sein!",
+      "repeatInvalidChoice": "Gültige Optionen sind `off`, `all` oder `single`",
+      "playlistEntryLoadFailed": "Dieser Playlist-Eintrag konnte nicht geladen werden.",
+      "playlistEntryNoMatches": "Keine Treffer für diesen Playlist-Eintrag gefunden.",
+      "playlistEntryLoadError": "Fehler beim Laden des Playlist-Eintrags: {0}"
+    }
+  },
+  "nowplaying": {
+    "contentFull": "**Läuft gerade...**",
+    "contentMinimal": "**Läuft gerade in** {0}",
+    "source": "**Quelle:** {0}",
+    "sourceUnknown": "Unbekannt",
+    "volumeLine": "**Lautstärke:** {0}%",
+    "repeatLine": "**Wiederholung:** {0}",
+    "queuedLabelOne": "1 Song in der Warteschlange",
+    "queuedLabelMany": "{0} Songs in der Warteschlange",
+    "embed": {
+      "author": "Interpret",
+      "duration": "Dauer",
+      "queue": "Warteschlange",
+      "volume": "Lautstärke",
+      "repeat": "Wiederholung",
+      "requester": "Angefragt von",
+      "noMusicTitle": "Keine Musik läuft"
+    },
+    "button": {
+      "prev": "Zurück",
+      "resume": "Fortsetzen",
+      "pause": "Pause",
+      "skip": "Skip",
+      "stop": "Stopp",
+      "shuffle": "Zufall",
+      "repeat": "Wiederholen",
+      "repeatAll": "Alle wiederholen",
+      "repeatOne": "Einen wiederholen",
+      "volumeUp": "Vol +",
+      "volumeDown": "Vol -",
+      "favorite": "Favorit"
+    },
+    "footer": {
+      "addedQueue": "{0} zur Warteschlange hinzugefügt.",
+      "addedFront": "{0} an den Anfang der Warteschlange gesetzt.",
+      "skippedForward": "{0} übersprungen.",
+      "addedFromHistory": "{0} aus dem Verlauf hinzugefügt.",
+      "addedAllHistory": "{0} hat den gesamten Verlauf zur Warteschlange hinzugefügt.",
+      "playingFromHistory": "{0} spielt aus dem Verlauf.",
+      "addedPlaylist": "{0} hat eine Playlist hinzugefügt.",
+      "repeatingQueue": "Warteschlange wird wiederholt.",
+      "repeatingSong": "Song wird wiederholt.",
+      "playingNextSong": "Nächster Song wird gespielt."
+    },
+    "errors": {
+      "noMusicInServer": "Auf diesem Server läuft keine Musik."
+    }
+  },
+  "queue": {
+    "trackAddedNow": "**{0}** (`{1}`) hinzugefügt und wird jetzt abgespielt",
+    "trackAddedAtPosition": "**{0}** (`{1}`) an Position {2} zur Warteschlange hinzugefügt",
+    "removed": "**{0}** aus der Warteschlange entfernt",
+    "removedByDJ": "**{0}** aus der Warteschlange entfernt (angefragt von {1})",
+    "removedBySomeone": "jemandem",
+    "removedAllMine": "Deine {0} Einträge wurden erfolgreich entfernt.",
+    "removedAllByUser": "`{0}` Einträge von {1} wurden erfolgreich entfernt.",
+    "moved": "**{0}** von Position `{1}` zu `{2}` verschoben.",
+    "skippedTo": "Zu **{0}** gesprungen",
+    "shuffledSuccess": "Deine {0} Einträge wurden erfolgreich gemischt.",
+    "shuffledButton": "{0} Titel gemischt!",
+    "nowEmpty": "Die Warteschlange ist jetzt leer!",
+    "type": {
+      "linear": "Linear",
+      "fair": "Fair"
+    },
+    "embed": {
+      "title": "Aktuelle Warteschlange",
+      "upNextSection": "**Als Nächstes** *(wähle unten einen Titel)*",
+      "entries": "Einträge",
+      "mode": "Modus",
+      "pageFooter": "Seite {0} von {1}"
+    },
+    "button": {
+      "remove": "Entfernen",
+      "playNext": "Als Nächstes",
+      "move": "Verschieben",
+      "playNow": "Jetzt spielen"
+    },
+    "moveSelect": {
+      "placeholder": "Neue Position wählen",
+      "optionLabel": "Position {0}"
+    },
+    "errors": {
+      "empty": "Die Warteschlange ist leer!",
+      "noMusicInQueue": "Es ist keine Musik in der Warteschlange!",
+      "noSongsToRemove": "Du hast keine Songs in der Warteschlange!",
+      "userNoSongs": "**{0}** hat keine Songs in der Warteschlange!",
+      "removeNotOwner": "Du kannst **{0}** nicht entfernen, weil du es nicht hinzugefügt hast!",
+      "cannotMoveSamePosition": "Ein Titel kann nicht an dieselbe Position verschoben werden.",
+      "alreadyNext": "Dieser Titel ist bereits als Nächstes dran!",
+      "invalidQueuePosition": "`{0}` ist keine gültige Position in der Warteschlange!",
+      "invalidPositionRange": "Die Position muss eine ganze Zahl zwischen 1 und {0} sein!",
+      "invalidPositionNotInteger": "`{0}` ist keine gültige Ganzzahl!",
+      "invalidPositionOrAll": "Bitte gib eine gültige Positionsnummer oder 'all' an.",
+      "emptyToShuffle": "Du hast keine Musik in der Warteschlange zum Mischen!",
+      "onlyOneToShuffle": "Du hast nur einen Song in der Warteschlange!",
+      "mentionUser": "Du musst einen Nutzer erwähnen!",
+      "userNotFound": "Der Nutzer konnte nicht gefunden werden!",
+      "multipleUsersFound": "Mehrere Nutzer gefunden:",
+      "twoValidIndexes": "Bitte gib zwei gültige Indizes an."
+    }
+  },
+  "history": {
+    "disabled": "Der Wiedergabeverlauf ist per Konfiguration deaktiviert (playback.maxHistorySize = 0).",
+    "nowEmpty": "Der Wiedergabeverlauf ist jetzt leer!",
+    "queueAllSuccess": "**{0}** Titel zur Warteschlange hinzugefügt.",
+    "queueAllSkippedSuffix": " {0} Titel übersprungen (zu lang).",
+    "savedAsPlaylist": "{0} Titel aus dem Verlauf in Playlist `{1}` gespeichert!",
+    "embed": {
+      "title": "Verlaufswarteschlange",
+      "section": "**Zuletzt gespielt** *(wähle unten einen Titel zum Einreihen oder Abspielen)*",
+      "maxHistory": "Max. Verlauf",
+      "pageFooter": "Seite {0} von {1} | 1 = neueste"
+    },
+    "button": {
+      "save": "Als Playlist speichern",
+      "queue": "Einreihen",
+      "queueAll": "Alle einreihen"
+    },
+    "modal": {
+      "title": "Verlauf als Playlist speichern",
+      "labelPlaylistName": "Playlist-Name",
+      "playlistNamePlaceholder": "z. B. my-history"
+    },
+    "errors": {
+      "empty": "Der Wiedergabeverlauf ist leer!",
+      "positionRange": "Die Position muss zwischen 1 und {0} liegen!",
+      "allTooLong": "Alle {0} Titel waren zu lang zum Hinzufügen.",
+      "noValidUrls": "Keine gültigen Titel-URLs im Verlauf zum Speichern (nur http(s)-Quellen werden gespeichert).",
+      "emptyPlaylistName": "Bitte gib einen Playlist-Namen ein!"
+    }
+  },
+  "playlist": {
+    "favoritesLabel": "⭐ Favoriten ⭐",
+    "queuedFromPlaylist": "**{0}** Titel aus Playlist `{1}` eingereiht.",
+    "queuedFailedSuffix": " {0} Einträge konnten nicht geladen werden.",
+    "nowPlayingReplaced": "Playlist `{0}` wird jetzt gespielt (Warteschlange ersetzt). {1}",
+    "couldNotLoadLine": "`[?:??]` **Konnte nicht geladen werden**",
+    "embed": {
+      "title": "Playlists",
+      "section": "**Verfügbare Playlists** *(wähle unten eine aus zum Einreihen oder sofort Abspielen)*",
+      "detailsTitle": "Playlist: {0}",
+      "previewSection": "**Vorschau** *(erste {0} Einträge)*",
+      "previewFooter": "Vorschau: erste {0} Einträge",
+      "tracksSection": "**Titel** *(wähle unten einen aus)*",
+      "unsavedSuffix": " • Ungespeicherte Änderungen",
+      "linkLabel": "Link"
+    },
+    "button": {
+      "refresh": "Aktualisieren",
+      "details": "Details",
+      "save": "Speichern",
+      "discard": "Verwerfen",
+      "moveTop": "Nach oben",
+      "moveBottom": "Nach unten",
+      "up1": "1 hoch",
+      "down1": "1 runter",
+      "moveTo": "Verschieben zu",
+      "queueTrack": "Titel einreihen",
+      "queuePlaylist": "Playlist einreihen",
+      "playPlaylist": "Playlist abspielen",
+      "unselect": "Auswahl aufheben",
+      "back": "Zurück"
+    },
+    "errors": {
+      "storageUnavailable": "Der Playlist-Speicher ist nicht verfügbar.",
+      "misconfigured": "Der Playlist-Speicher ist falsch konfiguriert (`{0}`). {1}",
+      "storageUnavailableWithPath": "Der Playlist-Speicher ist nicht verfügbar (`{0}`). {1}",
+      "pathNotConfigured": "(nicht konfiguriert)",
+      "noneInFolder": "Es gibt keine Playlists im Playlists-Ordner!",
+      "noTracksLoaded": "Es wurden keine Titel aus Playlist `{0}` geladen!",
+      "notFoundShort": "Die Playlist existiert nicht mehr.",
+      "notFoundRefresh": "Die Playlist existiert nicht mehr. Klicke auf Zurück und Aktualisieren.",
+      "notFoundRefreshShort": "Die Playlist existiert nicht mehr. Klicke auf Aktualisieren.",
+      "positionRange": "Die Position muss zwischen 1 und {0} liegen.",
+      "positionsRange": "Die Positionen müssen zwischen 1 und {0} liegen.",
+      "noUnsavedChanges": "Es gibt keine ungespeicherten Änderungen.",
+      "alreadyExistsChooseOther": "Playlist `{0}` existiert bereits! Wähle einen anderen Namen.",
+      "invalidName": "Bitte gib einen gültigen Playlist-Namen an!"
+    },
+    "owner": {
+      "helpTitle": "Playlist-Verwaltungsbefehle:",
+      "created": "Playlist `{0}` erfolgreich erstellt!",
+      "deleted": "Playlist `{0}` erfolgreich gelöscht!",
+      "appended": "{0} Einträge erfolgreich zu Playlist `{1}` hinzugefügt!",
+      "availableList": "Verfügbare Playlists:",
+      "errors": {
+        "noName": "Bitte gib einen Namen für die Playlist an!",
+        "createFailed": "Die Playlist konnte nicht erstellt werden: {0}",
+        "deleteFailed": "Die Playlist konnte nicht gelöscht werden: {0}",
+        "appendFailed": "Es konnte nicht zur Playlist hinzugefügt werden: {0}",
+        "alreadyExists": "Playlist `{0}` existiert bereits!",
+        "doesNotExist": "Playlist `{0}` existiert nicht!",
+        "appendMissingArgs": "Bitte gib einen Playlist-Namen und URLs zum Hinzufügen an!",
+        "folderMissing": "Der Playlists-Ordner existiert nicht und konnte nicht erstellt werden!",
+        "loadFailed": "Verfügbare Playlists konnten nicht geladen werden!"
+      }
+    },
+    "autoplaylist": {
+      "cleared": "Standard-Playlist für **{0}** entfernt",
+      "set": "Die Standard-Playlist für **{0}** ist jetzt `{1}`",
+      "errors": {
+        "missingArg": "Bitte gib einen Playlist-Namen oder NONE an",
+        "notFound": "`{0}.txt` konnte nicht gefunden werden!"
+      }
+    },
+    "load": {
+      "missingName": "Bitte gib einen Playlist-Namen an.",
+      "notFound": "`{0}.txt` konnte im Playlists-Ordner nicht gefunden werden.",
+      "loading": "Playlist **{0}** wird geladen... ({1} Einträge)",
+      "noTracksLoaded": "Es wurden keine Titel geladen!",
+      "loadedTracks": "**{0}** Titel geladen!",
+      "failedHeader": "Die folgenden Titel konnten nicht geladen werden:"
+    }
+  },
+  "search": {
+    "loading": "Lädt... `[{0}]`",
+    "searching": "Suche in {0} nach `{1}`...",
+    "resultsHeader": "Suchergebnisse für `{0}`:",
+    "timedOut": "Die Suche hat das Zeitlimit überschritten.",
+    "playlistFoundPrompt": "\nDieser Titel hat eine angehängte Playlist mit **{0}** Titeln. Wähle 📥, um die Playlist zu laden.",
+    "playlistLoadedAdditional": "\n**{0}** weitere Titel geladen!",
+    "playlistFoundAdded": "{0} mit `{1}` Einträgen gefunden; zur Warteschlange hinzugefügt!",
+    "playlistOmittedSuffix": "\nTitel, die länger als das erlaubte Maximum (`{0}`) sind, wurden ausgelassen.",
+    "selectMenu": {
+      "placeholder": "Wähle einen Titel zum Abspielen",
+      "optionDescriptionDuration": "Dauer: {0}"
+    },
+    "embed": {
+      "title": "Suchergebnisse für: {0}",
+      "footer": "Wähle unten einen Titel aus dem Menü"
+    },
+    "button": {
+      "loadPlaylist": "Playlist laden",
+      "cancel": "Abbrechen"
+    },
+    "errors": {
+      "missingQuery": "Bitte gib einen Suchbegriff an.",
+      "noResults": "Keine Ergebnisse für `{0}` gefunden.",
+      "loadFailed": "Fehler beim Laden: {0}",
+      "loadFailedGeneric": "Fehler beim Laden des Titels.",
+      "playlistLoadFailedOrEmpty": "Die Playlist {0} konnte nicht geladen werden oder enthielt 0 Einträge",
+      "playlistAllTooLong": "Alle Einträge in dieser Playlist {0}waren länger als das erlaubte Maximum (`{1}`)",
+      "missingSongOrUrl": "Bitte gib einen Songtitel oder eine URL an!"
+    },
+    "searchingSimple": "Suche läuft... `[{0}]`"
+  },
+  "voting": {
+    "status": "[{0} Stimmen, {1}/{2} benötigt]",
+    "alreadyVoted": "Du hast bereits dafür gestimmt, diesen Song zu überspringen: `{0}`",
+    "voteRegistered": "Du hast dafür gestimmt, den Song zu überspringen: `{0}`",
+    "voteSkipSuccess": "Du hast dafür gestimmt, den Song zu überspringen: `{0}`\n**{1}** übersprungen {2}"
+  },
+  "settings": {
+    "updated": "Einstellungen aktualisiert.",
+    "closeFailed": "Einstellungsfenster konnte nicht geschlossen werden.",
+    "refreshFailed": "Einstellungsfenster konnte nicht aktualisiert werden. Führe `/settings` erneut aus.",
+    "panel": {
+      "title": "NextVoiceCord-Einstellungen",
+      "description": "Einstellungsfenster für **{0}**.\nNutze die Buttons unten, um Werte zu ändern.",
+      "valueNone": "Keine",
+      "valueAny": "Beliebig",
+      "skipDefault": "Standard (`55%`)",
+      "footerNamed": "Nur {0} kann diese Steuerelemente nutzen.",
+      "footerGeneric": "Nur die Person, die den Befehl ausgeführt hat, kann diese Steuerelemente nutzen.",
+      "field": {
+        "textChannel": "Textkanal",
+        "voiceChannel": "Sprachkanal",
+        "djRole": "DJ-Rolle",
+        "prefix": "Präfix",
+        "skipRatio": "Skip-Quote",
+        "queueType": "Warteschlangentyp",
+        "nowPlaying": "Wird-gespielt",
+        "layout": "Layout",
+        "buttons": "Buttons"
+      },
+      "button": {
+        "toggleQueue": "Warteschl. umschalten",
+        "toggleLayout": "Layout umschalten",
+        "toggleButtons": "Buttons umschalten",
+        "setTextChannel": "Textkanal setzen",
+        "setVoiceChannel": "Sprachkanal setzen",
+        "setDjRole": "DJ-Rolle setzen",
+        "setPrefix": "Präfix setzen",
+        "setSkip": "Skip % setzen",
+        "clearText": "Text löschen",
+        "clearVoice": "Voice löschen",
+        "clearDj": "DJ löschen",
+        "close": "Schließen"
+      },
+      "select": {
+        "textChannelPlaceholder": "Textkanal wählen",
+        "voiceChannelPlaceholder": "Sprachkanal wählen",
+        "djRolePlaceholder": "DJ-Rolle wählen"
+      }
+    },
+    "modal": {
+      "setPrefixTitle": "Präfix setzen",
+      "setPrefixPlaceholder": "Eigenes Präfix (leer = löschen)",
+      "setSkipTitle": "Skip-Prozentsatz setzen",
+      "setSkipPlaceholder": "Ganzzahl von 0 bis 100",
+      "labelValue": "Wert"
+    },
+    "prompt": {
+      "textChannel": "Wähle einen Textkanal:",
+      "voiceChannel": "Wähle einen Sprachkanal:",
+      "djRole": "Wähle die DJ-Rolle:"
+    },
+    "language": {
+      "current": "Die Bot-Sprache für diesen Server ist **{0}**.",
+      "set": "Die Sprache für diesen Server wurde auf **{0}** gesetzt.",
+      "invalid": "Unbekannte Sprache `{0}`. Verfügbar: {1}",
+      "optionDescription": "{0} ({1})"
+    },
+    "prefix": {
+      "cleared": "Präfix gelöscht.",
+      "set": "Eigenes Präfix auf `{0}` gesetzt für *{1}*",
+      "missing": "Bitte gib ein Präfix oder NONE an"
+    },
+    "queueType": {
+      "current": "Aktueller Warteschlangentyp: `{0}`.",
+      "set": "Warteschlangentyp wurde auf `{0}` gesetzt.",
+      "invalid": "Ungültiger Warteschlangentyp. Gültige Typen: [{0}]"
+    },
+    "dj": {
+      "cleared": "DJ-Rolle entfernt; nur Admins können die DJ-Befehle nutzen.",
+      "set": "DJ-Befehle können jetzt von Nutzern mit der Rolle **{0}** verwendet werden.",
+      "missingArg": "Bitte gib einen Rollennamen oder NONE an",
+      "notFound": "Keine Rollen gefunden, die zu \"{0}\" passen"
+    },
+    "textChannel": {
+      "set": "Musikbefehle können jetzt nur noch in {0} verwendet werden",
+      "cleared": "Musikbefehle können jetzt in jedem Kanal verwendet werden",
+      "mustBeText": "Bitte wähle einen Textkanal!",
+      "missingArg": "Bitte gib einen Textkanal oder NONE an",
+      "notFound": "Keine Textkanäle gefunden, die zu \"{0}\" passen"
+    },
+    "voiceChannel": {
+      "set": "Musik kann jetzt nur noch in {0} abgespielt werden",
+      "cleared": "Musik kann jetzt in jedem Kanal abgespielt werden",
+      "mustBeVoice": "Bitte wähle einen Sprachkanal!",
+      "missingArg": "Bitte gib einen Sprachkanal oder NONE an",
+      "notFound": "Keine Sprachkanäle gefunden, die zu \"{0}\" passen"
+    },
+    "skipRatio": {
+      "set": "Der Skip-Prozentsatz wurde auf `{0}%` der Zuhörer für *{1}* gesetzt",
+      "range": "Der angegebene Wert muss zwischen 0 und 100 liegen!",
+      "invalidNumber": "Bitte gib eine Ganzzahl zwischen 0 und 100 an (Standard ist 55). Diese Zahl gibt an, wie viel Prozent der Zuhörer für einen Skip stimmen müssen.",
+      "emptyError": "Bitte gib eine Ganzzahl zwischen 0 und 100 ein.",
+      "rangeError": "Der Skip-Prozentsatz muss zwischen 0 und 100 liegen."
+    },
+    "npLayout": {
+      "current": "Der Layout-Modus für „Wird gespielt“ ist `{0}` (effektiv: `{1}`).",
+      "set": "Layout-Modus für „Wird gespielt“ auf `{0}` gesetzt (effektiv: `{1}`).",
+      "invalid": "Gültige Werte sind `full`, `minimal` oder `inherit`."
+    },
+    "npButtons": {
+      "current": "Der Button-Modus für „Wird gespielt“ ist `{0}` (effektiv: `{1}`).",
+      "set": "Button-Modus für „Wird gespielt“ auf `{0}` gesetzt (effektiv: `{1}`).",
+      "invalid": "Gültige Werte sind `on`, `off` oder `inherit`."
+    },
+    "errors": {
+      "panelExpired": "Dieses Einstellungsfenster ist abgelaufen. Führe `/settings` erneut aus.",
+      "chooseTextChannel": "Bitte wähle einen Textkanal.",
+      "chooseVoiceChannel": "Bitte wähle einen Sprachkanal.",
+      "chooseRole": "Bitte wähle eine Rolle."
+    },
+    "summary": {
+      "header": "{0}-Einstellungen:",
+      "textChannel": "Textkanal: {0}",
+      "voiceChannel": "Sprachkanal: {0}",
+      "djRole": "DJ-Rolle: {0}",
+      "prefix": "Eigenes Präfix: {0}",
+      "repeatMode": "Wiederholungsmodus: {0}",
+      "queueType": "Warteschlangentyp: {0}",
+      "defaultPlaylist": "Standard-Playlist: {0}",
+      "footer": "{0} Server | {1} Audioverbindungen"
+    }
+  },
+  "clearchannel": {
+    "clearing": "Kanal wird geleert...",
+    "cleared": "{0} Nachrichten gelöscht.",
+    "error": "Fehler: {0}",
+    "errors": {
+      "noChannelConfigured": "Für diesen Server ist kein Textkanal konfiguriert. Ein Admin kann einen mit `{0}` festlegen."
+    }
+  },
+  "lyrics": {
+    "errors": {
+      "removed": "Die Songtext-Funktion wurde entfernt."
+    }
+  },
+  "owner": {
+    "setname": {
+      "changed": "Name von `{0}` zu `{1}` geändert",
+      "errors": {
+        "rateLimited": "Der Name kann nur zweimal pro Stunde geändert werden!",
+        "invalid": "Dieser Name ist ungültig!"
+      }
+    },
+    "setavatar": {
+      "success": "Avatar erfolgreich geändert.",
+      "errors": {
+        "invalidUrl": "Ungültige oder fehlende URL",
+        "setFailed": "Avatar konnte nicht gesetzt werden.",
+        "loadFailed": "Konnte nicht von der angegebenen URL laden."
+      }
+    },
+    "setgame": {
+      "playingSet": "**{0}** spielt jetzt `{1}`",
+      "playingCleared": "**{0}** spielt nichts mehr.",
+      "streamSet": "**{0}** streamt jetzt `{1}`",
+      "listenSet": "**{0}** hört jetzt `{1}`",
+      "watchSet": "**{0}** schaut jetzt `{1}`",
+      "errors": {
+        "setFailed": "Das Spiel konnte nicht gesetzt werden!",
+        "streamMissingArgs": "Bitte gib einen Twitch-Benutzernamen und den Namen des Spiels zum 'Streamen' an",
+        "listenMissingTitle": "Bitte gib einen Titel zum Anhören an!",
+        "watchMissingTitle": "Bitte gib einen Titel zum Anschauen an!"
+      }
+    },
+    "setstatus": {
+      "set": "Status auf `{0}` gesetzt",
+      "errors": {
+        "invalid": "Bitte gib einen der folgenden Status an: `ONLINE`, `IDLE`, `DND`, `INVISIBLE`",
+        "setFailed": "Der Status konnte nicht gesetzt werden!"
+      }
+    },
+    "shutdown": {
+      "message": "Wird heruntergefahren..."
+    },
+    "eval": {
+      "success": "Erfolgreich ausgewertet:\n```\n{0} ```",
+      "exceptionThrown": "Eine Ausnahme wurde ausgelöst:\n```\n{0} ```",
+      "errors": {
+        "engineMissing": "Die in der Konfiguration angegebene Eval-Engine (`{0}`) existiert nicht. Das kann an einem ungültigen Engine-Namen liegen oder daran, dass die Engine in deiner Java-Version nicht existiert (`{1}`)."
+      }
+    }
+  }
+}

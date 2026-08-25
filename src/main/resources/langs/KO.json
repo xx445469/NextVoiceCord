@@ -1,0 +1,541 @@
+{
+  "_meta": {
+    "language": "KO",
+    "englishName": "Korean",
+    "reviewed": false,
+    "note": "Machine-generated, not yet reviewed by a native speaker. Corrections welcome."
+  },
+  "common": {
+    "errors": {
+      "serverOnly": "이 기능은 서버에서만 사용할 수 있어요!",
+      "sameVoiceChannel": "이걸 사용하려면 같은 음성 채널에 있어야 해요!",
+      "needVoiceChannel": "이걸 사용하려면 음성 채널에 참여해야 해요!",
+      "cannotConnectVoice": "{0}에 연결할 수 없어요! 권한을 확인해 주세요.",
+      "voiceConnectFailed": "{0}에 연결할 수 없어요!",
+      "mustBeInChannel": "그 명령어는 {0}에서만 사용할 수 있어요!",
+      "mustBeListening": "그걸 사용하려면 {0}에서 듣고 있어야 해요!",
+      "afkChannel": "AFK 채널에서는 그 명령어를 사용할 수 없어요!",
+      "invalidButtonState": "잘못된 버튼 상태예요.",
+      "invalidSelectionState": "잘못된 선택 상태예요.",
+      "invalidModalState": "잘못된 대화상자 상태예요.",
+      "invalidTrackSelection": "잘못된 트랙 선택이에요.",
+      "invalidPlaylistSelection": "잘못된 재생목록 선택이에요.",
+      "invalidPositionSelected": "잘못된 위치가 선택됐어요.",
+      "trackNotOnPage": "그 트랙은 이 페이지에 없어요!",
+      "playlistNotOnPage": "그 재생목록은 이 페이지에 없어요!",
+      "trackNoLongerExists": "그 트랙은 더 이상 존재하지 않아요!",
+      "playlistNoLongerExists": "그 재생목록은 더 이상 존재하지 않아요!",
+      "noTrackSelected": "선택된 트랙이 없어요!",
+      "noPlaylistSelected": "선택된 재생목록이 없어요!",
+      "notCommandInvokerButtons": "명령어를 실행한 사용자만 이 버튼을 사용할 수 있어요!",
+      "notCommandInvokerThis": "명령어를 실행한 사용자만 사용할 수 있어요!",
+      "notPanelOwner": "이 설정 패널을 연 사용자만 조작할 수 있어요.",
+      "notModalOwner": "이 설정 대화상자를 연 사용자만 제출할 수 있어요.",
+      "notSaveDialogOwner": "저장 대화상자를 연 사용자만 제출할 수 있어요!",
+      "noPlayerInServer": "이 서버에는 플레이어가 없어요!",
+      "noMusicPlaying": "재생 중인 음악이 없어요!",
+      "noMusicPlayingToUse": "그걸 사용하려면 음악이 재생 중이어야 해요!"
+    }
+  },
+  "permissions": {
+    "errors": {
+      "needManageServer": "설정을 변경하려면 서버 관리 권한이 필요해요.",
+      "needManageServerCommand": "이 명령어를 사용하려면 서버 관리 권한이 필요해요!",
+      "ownerOnly": "이 명령어는 봇 소유자만 사용할 수 있어요!",
+      "needDj": "이 명령어를 사용하려면 DJ여야 해요!",
+      "needDjOrRequesterSkip": "건너뛰려면 DJ이거나 신청자여야 해요!",
+      "needDjOrRequesterPrevious": "이전 곡으로 돌아가려면 DJ이거나 신청자여야 해요!",
+      "needDjUnpause": "일시정지를 해제할 수 있는 건 DJ뿐이에요!",
+      "needDjOrOwnerEditPlaylist": "재생목록을 편집하려면 DJ이거나 봇 소유자여야 해요!",
+      "needDjOrOwnerSaveHistory": "기록을 재생목록으로 저장하려면 DJ이거나 봇 소유자여야 해요!",
+      "needDjToUseButton": "이 버튼을 사용하려면 DJ여야 해요!",
+      "needDjToMoveTracks": "트랙 순서를 바꾸려면 DJ여야 해요!",
+      "needDjToPlayImmediately": "트랙을 즉시 재생하려면 DJ여야 해요!",
+      "needDjToFavorite": "현재 트랙을 즐겨찾기에 추가하려면 DJ여야 해요!",
+      "needDjToSkipToPosition": "특정 위치로 건너뛰려면 DJ여야 해요!",
+      "noManageMessages": "그 채널에서 메시지를 관리할 권한이 없어요."
+    }
+  },
+  "player": {
+    "resumed": "**{0}** 재생을 다시 시작했어요.",
+    "restarted": "**{0}** 다시 시작했어요",
+    "wentBack": "**{0}**(으)로 돌아갔어요",
+    "skipped": "건너뛰었어요!",
+    "skippedTrack": "**{0}** 건너뛰었어요",
+    "forceSkipped": "**{0}** 건너뛰었어요 {1}",
+    "nowPlayingSet": "현재 재생 중: **{0}**",
+    "paused": "**{0}** 일시정지했어요. 다시 재생하려면 `{1}`를 사용하세요!",
+    "pauseAlready": "플레이어가 이미 일시정지 상태예요! 다시 재생하려면 `{0}`를 사용하세요!",
+    "stopped": "플레이어를 정지하고 대기열을 비웠어요.",
+    "volumeCurrent": "현재 음량은 `{0}`이에요",
+    "volumeChanged": "음량을 `{0}`에서 `{1}`(으)로 변경했어요",
+    "repeatModeSet": "반복 모드를 `{0}`(으)로 설정했어요",
+    "favoriteAdded": "{0}을(를) 즐겨찾기에 추가했어요",
+    "favoriteAlready": "이 트랙은 이미 즐겨찾기에 추가되어 있어요",
+    "seekSuccess": "`{0}/{1}`(으)로 이동했어요!",
+    "requesterAutoplay": "(자동재생)",
+    "requesterUser": "(**{0}**님이 신청)",
+    "repeatMode": {
+      "off": "끄기",
+      "all": "전체",
+      "single": "한 곡"
+    },
+    "errors": {
+      "noPreviousTracks": "이전 트랙이 없어요!",
+      "nothingPlaying": "지금 재생 중인 게 없어요!",
+      "noTrackCurrentlyPlaying": "현재 재생 중인 트랙이 없어요!",
+      "favoriteInvalidUri": "현재 트랙에는 저장할 수 있는 유효한 URI나 절대 경로가 없어요.",
+      "favoriteUnsupported": "즐겨찾기에는 URI 참조나 이 OS의 절대 파일 경로만 추가할 수 있어요.",
+      "notSeekable": "이 트랙은 탐색할 수 없어요.",
+      "seekNotOwner": "**{0}**은(는) 회원님이 추가한 트랙이 아니라서 이동할 수 없어요!",
+      "invalidSeekFormat": "잘못된 탐색 형식이에요! 예상 형식: [+ | -] <HH:MM:SS | MM:SS | SS> 또는 <0h0m0s>\n예시: `1:02:23` `+1:10` `-90`, `1h10m`, `+90s`",
+      "seekPastDuration": "현재 트랙 길이가 `{1}`라서 `{0}`(으)로 이동할 수 없어요!",
+      "seekGeneric": "탐색 중 오류가 발생했어요: {0}",
+      "trackTooLong": "이 트랙(**{0}**)이 허용된 최대 길이를 초과했어요: `{1}` > `{2}`",
+      "volumeInvalid": "음량은 0에서 150 사이의 정수여야 해요!",
+      "repeatInvalidChoice": "사용할 수 있는 값은 `off`, `all`, `single`이에요",
+      "playlistEntryLoadFailed": "그 재생목록 항목을 불러올 수 없었어요.",
+      "playlistEntryNoMatches": "그 재생목록 항목에 일치하는 게 없었어요.",
+      "playlistEntryLoadError": "재생목록 항목 로드 오류: {0}"
+    }
+  },
+  "nowplaying": {
+    "contentFull": "**재생 중...**",
+    "contentMinimal": "**{0}에서 재생 중**",
+    "source": "**소스:** {0}",
+    "sourceUnknown": "알 수 없음",
+    "volumeLine": "**음량:** {0}%",
+    "repeatLine": "**반복:** {0}",
+    "queuedLabelOne": "1곡이 대기열에 있어요",
+    "queuedLabelMany": "{0}곡이 대기열에 있어요",
+    "embed": {
+      "author": "아티스트",
+      "duration": "길이",
+      "queue": "대기열",
+      "volume": "음량",
+      "repeat": "반복",
+      "requester": "신청자",
+      "noMusicTitle": "재생 중인 음악 없음"
+    },
+    "button": {
+      "prev": "이전",
+      "resume": "재생",
+      "pause": "일시정지",
+      "skip": "건너뛰기",
+      "stop": "정지",
+      "shuffle": "셔플",
+      "repeat": "반복",
+      "repeatAll": "전체 반복",
+      "repeatOne": "한 곡 반복",
+      "volumeUp": "음량 +",
+      "volumeDown": "음량 -",
+      "favorite": "즐겨찾기"
+    },
+    "footer": {
+      "addedQueue": "{0}을(를) 대기열에 추가했어요.",
+      "addedFront": "{0}을(를) 대기열 맨 앞에 추가했어요.",
+      "skippedForward": "{0}을(를) 건너뛰었어요.",
+      "addedFromHistory": "{0}을(를) 기록에서 추가했어요.",
+      "addedAllHistory": "{0}이(가) 전체 기록을 대기열에 추가했어요.",
+      "playingFromHistory": "{0}이(가) 기록에서 재생 중이에요.",
+      "addedPlaylist": "{0}이(가) 재생목록을 추가했어요.",
+      "repeatingQueue": "대기열을 반복하고 있어요.",
+      "repeatingSong": "이 곡을 반복하고 있어요.",
+      "playingNextSong": "다음 곡을 재생하고 있어요."
+    },
+    "errors": {
+      "noMusicInServer": "이 서버에서는 재생 중인 음악이 없어요."
+    }
+  },
+  "queue": {
+    "trackAddedNow": "**{0}**(`{1}`)을(를) 추가해서 바로 재생해요",
+    "trackAddedAtPosition": "**{0}**(`{1}`)을(를) 대기열 {2}번째 위치에 추가했어요",
+    "removed": "**{0}**을(를) 대기열에서 제거했어요",
+    "removedByDJ": "**{0}**을(를) 대기열에서 제거했어요 ({1}님이 신청)",
+    "removedBySomeone": "누군가",
+    "removedAllMine": "회원님의 {0}개 항목을 제거했어요.",
+    "removedAllByUser": "{1}의 `{0}`개 항목을 제거했어요.",
+    "moved": "**{0}**을(를) `{1}`번째에서 `{2}`번째로 이동했어요.",
+    "skippedTo": "**{0}**(으)로 건너뛰었어요",
+    "shuffledSuccess": "회원님의 {0}개 항목을 셔플했어요.",
+    "shuffledButton": "{0}곡을 셔플했어요!",
+    "nowEmpty": "대기열이 비었어요!",
+    "type": {
+      "linear": "순차",
+      "fair": "공정"
+    },
+    "embed": {
+      "title": "현재 대기열",
+      "upNextSection": "**다음 곡** *(아래에서 트랙 선택)*",
+      "entries": "항목 수",
+      "mode": "모드",
+      "pageFooter": "{1}페이지 중 {0}페이지"
+    },
+    "button": {
+      "remove": "제거",
+      "playNext": "다음에 재생",
+      "move": "이동",
+      "playNow": "지금 재생"
+    },
+    "moveSelect": {
+      "placeholder": "새 위치 선택",
+      "optionLabel": "위치 {0}"
+    },
+    "errors": {
+      "empty": "대기열이 비어 있어요!",
+      "noMusicInQueue": "대기열에 음악이 없어요!",
+      "noSongsToRemove": "대기열에 회원님의 곡이 없어요!",
+      "userNoSongs": "**{0}**님의 곡이 대기열에 없어요!",
+      "removeNotOwner": "**{0}**은(는) 회원님이 추가한 트랙이 아니라서 제거할 수 없어요!",
+      "cannotMoveSamePosition": "같은 위치로는 이동할 수 없어요.",
+      "alreadyNext": "이 트랙은 이미 다음 순서예요!",
+      "invalidQueuePosition": "`{0}`은(는) 대기열의 유효한 위치가 아니에요!",
+      "invalidPositionRange": "위치는 1에서 {0} 사이의 정수여야 해요!",
+      "invalidPositionNotInteger": "`{0}`은(는) 유효한 정수가 아니에요!",
+      "invalidPositionOrAll": "유효한 위치 번호나 'all'을 입력해 주세요.",
+      "emptyToShuffle": "셔플할 음악이 대기열에 없어요!",
+      "onlyOneToShuffle": "대기열에 곡이 하나뿐이에요!",
+      "mentionUser": "사용자를 멘션해 주세요!",
+      "userNotFound": "그 사용자를 찾을 수 없어요!",
+      "multipleUsersFound": "여러 명의 사용자를 찾았어요:",
+      "twoValidIndexes": "유효한 번호를 두 개 입력해 주세요."
+    }
+  },
+  "history": {
+    "disabled": "재생 기록이 설정에서 비활성화되어 있어요 (playback.maxHistorySize = 0).",
+    "nowEmpty": "재생 기록이 비었어요!",
+    "queueAllSuccess": "**{0}**곡을 대기열에 추가했어요.",
+    "queueAllSkippedSuffix": " {0}곡을 건너뛰었어요 (너무 길어서).",
+    "savedAsPlaylist": "기록에서 {0}곡을 재생목록 `{1}`에 저장했어요!",
+    "embed": {
+      "title": "기록 대기열",
+      "section": "**최근 재생** *(아래에서 트랙을 선택해 대기열에 추가하거나 재생)*",
+      "maxHistory": "최대 기록 수",
+      "pageFooter": "{1}페이지 중 {0}페이지 | 1 = 최신"
+    },
+    "button": {
+      "save": "재생목록으로 저장",
+      "queue": "대기열 추가",
+      "queueAll": "전체 대기열 추가"
+    },
+    "modal": {
+      "title": "기록을 재생목록으로 저장",
+      "labelPlaylistName": "재생목록 이름",
+      "playlistNamePlaceholder": "예: my-history"
+    },
+    "errors": {
+      "empty": "재생 기록이 비어 있어요!",
+      "positionRange": "위치는 1에서 {0} 사이여야 해요!",
+      "allTooLong": "{0}곡 모두 너무 길어서 추가할 수 없었어요.",
+      "noValidUrls": "저장할 유효한 트랙 URL이 기록에 없어요 (http(s) 소스만 저장돼요).",
+      "emptyPlaylistName": "재생목록 이름을 입력해 주세요!"
+    }
+  },
+  "playlist": {
+    "favoritesLabel": "⭐ 즐겨찾기 ⭐",
+    "queuedFromPlaylist": "재생목록 `{1}`에서 **{0}**곡을 대기열에 추가했어요.",
+    "queuedFailedSuffix": " {0}개 항목을 불러오지 못했어요.",
+    "nowPlayingReplaced": "재생목록 `{0}`을(를) 재생 중이에요 (대기열 교체됨). {1}",
+    "couldNotLoadLine": "`[?:??]` **불러올 수 없음**",
+    "embed": {
+      "title": "재생목록",
+      "section": "**사용 가능한 재생목록** *(아래에서 선택해 대기열에 추가하거나 바로 재생)*",
+      "detailsTitle": "재생목록: {0}",
+      "previewSection": "**미리보기** *(처음 {0}개 항목)*",
+      "previewFooter": "미리보기: 처음 {0}개 항목",
+      "tracksSection": "**트랙** *(아래에서 선택)*",
+      "unsavedSuffix": " • 저장되지 않은 변경사항",
+      "linkLabel": "링크"
+    },
+    "button": {
+      "refresh": "새로고침",
+      "details": "상세정보",
+      "save": "저장",
+      "discard": "취소",
+      "moveTop": "맨 위로",
+      "moveBottom": "맨 아래로",
+      "up1": "1칸 위로",
+      "down1": "1칸 아래로",
+      "moveTo": "이동",
+      "queueTrack": "트랙 추가",
+      "queuePlaylist": "전체 추가",
+      "playPlaylist": "전체 재생",
+      "unselect": "선택 해제",
+      "back": "뒤로"
+    },
+    "errors": {
+      "storageUnavailable": "재생목록 저장소를 사용할 수 없어요.",
+      "misconfigured": "재생목록 저장소 설정이 잘못됐어요 (`{0}`). {1}",
+      "storageUnavailableWithPath": "재생목록 저장소를 사용할 수 없어요 (`{0}`). {1}",
+      "pathNotConfigured": "(설정 안 됨)",
+      "noneInFolder": "Playlists 폴더에 재생목록이 없어요!",
+      "noTracksLoaded": "재생목록 `{0}`에서 트랙을 불러오지 못했어요!",
+      "notFoundShort": "재생목록이 더 이상 존재하지 않아요.",
+      "notFoundRefresh": "재생목록이 더 이상 존재하지 않아요. 뒤로를 누른 다음 새로고침하세요.",
+      "notFoundRefreshShort": "재생목록이 더 이상 존재하지 않아요. 새로고침을 누르세요.",
+      "positionRange": "위치는 1에서 {0} 사이여야 해요.",
+      "positionsRange": "위치는 1에서 {0} 사이여야 해요.",
+      "noUnsavedChanges": "저장되지 않은 변경사항이 없어요.",
+      "alreadyExistsChooseOther": "재생목록 `{0}`은(는) 이미 존재해요! 다른 이름을 선택해 주세요.",
+      "invalidName": "유효한 재생목록 이름을 입력해 주세요!"
+    },
+    "owner": {
+      "helpTitle": "재생목록 관리 명령어:",
+      "created": "재생목록 `{0}`을(를) 만들었어요!",
+      "deleted": "재생목록 `{0}`을(를) 삭제했어요!",
+      "appended": "재생목록 `{1}`에 {0}개 항목을 추가했어요!",
+      "availableList": "사용 가능한 재생목록:",
+      "errors": {
+        "noName": "재생목록 이름을 입력해 주세요!",
+        "createFailed": "재생목록을 만들 수 없었어요: {0}",
+        "deleteFailed": "재생목록을 삭제할 수 없었어요: {0}",
+        "appendFailed": "재생목록에 추가할 수 없었어요: {0}",
+        "alreadyExists": "재생목록 `{0}`은(는) 이미 존재해요!",
+        "doesNotExist": "재생목록 `{0}`은(는) 존재하지 않아요!",
+        "appendMissingArgs": "재생목록 이름과 추가할 URL을 입력해 주세요!",
+        "folderMissing": "Playlists 폴더가 없고 생성도 할 수 없었어요!",
+        "loadFailed": "사용 가능한 재생목록을 불러오지 못했어요!"
+      }
+    },
+    "autoplaylist": {
+      "cleared": "**{0}**의 기본 재생목록을 초기화했어요",
+      "set": "**{0}**의 기본 재생목록을 `{1}`(으)로 설정했어요",
+      "errors": {
+        "missingArg": "재생목록 이름 또는 NONE을 입력해 주세요",
+        "notFound": "`{0}.txt`을(를) 찾을 수 없어요!"
+      }
+    },
+    "load": {
+      "missingName": "재생목록 이름을 입력해 주세요.",
+      "notFound": "Playlists 폴더에서 `{0}.txt`을(를) 찾을 수 없어요.",
+      "loading": "재생목록 **{0}** 불러오는 중... ({1}개 항목)",
+      "noTracksLoaded": "트랙을 불러오지 못했어요!",
+      "loadedTracks": "**{0}**곡을 불러왔어요!",
+      "failedHeader": "다음 트랙을 불러오지 못했어요:"
+    }
+  },
+  "search": {
+    "loading": "불러오는 중... `[{0}]`",
+    "searching": "{0}에서 `{1}` 검색 중...",
+    "resultsHeader": "`{0}` 검색 결과:",
+    "timedOut": "검색이 시간 초과됐어요.",
+    "playlistFoundPrompt": "\n이 트랙에는 **{0}**곡짜리 재생목록이 연결되어 있어요. 재생목록을 불러오려면 📥를 선택하세요.",
+    "playlistLoadedAdditional": "\n추가로 **{0}**곡을 불러왔어요!",
+    "playlistFoundAdded": "{0}을(를) 찾았어요 (`{1}`개 항목); 대기열에 추가했어요!",
+    "playlistOmittedSuffix": "\n허용된 최대 길이(`{0}`)를 초과하는 트랙은 제외됐어요.",
+    "selectMenu": {
+      "placeholder": "재생할 트랙 선택",
+      "optionDescriptionDuration": "길이: {0}"
+    },
+    "embed": {
+      "title": "'{0}' 검색 결과",
+      "footer": "아래 메뉴에서 트랙을 선택하세요"
+    },
+    "button": {
+      "loadPlaylist": "재생목록 불러오기",
+      "cancel": "취소"
+    },
+    "errors": {
+      "missingQuery": "검색어를 입력해 주세요.",
+      "noResults": "`{0}`에 대한 검색 결과가 없어요.",
+      "loadFailed": "로드 오류: {0}",
+      "loadFailedGeneric": "트랙을 불러오는 중 오류가 발생했어요.",
+      "playlistLoadFailedOrEmpty": "재생목록 {0}을(를) 불러올 수 없었거나 항목이 0개였어요",
+      "playlistAllTooLong": "이 재생목록 {0}의 모든 항목이 허용된 최대 길이(`{1}`)를 초과했어요",
+      "missingSongOrUrl": "곡 제목이나 URL을 입력해 주세요!"
+    },
+    "searchingSimple": "검색 중... `[{0}]`"
+  },
+  "voting": {
+    "status": "[{0}표, {1}/{2} 필요]",
+    "alreadyVoted": "이 곡의 건너뛰기에 이미 투표했어요 `{0}`",
+    "voteRegistered": "이 곡의 건너뛰기에 투표했어요 `{0}`",
+    "voteSkipSuccess": "이 곡의 건너뛰기에 투표했어요 `{0}`\n**{1}** 건너뛰었어요 {2}"
+  },
+  "settings": {
+    "updated": "설정을 업데이트했어요.",
+    "closeFailed": "설정 패널을 닫지 못했어요.",
+    "refreshFailed": "설정 패널을 새로고침하지 못했어요. `/settings`를 다시 실행해 주세요.",
+    "panel": {
+      "title": "NextVoiceCord 설정",
+      "description": "**{0}**의 설정 패널이에요.\n아래 버튼으로 값을 변경하세요.",
+      "valueNone": "없음",
+      "valueAny": "제한 없음",
+      "skipDefault": "기본값 (`55%`)",
+      "footerNamed": "이 컨트롤은 {0}만 사용할 수 있어요.",
+      "footerGeneric": "이 컨트롤은 명령어를 실행한 사용자만 사용할 수 있어요.",
+      "field": {
+        "textChannel": "텍스트 채널",
+        "voiceChannel": "음성 채널",
+        "djRole": "DJ 역할",
+        "prefix": "접두사",
+        "skipRatio": "건너뛰기 비율",
+        "queueType": "대기열 유형",
+        "nowPlaying": "재생 중 패널",
+        "layout": "레이아웃",
+        "buttons": "버튼"
+      },
+      "button": {
+        "toggleQueue": "대기열 전환",
+        "toggleLayout": "레이아웃 전환",
+        "toggleButtons": "버튼 전환",
+        "setTextChannel": "텍스트 채널 설정",
+        "setVoiceChannel": "음성 채널 설정",
+        "setDjRole": "DJ 역할 설정",
+        "setPrefix": "접두사 설정",
+        "setSkip": "건너뛰기% 설정",
+        "clearText": "텍스트 채널 해제",
+        "clearVoice": "음성 채널 해제",
+        "clearDj": "DJ 해제",
+        "close": "닫기"
+      },
+      "select": {
+        "textChannelPlaceholder": "텍스트 채널 선택",
+        "voiceChannelPlaceholder": "음성 채널 선택",
+        "djRolePlaceholder": "DJ 역할 선택"
+      }
+    },
+    "modal": {
+      "setPrefixTitle": "접두사 설정",
+      "setPrefixPlaceholder": "사용자 지정 접두사 (비우면 초기화)",
+      "setSkipTitle": "건너뛰기 비율 설정",
+      "setSkipPlaceholder": "0에서 100 사이의 정수",
+      "labelValue": "값"
+    },
+    "prompt": {
+      "textChannel": "텍스트 채널을 선택하세요:",
+      "voiceChannel": "음성 채널을 선택하세요:",
+      "djRole": "DJ 역할을 선택하세요:"
+    },
+    "language": {
+      "current": "이 서버의 봇 언어는 **{0}**이에요.",
+      "set": "이 서버의 언어를 **{0}**(으)로 설정했어요.",
+      "invalid": "알 수 없는 언어예요 `{0}`. 사용 가능: {1}",
+      "optionDescription": "{0} ({1})"
+    },
+    "prefix": {
+      "cleared": "접두사를 초기화했어요.",
+      "set": "*{1}*의 사용자 지정 접두사를 `{0}`(으)로 설정했어요",
+      "missing": "접두사 또는 NONE을 입력해 주세요"
+    },
+    "queueType": {
+      "current": "현재 대기열 유형: `{0}`.",
+      "set": "대기열 유형을 `{0}`(으)로 설정했어요.",
+      "invalid": "잘못된 대기열 유형이에요. 사용 가능한 유형: [{0}]"
+    },
+    "dj": {
+      "cleared": "DJ 역할을 초기화했어요. DJ 명령어는 관리자만 사용할 수 있어요.",
+      "set": "이제 **{0}** 역할을 가진 사용자가 DJ 명령어를 사용할 수 있어요.",
+      "missingArg": "역할 이름 또는 NONE을 입력해 주세요",
+      "notFound": "\"{0}\"와(과) 일치하는 역할을 찾을 수 없어요"
+    },
+    "textChannel": {
+      "set": "이제 음악 명령어는 {0}에서만 사용할 수 있어요",
+      "cleared": "이제 음악 명령어를 모든 채널에서 사용할 수 있어요",
+      "mustBeText": "텍스트 채널을 선택해 주세요!",
+      "missingArg": "텍스트 채널 또는 NONE을 입력해 주세요",
+      "notFound": "\"{0}\"와(과) 일치하는 텍스트 채널을 찾을 수 없어요"
+    },
+    "voiceChannel": {
+      "set": "이제 음악은 {0}에서만 재생할 수 있어요",
+      "cleared": "이제 음악을 모든 채널에서 재생할 수 있어요",
+      "mustBeVoice": "음성 채널을 선택해 주세요!",
+      "missingArg": "음성 채널 또는 NONE을 입력해 주세요",
+      "notFound": "\"{0}\"와(과) 일치하는 음성 채널을 찾을 수 없어요"
+    },
+    "skipRatio": {
+      "set": "*{1}*의 건너뛰기 비율을 청취자의 `{0}%`(으)로 설정했어요",
+      "range": "입력한 값은 0에서 100 사이여야 해요!",
+      "invalidNumber": "0에서 100 사이의 정수를 입력해 주세요 (기본값은 55). 이 숫자는 곡을 건너뛰기 위해 투표해야 하는 청취자의 비율이에요.",
+      "emptyError": "0에서 100 사이의 정수를 입력해 주세요.",
+      "rangeError": "건너뛰기 비율은 0에서 100 사이여야 해요."
+    },
+    "npLayout": {
+      "current": "재생 중 패널 레이아웃 모드는 `{0}`이에요 (적용값: `{1}`).",
+      "set": "재생 중 패널 레이아웃 모드를 `{0}`(으)로 설정했어요 (적용값: `{1}`).",
+      "invalid": "사용할 수 있는 값은 `full`, `minimal`, `inherit`이에요."
+    },
+    "npButtons": {
+      "current": "재생 중 패널 버튼 모드는 `{0}`이에요 (적용값: `{1}`).",
+      "set": "재생 중 패널 버튼 모드를 `{0}`(으)로 설정했어요 (적용값: `{1}`).",
+      "invalid": "사용할 수 있는 값은 `on`, `off`, `inherit`이에요."
+    },
+    "errors": {
+      "panelExpired": "이 설정 패널은 만료됐어요. `/settings`를 다시 실행해 주세요.",
+      "chooseTextChannel": "텍스트 채널을 선택해 주세요.",
+      "chooseVoiceChannel": "음성 채널을 선택해 주세요.",
+      "chooseRole": "역할을 선택해 주세요."
+    },
+    "summary": {
+      "header": "{0} 설정:",
+      "textChannel": "텍스트 채널: {0}",
+      "voiceChannel": "음성 채널: {0}",
+      "djRole": "DJ 역할: {0}",
+      "prefix": "사용자 지정 접두사: {0}",
+      "repeatMode": "반복 모드: {0}",
+      "queueType": "대기열 유형: {0}",
+      "defaultPlaylist": "기본 재생목록: {0}",
+      "footer": "{0} 서버 | {1} 음성 연결"
+    }
+  },
+  "clearchannel": {
+    "clearing": "채널 정리 중...",
+    "cleared": "{0}개의 메시지를 삭제했어요.",
+    "error": "오류: {0}",
+    "errors": {
+      "noChannelConfigured": "이 서버에는 텍스트 채널이 설정되어 있지 않아요. 관리자가 `{0}`(으)로 설정할 수 있어요."
+    }
+  },
+  "lyrics": {
+    "errors": {
+      "removed": "가사 기능이 제거됐어요."
+    }
+  },
+  "owner": {
+    "setname": {
+      "changed": "이름을 `{0}`에서 `{1}`(으)로 변경했어요",
+      "errors": {
+        "rateLimited": "이름은 1시간에 두 번까지만 변경할 수 있어요!",
+        "invalid": "그 이름은 유효하지 않아요!"
+      }
+    },
+    "setavatar": {
+      "success": "아바타를 변경했어요.",
+      "errors": {
+        "invalidUrl": "URL이 잘못됐거나 없어요",
+        "setFailed": "아바타 설정에 실패했어요.",
+        "loadFailed": "제공된 URL에서 불러올 수 없었어요."
+      }
+    },
+    "setgame": {
+      "playingSet": "**{0}**이(가) 지금 `{1}`을(를) 플레이 중이에요",
+      "playingCleared": "**{0}**이(가) 더 이상 아무것도 플레이하고 있지 않아요.",
+      "streamSet": "**{0}**이(가) 지금 `{1}`을(를) 스트리밍 중이에요",
+      "listenSet": "**{0}**이(가) 지금 `{1}`을(를) 듣고 있어요",
+      "watchSet": "**{0}**이(가) 지금 `{1}`을(를) 보고 있어요",
+      "errors": {
+        "setFailed": "게임을 설정할 수 없었어요!",
+        "streamMissingArgs": "Twitch 사용자 이름과 '스트리밍'할 게임 이름을 입력해 주세요",
+        "listenMissingTitle": "들을 제목을 입력해 주세요!",
+        "watchMissingTitle": "볼 제목을 입력해 주세요!"
+      }
+    },
+    "setstatus": {
+      "set": "상태를 `{0}`(으)로 설정했어요",
+      "errors": {
+        "invalid": "다음 상태 중 하나를 입력해 주세요: `ONLINE`, `IDLE`, `DND`, `INVISIBLE`",
+        "setFailed": "상태를 설정할 수 없었어요!"
+      }
+    },
+    "shutdown": {
+      "message": "종료 중..."
+    },
+    "eval": {
+      "success": "평가에 성공했어요:\n```\n{0} ```",
+      "exceptionThrown": "예외가 발생했어요:\n```\n{0} ```",
+      "errors": {
+        "engineMissing": "설정에 지정된 eval 엔진(`{0}`)이 존재하지 않아요. 엔진 이름이 잘못됐거나, 사용 중인 Java 버전(`{1}`)에 해당 엔진이 없을 수 있어요."
+      }
+    }
+  }
+}

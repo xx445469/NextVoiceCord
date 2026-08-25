@@ -1,0 +1,541 @@
+{
+  "_meta": {
+    "language": "ZHCN",
+    "englishName": "Chinese (Simplified)",
+    "reviewed": false,
+    "note": "Machine-generated, not yet reviewed by a native speaker. Corrections welcome."
+  },
+  "common": {
+    "errors": {
+      "serverOnly": "该功能只能在服务器中使用！",
+      "sameVoiceChannel": "你必须在同一个语音频道才能使用！",
+      "needVoiceChannel": "你需要先加入语音频道才能使用！",
+      "cannotConnectVoice": "我无法连接到 {0}！请检查我的权限。",
+      "voiceConnectFailed": "我无法连接到 {0}！",
+      "mustBeInChannel": "该指令只能在 {0} 使用！",
+      "mustBeListening": "你必须在 {0} 收听才能使用！",
+      "afkChannel": "无法在闲置（AFK）频道使用该指令！",
+      "invalidButtonState": "按钮状态无效。",
+      "invalidSelectionState": "选择状态无效。",
+      "invalidModalState": "对话框状态无效。",
+      "invalidTrackSelection": "选择的曲目无效。",
+      "invalidPlaylistSelection": "选择的播放列表无效。",
+      "invalidPositionSelected": "选择的位置无效。",
+      "trackNotOnPage": "这首歌不在这一页！",
+      "playlistNotOnPage": "这个播放列表不在这一页！",
+      "trackNoLongerExists": "这首歌已经不存在了！",
+      "playlistNoLongerExists": "这个播放列表已经不存在了！",
+      "noTrackSelected": "尚未选择曲目！",
+      "noPlaylistSelected": "尚未选择播放列表！",
+      "notCommandInvokerButtons": "只有执行指令的用户可以使用这些按钮！",
+      "notCommandInvokerThis": "只有执行指令的用户可以使用！",
+      "notPanelOwner": "只有打开此设置面板的用户可以操作。",
+      "notModalOwner": "只有打开此设置对话框的用户可以提交。",
+      "notSaveDialogOwner": "只有打开保存对话框的用户可以提交！",
+      "noPlayerInServer": "此服务器中没有播放器！",
+      "noMusicPlaying": "目前没有正在播放的音乐！",
+      "noMusicPlayingToUse": "必须有音乐正在播放才能使用！"
+    }
+  },
+  "permissions": {
+    "errors": {
+      "needManageServer": "你需要“管理服务器”权限才能更改设置。",
+      "needManageServerCommand": "你需要“管理服务器”权限才能使用此指令！",
+      "ownerOnly": "只有机器人所有者可以使用此指令！",
+      "needDj": "你需要 DJ 身份才能使用此指令！",
+      "needDjOrRequesterSkip": "你需要是 DJ 或点歌者才能跳过！",
+      "needDjOrRequesterPrevious": "你需要是 DJ 或点歌者才能返回上一首！",
+      "needDjUnpause": "只有 DJ 可以恢复播放！",
+      "needDjOrOwnerEditPlaylist": "你需要是 DJ 或机器人所有者才能编辑播放列表！",
+      "needDjOrOwnerSaveHistory": "你需要是 DJ 或机器人所有者才能将历史记录保存为播放列表！",
+      "needDjToUseButton": "你需要 DJ 身份才能使用此按钮！",
+      "needDjToMoveTracks": "你需要 DJ 身份才能调整曲目顺序！",
+      "needDjToPlayImmediately": "你需要 DJ 身份才能立即播放曲目！",
+      "needDjToFavorite": "你需要 DJ 身份才能将当前曲目加入收藏！",
+      "needDjToSkipToPosition": "你需要 DJ 身份才能跳转到指定位置！",
+      "noManageMessages": "我没有在该频道管理消息的权限。"
+    }
+  },
+  "player": {
+    "resumed": "已恢复播放 **{0}**。",
+    "restarted": "已重新播放 **{0}**",
+    "wentBack": "已返回 **{0}**",
+    "skipped": "已跳过！",
+    "skippedTrack": "已跳过 **{0}**",
+    "forceSkipped": "已跳过 **{0}** {1}",
+    "nowPlayingSet": "正在播放 **{0}**",
+    "paused": "已暂停 **{0}**。使用 `{1}` 恢复播放！",
+    "pauseAlready": "播放器已处于暂停状态！使用 `{0}` 恢复播放！",
+    "stopped": "播放器已停止，队列已清空。",
+    "volumeCurrent": "当前音量为 `{0}`",
+    "volumeChanged": "音量已从 `{0}` 调整为 `{1}`",
+    "repeatModeSet": "循环模式已设为 `{0}`",
+    "favoriteAdded": "已将 {0} 加入收藏",
+    "favoriteAlready": "这首歌已经在收藏中了",
+    "seekSuccess": "已成功跳转至 `{0}/{1}`！",
+    "requesterAutoplay": "（自动播放）",
+    "requesterUser": "（由 **{0}** 点播）",
+    "repeatMode": {
+      "off": "关闭",
+      "all": "全部循环",
+      "single": "单曲循环"
+    },
+    "errors": {
+      "noPreviousTracks": "没有上一首歌！",
+      "nothingPlaying": "目前没有播放任何内容！",
+      "noTrackCurrentlyPlaying": "目前没有曲目正在播放！",
+      "favoriteInvalidUri": "当前曲目没有可保存的有效链接或绝对路径。",
+      "favoriteUnsupported": "只有链接或本系统的绝对文件路径可以加入收藏。",
+      "notSeekable": "这首歌无法跳转播放位置。",
+      "seekNotOwner": "你无法跳转 **{0}**，因为不是你点的！",
+      "invalidSeekFormat": "跳转格式无效！预期格式：[+ | -] <HH:MM:SS | MM:SS | SS> 或 <0h0m0s>\n示例：`1:02:23` `+1:10` `-90`、`1h10m`、`+90s`",
+      "seekPastDuration": "无法跳转到 `{0}`，因为这首歌长度只有 `{1}`！",
+      "seekGeneric": "跳转时发生错误：{0}",
+      "trackTooLong": "这首歌（**{0}**）超过了允许的最大长度：`{1}` > `{2}`",
+      "volumeInvalid": "音量必须是 0 到 150 之间的有效整数！",
+      "repeatInvalidChoice": "可用选项为 `off`、`all` 或 `single`",
+      "playlistEntryLoadFailed": "该播放列表项目无法加载。",
+      "playlistEntryNoMatches": "找不到与该播放列表项目匹配的内容。",
+      "playlistEntryLoadError": "加载播放列表项目时出错：{0}"
+    }
+  },
+  "nowplaying": {
+    "contentFull": "**正在播放…**",
+    "contentMinimal": "**正在 {0} 播放**",
+    "source": "**来源：**{0}",
+    "sourceUnknown": "未知",
+    "volumeLine": "**音量：**{0}%",
+    "repeatLine": "**循环：**{0}",
+    "queuedLabelOne": "队列中还有 1 首",
+    "queuedLabelMany": "队列中还有 {0} 首",
+    "embed": {
+      "author": "作者",
+      "duration": "时长",
+      "queue": "队列",
+      "volume": "音量",
+      "repeat": "循环",
+      "requester": "点歌者",
+      "noMusicTitle": "当前没有播放音乐"
+    },
+    "button": {
+      "prev": "上一首",
+      "resume": "继续",
+      "pause": "暂停",
+      "skip": "下一首",
+      "stop": "停止",
+      "shuffle": "随机",
+      "repeat": "循环",
+      "repeatAll": "全部循环",
+      "repeatOne": "单曲循环",
+      "volumeUp": "音量 +",
+      "volumeDown": "音量 -",
+      "favorite": "收藏"
+    },
+    "footer": {
+      "addedQueue": "{0} 已加入队列。",
+      "addedFront": "{0} 已插队到队列最前面。",
+      "skippedForward": "{0} 跳过了这首歌。",
+      "addedFromHistory": "{0} 从历史记录加入。",
+      "addedAllHistory": "{0} 将整个历史记录加入了队列。",
+      "playingFromHistory": "{0} 从历史记录播放。",
+      "addedPlaylist": "{0} 加入了一个播放列表。",
+      "repeatingQueue": "正在循环整个队列。",
+      "repeatingSong": "正在单曲循环。",
+      "playingNextSong": "正在播放下一首。"
+    },
+    "errors": {
+      "noMusicInServer": "此服务器目前没有播放音乐。"
+    }
+  },
+  "queue": {
+    "trackAddedNow": "已加入 **{0}**（`{1}`），即将开始播放",
+    "trackAddedAtPosition": "已将 **{0}**（`{1}`）加入队列第 {2} 位",
+    "removed": "已从队列移除 **{0}**",
+    "removedByDJ": "已从队列移除 **{0}**（由 {1} 点播）",
+    "removedBySomeone": "某人",
+    "removedAllMine": "已成功移除你的 {0} 个项目。",
+    "removedAllByUser": "已成功移除 {1} 的 `{0}` 个项目。",
+    "moved": "已将 **{0}** 从第 `{1}` 位移动到第 `{2}` 位。",
+    "skippedTo": "已跳至 **{0}**",
+    "shuffledSuccess": "已成功随机排序你的 {0} 个项目。",
+    "shuffledButton": "已随机排序 {0} 首歌！",
+    "nowEmpty": "队列已清空！",
+    "type": {
+      "linear": "顺序",
+      "fair": "公平"
+    },
+    "embed": {
+      "title": "当前队列",
+      "upNextSection": "**接下来播放** *（请在下方选择曲目）*",
+      "entries": "项目数",
+      "mode": "模式",
+      "pageFooter": "第 {0} / {1} 页"
+    },
+    "button": {
+      "remove": "移除",
+      "playNext": "下一首播放",
+      "move": "移动",
+      "playNow": "立即播放"
+    },
+    "moveSelect": {
+      "placeholder": "选择新位置",
+      "optionLabel": "第 {0} 位"
+    },
+    "errors": {
+      "empty": "队列中没有任何内容！",
+      "noMusicInQueue": "队列中没有音乐！",
+      "noSongsToRemove": "你在队列中没有任何歌曲！",
+      "userNoSongs": "**{0}** 在队列中没有任何歌曲！",
+      "removeNotOwner": "你无法移除 **{0}**，因为不是你添加的！",
+      "cannotMoveSamePosition": "无法将曲目移动到相同位置。",
+      "alreadyNext": "这首歌已经是下一首了！",
+      "invalidQueuePosition": "`{0}` 不是队列中的有效位置！",
+      "invalidPositionRange": "位置必须是 1 到 {0} 之间的有效整数！",
+      "invalidPositionNotInteger": "`{0}` 不是有效的整数！",
+      "invalidPositionOrAll": "请提供有效的位置数字或 'all'。",
+      "emptyToShuffle": "你的队列中没有可以随机排序的音乐！",
+      "onlyOneToShuffle": "你的队列中只有一首歌！",
+      "mentionUser": "你需要提及一位用户！",
+      "userNotFound": "找不到该用户！",
+      "multipleUsersFound": "找到多位匹配的用户：",
+      "twoValidIndexes": "请提供两个有效的位置编号。"
+    }
+  },
+  "history": {
+    "disabled": "播放历史记录已在配置中禁用（playback.maxHistorySize = 0）。",
+    "nowEmpty": "播放历史记录已清空！",
+    "queueAllSuccess": "已将 **{0}** 首歌加入队列。",
+    "queueAllSkippedSuffix": " 已跳过 {0} 首（长度超限）。",
+    "savedAsPlaylist": "已将历史记录中的 {0} 首歌保存为播放列表 `{1}`！",
+    "embed": {
+      "title": "历史队列",
+      "section": "**最近播放** *（在下方选择曲目以加入队列或播放）*",
+      "maxHistory": "历史记录上限",
+      "pageFooter": "第 {0} / {1} 页｜1 = 最近播放"
+    },
+    "button": {
+      "save": "保存为播放列表",
+      "queue": "加入队列",
+      "queueAll": "全部加入队列"
+    },
+    "modal": {
+      "title": "将历史记录保存为播放列表",
+      "labelPlaylistName": "播放列表名称",
+      "playlistNamePlaceholder": "例如：my-history"
+    },
+    "errors": {
+      "empty": "播放历史记录为空！",
+      "positionRange": "位置必须介于 1 到 {0} 之间！",
+      "allTooLong": "全部 {0} 首歌都因为过长而无法加入。",
+      "noValidUrls": "历史记录中没有可保存的有效曲目链接（仅会保存 http(s) 来源）。",
+      "emptyPlaylistName": "请输入播放列表名称！"
+    }
+  },
+  "playlist": {
+    "favoritesLabel": "⭐ 收藏 ⭐",
+    "queuedFromPlaylist": "已从播放列表 `{1}` 加入 **{0}** 首歌到队列。",
+    "queuedFailedSuffix": " 有 {0} 个项目加载失败。",
+    "nowPlayingReplaced": "正在播放播放列表 `{0}`（队列已替换）。{1}",
+    "couldNotLoadLine": "`[?:??]` **无法加载**",
+    "embed": {
+      "title": "播放列表",
+      "section": "**可用的播放列表** *（在下方选择以加入队列或立即播放）*",
+      "detailsTitle": "播放列表：{0}",
+      "previewSection": "**预览** *（前 {0} 个项目）*",
+      "previewFooter": "预览：前 {0} 个项目",
+      "tracksSection": "**曲目** *（在下方选择）*",
+      "unsavedSuffix": " • 有未保存的更改",
+      "linkLabel": "链接"
+    },
+    "button": {
+      "refresh": "刷新",
+      "details": "详细信息",
+      "save": "保存",
+      "discard": "放弃",
+      "moveTop": "移到最前",
+      "moveBottom": "移到最后",
+      "up1": "上移一位",
+      "down1": "下移一位",
+      "moveTo": "移动到",
+      "queueTrack": "加入此曲",
+      "queuePlaylist": "加入整个列表",
+      "playPlaylist": "播放整个列表",
+      "unselect": "取消选择",
+      "back": "返回"
+    },
+    "errors": {
+      "storageUnavailable": "播放列表存储空间不可用。",
+      "misconfigured": "播放列表存储配置错误（`{0}`）。{1}",
+      "storageUnavailableWithPath": "播放列表存储空间不可用（`{0}`）。{1}",
+      "pathNotConfigured": "（未配置）",
+      "noneInFolder": "Playlists 文件夹中没有任何播放列表！",
+      "noTracksLoaded": "播放列表 `{0}` 没有加载任何曲目！",
+      "notFoundShort": "播放列表已不存在。",
+      "notFoundRefresh": "播放列表已不存在。请点击“返回”再“刷新”。",
+      "notFoundRefreshShort": "播放列表已不存在。请点击“刷新”。",
+      "positionRange": "位置必须介于 1 到 {0} 之间。",
+      "positionsRange": "位置必须介于 1 到 {0} 之间。",
+      "noUnsavedChanges": "没有未保存的更改。",
+      "alreadyExistsChooseOther": "播放列表 `{0}` 已存在！请换一个名称。",
+      "invalidName": "请提供有效的播放列表名称！"
+    },
+    "owner": {
+      "helpTitle": "播放列表管理指令：",
+      "created": "已成功创建播放列表 `{0}`！",
+      "deleted": "已成功删除播放列表 `{0}`！",
+      "appended": "已成功将 {0} 个项目加入播放列表 `{1}`！",
+      "availableList": "可用的播放列表：",
+      "errors": {
+        "noName": "请提供播放列表名称！",
+        "createFailed": "无法创建播放列表：{0}",
+        "deleteFailed": "无法删除播放列表：{0}",
+        "appendFailed": "无法追加到播放列表：{0}",
+        "alreadyExists": "播放列表 `{0}` 已存在！",
+        "doesNotExist": "播放列表 `{0}` 不存在！",
+        "appendMissingArgs": "请提供播放列表名称与要添加的链接！",
+        "folderMissing": "Playlists 文件夹不存在且无法创建！",
+        "loadFailed": "加载可用播放列表失败！"
+      }
+    },
+    "autoplaylist": {
+      "cleared": "已清除 **{0}** 的默认播放列表",
+      "set": "**{0}** 的默认播放列表现在是 `{1}`",
+      "errors": {
+        "missingArg": "请提供播放列表名称或 NONE",
+        "notFound": "找不到 `{0}.txt`！"
+      }
+    },
+    "load": {
+      "missingName": "请提供播放列表名称。",
+      "notFound": "在 Playlists 文件夹中找不到 `{0}.txt`。",
+      "loading": "正在加载播放列表 **{0}**……（{1} 个项目）",
+      "noTracksLoaded": "没有加载任何曲目！",
+      "loadedTracks": "已加载 **{0}** 首曲目！",
+      "failedHeader": "以下曲目加载失败："
+    }
+  },
+  "search": {
+    "loading": "加载中…… `[{0}]`",
+    "searching": "正在 {0} 搜索 `{1}`……",
+    "resultsHeader": "`{0}` 的搜索结果：",
+    "timedOut": "搜索超时。",
+    "playlistFoundPrompt": "\n这首歌附带一个含 **{0}** 首歌的播放列表。点选 📥 加载整个列表。",
+    "playlistLoadedAdditional": "\n已额外加载 **{0}** 首歌！",
+    "playlistFoundAdded": "找到 {0}，共 `{1}` 个项目，已加入队列！",
+    "playlistOmittedSuffix": "\n超过允许最大长度（`{0}`）的曲目已被忽略。",
+    "selectMenu": {
+      "placeholder": "选择要播放的曲目",
+      "optionDescriptionDuration": "时长：{0}"
+    },
+    "embed": {
+      "title": "{0} 的搜索结果",
+      "footer": "请从下方菜单选择曲目"
+    },
+    "button": {
+      "loadPlaylist": "加载播放列表",
+      "cancel": "取消"
+    },
+    "errors": {
+      "missingQuery": "请输入搜索关键词。",
+      "noResults": "找不到 `{0}` 的搜索结果。",
+      "loadFailed": "加载时发生错误：{0}",
+      "loadFailedGeneric": "加载曲目时发生错误。",
+      "playlistLoadFailedOrEmpty": "播放列表 {0} 无法加载，或内容为空",
+      "playlistAllTooLong": "这个播放列表 {0}中所有项目都超过了允许的最大长度（`{1}`）",
+      "missingSongOrUrl": "请提供歌曲名称或链接！"
+    },
+    "searchingSimple": "搜索中…… `[{0}]`"
+  },
+  "voting": {
+    "status": "[{0} 票，需要 {1}/{2}]",
+    "alreadyVoted": "你已经投票跳过这首歌了 `{0}`",
+    "voteRegistered": "你投票跳过了这首歌 `{0}`",
+    "voteSkipSuccess": "你投票跳过了这首歌 `{0}`\n已跳过 **{1}** {2}"
+  },
+  "settings": {
+    "updated": "设置已更新。",
+    "closeFailed": "关闭设置面板失败。",
+    "refreshFailed": "刷新设置面板失败。请重新运行 `/settings`。",
+    "panel": {
+      "title": "NextVoiceCord 设置",
+      "description": "**{0}** 的设置面板。\n请使用下方按钮更新数值。",
+      "valueNone": "无",
+      "valueAny": "不限",
+      "skipDefault": "默认（`55%`）",
+      "footerNamed": "只有 {0} 可以操作这些控件。",
+      "footerGeneric": "只有执行指令的用户可以操作这些控件。",
+      "field": {
+        "textChannel": "文字频道",
+        "voiceChannel": "语音频道",
+        "djRole": "DJ 身份组",
+        "prefix": "指令前缀",
+        "skipRatio": "跳过比例",
+        "queueType": "队列类型",
+        "nowPlaying": "播放中面板",
+        "layout": "布局",
+        "buttons": "按钮"
+      },
+      "button": {
+        "toggleQueue": "切换队列类型",
+        "toggleLayout": "切换布局",
+        "toggleButtons": "切换按钮",
+        "setTextChannel": "设置文字频道",
+        "setVoiceChannel": "设置语音频道",
+        "setDjRole": "设置 DJ 身份组",
+        "setPrefix": "设置前缀",
+        "setSkip": "设置跳过百分比",
+        "clearText": "清除文字频道",
+        "clearVoice": "清除语音频道",
+        "clearDj": "清除 DJ",
+        "close": "关闭"
+      },
+      "select": {
+        "textChannelPlaceholder": "选择文字频道",
+        "voiceChannelPlaceholder": "选择语音频道",
+        "djRolePlaceholder": "选择 DJ 身份组"
+      }
+    },
+    "modal": {
+      "setPrefixTitle": "设置前缀",
+      "setPrefixPlaceholder": "自定义前缀（留空则清除）",
+      "setSkipTitle": "设置跳过百分比",
+      "setSkipPlaceholder": "0 到 100 的整数",
+      "labelValue": "数值"
+    },
+    "prompt": {
+      "textChannel": "选择文字频道：",
+      "voiceChannel": "选择语音频道：",
+      "djRole": "选择 DJ 身份组："
+    },
+    "language": {
+      "current": "此服务器的机器人语言是 **{0}**。",
+      "set": "此服务器的语言已设为 **{0}**。",
+      "invalid": "未知的语言 `{0}`。可用语言：{1}",
+      "optionDescription": "{0}（{1}）"
+    },
+    "prefix": {
+      "cleared": "前缀已清除。",
+      "set": "已将 *{1}* 的自定义前缀设为 `{0}`",
+      "missing": "请输入前缀或 NONE"
+    },
+    "queueType": {
+      "current": "当前队列类型为：`{0}`。",
+      "set": "队列类型已设为 `{0}`。",
+      "invalid": "无效的队列类型。可用类型：[{0}]"
+    },
+    "dj": {
+      "cleared": "DJ 身份组已清除；只有管理员可以使用 DJ 指令。",
+      "set": "拥有 **{0}** 身份组的成员现在可以使用 DJ 指令。",
+      "missingArg": "请输入身份组名称或 NONE",
+      "notFound": "找不到匹配“{0}”的身份组"
+    },
+    "textChannel": {
+      "set": "音乐指令现在只能在 {0} 使用",
+      "cleared": "音乐指令现在可以在任何频道使用",
+      "mustBeText": "请选择文字频道！",
+      "missingArg": "请输入文字频道或 NONE",
+      "notFound": "找不到匹配“{0}”的文字频道"
+    },
+    "voiceChannel": {
+      "set": "音乐现在只能在 {0} 播放",
+      "cleared": "音乐现在可以在任何频道播放",
+      "mustBeVoice": "请选择语音频道！",
+      "missingArg": "请输入语音频道或 NONE",
+      "notFound": "找不到匹配“{0}”的语音频道"
+    },
+    "skipRatio": {
+      "set": "已将 *{1}* 的跳过百分比设为听众的 `{0}%`",
+      "range": "输入值必须介于 0 到 100 之间！",
+      "invalidNumber": "请输入 0 到 100 之间的整数（默认为 55）。这个数字表示需要多少比例的听众投票才能跳过歌曲。",
+      "emptyError": "请输入 0 到 100 之间的整数。",
+      "rangeError": "跳过百分比必须介于 0 到 100 之间。"
+    },
+    "npLayout": {
+      "current": "播放中面板布局模式为 `{0}`（实际生效：`{1}`）。",
+      "set": "播放中面板布局模式已设为 `{0}`（实际生效：`{1}`）。",
+      "invalid": "可用数值为 `full`、`minimal` 或 `inherit`。"
+    },
+    "npButtons": {
+      "current": "播放中面板按钮模式为 `{0}`（实际生效：`{1}`）。",
+      "set": "播放中面板按钮模式已设为 `{0}`（实际生效：`{1}`）。",
+      "invalid": "可用数值为 `on`、`off` 或 `inherit`。"
+    },
+    "errors": {
+      "panelExpired": "此设置面板已过期。请重新运行 `/settings`。",
+      "chooseTextChannel": "请选择文字频道。",
+      "chooseVoiceChannel": "请选择语音频道。",
+      "chooseRole": "请选择身份组。"
+    },
+    "summary": {
+      "header": "{0} 的设置：",
+      "textChannel": "文字频道：{0}",
+      "voiceChannel": "语音频道：{0}",
+      "djRole": "DJ 身份组：{0}",
+      "prefix": "自定义前缀：{0}",
+      "repeatMode": "循环模式：{0}",
+      "queueType": "队列类型：{0}",
+      "defaultPlaylist": "默认播放列表：{0}",
+      "footer": "{0} 个服务器｜{1} 个音频连接"
+    }
+  },
+  "clearchannel": {
+    "clearing": "正在清除频道……",
+    "cleared": "已清除 {0} 条消息。",
+    "error": "错误：{0}",
+    "errors": {
+      "noChannelConfigured": "此服务器尚未配置文字频道。管理员可以使用 `{0}` 进行设置。"
+    }
+  },
+  "lyrics": {
+    "errors": {
+      "removed": "歌词功能已移除。"
+    }
+  },
+  "owner": {
+    "setname": {
+      "changed": "名称已从 `{0}` 更改为 `{1}`",
+      "errors": {
+        "rateLimited": "名称每小时只能更改两次！",
+        "invalid": "该名称无效！"
+      }
+    },
+    "setavatar": {
+      "success": "已成功更改头像。",
+      "errors": {
+        "invalidUrl": "链接无效或未提供",
+        "setFailed": "设置头像失败。",
+        "loadFailed": "无法从提供的链接加载。"
+      }
+    },
+    "setgame": {
+      "playingSet": "**{0}** 现在正在玩 `{1}`",
+      "playingCleared": "**{0}** 已不再显示游戏状态。",
+      "streamSet": "**{0}** 现在正在直播 `{1}`",
+      "listenSet": "**{0}** 现在正在收听 `{1}`",
+      "watchSet": "**{0}** 现在正在观看 `{1}`",
+      "errors": {
+        "setFailed": "无法设置游戏状态！",
+        "streamMissingArgs": "请提供 Twitch 用户名与要“直播”的游戏名称",
+        "listenMissingTitle": "请提供要收听的标题！",
+        "watchMissingTitle": "请提供要观看的标题！"
+      }
+    },
+    "setstatus": {
+      "set": "已将状态设为 `{0}`",
+      "errors": {
+        "invalid": "请提供以下其中一种状态：`ONLINE`、`IDLE`、`DND`、`INVISIBLE`",
+        "setFailed": "无法设置状态！"
+      }
+    },
+    "shutdown": {
+      "message": "正在关闭……"
+    },
+    "eval": {
+      "success": "执行成功：\n```\n{0} ```",
+      "exceptionThrown": "抛出异常：\n```\n{0} ```",
+      "errors": {
+        "engineMissing": "配置中指定的 eval 引擎（`{0}`）不存在。可能是引擎名称错误，或你的 Java 版本（`{1}`）中没有这个引擎。"
+      }
+    }
+  }
+}
