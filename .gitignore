@@ -1,28 +1,45 @@
-# ---- 機密：絕對不要 commit ----
-# macOS 檔案系統不分大小寫，各種寫法都擋掉
+# ============================================================
+#  機密：絕對不要 commit
+# ============================================================
+# macOS 檔案系統不分大小寫，各種寫法都擋
 claude.env
 CLAUDE.ENV
 Claude.env
 *.env
 !*.env.example
 youtubetoken.txt
-config.txt
-serversettings.json
 
-# ---- 建置產物 ----
-/target/
-dependency-reduced-pom.xml
-*.jar
-!mvnw*.jar
-
-# ---- 執行期檔案 ----
+# ============================================================
+#  執行期產生的設定與狀態（只擋根目錄，不影響 resources）
+# ============================================================
+/config.txt
+/serversettings.json
+/*.json
+/*.txt
+!/README.txt
 /Playlists/
+/logs/
 *.lock
 *.log
-/logs/
 .slashcommands.hash
 
-# ---- IDE ----
+# 例外：專案資源必須進版控（i18n 語言檔、controller 模板等）
+!src/main/resources/**/*.json
+!src/main/resources/**/*.txt
+!src/test/resources/**/*.json
+
+# ============================================================
+#  建置產物
+# ============================================================
+/target/
+/test/
+dependency-reduced-pom.xml
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ============================================================
+#  IDE
+# ============================================================
 /.idea/
 /.vscode/
 /.cursor/
@@ -31,6 +48,8 @@ nb*.xml
 *.iml
 *.iws
 
-# ---- OS ----
+# ============================================================
+#  OS
+# ============================================================
 .DS_Store
 Thumbs.db

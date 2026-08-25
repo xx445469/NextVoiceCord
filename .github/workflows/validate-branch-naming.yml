@@ -1,0 +1,69 @@
+name: Validate Branch Naming
+
+# Validates branch naming conventions for feature/fix/chore/deps/release branches
+# Runs only on pull requests
+on:
+  pull_request:
+    types: [opened]
+
+# Cancel in-progress runs for the same PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-branch-name:
+    name: Validate Branch Naming Convention
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate branch name
+        run: |
+          # Extract branch name from pull request head ref
+          BRANCH_NAME="${{ github.head_ref }}"
+          
+          echo "Validating branch: $BRANCH_NAME"
+          
+          # Check each allowed pattern
+          VALID=false
+          
+          # feature/<slug>
+          if [[ "$BRANCH_NAME" =~ ^feature/[a-z0-9-]+$ ]]; then
+            VALID=true
+            echo "✓ Branch name matches pattern: feature/<slug>"
+          # fix/<slug>
+          elif [[ "$BRANCH_NAME" =~ ^fix/[a-z0-9-]+$ ]]; then
+            VALID=true
+            echo "✓ Branch name matches pattern: fix/<slug>"
+          # chore/<slug>
+          elif [[ "$BRANCH_NAME" =~ ^chore/[a-z0-9-]+$ ]]; then
+            VALID=true
+            echo "✓ Branch name matches pattern: chore/<slug>"
+          # deps/<slug>
+          elif [[ "$BRANCH_NAME" =~ ^deps/[a-z0-9-]+$ ]]; then
+            VALID=true
+            echo "✓ Branch name matches pattern: deps/<slug>"
+          # release/<version> (e.g., release/0.6.3 or release/0.6.3-rc1)
+          elif [[ "$BRANCH_NAME" =~ ^release/[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9-]+)?$ ]]; then
+            VALID=true
+            echo "✓ Branch name matches pattern: release/<version>"
+          fi
+          
+          if [[ "$VALID" == "false" ]]; then
+            echo "❌ Branch name '$BRANCH_NAME' does not match allowed patterns:"
+            echo ""
+            echo "Allowed branch patterns:"
+            echo "  - feature/<slug>     (e.g., feature/new-player-ui)"
+            echo "  - fix/<slug>         (e.g., fix/youtube-oauth)"
+            echo "  - chore/<slug>       (e.g., chore/update-dependencies)"
+            echo "  - deps/<slug>       (e.g., deps/youtube-source-pr195)"
+            echo "  - release/<version>  (e.g., release/0.6.3 or release/0.6.3-rc1)"
+            echo ""
+            echo "Branch names should:"
+            echo "  - Use lowercase letters, numbers, and hyphens only"
+            echo "  - Follow the pattern: <type>/<descriptive-slug>"
+            echo ""
+            exit 1
+          fi
+          
+          echo "✅ Branch name is valid!"

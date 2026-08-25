@@ -1,0 +1,70 @@
+# Build artifacts (Maven will rebuild these)
+target/
+
+# Version control
+.git/
+.gitignore
+.github/
+.circleci/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.cursor/
+*.swp
+*.swo
+*~
+.classpath
+.project
+.settings/
+
+# Test files (not needed for build)
+src/test/
+
+# Documentation (not needed in image)
+docs/
+README.md
+LICENSE
+*.md
+
+# Docker files (not needed in image)
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# User-specific config files
+config.txt
+serversettings.json
+*.json
+
+# Playlists and user data
+Playlists/
+playlists/
+
+# Scripts (not needed in image, except entrypoint)
+scripts/
+*.sh
+!docker/entrypoint.sh
+
+# Maven files
+dependency-reduced-pom.xml
+.mvn/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.cache
+
+# Environment files
+.env
+.env.*
+
+# Misc
+CNAME

@@ -1,0 +1,131 @@
+name: Publish Preview Image
+
+# Optional workflow for manually publishing preview Docker images from any branch/tag/SHA
+# This is separate from the main CI/CD pipeline and allows explicit preview builds
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to build (branch name, tag, or SHA)'
+        required: true
+        type: string
+      tag:
+        description: 'Optional tag suffix override (if empty, derived from ref)'
+        required: false
+        type: string
+      run_tests:
+        description: 'Run Maven tests before building Docker image'
+        required: false
+        type: boolean
+        default: true
+
+# Cancel in-progress runs for the same workflow and ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: arif-banai/musicbot
+
+jobs:
+  publish-preview:
+    name: Publish Preview Docker Image
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write  # Required for pushing to GHCR
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.ref }}
+          fetch-depth: 0  # Full history needed for git commands
+
+      - name: Extract metadata
+        id: metadata
+        run: |
+          # Extract project version from pom.xml
+          VERSION=$(grep -m 1 '<version>' pom.xml | sed 's/.*<version>\([^<]*\)<\/version>.*/\1/' | tr -d ' ')
+          SHA_SHORT=$(git rev-parse --short HEAD)
+          TIMESTAMP=$(git log -1 --format=%cI)
+          
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA_SHORT" >> "$GITHUB_OUTPUT"
+          echo "timestamp=$TIMESTAMP" >> "$GITHUB_OUTPUT"
+          echo "Extracted version: $VERSION, SHA: $SHA_SHORT"
+
+      - name: Set up Java Environment
+        # Run if run_tests is true (default) or explicitly set to true
+        if: ${{ github.event.inputs.run_tests != 'false' }}
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Maven tests
+        # Run if run_tests is true (default) or explicitly set to true
+        if: ${{ github.event.inputs.run_tests != 'false' }}
+        run: |
+          COMMIT_TIME=$(git log -1 --format=%cI)
+          mvn --batch-mode verify -Pdocker -Dproject.build.outputTimestamp=$COMMIT_TIME
+
+      - name: Sanitize tag suffix
+        id: sanitize
+        run: |
+          # Determine the tag suffix: use input.tag if provided, otherwise derive from ref
+          if [[ -n "${{ github.event.inputs.tag }}" ]]; then
+            TAG_SUFFIX="${{ github.event.inputs.tag }}"
+          else
+            # Derive from ref: strip refs/heads/, refs/tags/, refs/ prefixes
+            REF="${{ github.event.inputs.ref }}"
+            REF="${REF#refs/heads/}"
+            REF="${REF#refs/tags/}"
+            REF="${REF#refs/}"
+            TAG_SUFFIX="$REF"
+          fi
+          
+          # Sanitize: lowercase, replace '/' with '-', strip invalid chars to [a-z0-9._-]
+          # Truncate to 50 characters to avoid tag length issues
+          SANITIZED=$(echo "$TAG_SUFFIX" | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd '[:alnum:]._-' | cut -c1-50)
+          
+          echo "suffix=$SANITIZED" >> "$GITHUB_OUTPUT"
+          echo "Sanitized tag suffix: $SANITIZED"
+
+      - name: Generate Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        env:
+          # For multi-arch images, annotations must be attached to the image index
+          # GitHub Packages reads annotations from the index level for multi-arch images
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Tag rules for preview images:
+          # - preview-<sanitized-ref> tag
+          # - sha-<short> immutable tag
+          tags: |
+            type=raw,value=preview-${{ steps.sanitize.outputs.suffix }}
+            type=raw,value=sha-${{ steps.metadata.outputs.sha }}
+          # Labels are automatically generated from git context by metadata-action
+          # No need to specify them - metadata-action will create standard OCI labels
+
+      - name: Build and push Docker image
+        id: build
+        uses: ./.github/actions/docker-build
+        with:
+          tags: ${{ steps.meta.outputs.tags }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          timestamp: ${{ steps.metadata.outputs.timestamp }}
+          registry: ${{ env.REGISTRY }}
+          image-name: ${{ env.IMAGE_NAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print final tags
+        run: |
+          echo "Successfully published preview Docker image"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
+          echo "Image digest: ${{ steps.build.outputs.digest }}"

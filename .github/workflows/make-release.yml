@@ -1,0 +1,153 @@
+name: Make Release
+
+# Manual workflow to create a GitHub release
+# This sets the version, builds the JAR, and creates a release with tag
+# The tag will trigger docker-publish.yml to build and push the Docker image
+on:
+  workflow_dispatch:
+    inputs:
+      version_number:
+        description: 'Version Number (e.g., 0.6.3)'
+        required: true
+        type: string
+      info:
+        description: 'Description of this Release'
+        required: true
+        type: string
+      is_prerelease:
+        description: 'Mark this as a pre-release (for testing)'
+        required: false
+        type: boolean
+        default: false
+      ref:
+        description: 'Branch, tag, or SHA to build from (defaults to the branch this workflow is run from)'
+        required: false
+        type: string
+        default: ''
+
+# Prevent concurrent releases
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  build_jar:
+    name: Build JAR
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write  # Required to push version commit
+    outputs:
+      release_sha: ${{ steps.set-release-sha.outputs.sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+          fetch-depth: 0  # Full history needed for git commands
+
+      - name: Validate branch for regular releases
+        if: ${{ github.event.inputs.is_prerelease != 'true' }}
+        run: |
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$BRANCH" != "master" ]; then
+            echo "❌ Error: Regular releases can only be created from the 'master' branch."
+            echo "   Current branch: $BRANCH"
+            echo "   To create a pre-release from this branch, check the 'Mark this as a pre-release' option."
+            exit 1
+          fi
+          echo "✓ Branch validation passed: $BRANCH"
+
+      - name: Set up Java Environment
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Get initial SHA (for pre-releases)
+        id: get-initial-sha
+        if: ${{ github.event.inputs.is_prerelease == 'true' }}
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Set Version
+        run: |
+          mvn -B versions:set -DnewVersion=${{ github.event.inputs.version_number }}
+          mvn -B versions:commit
+
+      - name: Commit version bump
+        if: ${{ github.event.inputs.is_prerelease != 'true' }}
+        id: commit-version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Stage whatever the version plugin changed
+          git add pom.xml
+
+          # If nothing is staged, don't fail the workflow
+          if git diff --cached --quiet; then
+            echo "No version changes to commit (pom.xml already at ${{ github.event.inputs.version_number }})."
+            exit 0
+          fi
+
+          git commit -m "chore: bump version to ${{ github.event.inputs.version_number }}"
+          git push
+
+
+      - name: Set release SHA output
+        id: set-release-sha
+        run: |
+          if [ "${{ github.event.inputs.is_prerelease }}" == "true" ]; then
+            echo "sha=${{ steps.get-initial-sha.outputs.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build with Maven
+        run: |
+          COMMIT_TIME=$(git log -1 --format=%cI)
+          mvn --batch-mode verify -Dproject.build.outputTimestamp=$COMMIT_TIME
+
+      - name: Rename JAR
+        run: mv target/*-All.jar JMusicBot-${{ github.event.inputs.version_number }}.jar
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: jar
+          path: JMusicBot-${{ github.event.inputs.version_number }}.jar
+          if-no-files-found: error
+
+  create_release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build_jar
+    permissions:
+      contents: write  # Required to create releases and tags
+    steps:
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: jar
+          path: .
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: v${{ github.event.inputs.version_number }}
+          commit: ${{ needs.build_jar.outputs.release_sha }}
+          name: v${{ github.event.inputs.version_number }}
+          draft: true
+          prerelease: ${{ github.event.inputs.is_prerelease }}
+          artifacts: "*.jar"
+          body: |
+            ${{ github.event.inputs.info }}
+            
+            ---
+            ### Setup
+            https://jmusicbot.com/setup  
+            https://jmusicbot.com/config  
+            # Download: [JMusicBot-${{ github.event.inputs.version_number }}.jar](https://github.com/arif-banai/MusicBot/releases/download/v${{ github.event.inputs.version_number }}/JMusicBot-${{ github.event.inputs.version_number }}.jar)
