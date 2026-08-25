@@ -1,0 +1,442 @@
+{
+  "common": {
+    "errors": {
+      "serverOnly": "This can only be used in a server!",
+      "sameVoiceChannel": "You must be in the same voice channel to use this!",
+      "needVoiceChannel": "You need to be in a voice channel to use this!",
+      "cannotConnectVoice": "I cannot connect to {0}! Check my permissions.",
+      "voiceConnectFailed": "I am unable to connect to {0}!",
+      "mustBeInChannel": "You can only use that command in {0}!",
+      "mustBeListening": "You must be listening in {0} to use that!",
+      "afkChannel": "You cannot use that command in an AFK channel!",
+      "invalidButtonState": "Invalid button state.",
+      "invalidSelectionState": "Invalid selection state.",
+      "invalidModalState": "Invalid modal state.",
+      "invalidTrackSelection": "Invalid track selection.",
+      "invalidPlaylistSelection": "Invalid playlist selection.",
+      "invalidPositionSelected": "Invalid position selected.",
+      "trackNotOnPage": "That track isn't on this page!",
+      "playlistNotOnPage": "That playlist isn't on this page!",
+      "trackNoLongerExists": "That track doesn't exist!",
+      "playlistNoLongerExists": "That playlist doesn't exist!",
+      "noTrackSelected": "No track selected!",
+      "noPlaylistSelected": "No playlist selected!",
+      "notCommandInvokerButtons": "Only the user who ran the command can use these buttons!",
+      "notCommandInvokerThis": "Only the user who ran the command can use this!",
+      "notPanelOwner": "Only the user who opened this settings panel can use it.",
+      "notModalOwner": "Only the user who opened this settings dialog can submit it.",
+      "notSaveDialogOwner": "Only the user who opened the save dialog can submit it!",
+      "noPlayerInServer": "There is no player in this server!",
+      "noMusicPlaying": "There is no music playing!",
+      "noMusicPlayingToUse": "There must be music playing to use that!"
+    }
+  },
+
+  "permissions": {
+    "errors": {
+      "needManageServer": "You need the Manage Server permission to change settings.",
+      "needManageServerCommand": "You need the Manage Server permission to use this command!",
+      "ownerOnly": "Only the bot owner can use this command!",
+      "needDj": "You need to be a DJ to use this command!",
+      "needDjOrRequesterSkip": "You need to be a DJ or the requester to skip!",
+      "needDjOrRequesterPrevious": "You need to be a DJ or the requester to go back!",
+      "needDjUnpause": "Only DJs can unpause the player!",
+      "needDjOrOwnerEditPlaylist": "You need to be a DJ or the bot owner to edit playlists!",
+      "needDjOrOwnerSaveHistory": "You need to be a DJ or the bot owner to save history as a playlist!",
+      "needDjToUseButton": "You need to be a DJ to use this button!",
+      "needDjToMoveTracks": "You need to be a DJ to move tracks!",
+      "needDjToPlayImmediately": "You need to be a DJ to play a track immediately!",
+      "needDjToFavorite": "You need to be a DJ to add the current track to favorites!",
+      "needDjToSkipToPosition": "You need to be a DJ to skip to a specific position!",
+      "noManageMessages": "I don't have permission to manage messages in that channel."
+    }
+  },
+
+  "player": {
+    "resumed": "Resumed **{0}**.",
+    "restarted": "Restarted **{0}**",
+    "wentBack": "Went back to **{0}**",
+    "skipped": "Skipped!",
+    "skippedTrack": "Skipped **{0}**",
+    "forceSkipped": "Skipped **{0}** {1}",
+    "nowPlayingSet": "Now playing **{0}**",
+    "paused": "Paused **{0}**. Use `{1}` to unpause!",
+    "pauseAlready": "The player is already paused! Use `{0}` to unpause!",
+    "stopped": "The player has stopped and the queue has been cleared.",
+    "volumeCurrent": "Current volume is `{0}`",
+    "volumeChanged": "Volume changed from `{0}` to `{1}`",
+    "repeatModeSet": "Repeat mode is now `{0}`",
+    "favoriteAdded": "Added {0} to Favorites",
+    "favoriteAlready": "This track is already favorited",
+    "seekSuccess": "Successfully seeked to `{0}/{1}`!",
+    "requesterAutoplay": "(autoplay)",
+    "requesterUser": "(requested by **{0}**)",
+    "repeatMode": {
+      "off": "Off",
+      "all": "All",
+      "single": "Single"
+    },
+    "errors": {
+      "noPreviousTracks": "There are no previous tracks!",
+      "nothingPlaying": "Nothing is currently playing!",
+      "noTrackCurrentlyPlaying": "There is no track currently playing!",
+      "favoriteInvalidUri": "The current track does not have a valid URI or absolute path to save.",
+      "favoriteUnsupported": "Only URI references or absolute file paths for this OS can be added to favorites.",
+      "notSeekable": "This track is not seekable.",
+      "seekNotOwner": "You cannot seek **{0}** because you didn't add it!",
+      "invalidSeekFormat": "Invalid seek! Expected format: [+ | -] <HH:MM:SS | MM:SS | SS> or <0h0m0s>\nExamples: `1:02:23` `+1:10` `-90`, `1h10m`, `+90s`",
+      "seekPastDuration": "Cannot seek to `{0}` because the current track is `{1}` long!",
+      "seekGeneric": "An error occurred while trying to seek: {0}",
+      "trackTooLong": "This track (**{0}**) is longer than the allowed maximum: `{1}` > `{2}`",
+      "volumeInvalid": "Volume must be a valid integer between 0 and 150!",
+      "repeatInvalidChoice": "Valid options are `off`, `all` or `single`",
+      "playlistEntryLoadFailed": "That playlist entry could not be loaded.",
+      "playlistEntryNoMatches": "No matches found for that playlist entry.",
+      "playlistEntryLoadError": "Error loading playlist entry: {0}"
+    }
+  },
+
+  "nowplaying": {
+    "contentFull": "**Now Playing...**",
+    "contentMinimal": "**Now Playing in** {0}",
+    "source": "**Source:** {0}",
+    "sourceUnknown": "Unknown",
+    "volumeLine": "**Volume:** {0}%",
+    "repeatLine": "**Repeat:** {0}",
+    "queuedLabelOne": "1 song queued",
+    "queuedLabelMany": "{0} songs queued",
+    "embed": {
+      "author": "Author",
+      "duration": "Duration",
+      "queue": "Queue",
+      "volume": "Volume",
+      "repeat": "Repeat",
+      "requester": "Requester",
+      "noMusicTitle": "No music playing"
+    },
+    "button": {
+      "prev": "Prev",
+      "resume": "Resume",
+      "pause": "Pause",
+      "skip": "Skip",
+      "stop": "Stop",
+      "shuffle": "Shuffle",
+      "repeat": "Repeat",
+      "repeatAll": "Repeat All",
+      "repeatOne": "Repeat One",
+      "volumeUp": "Vol +",
+      "volumeDown": "Vol -",
+      "favorite": "Favorite"
+    },
+    "footer": {
+      "addedQueue": "{0} added to the queue.",
+      "addedFront": "{0} added to the front of the queue.",
+      "skippedForward": "{0} skipped forward.",
+      "addedFromHistory": "{0} added from history.",
+      "addedAllHistory": "{0} added entire history to queue.",
+      "playingFromHistory": "{0} playing from history.",
+      "addedPlaylist": "{0} added a playlist.",
+      "repeatingQueue": "Repeating the queue.",
+      "repeatingSong": "Repeating the song.",
+      "playingNextSong": "Playing next song."
+    },
+    "errors": {
+      "noMusicInServer": "There is no music playing in this server."
+    }
+  },
+
+  "queue": {
+    "trackAddedNow": "Added **{0}** (`{1}`) to begin playing",
+    "trackAddedAtPosition": "Added **{0}** (`{1}`) to the queue at position {2}",
+    "removed": "Removed **{0}** from the queue",
+    "removedByDJ": "Removed **{0}** from the queue (requested by {1})",
+    "removedBySomeone": "someone",
+    "removedAllMine": "Successfully removed your {0} entries.",
+    "removedAllByUser": "Successfully removed `{0}` entries from {1}.",
+    "moved": "Moved **{0}** from position `{1}` to `{2}`.",
+    "skippedTo": "Skipped to **{0}**",
+    "shuffledSuccess": "You successfully shuffled your {0} entries.",
+    "shuffledButton": "Shuffled {0} tracks!",
+    "nowEmpty": "The queue is now empty!",
+    "type": {
+      "linear": "Linear",
+      "fair": "Fair"
+    },
+    "embed": {
+      "title": "Current Queue",
+      "upNextSection": "**Up Next** *(select a track below)*",
+      "entries": "Entries",
+      "mode": "Mode",
+      "pageFooter": "Page {0} of {1}"
+    },
+    "button": {
+      "remove": "Remove",
+      "playNext": "Play Next",
+      "move": "Move",
+      "playNow": "Play Now"
+    },
+    "moveSelect": {
+      "placeholder": "Select new position",
+      "optionLabel": "Position {0}"
+    },
+    "errors": {
+      "empty": "There is nothing in the queue!",
+      "noMusicInQueue": "There is no music in the queue!",
+      "noSongsToRemove": "You don't have any songs in the queue!",
+      "userNoSongs": "**{0}** doesn't have any songs in the queue!",
+      "removeNotOwner": "You cannot remove **{0}** because you didn't add it!",
+      "cannotMoveSamePosition": "Can't move a track to the same position.",
+      "alreadyNext": "This track is already next!",
+      "invalidQueuePosition": "`{0}` is not a valid position in the queue!",
+      "invalidPositionRange": "Position must be a valid integer between 1 and {0}!",
+      "invalidPositionNotInteger": "`{0}` is not a valid integer!",
+      "invalidPositionOrAll": "Please provide a valid position number or 'all'.",
+      "emptyToShuffle": "You don't have any music in the queue to shuffle!",
+      "onlyOneToShuffle": "You only have one song in the queue!"
+    }
+  },
+
+  "history": {
+    "disabled": "Playback history is disabled by config (playback.maxHistorySize = 0).",
+    "nowEmpty": "Playback history is now empty!",
+    "queueAllSuccess": "Added **{0}** track(s) to the queue.",
+    "queueAllSkippedSuffix": " Skipped {0} track(s) (too long).",
+    "savedAsPlaylist": "Saved {0} tracks from history to playlist `{1}`!",
+    "embed": {
+      "title": "History Queue",
+      "section": "**Recently played** *(select a track below to queue or play)*",
+      "maxHistory": "Max history",
+      "pageFooter": "Page {0} of {1} | 1 = most recent"
+    },
+    "button": {
+      "save": "Save as playlist",
+      "queue": "Queue",
+      "queueAll": "Add all to queue"
+    },
+    "modal": {
+      "title": "Save history as playlist",
+      "labelPlaylistName": "Playlist name",
+      "playlistNamePlaceholder": "e.g. my-history"
+    },
+    "errors": {
+      "empty": "Playback history is empty!",
+      "positionRange": "Position must be between 1 and {0}!",
+      "allTooLong": "All {0} track(s) were too long to add.",
+      "noValidUrls": "No valid track URLs in history to save (only http(s) sources are stored).",
+      "emptyPlaylistName": "Please enter a playlist name!"
+    }
+  },
+
+  "playlist": {
+    "favoritesLabel": "⭐ favorites ⭐",
+    "queuedFromPlaylist": "Queued **{0}** track(s) from playlist `{1}`.",
+    "queuedFailedSuffix": " Failed to load {0} item(s).",
+    "nowPlayingReplaced": "Now playing playlist `{0}` (queue replaced). {1}",
+    "couldNotLoadLine": "`[?:??]` **Could not load**",
+    "embed": {
+      "title": "Playlists",
+      "section": "**Available playlists** *(select one below to queue or play now)*",
+      "detailsTitle": "Playlist: {0}",
+      "previewSection": "**Preview** *(first {0} entries)*",
+      "previewFooter": "Preview: first {0} entries",
+      "tracksSection": "**Tracks** *(select one below)*",
+      "unsavedSuffix": " • Unsaved changes",
+      "linkLabel": "Link"
+    },
+    "button": {
+      "refresh": "Refresh",
+      "details": "Details",
+      "save": "Save",
+      "discard": "Discard",
+      "moveTop": "Move top",
+      "moveBottom": "Move bottom",
+      "up1": "Up 1",
+      "down1": "Down 1",
+      "moveTo": "Move to",
+      "queueTrack": "Queue Track",
+      "queuePlaylist": "Queue Playlist",
+      "playPlaylist": "Play Playlist",
+      "unselect": "Unselect song",
+      "back": "Back"
+    },
+    "errors": {
+      "storageUnavailable": "Playlist storage is unavailable.",
+      "misconfigured": "Playlists storage is misconfigured (`{0}`). {1}",
+      "storageUnavailableWithPath": "Playlists storage is unavailable (`{0}`). {1}",
+      "pathNotConfigured": "(not configured)",
+      "noneInFolder": "There are no playlists in the Playlists folder!",
+      "noTracksLoaded": "No tracks were loaded from playlist `{0}`!",
+      "notFoundShort": "Playlist no longer exists.",
+      "notFoundRefresh": "Playlist no longer exists. Click Back and Refresh.",
+      "notFoundRefreshShort": "Playlist no longer exists. Click Refresh.",
+      "positionRange": "Position must be between 1 and {0}.",
+      "positionsRange": "Positions must be between 1 and {0}.",
+      "noUnsavedChanges": "There are no unsaved changes.",
+      "alreadyExistsChooseOther": "Playlist `{0}` already exists! Choose a different name.",
+      "invalidName": "Please provide a valid playlist name!"
+    }
+  },
+
+  "search": {
+    "loading": "Loading... `[{0}]`",
+    "searching": "Searching {0} for `{1}`...",
+    "resultsHeader": "Search results for `{0}`:",
+    "timedOut": "Search timed out.",
+    "playlistFoundPrompt": "\nThis track has a playlist of **{0}** tracks attached. Select 📥 to load playlist.",
+    "playlistLoadedAdditional": "\nLoaded **{0}** additional tracks!",
+    "playlistFoundAdded": "Found {0} with `{1}` entries; added to the queue!",
+    "playlistOmittedSuffix": "\nTracks longer than the allowed maximum (`{0}`) have been omitted.",
+    "selectMenu": {
+      "placeholder": "Select a track to play",
+      "optionDescriptionDuration": "Duration: {0}"
+    },
+    "embed": {
+      "title": "Search Results for: {0}",
+      "footer": "Select a track from the menu below"
+    },
+    "button": {
+      "loadPlaylist": "Load Playlist",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "missingQuery": "Please include a query.",
+      "noResults": "No results found for `{0}`.",
+      "loadFailed": "Error loading: {0}",
+      "loadFailedGeneric": "Error loading track.",
+      "playlistLoadFailedOrEmpty": "The playlist {0} could not be loaded or contained 0 entries",
+      "playlistAllTooLong": "All entries in this playlist {0}were longer than the allowed maximum (`{1}`)"
+    }
+  },
+
+  "voting": {
+    "status": "[{0} votes, {1}/{2} needed]",
+    "alreadyVoted": "You already voted to skip this song `{0}`",
+    "voteRegistered": "You voted to skip the song `{0}`",
+    "voteSkipSuccess": "You voted to skip the song `{0}`\nSkipped **{1}** {2}"
+  },
+
+  "settings": {
+    "updated": "Settings updated.",
+    "closeFailed": "Failed to close settings panel.",
+    "refreshFailed": "Failed to refresh settings panel. Run `/settings` again.",
+    "panel": {
+      "title": "NextVoiceCord Settings",
+      "description": "Settings panel for **{0}**.\nUse the buttons below to update values.",
+      "valueNone": "None",
+      "valueAny": "Any",
+      "skipDefault": "Default (`55%`)",
+      "footerNamed": "Only {0} can use these controls.",
+      "footerGeneric": "Only the command invoker can use these controls.",
+      "field": {
+        "textChannel": "Text Channel",
+        "voiceChannel": "Voice Channel",
+        "djRole": "DJ Role",
+        "prefix": "Prefix",
+        "skipRatio": "Skip Ratio",
+        "queueType": "Queue Type",
+        "nowPlaying": "Now-Playing",
+        "layout": "Layout",
+        "buttons": "Buttons"
+      },
+      "button": {
+        "toggleQueue": "Toggle Queue",
+        "toggleLayout": "Toggle Layout",
+        "toggleButtons": "Toggle Buttons",
+        "setTextChannel": "Set Text Channel",
+        "setVoiceChannel": "Set Voice Channel",
+        "setDjRole": "Set DJ Role",
+        "setPrefix": "Set Prefix",
+        "setSkip": "Set Skip %",
+        "clearText": "Clear Text",
+        "clearVoice": "Clear Voice",
+        "clearDj": "Clear DJ",
+        "close": "Close"
+      },
+      "select": {
+        "textChannelPlaceholder": "Choose a text channel",
+        "voiceChannelPlaceholder": "Choose a voice channel",
+        "djRolePlaceholder": "Choose the DJ role"
+      }
+    },
+    "modal": {
+      "setPrefixTitle": "Set prefix",
+      "setPrefixPlaceholder": "Custom prefix (empty clears)",
+      "setSkipTitle": "Set skip percentage",
+      "setSkipPlaceholder": "Integer from 0 to 100",
+      "labelValue": "Value"
+    },
+    "prompt": {
+      "textChannel": "Select a text channel:",
+      "voiceChannel": "Select a voice channel:",
+      "djRole": "Select the DJ role:"
+    },
+    "language": {
+      "current": "The bot language for this server is **{0}**.",
+      "set": "Language for this server set to **{0}**.",
+      "invalid": "Unknown language `{0}`. Available: {1}",
+      "optionDescription": "{0} ({1})"
+    },
+    "prefix": {
+      "cleared": "Prefix cleared.",
+      "set": "Custom prefix set to `{0}` on *{1}*",
+      "missing": "Please include a prefix or NONE"
+    },
+    "queueType": {
+      "current": "Current queue type is: `{0}`.",
+      "set": "Queue type was set to `{0}`.",
+      "invalid": "Invalid queue type. Valid types are: [{0}]"
+    },
+    "dj": {
+      "cleared": "DJ role cleared; Only Admins can use the DJ commands.",
+      "set": "DJ commands can now be used by users with the **{0}** role.",
+      "missingArg": "Please include a role name or NONE",
+      "notFound": "No Roles found matching \"{0}\""
+    },
+    "textChannel": {
+      "set": "Music commands can now only be used in {0}",
+      "cleared": "Music commands can now be used in any channel",
+      "mustBeText": "Please select a text channel!",
+      "missingArg": "Please include a text channel or NONE",
+      "notFound": "No Text Channels found matching \"{0}\""
+    },
+    "voiceChannel": {
+      "set": "Music can now only be played in {0}",
+      "cleared": "Music can now be played in any channel",
+      "mustBeVoice": "Please select a voice channel!",
+      "missingArg": "Please include a voice channel or NONE",
+      "notFound": "No Voice Channels found matching \"{0}\""
+    },
+    "skipRatio": {
+      "set": "Skip percentage has been set to `{0}%` of listeners on *{1}*",
+      "range": "The provided value must be between 0 and 100!",
+      "invalidNumber": "Please include an integer between 0 and 100 (default is 55). This number is the percentage of listening users that must vote to skip a song.",
+      "emptyError": "Please enter an integer between 0 and 100.",
+      "rangeError": "Skip percentage must be between 0 and 100."
+    },
+    "npLayout": {
+      "current": "Now-playing layout mode is `{0}` (effective: `{1}`).",
+      "set": "Now-playing layout mode set to `{0}` (effective: `{1}`).",
+      "invalid": "Valid values are `full`, `minimal`, or `inherit`."
+    },
+    "npButtons": {
+      "current": "Now-playing buttons mode is `{0}` (effective: `{1}`).",
+      "set": "Now-playing buttons mode set to `{0}` (effective: `{1}`).",
+      "invalid": "Valid values are `on`, `off`, or `inherit`."
+    },
+    "errors": {
+      "panelExpired": "This settings panel is expired. Run `/settings` again.",
+      "chooseTextChannel": "Please choose a text channel.",
+      "chooseVoiceChannel": "Please choose a voice channel.",
+      "chooseRole": "Please choose a role."
+    }
+  },
+
+  "clearchannel": {
+    "clearing": "Clearing channel...",
+    "cleared": "Cleared {0} messages.",
+    "error": "Error: {0}",
+    "errors": {
+      "noChannelConfigured": "No text channel is configured for this server. An admin can set one with `{0}`."
+    }
+  }
+}
