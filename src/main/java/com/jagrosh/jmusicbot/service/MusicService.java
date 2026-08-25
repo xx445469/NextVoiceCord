@@ -17,6 +17,7 @@ package com.jagrosh.jmusicbot.service;
 
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.PlaybackReason;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.v1.DJCommand;
@@ -107,15 +108,15 @@ public class MusicService
      *
      * @param guild  The guild
      * @param member The member to check
-     * @param output The output adapter for error messages
-     * @param action Description of the action being attempted (for error message)
+     * @param output     The output adapter for error messages
+     * @param messageKey The i18n key for the specific "need DJ to ..." error message
      * @return true if the member has DJ permission, false otherwise
      */
-    private boolean requireDJPermission(Guild guild, Member member, OutputAdapter output, String action)
+    private boolean requireDJPermission(Guild guild, Member member, OutputAdapter output, String messageKey)
     {
         if (!DJCommand.checkDJPermission(bot, guild, member))
         {
-            output.replyError("You need to be a DJ to " + action + "!");
+            output.replyError(bot.msg(guild, messageKey));
             return false;
         }
         return true;
@@ -152,22 +153,26 @@ public class MusicService
     public String formatTooLongError(AudioTrack track)
     {
         String title = FormatUtil.getTrackTitle(track);
-        return "This track (**" + title + "**) is longer than the allowed maximum: `"
-                + TimeUtil.formatTime(track.getDuration()) + "` > `" + bot.getConfig().getMaxTime() + "`";
+        return bot.msg(null, "player.errors.trackTooLong",
+                title, TimeUtil.formatTime(track.getDuration()), bot.getConfig().getMaxTime());
     }
 
     /**
      * Formats a success message for a track that was added to the queue.
      *
+     * @param guild    The guild (for language selection; may be null)
      * @param title    The track title
      * @param duration The track duration in milliseconds
      * @param position The queue position (0 = now playing, >0 = queue position)
      * @return Formatted success message
      */
-    public String formatTrackAddedMessage(String title, long duration, int position)
+    public String formatTrackAddedMessage(Guild guild, String title, long duration, int position)
     {
-        return "Added **" + FormatUtil.filter(title) + "** (`" + TimeUtil.formatTime(duration) + "`) "
-                + (position == 0 ? "to begin playing" : " to the queue at position " + position);
+        String filteredTitle = FormatUtil.filter(title);
+        String formattedDuration = TimeUtil.formatTime(duration);
+        return position == 0
+                ? bot.msg(guild, "queue.trackAddedNow", filteredTitle, formattedDuration)
+                : bot.msg(guild, "queue.trackAddedAtPosition", filteredTitle, formattedDuration, position);
     }
 
     /**
@@ -185,7 +190,7 @@ public class MusicService
      */
     private TrackAddResult addTrackInternal(Guild guild, Member member, AudioTrack track,
                                             String queryArgs, TextChannel channel,
-                                            TrackAdder adder, String reason, String logLocation)
+                                            TrackAdder adder, PlaybackReason.Kind reasonKind, String logLocation)
     {
         LOG.debug("Adding track to {}: guild={}, user={}, track={}",
                 logLocation, guild.getId(), member.getUser().getName(), track.getInfo().title);
@@ -198,7 +203,7 @@ public class MusicService
         }
 
         AudioHandler handler = getHandler(guild);
-        handler.setLastReason(member.getUser().getName() + " " + reason);
+        handler.setLastReason(PlaybackReason.by(reasonKind, member.getUser().getName()));
         QueuedTrack queuedTrack = new QueuedTrack(track,
                 new RequestMetadata(member.getUser(),
                         new RequestMetadata.RequestInfo(queryArgs, track.getInfo().uri),
@@ -206,7 +211,7 @@ public class MusicService
         int position = adder.add(handler, queuedTrack) + 1;
 
         String title = FormatUtil.getTrackTitle(track);
-        String message = formatTrackAddedMessage(title, track.getDuration(), position);
+        String message = formatTrackAddedMessage(guild, title, track.getDuration(), position);
 
         LOG.info("Track added to {}: guild={}, user={}, track=\"{}\", position={}",
                 logLocation, guild.getId(), member.getUser().getName(), title, position);
@@ -228,7 +233,7 @@ public class MusicService
                                           String queryArgs, TextChannel channel)
     {
         return addTrackInternal(guild, member, track, queryArgs, channel,
-                AudioHandler::addTrack, "added to the queue.", "queue");
+                AudioHandler::addTrack, PlaybackReason.Kind.ADDED_TO_QUEUE, "queue");
     }
 
     /**
@@ -245,7 +250,7 @@ public class MusicService
                                           String queryArgs, TextChannel channel)
     {
         return addTrackInternal(guild, member, track, queryArgs, channel,
-                AudioHandler::addTrackToFront, "added to the front of the queue.", "front of queue");
+                AudioHandler::addTrackToFront, PlaybackReason.Kind.ADDED_TO_FRONT, "front of queue");
     }
 
     // ========== Player Operations ==========
@@ -291,12 +296,12 @@ public class MusicService
                     LOG.info("Playback resumed: guild={}, user={}, track=\"{}\"",
                             guild.getId(), member.getUser().getName(), handler.getPlayer().getPlayingTrack().getInfo().title);
                     String resumedTitle = FormatUtil.getTrackTitle(handler.getPlayer().getPlayingTrack());
-                    output.replySuccess("Resumed **" + resumedTitle + "**.");
+                    output.replySuccess(bot.msg(guild, "player.resumed", resumedTitle));
                 }
                 else
                 {
                     LOG.debug("Resume rejected: user lacks DJ permission");
-                    output.replyError("Only DJs can unpause the player!");
+                    output.replyError(bot.msg(guild, "permissions.errors.needDjUnpause"));
                 }
                 return;
             }
@@ -322,7 +327,7 @@ public class MusicService
         if (!isDJ && handler.getRequestMetadata().getOwner() != member.getIdLong())
         {
             LOG.debug("Previous rejected: user lacks permission");
-            output.replyError("You need to be a DJ or the requester to go back!");
+            output.replyError(bot.msg(guild, "permissions.errors.needDjOrRequesterPrevious"));
             return;
         }
         AudioTrack playing = handler.getPlayer().getPlayingTrack();
@@ -331,7 +336,7 @@ public class MusicService
         {
             playing.setPosition(0);
             LOG.info("Track restarted: guild={}, track=\"{}\"", guild.getId(), playing.getInfo().title);
-            output.replySuccess("Restarted **" + FormatUtil.getTrackTitle(playing) + "**");
+            output.replySuccess(bot.msg(guild, "player.restarted", FormatUtil.getTrackTitle(playing)));
             return;
         }
 
@@ -350,7 +355,7 @@ public class MusicService
         if (history.isEmpty())
         {
             LOG.debug("Previous rejected: no history available");
-            output.replyError("There are no previous tracks!");
+            output.replyError(bot.msg(guild, "player.errors.noPreviousTracks"));
             return;
         }
 
@@ -365,23 +370,23 @@ public class MusicService
             handler.getPlayer().playTrack(previous.getTrack());
             LOG.info("Went to previous track: guild={}, track=\"{}\"",
                     guild.getId(), previous.getTrack().getInfo().title);
-            output.replySuccess("Went back to **" + FormatUtil.getTrackTitle(previous.getTrack()) + "**");
+            output.replySuccess(bot.msg(guild, "player.wentBack", FormatUtil.getTrackTitle(previous.getTrack())));
         }
         else
         {
             LOG.debug("Previous failed: no previous tracks in history");
-            output.replyError("There are no previous tracks!");
+            output.replyError(bot.msg(guild, "player.errors.noPreviousTracks"));
         }
     }
 
     public void shuffle(Guild guild, Member member, int startIndex, OutputAdapter output)
     {
-        if (!requireDJPermission(guild, member, output, "use this button"))
+        if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToUseButton"))
             return;
 
         AudioHandler handler = getHandler(guild);
         int s = handler.getQueue().shuffle(startIndex);
-        output.replySuccess("Shuffled " + s + " tracks!");
+        output.replySuccess(bot.msg(guild, "queue.shuffledButton", s));
     }
 
     /**
@@ -405,7 +410,7 @@ public class MusicService
 
     public void cycleRepeatMode(Guild guild, Member member, OutputAdapter output)
     {
-        if (!requireDJPermission(guild, member, output, "use this button"))
+        if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToUseButton"))
             return;
 
         AudioHandler handler = getHandler(guild);
@@ -452,7 +457,7 @@ public class MusicService
 
     public void adjustVolume(Guild guild, Member member, int change, OutputAdapter output)
     {
-        if (!requireDJPermission(guild, member, output, "use this button"))
+        if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToUseButton"))
             return;
 
         AudioHandler handler = getHandler(guild);
@@ -519,7 +524,7 @@ public class MusicService
 
     public void stop(Guild guild, Member member, OutputAdapter output)
     {
-        if (!requireDJPermission(guild, member, output, "use this button"))
+        if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToUseButton"))
             return;
 
         AudioHandler handler = getHandler(guild);
@@ -547,7 +552,7 @@ public class MusicService
 
     public void pause(Guild guild, Member member, OutputAdapter output)
     {
-        if (!requireDJPermission(guild, member, output, "use this button"))
+        if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToUseButton"))
             return;
 
         AudioHandler handler = getHandler(guild);
@@ -595,7 +600,7 @@ public class MusicService
         RequestMetadata skipRm = handler.getRequestMetadata();
         if (!isDJ && skipRm.getOwner() != member.getIdLong())
         {
-            output.replyError("You need to be a DJ or the requester to skip!");
+            output.replyError(bot.msg(guild, "permissions.errors.needDjOrRequesterSkip"));
             return;
         }
         if (getSettings(guild).getRepeatMode() == RepeatMode.ALL)
@@ -604,9 +609,9 @@ public class MusicService
             if (track != null)
                 handler.addTrack(new QueuedTrack(track.makeClone(), track.getUserData(RequestMetadata.class)));
         }
-        handler.setLastReason(member.getUser().getName() + " skipped forward.");
+        handler.setLastReason(PlaybackReason.by(PlaybackReason.Kind.SKIPPED_FORWARD, member.getUser().getName()));
         handler.getPlayer().stopTrack();
-        output.replySuccess("Skipped!");
+        output.replySuccess(bot.msg(guild, "player.skipped"));
     }
 
     /**
@@ -630,7 +635,9 @@ public class MusicService
 
         RequestMetadata rm = handler.getRequestMetadata();
         String trackTitle = FormatUtil.getTrackTitle(track);
-        String requesterInfo = rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + FormatUtil.formatUsername(rm.user) + "**)";
+        String requesterInfo = rm.getOwner() == 0L
+                ? bot.msg(guild, "player.requesterAutoplay")
+                : bot.msg(guild, "player.requesterUser", FormatUtil.formatUsername(rm.user));
 
         handler.getPlayer().stopTrack();
 
@@ -674,7 +681,7 @@ public class MusicService
             handler.getPlayer().stopTrack();
             LOG.info("Track skipped by owner/instant skip: guild={}, user={}, track=\"{}\"",
                     guild.getId(), member.getUser().getName(), trackTitle);
-            output.replySuccess("Skipped **" + trackTitle + "**");
+            output.replySuccess(bot.msg(guild, "player.skippedTrack", trackTitle));
             return;
         }
 
@@ -693,58 +700,60 @@ public class MusicService
                 .count();
         int required = (int) Math.ceil(listeners * skipRatio);
 
-        String voteStatus = "[" + skippers + " votes, " + required + "/" + listeners + " needed]";
+        String voteStatus = bot.msg(guild, "voting.status", skippers, required, listeners);
 
         if (alreadyVoted)
         {
             LOG.debug("Duplicate skip vote: guild={}, user={}", guild.getId(), member.getUser().getName());
-            output.replyWarning("You already voted to skip this song `" + voteStatus + "`");
+            output.replyWarning(bot.msg(guild, "voting.alreadyVoted", voteStatus));
         }
         else if (skippers >= required)
         {
             String trackTitle = FormatUtil.getTrackTitle(handler.getPlayer().getPlayingTrack());
-            String requester = rm.getOwner() == 0L ? "(autoplay)" : "(requested by **" + FormatUtil.formatUsername(rm.user) + "**)";
+            String requester = rm.getOwner() == 0L
+                    ? bot.msg(guild, "player.requesterAutoplay")
+                    : bot.msg(guild, "player.requesterUser", FormatUtil.formatUsername(rm.user));
             handler.getPlayer().stopTrack();
             LOG.info("Track skipped by vote: guild={}, track=\"{}\", votes={}/{}",
                     guild.getId(), trackTitle, skippers, required);
-            output.replySuccess("You voted to skip the song `" + voteStatus + "`\nSkipped **" + trackTitle + "** " + requester);
+            output.replySuccess(bot.msg(guild, "voting.voteSkipSuccess", voteStatus, trackTitle, requester));
         }
         else
         {
             LOG.debug("Skip vote registered: guild={}, user={}, votes={}/{}",
                     guild.getId(), member.getUser().getName(), skippers, required);
-            output.replySuccess("You voted to skip the song `" + voteStatus + "`");
+            output.replySuccess(bot.msg(guild, "voting.voteRegistered", voteStatus));
         }
     }
 
     public void addCurrentTrackToFavorites(Guild guild, Member member, OutputAdapter output)
     {
-        if (!requireDJPermission(guild, member, output, "add the current track to favorites"))
+        if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToFavorite"))
             return;
 
         AudioHandler handler = getHandler(guild);
         if (handler == null)
         {
-            output.replyError("There is no player in this server!");
+            output.replyError(bot.msg(guild, "common.errors.noPlayerInServer"));
             return;
         }
 
         AudioTrack currentTrack = handler.getPlayer().getPlayingTrack();
         if (currentTrack == null)
         {
-            output.replyError("There is no track currently playing!");
+            output.replyError(bot.msg(guild, "player.errors.noTrackCurrentlyPlaying"));
             return;
         }
 
         String favoriteEntry = currentTrack.getInfo().uri;
         if (favoriteEntry == null || favoriteEntry.isBlank())
         {
-            output.replyError("The current track does not have a valid URI or absolute path to save.");
+            output.replyError(bot.msg(guild, "player.errors.favoriteInvalidUri"));
             return;
         }
         if (!isSupportedFavoriteEntry(favoriteEntry))
         {
-            output.replyError("Only URI references or absolute file paths for this OS can be added to favorites.");
+            output.replyError(bot.msg(guild, "player.errors.favoriteUnsupported"));
             return;
         }
 
@@ -752,7 +761,7 @@ public class MusicService
                 bot.getPlaylistLoader().appendItemIfAbsentResult(FAVORITES_PLAYLIST_NAME, favoriteEntry);
         if (!appendResult.isSuccess())
         {
-            output.replyError(mapPlaylistErrorToMessage(appendResult.getError()));
+            output.replyError(mapPlaylistErrorToMessage(guild, appendResult.getError()));
             return;
         }
 
@@ -760,13 +769,13 @@ public class MusicService
         {
             handler.markCurrentTrackFavorited(favoriteEntry);
             output.editNowPlaying(handler);
-            output.replyWarning("This track is already favorited");
+            output.replyWarning(bot.msg(guild, "player.favoriteAlready"));
             return;
         }
 
         handler.markCurrentTrackFavorited(favoriteEntry);
         output.editNowPlaying(handler);
-        output.replySuccess("Added " + FormatUtil.filter(FormatUtil.getTrackTitle(currentTrack)) + " to Favorites");
+        output.replySuccess(bot.msg(guild, "player.favoriteAdded", FormatUtil.filter(FormatUtil.getTrackTitle(currentTrack))));
     }
 
     private static boolean isSupportedFavoriteEntry(String value)
@@ -827,14 +836,14 @@ public class MusicService
         if (playingTrack == null)
         {
             LOG.debug("Seek rejected: no track playing in guild={}", guild.getId());
-            output.replyError("There is no track currently playing!");
+            output.replyError(bot.msg(guild, "player.errors.noTrackCurrentlyPlaying"));
             return;
         }
 
         if (!playingTrack.isSeekable())
         {
             LOG.debug("Seek rejected: track not seekable - track=\"{}\"", playingTrack.getInfo().title);
-            output.replyError("This track is not seekable.");
+            output.replyError(bot.msg(guild, "player.errors.notSeekable"));
             return;
         }
 
@@ -844,7 +853,7 @@ public class MusicService
         {
             LOG.debug("Seek rejected: user lacks permission - user={}, track=\"{}\"",
                     member.getUser().getName(), playingTrack.getInfo().title);
-            output.replyError("You cannot seek **" + FormatUtil.getTrackTitle(playingTrack) + "** because you didn't add it!");
+            output.replyError(bot.msg(guild, "player.errors.seekNotOwner", FormatUtil.getTrackTitle(playingTrack)));
             return;
         }
 
@@ -852,7 +861,7 @@ public class MusicService
         if (seekTime == null)
         {
             LOG.debug("Seek rejected: invalid time format - input=\"{}\"", timeString);
-            output.replyError("Invalid seek! Expected format: [+ | -] <HH:MM:SS | MM:SS | SS> or <0h0m0s>\nExamples: `1:02:23` `+1:10` `-90`, `1h10m`, `+90s`");
+            output.replyError(bot.msg(guild, "player.errors.invalidSeekFormat"));
             return;
         }
 
@@ -868,7 +877,8 @@ public class MusicService
         {
             LOG.debug("Seek rejected: position {} exceeds track duration {}",
                     TimeUtil.formatTime(seekMilliseconds), TimeUtil.formatTime(trackDuration));
-            output.replyError("Cannot seek to `" + TimeUtil.formatTime(seekMilliseconds) + "` because the current track is `" + TimeUtil.formatTime(trackDuration) + "` long!");
+            output.replyError(bot.msg(guild, "player.errors.seekPastDuration",
+                    TimeUtil.formatTime(seekMilliseconds), TimeUtil.formatTime(trackDuration)));
             return;
         }
 
@@ -878,13 +888,14 @@ public class MusicService
             LOG.info("Seek successful: guild={}, user={}, track=\"{}\", position={}",
                     guild.getId(), member.getUser().getName(), playingTrack.getInfo().title,
                     TimeUtil.formatTime(playingTrack.getPosition()));
-            output.replySuccess("Successfully seeked to `" + TimeUtil.formatTime(playingTrack.getPosition()) + "/" + TimeUtil.formatTime(trackDuration) + "`!");
+            output.replySuccess(bot.msg(guild, "player.seekSuccess",
+                    TimeUtil.formatTime(playingTrack.getPosition()), TimeUtil.formatTime(trackDuration)));
         }
         catch (Exception e)
         {
             LOG.error("Seek failed: guild={}, track=\"{}\", error={}",
                     guild.getId(), playingTrack.getInfo().title, e.getMessage(), e);
-            output.replyError("An error occurred while trying to seek: " + e.getMessage());
+            output.replyError(bot.msg(guild, "player.errors.seekGeneric", e.getMessage()));
         }
     }
 
@@ -894,10 +905,10 @@ public class MusicService
     {
         AudioHandler handler = getHandler(guild);
 
-        if (!requireNonEmptyQueue(handler, output))
+        if (!requireNonEmptyQueue(guild, handler, output))
             return;
 
-        if (!validateQueuePosition(handler, position, output))
+        if (!validateQueuePosition(guild, handler, position, output))
             return;
 
         boolean isDJ = DJCommand.checkDJPermission(bot, guild, member);
@@ -906,7 +917,7 @@ public class MusicService
         if (qt.getIdentifier() == member.getIdLong())
         {
             handler.getQueue().remove(position - 1);
-            output.replySuccess("Removed **" + FormatUtil.getTrackTitle(qt.getTrack()) + "** from the queue");
+            output.replySuccess(bot.msg(guild, "queue.removed", FormatUtil.getTrackTitle(qt.getTrack())));
         }
         else if (isDJ)
         {
@@ -918,12 +929,12 @@ public class MusicService
             }
             catch (Exception ignored) {}
 
-            output.replySuccess("Removed **" + FormatUtil.getTrackTitle(qt.getTrack())
-                    + "** from the queue (requested by " + (u == null ? "someone" : "**" + u.getName() + "**") + ")");
+            String requester = u == null ? bot.msg(guild, "queue.removedBySomeone") : "**" + u.getName() + "**";
+            output.replySuccess(bot.msg(guild, "queue.removedByDJ", FormatUtil.getTrackTitle(qt.getTrack()), requester));
         }
         else
         {
-            output.replyError("You cannot remove **" + FormatUtil.getTrackTitle(qt.getTrack()) + "** because you didn't add it!");
+            output.replyError(bot.msg(guild, "queue.errors.removeNotOwner", FormatUtil.getTrackTitle(qt.getTrack())));
         }
     }
 
@@ -931,17 +942,17 @@ public class MusicService
     {
         AudioHandler handler = getHandler(guild);
 
-        if (!requireNonEmptyQueue(handler, output))
+        if (!requireNonEmptyQueue(guild, handler, output))
             return;
 
         int count = handler.getQueue().removeAll(member.getIdLong());
         if (count == 0)
         {
-            output.replyWarning("You don't have any songs in the queue!");
+            output.replyWarning(bot.msg(guild, "queue.errors.noSongsToRemove"));
         }
         else
         {
-            output.replySuccess("Successfully removed your " + count + " entries.");
+            output.replySuccess(bot.msg(guild, "queue.removedAllMine", count));
         }
     }
 
@@ -978,12 +989,12 @@ public class MusicService
 
     public void moveTrack(Guild guild, Member member, int from, int to, OutputAdapter output)
     {
-        if (!requireDJPermission(guild, member, output, "move tracks"))
+        if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToMoveTracks"))
             return;
 
         if (from == to)
         {
-            output.replyError("Can't move a track to the same position.");
+            output.replyError(bot.msg(guild, "queue.errors.cannotMoveSamePosition"));
             return;
         }
 
@@ -992,18 +1003,18 @@ public class MusicService
 
         if (isInvalidPosition(queue, from))
         {
-            output.replyError("`" + from + "` is not a valid position in the queue!");
+            output.replyError(bot.msg(guild, "queue.errors.invalidQueuePosition", from));
             return;
         }
         if (isInvalidPosition(queue, to))
         {
-            output.replyError("`" + to + "` is not a valid position in the queue!");
+            output.replyError(bot.msg(guild, "queue.errors.invalidQueuePosition", to));
             return;
         }
 
         QueuedTrack track = queue.moveItem(from - 1, to - 1);
         String trackTitle = FormatUtil.getTrackTitle(track.getTrack());
-        output.replySuccess("Moved **" + trackTitle + "** from position `" + from + "` to `" + to + "`.");
+        output.replySuccess(bot.msg(guild, "queue.moved", trackTitle, from, to));
     }
 
     /**
@@ -1019,7 +1030,7 @@ public class MusicService
     {
         if (position == 1)
         {
-            output.replyWarning("This track is already next!");
+            output.replyWarning(bot.msg(guild, "queue.errors.alreadyNext"));
             return;
         }
         moveTrack(guild, member, position, 1, output);
@@ -1036,7 +1047,7 @@ public class MusicService
      */
     public void playNow(Guild guild, Member member, int position, OutputAdapter output)
     {
-        if (!requireDJPermission(guild, member, output, "play a track immediately"))
+        if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToPlayImmediately"))
             return;
 
         AudioHandler handler = getHandler(guild);
@@ -1044,7 +1055,7 @@ public class MusicService
 
         if (isInvalidPosition(queue, position))
         {
-            output.replyError("`" + position + "` is not a valid position in the queue!");
+            output.replyError(bot.msg(guild, "queue.errors.invalidQueuePosition", position));
             return;
         }
 
@@ -1061,7 +1072,7 @@ public class MusicService
         // Skip the currently playing track to start the moved track immediately
         handler.getPlayer().stopTrack();
 
-        output.replySuccess("Now playing **" + trackTitle + "**");
+        output.replySuccess(bot.msg(guild, "player.nowPlayingSet", trackTitle));
     }
 
     /**
@@ -1111,18 +1122,18 @@ public class MusicService
 
     public void skipTo(Guild guild, Member member, int position, OutputAdapter output)
     {
-        if (!requireDJPermission(guild, member, output, "skip to a specific position"))
+        if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToSkipToPosition"))
             return;
 
         AudioHandler handler = getHandler(guild);
 
-        if (!validateQueuePosition(handler, position, output))
+        if (!validateQueuePosition(guild, handler, position, output))
             return;
 
         handler.getQueue().skip(position - 1);
         String trackTitle = FormatUtil.getTrackTitle(handler.getQueue().get(0).getTrack());
         handler.getPlayer().stopTrack();
-        output.replySuccess("Skipped to **" + trackTitle + "**");
+        output.replySuccess(bot.msg(guild, "queue.skippedTo", trackTitle));
     }
 
     /**
@@ -1313,7 +1324,7 @@ public class MusicService
         AudioHandler handler = getHandler(guild);
         if (handler == null)
         {
-            output.replyError("There is no player in this server!");
+            output.replyError(bot.msg(guild, "common.errors.noPlayerInServer"));
             return;
         }
 
@@ -1324,12 +1335,12 @@ public class MusicService
         }
         if (history.isEmpty())
         {
-            output.replyError("Playback history is empty!");
+            output.replyError(bot.msg(guild, "history.errors.empty"));
             return;
         }
         if (historyPosition < 1 || historyPosition > history.size())
         {
-            output.replyError("Position must be between 1 and " + history.size() + "!");
+            output.replyError(bot.msg(guild, "history.errors.positionRange", history.size()));
             return;
         }
 
@@ -1348,10 +1359,10 @@ public class MusicService
                 new RequestMetadata.RequestInfo(qt.getTrack().getInfo().uri, qt.getTrack().getInfo().uri),
                 channel.getIdLong());
         QueuedTrack newQt = new QueuedTrack(track, rm);
-        handler.setLastReason(member.getUser().getName() + " added from history.");
+        handler.setLastReason(PlaybackReason.by(PlaybackReason.Kind.ADDED_FROM_HISTORY, member.getUser().getName()));
         int position = handler.addTrack(newQt) + 1;
         String title = FormatUtil.getTrackTitle(track);
-        output.replySuccess(formatTrackAddedMessage(title, track.getDuration(), position));
+        output.replySuccess(formatTrackAddedMessage(guild, title, track.getDuration(), position));
     }
 
     /**
@@ -1368,7 +1379,7 @@ public class MusicService
         AudioHandler handler = getHandler(guild);
         if (handler == null)
         {
-            output.replyError("There is no player in this server!");
+            output.replyError(bot.msg(guild, "common.errors.noPlayerInServer"));
             return;
         }
 
@@ -1379,11 +1390,11 @@ public class MusicService
         }
         if (history.isEmpty())
         {
-            output.replyError("Playback history is empty!");
+            output.replyError(bot.msg(guild, "history.errors.empty"));
             return;
         }
 
-        handler.setLastReason(member.getUser().getName() + " added entire history to queue.");
+        handler.setLastReason(PlaybackReason.by(PlaybackReason.Kind.ADDED_ALL_HISTORY, member.getUser().getName()));
         int added = 0;
         int skipped = 0;
 
@@ -1410,13 +1421,13 @@ public class MusicService
 
         if (added == 0 && skipped > 0)
         {
-            output.replyError("All " + skipped + " track(s) were too long to add.");
+            output.replyError(bot.msg(guild, "history.errors.allTooLong", skipped));
             return;
         }
-        String message = "Added **" + added + "** track(s) to the queue.";
+        String message = bot.msg(guild, "history.queueAllSuccess", added);
         if (skipped > 0)
         {
-            message += " Skipped " + skipped + " track(s) (too long).";
+            message += bot.msg(guild, "history.queueAllSkippedSuffix", skipped);
         }
         output.replySuccess(message);
         if (handler.getPlayer().getPlayingTrack() != null)
@@ -1439,7 +1450,7 @@ public class MusicService
         AudioHandler handler = getHandler(guild);
         if (handler == null)
         {
-            output.replyError("There is no player in this server!");
+            output.replyError(bot.msg(guild, "common.errors.noPlayerInServer"));
             return;
         }
 
@@ -1450,12 +1461,12 @@ public class MusicService
         }
         if (history.isEmpty())
         {
-            output.replyError("Playback history is empty!");
+            output.replyError(bot.msg(guild, "history.errors.empty"));
             return;
         }
         if (historyPosition < 1 || historyPosition > history.size())
         {
-            output.replyError("Position must be between 1 and " + history.size() + "!");
+            output.replyError(bot.msg(guild, "history.errors.positionRange", history.size()));
             return;
         }
 
@@ -1474,29 +1485,36 @@ public class MusicService
                 new RequestMetadata.RequestInfo(qt.getTrack().getInfo().uri, qt.getTrack().getInfo().uri),
                 channel.getIdLong());
         QueuedTrack newQt = new QueuedTrack(track, rm);
-        handler.setLastReason(member.getUser().getName() + " playing from history.");
+        handler.setLastReason(PlaybackReason.by(PlaybackReason.Kind.PLAYING_FROM_HISTORY, member.getUser().getName()));
         handler.addTrackToFront(newQt);
         if (handler.getPlayer().getPlayingTrack() != null)
         {
             handler.getPlayer().stopTrack();
         }
         String title = FormatUtil.getTrackTitle(track);
-        output.replySuccess("Now playing **" + FormatUtil.filter(title) + "**");
+        output.replySuccess(bot.msg(guild, "player.nowPlayingSet", FormatUtil.filter(title)));
     }
 
     private String mapPlaylistErrorToMessage(PlaylistLoader.PlaylistError error)
     {
+        return mapPlaylistErrorToMessage(null, error);
+    }
+
+    private String mapPlaylistErrorToMessage(Guild guild, PlaylistLoader.PlaylistError error)
+    {
         if (error == null)
         {
-            return "Playlist storage is unavailable.";
+            return bot.msg(guild, "playlist.errors.storageUnavailable");
         }
-        String path = error.getConfiguredPath() == null ? "(not configured)" : error.getConfiguredPath();
+        String path = error.getConfiguredPath() == null
+                ? bot.msg(guild, "playlist.errors.pathNotConfigured")
+                : error.getConfiguredPath();
         return switch (error.getType())
         {
             case INVALID_CONFIG ->
-                    "Playlists storage is misconfigured (`" + path + "`). " + error.getMessage();
+                    bot.msg(guild, "playlist.errors.misconfigured", path, error.getMessage());
             case STORAGE_UNAVAILABLE ->
-                    "Playlists storage is unavailable (`" + path + "`). " + error.getMessage();
+                    bot.msg(guild, "playlist.errors.storageUnavailableWithPath", path, error.getMessage());
             case PLAYLIST_NOT_FOUND -> error.getMessage();
         };
     }
@@ -1525,7 +1543,7 @@ public class MusicService
         PlaylistLoader.PlaylistResult<Playlist> playlistResult = bot.getPlaylistLoader().getPlaylistResult(playlistName);
         if (!playlistResult.isSuccess())
         {
-            output.replyError(mapPlaylistErrorToMessage(playlistResult.getError()));
+            output.replyError(mapPlaylistErrorToMessage(guild, playlistResult.getError()));
             return;
         }
         Playlist playlist = playlistResult.getValue();
@@ -1537,7 +1555,7 @@ public class MusicService
         }
         if (handler == null)
         {
-            output.replyError("There is no player in this server!");
+            output.replyError(bot.msg(guild, "common.errors.noPlayerInServer"));
             return;
         }
 
@@ -1552,18 +1570,14 @@ public class MusicService
             int errorCount = playlist.getErrors().size();
             if (loadedCount == 0)
             {
-                output.replyWarning("No tracks were loaded from playlist `" + playlist.getName() + "`!");
+                output.replyWarning(bot.msg(guild, "playlist.errors.noTracksLoaded", playlist.getName()));
                 return;
             }
 
-            StringBuilder msg = new StringBuilder("Queued **")
-                    .append(loadedCount)
-                    .append("** track(s) from playlist `")
-                    .append(playlist.getName())
-                    .append("`.");
+            StringBuilder msg = new StringBuilder(bot.msg(guild, "playlist.queuedFromPlaylist", loadedCount, playlist.getName()));
             if (errorCount > 0)
             {
-                msg.append(" Failed to load ").append(errorCount).append(" item(s).");
+                msg.append(bot.msg(guild, "playlist.queuedFailedSuffix", errorCount));
             }
             output.replySuccess(msg.toString());
             if (finalHandler.getPlayer().getPlayingTrack() != null)
@@ -1587,7 +1601,7 @@ public class MusicService
         PlaylistLoader.PlaylistResult<Playlist> playlistResult = bot.getPlaylistLoader().getPlaylistResult(playlistName);
         if (!playlistResult.isSuccess())
         {
-            output.replyError(mapPlaylistErrorToMessage(playlistResult.getError()));
+            output.replyError(mapPlaylistErrorToMessage(guild, playlistResult.getError()));
             return;
         }
 
@@ -1598,7 +1612,7 @@ public class MusicService
         }
         if (handler == null)
         {
-            output.replyError("There is no player in this server!");
+            output.replyError(bot.msg(guild, "common.errors.noPlayerInServer"));
             return;
         }
 
@@ -1608,7 +1622,7 @@ public class MusicService
             @Override
             public void replySuccess(String content)
             {
-                output.replySuccess("Now playing playlist `" + playlistName + "` (queue replaced). " + content);
+                output.replySuccess(bot.msg(guild, "playlist.nowPlayingReplaced", playlistName, content));
             }
 
             @Override
@@ -1690,14 +1704,15 @@ public class MusicService
 
     public PlaylistDraftMutationResult removePlaylistDraftItem(PlaylistDraftContext context, int position)
     {
+        Guild guild = guildOf(context);
         PlaylistDraftState state = getOrCreatePlaylistDraftState(context);
         if (state == null)
         {
-            return PlaylistDraftMutationResult.error("Playlist no longer exists.");
+            return PlaylistDraftMutationResult.error(bot.msg(guild, "playlist.errors.notFoundShort"));
         }
         if (position < 1 || position > state.items.size())
         {
-            return PlaylistDraftMutationResult.error("Position must be between 1 and " + state.items.size() + ".");
+            return PlaylistDraftMutationResult.error(bot.msg(guild, "playlist.errors.positionRange", state.items.size()));
         }
         state.items.remove(position - 1);
         state.dirty = true;
@@ -1707,15 +1722,16 @@ public class MusicService
 
     public PlaylistDraftMutationResult movePlaylistDraftItem(PlaylistDraftContext context, int fromPosition, int toPosition)
     {
+        Guild guild = guildOf(context);
         PlaylistDraftState state = getOrCreatePlaylistDraftState(context);
         if (state == null)
         {
-            return PlaylistDraftMutationResult.error("Playlist no longer exists.");
+            return PlaylistDraftMutationResult.error(bot.msg(guild, "playlist.errors.notFoundShort"));
         }
         int size = state.items.size();
         if (fromPosition < 1 || fromPosition > size || toPosition < 1 || toPosition > size)
         {
-            return PlaylistDraftMutationResult.error("Positions must be between 1 and " + size + ".");
+            return PlaylistDraftMutationResult.error(bot.msg(guild, "playlist.errors.positionsRange", size));
         }
         if (fromPosition == toPosition)
         {
@@ -1730,25 +1746,31 @@ public class MusicService
 
     public PlaylistDraftMutationResult savePlaylistDraft(PlaylistDraftContext context)
     {
+        Guild guild = guildOf(context);
         PlaylistDraftState state = playlistDrafts.get(toDraftKey(context));
         if (state == null)
         {
-            return PlaylistDraftMutationResult.error("There are no unsaved changes.");
+            return PlaylistDraftMutationResult.error(bot.msg(guild, "playlist.errors.noUnsavedChanges"));
         }
         if (!state.dirty)
         {
-            return PlaylistDraftMutationResult.error("There are no unsaved changes.");
+            return PlaylistDraftMutationResult.error(bot.msg(guild, "playlist.errors.noUnsavedChanges"));
         }
         String content = String.join(System.lineSeparator(), state.items);
         PlaylistLoader.PlaylistResult<Void> writeResult = bot.getPlaylistLoader()
                 .writePlaylistResult(context.playlistName(), content);
         if (!writeResult.isSuccess())
         {
-            return PlaylistDraftMutationResult.error(mapPlaylistErrorToMessage(writeResult.getError()));
+            return PlaylistDraftMutationResult.error(mapPlaylistErrorToMessage(guild, writeResult.getError()));
         }
         state.dirty = false;
         state.revision++;
         return PlaylistDraftMutationResult.success(state.items.size(), false, state.revision);
+    }
+
+    private Guild guildOf(PlaylistDraftContext context)
+    {
+        return bot.getJDA().getGuildById(context.guildId());
     }
 
     public void discardPlaylistDraft(PlaylistDraftContext context)
@@ -1809,7 +1831,10 @@ public class MusicService
         return raced != null ? raced : created;
     }
 
-    private static final String COULD_NOT_LOAD_LINE = "`[?:??]` **Could not load**";
+    private String couldNotLoadLine()
+    {
+        return bot.msg(null, "playlist.couldNotLoadLine");
+    }
 
     /**
      * Asynchronously loads the first N playlist URLs and invokes the callback with formatted track lines
@@ -1919,7 +1944,7 @@ public class MusicService
     {
         if (url == null || url.isBlank())
         {
-            output.replyError("That playlist entry could not be loaded.");
+            output.replyError(bot.msg(guild, "player.errors.playlistEntryLoadFailed"));
             return;
         }
         bot.getPlayerManager().loadItemOrdered(guild, url, bot.getAudioLoadWrapper().wrap(url, new AudioLoadResultHandler()
@@ -1937,7 +1962,7 @@ public class MusicService
                 {
                     handler.getPlayer().stopTrack();
                 }
-                output.replySuccess("Now playing **" + FormatUtil.filter(FormatUtil.getTrackTitle(track)) + "**");
+                output.replySuccess(bot.msg(guild, "player.nowPlayingSet", FormatUtil.filter(FormatUtil.getTrackTitle(track))));
             }
 
             @Override
@@ -1964,7 +1989,7 @@ public class MusicService
                 }
                 else
                 {
-                    output.replyError("That playlist entry could not be loaded.");
+                    output.replyError(bot.msg(guild, "player.errors.playlistEntryLoadFailed"));
                     return;
                 }
                 loadSingle(single);
@@ -1973,13 +1998,13 @@ public class MusicService
             @Override
             public void noMatches()
             {
-                output.replyError("No matches found for that playlist entry.");
+                output.replyError(bot.msg(guild, "player.errors.playlistEntryNoMatches"));
             }
 
             @Override
             public void loadFailed(FriendlyException exception)
             {
-                output.replyError("Error loading playlist entry: " + exception.getMessage());
+                output.replyError(bot.msg(guild, "player.errors.playlistEntryLoadError", exception.getMessage()));
             }
         }));
     }
@@ -2066,7 +2091,7 @@ public class MusicService
                     }
                     else
                     {
-                        lines[index] = COULD_NOT_LOAD_LINE;
+                        lines[index] = couldNotLoadLine();
                         maybeDone.run();
                         return;
                     }
@@ -2077,14 +2102,14 @@ public class MusicService
                 @Override
                 public void noMatches()
                 {
-                    lines[index] = COULD_NOT_LOAD_LINE;
+                    lines[index] = couldNotLoadLine();
                     maybeDone.run();
                 }
 
                 @Override
                 public void loadFailed(FriendlyException exception)
                 {
-                    lines[index] = COULD_NOT_LOAD_LINE;
+                    lines[index] = couldNotLoadLine();
                     maybeDone.run();
                 }
             });
@@ -2104,14 +2129,14 @@ public class MusicService
     {
         if (!canSaveHistoryAsPlaylist(guild, member))
         {
-            output.replyError("You need to be a DJ or the bot owner to save history as a playlist!");
+            output.replyError(bot.msg(guild, "permissions.errors.needDjOrOwnerSaveHistory"));
             return;
         }
 
         AudioHandler handler = getHandler(guild);
         if (handler == null)
         {
-            output.replyError("There is no player in this server!");
+            output.replyError(bot.msg(guild, "common.errors.noPlayerInServer"));
             return;
         }
 
@@ -2125,27 +2150,27 @@ public class MusicService
         List<String> uris = extractHttpUrisFromHistory(previous);
         if (uris.isEmpty())
         {
-            output.replyWarning("No valid track URLs in history to save (only http(s) sources are stored).");
+            output.replyWarning(bot.msg(guild, "history.errors.noValidUrls"));
             return;
         }
 
         String sanitized = playlistName.replaceAll("\\s+", "_").replaceAll("[*?|\\/\":<>]", "");
         if (sanitized.isEmpty())
         {
-            output.replyError("Please provide a valid playlist name!");
+            output.replyError(bot.msg(guild, "playlist.errors.invalidName"));
             return;
         }
 
         if (bot.getPlaylistLoader().getPlaylistResult(sanitized).isSuccess())
         {
-            output.replyError("Playlist `" + sanitized + "` already exists! Choose a different name.");
+            output.replyError(bot.msg(guild, "playlist.errors.alreadyExistsChooseOther", sanitized));
             return;
         }
 
         PlaylistLoader.PlaylistResult<Void> createResult = bot.getPlaylistLoader().createPlaylistResult(sanitized);
         if (!createResult.isSuccess())
         {
-            output.replyError(mapPlaylistErrorToMessage(createResult.getError()));
+            output.replyError(mapPlaylistErrorToMessage(guild, createResult.getError()));
             return;
         }
 
@@ -2153,10 +2178,10 @@ public class MusicService
         PlaylistLoader.PlaylistResult<Void> writeResult = bot.getPlaylistLoader().writePlaylistResult(sanitized, content);
         if (!writeResult.isSuccess())
         {
-            output.replyError(mapPlaylistErrorToMessage(writeResult.getError()));
+            output.replyError(mapPlaylistErrorToMessage(guild, writeResult.getError()));
             return;
         }
-        output.replySuccess("Saved " + uris.size() + " tracks from history to playlist `" + sanitized + "`!");
+        output.replySuccess(bot.msg(guild, "history.savedAsPlaylist", uris.size(), sanitized));
     }
 
     private boolean canSaveHistoryAsPlaylist(Guild guild, Member member)
@@ -2200,17 +2225,18 @@ public class MusicService
     /**
      * Validates a queue position and sends an error message if invalid.
      *
+     * @param guild    The guild (for language selection)
      * @param handler  The audio handler
      * @param position The 1-based position to validate
      * @param output   The output adapter for error messages
      * @return true if the position is valid, false otherwise
      */
-    private boolean validateQueuePosition(AudioHandler handler, int position, OutputAdapter output)
+    private boolean validateQueuePosition(Guild guild, AudioHandler handler, int position, OutputAdapter output)
     {
         int size = handler.getQueue().size();
         if (position < 1 || position > size)
         {
-            output.replyError("Position must be a valid integer between 1 and " + size + "!");
+            output.replyError(bot.msg(guild, "queue.errors.invalidPositionRange", size));
             return false;
         }
         return true;
@@ -2219,15 +2245,16 @@ public class MusicService
     /**
      * Checks if the queue is non-empty and sends an error message if empty.
      *
+     * @param guild   The guild (for language selection)
      * @param handler The audio handler
      * @param output  The output adapter for error messages
      * @return true if the queue is non-empty, false otherwise
      */
-    private boolean requireNonEmptyQueue(AudioHandler handler, OutputAdapter output)
+    private boolean requireNonEmptyQueue(Guild guild, AudioHandler handler, OutputAdapter output)
     {
         if (handler.getQueue().isEmpty())
         {
-            output.replyError("There is nothing in the queue!");
+            output.replyError(bot.msg(guild, "queue.errors.empty"));
             return false;
         }
         return true;

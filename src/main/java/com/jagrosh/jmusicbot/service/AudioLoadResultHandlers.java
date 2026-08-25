@@ -17,6 +17,7 @@ package com.jagrosh.jmusicbot.service;
 
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.PlaybackReason;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
@@ -95,7 +96,7 @@ public final class AudioLoadResultHandlers
             if (ytsearch)
             {
                 LOG.debug("{} no matches found: guild={}, query=\"{}\"", getHandlerName(), guild.getId(), args);
-                output.editMessage(FormatUtil.filter(bot.getConfig().getWarning() + " No results found for `" + args + "`."));
+                output.editMessage(FormatUtil.filter(bot.getConfig().getWarning() + " " + bot.msg(guild, "search.errors.noResults", args)));
             }
             else
             {
@@ -113,13 +114,13 @@ public final class AudioLoadResultHandlers
             {
                 LOG.warn("{} load failed (common): guild={}, query=\"{}\", error={}",
                         getHandlerName(), guild.getId(), args, throwable.getMessage());
-                output.editMessage(bot.getConfig().getError() + " Error loading: " + throwable.getMessage());
+                output.editMessage(bot.getConfig().getError() + " " + bot.msg(guild, "search.errors.loadFailed", throwable.getMessage()));
             }
             else
             {
                 LOG.error("{} load failed (severe): guild={}, query=\"{}\"",
                         getHandlerName(), guild.getId(), args, throwable);
-                output.editMessage(bot.getConfig().getError() + " Error loading track.");
+                output.editMessage(bot.getConfig().getError() + " " + bot.msg(guild, "search.errors.loadFailedGeneric"));
             }
         }
     }
@@ -172,14 +173,14 @@ public final class AudioLoadResultHandlers
 
         private void promptForPlaylistLoad(AudioTrack track, AudioPlaylist playlist, String addMsg)
         {
-            String promptMsg = addMsg + "\n" + bot.getConfig().getWarning() + " This track has a playlist of **"
-                    + playlist.getTracks().size() + "** tracks attached. Select " + LOAD + " to load playlist.";
+            String promptMsg = addMsg + bot.getConfig().getWarning()
+                    + bot.msg(guild, "search.playlistFoundPrompt", playlist.getTracks().size());
 
             MessageEditBuilder editBuilder = new MessageEditBuilder()
                     .setContent(promptMsg)
                     .setComponents(ActionRow.of(
-                            Button.success("load_playlist", Emoji.fromUnicode(LOAD)).withLabel("Load Playlist"),
-                            Button.danger("cancel_playlist", Emoji.fromUnicode(CANCEL)).withLabel("Cancel")
+                            Button.success("load_playlist", Emoji.fromUnicode(LOAD)).withLabel(bot.msg(guild, "search.button.loadPlaylist")),
+                            Button.danger("cancel_playlist", Emoji.fromUnicode(CANCEL)).withLabel(bot.msg(guild, "search.button.cancel"))
                     ));
 
             output.editMessage(addMsg, m -> {
@@ -192,7 +193,8 @@ public final class AudioLoadResultHandlers
                                 if (event.getComponentId().equals("load_playlist"))
                                 {
                                     int loaded = loadPlaylist(playlist, track);
-                                    event.editMessage(addMsg + "\n" + bot.getConfig().getSuccess() + " Loaded **" + loaded + "** additional tracks!").setComponents().queue();
+                                    event.editMessage(addMsg + bot.getConfig().getSuccess()
+                                            + bot.msg(guild, "search.playlistLoadedAdditional", loaded)).setComponents().queue();
                                 }
                                 else
                                 {
@@ -212,7 +214,7 @@ public final class AudioLoadResultHandlers
             playlist.getTracks().forEach((track) -> {
                 if (!musicService.isTooLong(track) && !track.equals(exclude))
                 {
-                    handler.setLastReason(member.getUser().getName() + " added a playlist.");
+                    handler.setLastReason(PlaybackReason.by(PlaybackReason.Kind.ADDED_PLAYLIST, member.getUser().getName()));
                     handler.addTrack(new QueuedTrack(track,
                             new RequestMetadata(member.getUser(),
                                     new RequestMetadata.RequestInfo(args, track.getInfo().uri),
@@ -259,27 +261,28 @@ public final class AudioLoadResultHandlers
             {
                 LOG.warn("Playlist empty or could not be loaded: guild={}, name=\"{}\"",
                         guild.getId(), playlist.getName());
-                output.editMessage(FormatUtil.filter(bot.getConfig().getWarning() + " The playlist "
-                        + (playlist.getName() == null ? "" : "(**" + playlist.getName() + "**) ")
-                        + " could not be loaded or contained 0 entries"));
+                String nameSuffix = playlist.getName() == null ? "" : "(**" + playlist.getName() + "**) ";
+                output.editMessage(FormatUtil.filter(bot.getConfig().getWarning() + " "
+                        + bot.msg(guild, "search.errors.playlistLoadFailedOrEmpty", nameSuffix)));
             }
             else if (count == 0)
             {
                 LOG.warn("All playlist tracks too long: guild={}, name=\"{}\"",
                         guild.getId(), playlist.getName());
-                output.editMessage(FormatUtil.filter(bot.getConfig().getWarning() + " All entries in this playlist "
-                        + (playlist.getName() == null ? "" : "(**" + playlist.getName() + "**) ")
-                        + "were longer than the allowed maximum (`" + bot.getConfig().getMaxTime() + "`)"));
+                String nameSuffix = playlist.getName() == null ? "" : "(**" + playlist.getName() + "**) ";
+                output.editMessage(FormatUtil.filter(bot.getConfig().getWarning() + " "
+                        + bot.msg(guild, "search.errors.playlistAllTooLong", nameSuffix, bot.getConfig().getMaxTime())));
             }
             else
             {
                 LOG.info("Playlist added to queue: guild={}, name=\"{}\", tracksAdded={}/{}",
                         guild.getId(), playlist.getName(), count, playlist.getTracks().size());
-                output.editMessage(FormatUtil.filter(bot.getConfig().getSuccess() + " Found "
-                        + (playlist.getName() == null ? "a playlist" : "playlist **" + playlist.getName() + "**") + " with `"
-                        + playlist.getTracks().size() + "` entries; added to the queue!"
-                        + (count < playlist.getTracks().size() ? "\n" + bot.getConfig().getWarning()
-                        + " Tracks longer than the allowed maximum (`" + bot.getConfig().getMaxTime() + "`) have been omitted." : "")));
+                String nameLabel = playlist.getName() == null ? "a playlist" : "playlist **" + playlist.getName() + "**";
+                String foundMsg = bot.msg(guild, "search.playlistFoundAdded", nameLabel, playlist.getTracks().size());
+                String omittedSuffix = count < playlist.getTracks().size()
+                        ? bot.getConfig().getWarning() + bot.msg(guild, "search.playlistOmittedSuffix", bot.getConfig().getMaxTime())
+                        : "";
+                output.editMessage(FormatUtil.filter(bot.getConfig().getSuccess() + " " + foundMsg + omittedSuffix));
             }
         }
     }

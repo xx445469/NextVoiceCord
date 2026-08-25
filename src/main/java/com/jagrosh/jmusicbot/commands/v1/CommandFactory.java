@@ -16,6 +16,7 @@ import com.jagrosh.jmusicbot.commands.v2.admin.ClearchannelSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.admin.NpButtonsSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.admin.NpLayoutSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.admin.PrefixSlashCmd;
+import com.jagrosh.jmusicbot.commands.v2.admin.LanguageSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.admin.QueuetypeSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.admin.SetdjSlashCmd;
 import com.jagrosh.jmusicbot.commands.v2.admin.SettingsSlashCmd;
@@ -135,6 +136,7 @@ public class CommandFactory {
 
                     // Admin commands
                     new PrefixSlashCmd(bot),
+                    new LanguageSlashCmd(bot),
                     new QueuetypeSlashCmd(bot),
                     new NpLayoutSlashCmd(bot),
                     new NpButtonsSlashCmd(bot),

@@ -63,7 +63,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
 
     private AudioFrame lastFrame;
     private AbstractQueue<QueuedTrack> queue;
-    private String lastReason = null;
+    private PlaybackReason lastReason = null;
     private volatile String favoritedTrackUri = null;
 
     protected AudioHandler(PlayerManager manager, Guild guild, AudioPlayer player)
@@ -88,7 +88,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
         queue = type.createInstance(queue, maxHistorySize);
     }
 
-    public void setLastReason(String reason)
+    public void setLastReason(PlaybackReason reason)
     {
         this.lastReason = reason;
     }
@@ -244,12 +244,12 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
             if(repeatMode == RepeatMode.ALL)
             {
                 queue.add(clone);
-                lastReason = "Repeating the queue.";
+                lastReason = PlaybackReason.of(PlaybackReason.Kind.REPEATING_QUEUE);
             }
             else
             {
                 queue.addAt(0, clone);
-                lastReason = "Repeating the song.";
+                lastReason = PlaybackReason.of(PlaybackReason.Kind.REPEATING_SONG);
             }
         }
         
@@ -269,8 +269,11 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
         else if (endReason != AudioTrackEndReason.REPLACED)
         {
             QueuedTrack qt = queue.pull();
-            if (lastReason == null || (!lastReason.startsWith("Repeating") && !lastReason.startsWith("Skipped")))
-                lastReason = "Playing next song.";
+            // Was a startsWith() test on the footer text. That could never match a skip,
+            // because callers prefixed the username, so the skip footer was always
+            // overwritten here. The property is now declared on the reason itself.
+            if (lastReason == null || !lastReason.kind().survivesTrackChange())
+                lastReason = PlaybackReason.of(PlaybackReason.Kind.PLAYING_NEXT);
             player.playTrack(qt.getTrack());
         }
     }
@@ -385,7 +388,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
         }
 
         if (lastReason == null)
-            lastReason = "Playing next song.";
+            lastReason = PlaybackReason.of(PlaybackReason.Kind.PLAYING_NEXT);
 
         manager.getBot().getNowplayingHandler().onTrackUpdate(guildId, track);
     }
@@ -446,7 +449,10 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
             queue.size(),
             queue.getHistory().size(),
             isCurrentTrackFavorited(),
-            lastReason
+            // Rendered here rather than stored as text: the reason is control-flow state
+            // until the moment it is displayed, and only here is the guild's language known.
+            lastReason == null ? null : manager.getBot().msg(jda.getGuildById(guildId),
+                    lastReason.kind().getMessageKey(), lastReason.arguments())
         );
     }
 
