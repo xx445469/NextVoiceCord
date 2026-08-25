@@ -45,7 +45,7 @@ import java.time.Instant;
 public class MainFrame extends JFrame {
     
     private static final Logger LOG = LoggerFactory.getLogger(MainFrame.class);
-    private static final String TITLE = "JMusicBot";
+    private static final String TITLE = "NextVoiceCord";
     private static final int DEFAULT_WIDTH = 800;
     private static final int DEFAULT_HEIGHT = 600;
     
@@ -133,7 +133,7 @@ public class MainFrame extends JFrame {
         // Start system health monitoring (CPU, memory, threads)
         SystemHealthMonitor.getInstance().start();
         
-        LOG.info("JMusicBot GUI initialized");
+        LOG.info("NextVoiceCord GUI initialized");
     }
     
     /**
@@ -304,9 +304,9 @@ public class MainFrame extends JFrame {
      */
     private void showAboutDialog() {
         String message = """
-            JMusicBot
+            NextVoiceCord
             
-            A cross-platform Discord music bot with a clean interface.
+            JMusicBot's playback core, a Vocard-style interface, and 12 languages.
             
             Theme: %s
             Java: %s
@@ -318,7 +318,7 @@ public class MainFrame extends JFrame {
         JOptionPane.showMessageDialog(
             this,
             message,
-            "About JMusicBot",
+            "About NextVoiceCord",
             JOptionPane.INFORMATION_MESSAGE
         );
     }

@@ -51,7 +51,7 @@ public class StartupLifecycleListenerTest {
 
             verify(fixture.getUserInteraction()).alert(
                     eq(Level.ERROR),
-                    eq("JMusicBot"),
+                    eq("NextVoiceCord"),
                     contains("missing required Discord intents")
             );
         }
@@ -83,7 +83,7 @@ public class StartupLifecycleListenerTest {
 
             verify(fixture.getUserInteraction()).alert(
                     eq(Level.ERROR),
-                    eq("JMusicBot"),
+                    eq("NextVoiceCord"),
                     argThat(message ->
                             message.contains("discord.com/developers/applications") &&
                                     message.contains("MESSAGE CONTENT INTENT") &&

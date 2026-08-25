@@ -2,14 +2,14 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.arifbanai</groupId>
-    <artifactId>JMusicBot</artifactId>
+    <groupId>com.nextvoicecord</groupId>
+    <artifactId>NextVoiceCord</artifactId>
     <version>0.7.0</version>
     <packaging>jar</packaging>
 
-    <name>JMusicBot</name>
-    <description>A cross-platform Discord music bot with a clean interface</description>
-    <url>https://jmusicbot.com</url>
+    <name>NextVoiceCord</name>
+    <description>A self-hosted Discord music bot: JMusicBot's playback core, a Vocard-style interface, and 12 languages</description>
+    <url>https://github.com/xx445469/NextVoiceCord</url>
     <inceptionYear>2017</inceptionYear>
 
     <licenses>
@@ -21,8 +21,8 @@
     </licenses>
 
     <organization>
-        <name>JMusicBot</name>
-        <url>https://jmusicbot.com</url>
+        <name>NextVoiceCord</name>
+        <url>https://github.com/xx445469/NextVoiceCord</url>
     </organization>
 
     <developers>
@@ -39,21 +39,29 @@
             <name>Arif Banai</name>
             <url>https://github.com/arif-banai</url>
             <roles>
-                <role>maintainer</role>
+                <role>fork maintainer (upstream)</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>xx445469</id>
+            <name>adan</name>
+            <url>https://github.com/xx445469</url>
+            <roles>
+                <role>NextVoiceCord maintainer</role>
             </roles>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/arif-banai/MusicBot.git</connection>
-        <developerConnection>scm:git:git@github.com:arif-banai/MusicBot.git</developerConnection>
-        <url>https://github.com/arif-banai/MusicBot</url>
+        <connection>scm:git:https://github.com/xx445469/NextVoiceCord.git</connection>
+        <developerConnection>scm:git:git@github.com:xx445469/NextVoiceCord.git</developerConnection>
+        <url>https://github.com/xx445469/NextVoiceCord</url>
         <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
         <system>GitHub Issues</system>
-        <url>https://github.com/arif-banai/MusicBot/issues</url>
+        <url>https://github.com/xx445469/NextVoiceCord/issues</url>
     </issueManagement>
 
     <ciManagement>

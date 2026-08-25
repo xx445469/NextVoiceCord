@@ -383,14 +383,14 @@ public class BotConfig {
      * @param userInteraction The user interaction handler for displaying progress and errors
      */
     public static void writeDefaultConfig(UserInteraction userInteraction) {
-        userInteraction.alert(Level.INFO, "JMusicBot Config", "Generating default config file");
+        userInteraction.alert(Level.INFO, "NextVoiceCord Config", "Generating default config file");
         Path path = ConfigIO.getConfigPath();
         try {
-            userInteraction.alert(Level.INFO, "JMusicBot Config",
+            userInteraction.alert(Level.INFO, "NextVoiceCord Config",
                     "Writing default config file to " + path.toAbsolutePath().toString());
             ConfigIO.writeConfigFile(path, ConfigIO.loadDefaultConfig());
         } catch (Exception ex) {
-            userInteraction.alert(Level.ERROR, "JMusicBot Config",
+            userInteraction.alert(Level.ERROR, "NextVoiceCord Config",
                     "An error occurred writing the default config file: " + ex.getMessage());
         }
     }
