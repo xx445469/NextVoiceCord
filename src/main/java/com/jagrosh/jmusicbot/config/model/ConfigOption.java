@@ -84,6 +84,7 @@ public enum ConfigOption {
     GUI_ENABLED("gui.enabled", ConfigType.BOOLEAN, false, "Enable or disable the GUI (default true)"),
     GUI_THEME("gui.theme", ConfigType.STRING, false, "GUI theme: light, dark, darcula, intellij"),
     GUI_FONT_SIZE("gui.fontSize", ConfigType.INT, false, "Base font size for GUI components (8-24)"),
+    GUI_LANGUAGE("gui.language", ConfigType.STRING, false, "Language for the desktop window (blank follows ui.language)"),
     
     // Performance options
     NAS_BUFFER_MS("performance.nasBufferMs", ConfigType.INT, false, "NAS buffer duration in ms (protects against GC pauses)"),

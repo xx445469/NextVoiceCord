@@ -83,7 +83,7 @@ public class MainFrame extends JFrame {
 
         // Initialised before any panel is built, so the first labels are already in the
         // right language rather than being written in English and corrected a moment later.
-        GuiLanguage.initialise(bot.getLanguages(), bot.getConfig().getDefaultLanguage());
+        GuiLanguage.initialise(bot.getLanguages(), bot.getConfig().getGuiLanguage());
 
         // Without this the window shows the generic Java coffee cup in the taskbar,
         // the dock and the Alt-Tab switcher — the three places a user actually looks
@@ -299,22 +299,22 @@ public class MainFrame extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         
         // File menu
-        JMenu fileMenu = new JMenu("File");
+        JMenu fileMenu = new JMenu(GuiLanguage.msg("gui.main.file"));
         fileMenu.setMnemonic('F');
-        
-        JMenuItem exitItem = new JMenuItem("Exit");
+
+        JMenuItem exitItem = new JMenuItem(GuiLanguage.msg("gui.main.exit"));
         exitItem.setMnemonic('x');
         exitItem.addActionListener(e -> handleWindowClosing());
         fileMenu.add(exitItem);
-        
+
         // View menu
-        JMenu viewMenu = new JMenu("View");
+        JMenu viewMenu = new JMenu(GuiLanguage.msg("gui.main.view"));
         viewMenu.setMnemonic('V');
-        
+
         // Theme submenu
-        JMenu themeMenu = new JMenu("Theme");
+        JMenu themeMenu = new JMenu(GuiLanguage.msg("gui.main.theme"));
         ButtonGroup themeGroup = new ButtonGroup();
-        
+
         for (ThemeManager.Theme theme : ThemeManager.getAvailableThemes()) {
             JRadioButtonMenuItem themeItem = new JRadioButtonMenuItem(theme.getDisplayName());
             themeItem.setSelected(theme == ThemeManager.getCurrentTheme());
@@ -323,43 +323,43 @@ public class MainFrame extends JFrame {
             themeMenu.add(themeItem);
         }
         viewMenu.add(themeMenu);
-        
+
         viewMenu.addSeparator();
-        
+
         // Tab navigation
-        JMenuItem consoleTab = new JMenuItem("Console");
+        JMenuItem consoleTab = new JMenuItem(GuiLanguage.msg("gui.main.console"));
         consoleTab.addActionListener(e -> sidebar.select("console"));
         viewMenu.add(consoleTab);
-        
-        JMenuItem statusTab = new JMenuItem("Status");
+
+        JMenuItem statusTab = new JMenuItem(GuiLanguage.msg("gui.main.status"));
         statusTab.addActionListener(e -> sidebar.select("status"));
         viewMenu.add(statusTab);
-        
-        JMenuItem performanceTab = new JMenuItem("Performance");
+
+        JMenuItem performanceTab = new JMenuItem(GuiLanguage.msg("gui.main.performance"));
         performanceTab.addActionListener(e -> sidebar.select("performance"));
         viewMenu.add(performanceTab);
-        
-        JMenuItem systemTab = new JMenuItem("System Health");
+
+        JMenuItem systemTab = new JMenuItem(GuiLanguage.msg("gui.main.systemHealth"));
         systemTab.addActionListener(e -> sidebar.select("system"));
         viewMenu.add(systemTab);
-        
-        JMenuItem sourcesTab = new JMenuItem("Sources");
+
+        JMenuItem sourcesTab = new JMenuItem(GuiLanguage.msg("gui.main.sources"));
         sourcesTab.addActionListener(e -> sidebar.select("sources"));
         viewMenu.add(sourcesTab);
-        
-        JMenuItem settingsTab = new JMenuItem("Settings");
+
+        JMenuItem settingsTab = new JMenuItem(GuiLanguage.msg("gui.main.settings"));
         settingsTab.addActionListener(e -> sidebar.select("settings"));
         viewMenu.add(settingsTab);
-        
-        JMenuItem configTab = new JMenuItem("Config");
+
+        JMenuItem configTab = new JMenuItem(GuiLanguage.msg("gui.main.config"));
         configTab.addActionListener(e -> sidebar.select("config"));
         viewMenu.add(configTab);
-        
+
         // Help menu
-        JMenu helpMenu = new JMenu("Help");
+        JMenu helpMenu = new JMenu(GuiLanguage.msg("gui.main.help"));
         helpMenu.setMnemonic('H');
-        
-        JMenuItem aboutItem = new JMenuItem("About");
+
+        JMenuItem aboutItem = new JMenuItem(GuiLanguage.msg("gui.main.about"));
         aboutItem.addActionListener(e -> showAboutDialog());
         helpMenu.add(aboutItem);
         
@@ -380,8 +380,8 @@ public class MainFrame extends JFrame {
     private void handleWindowClosing() {
         int result = JOptionPane.showConfirmDialog(
             this,
-            "Are you sure you want to exit? This will shut down the bot.",
-            "Confirm Exit",
+            GuiLanguage.msg("gui.main.confirmExitMessage"),
+            GuiLanguage.msg("gui.main.confirmExitTitle"),
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE
         );
@@ -402,25 +402,14 @@ public class MainFrame extends JFrame {
      * Shows the About dialog.
      */
     private void showAboutDialog() {
-        String message = """
-            NextVoiceCord
-            
-            JMusicBot's playback core, a Vocard-style interface, and 12 languages.
-            
-            Beta: pinned to an unreleased youtube-source build, because the
-            published releases cannot play a large share of videos.
-            
-            Theme: %s
-            Java: %s
-            """.formatted(
+        String message = GuiLanguage.msg("gui.main.aboutMessage",
                 ThemeManager.getCurrentTheme().getDisplayName(),
-                System.getProperty("java.version")
-            );
-        
+                System.getProperty("java.version"));
+
         JOptionPane.showMessageDialog(
             this,
             message,
-            "About NextVoiceCord",
+            GuiLanguage.msg("gui.main.aboutTitle", TITLE),
             JOptionPane.INFORMATION_MESSAGE
         );
     }

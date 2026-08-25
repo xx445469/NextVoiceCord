@@ -23,6 +23,7 @@ import com.jagrosh.jmusicbot.audio.PerformanceMetrics.*;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor.HealthSample;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor.HealthSnapshot;
+import com.jagrosh.jmusicbot.gui.GuiLanguage;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
 import net.dv8tion.jda.api.entities.Guild;
@@ -66,21 +67,21 @@ public class PerformancePanel extends JPanel {
     private final DefaultTableModel guildOverviewModel;
 
     // Health indicator
-    private final Widgets.Badge healthBadge = new Widgets.Badge("NO DATA", Tokens.textMuted());
+    private final Widgets.Badge healthBadge = new Widgets.Badge(GuiLanguage.msg("gui.performance.badgeNoData"), Tokens.textMuted());
 
     // Stat tiles
-    private final Widgets.StatTile qualityTile = new Widgets.StatTile("quality score");
-    private final Widgets.StatTile durationTile = new Widgets.StatTile("duration");
-    private final Widgets.StatTile framesTile = new Widgets.StatTile("frames");
-    private final Widgets.StatTile missedTile = new Widgets.StatTile("missed frames");
-    private final Widgets.StatTile missRateTile = new Widgets.StatTile("miss rate");
-    private final Widgets.StatTile missRateWindowTile = new Widgets.StatTile("miss rate 10s / 60s");
-    private final Widgets.StatTile latencyTile = new Widgets.StatTile("latency avg (p95)");
-    private final Widgets.StatTile fpsTile = new Widgets.StatTile("frame rate");
-    private final Widgets.StatTile stutterTile = new Widgets.StatTile("stutters");
-    private final Widgets.StatTile stuckTile = new Widgets.StatTile("stuck events");
-    private final Widgets.StatTile gcTile = new Widgets.StatTile("gc events");
-    private final Widgets.StatTile ttffTile = new Widgets.StatTile("time to first frame");
+    private final Widgets.StatTile qualityTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statQualityScore"));
+    private final Widgets.StatTile durationTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statDuration"));
+    private final Widgets.StatTile framesTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statFrames"));
+    private final Widgets.StatTile missedTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statMissedFrames"));
+    private final Widgets.StatTile missRateTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statMissRate"));
+    private final Widgets.StatTile missRateWindowTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statMissRateWindow"));
+    private final Widgets.StatTile latencyTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statLatencyAvg"));
+    private final Widgets.StatTile fpsTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statFrameRate"));
+    private final Widgets.StatTile stutterTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statStutters"));
+    private final Widgets.StatTile stuckTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statStuckEvents"));
+    private final Widgets.StatTile gcTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statGcEvents"));
+    private final Widgets.StatTile ttffTile = new Widgets.StatTile(GuiLanguage.msg("gui.performance.statTimeToFirstFrame"));
 
     // Event table
     private final JTable eventTable;
@@ -91,10 +92,10 @@ public class PerformancePanel extends JPanel {
     private int selectedWindowSeconds = 30;
 
     private enum WindowOption {
-        SECONDS_10(10, "10 seconds"),
-        SECONDS_30(30, "30 seconds"),
-        MINUTE_1(60, "1 minute"),
-        MINUTE_2(120, "2 minutes");
+        SECONDS_10(10, GuiLanguage.msg("gui.performance.windowSeconds10")),
+        SECONDS_30(30, GuiLanguage.msg("gui.performance.windowSeconds30")),
+        MINUTE_1(60, GuiLanguage.msg("gui.performance.windowMinute1")),
+        MINUTE_2(120, GuiLanguage.msg("gui.performance.windowMinutes2"));
 
         private final int seconds;
         private final String display;
@@ -135,7 +136,15 @@ public class PerformancePanel extends JPanel {
         });
 
         // === Guild overview table ===
-        String[] overviewCols = {"Guild", "Status", "Quality", "Miss Rate", "Stutters", "Stuck", "TTFF"};
+        String[] overviewCols = {
+                GuiLanguage.msg("gui.performance.guild"),
+                GuiLanguage.msg("gui.performance.colStatus"),
+                GuiLanguage.msg("gui.performance.colQuality"),
+                GuiLanguage.msg("gui.performance.colMissRate"),
+                GuiLanguage.msg("gui.performance.colStutters"),
+                GuiLanguage.msg("gui.performance.colStuck"),
+                GuiLanguage.msg("gui.performance.colTtff")
+        };
         guildOverviewModel = new DefaultTableModel(overviewCols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
@@ -167,7 +176,12 @@ public class PerformancePanel extends JPanel {
         driftChart = new SchedulerDriftPanel();
 
         // === Events table ===
-        String[] cols = {"Time", "Type", "Details", "Sev"};
+        String[] cols = {
+                GuiLanguage.msg("gui.performance.colTime"),
+                GuiLanguage.msg("gui.performance.colType"),
+                GuiLanguage.msg("gui.performance.colDetails"),
+                GuiLanguage.msg("gui.performance.colSev")
+        };
         eventTableModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
@@ -186,8 +200,8 @@ public class PerformancePanel extends JPanel {
 
     private Component buildHeader() {
         JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
-        header.add(Widgets.pageTitle("Performance"), BorderLayout.NORTH);
-        header.add(Widgets.muted("Per-guild audio pipeline diagnostics — frame timing, latency and stability"),
+        header.add(Widgets.pageTitle(GuiLanguage.msg("gui.performance.title")), BorderLayout.NORTH);
+        header.add(Widgets.muted(GuiLanguage.msg("gui.performance.subtitle")),
                 BorderLayout.SOUTH);
         return header;
     }
@@ -205,13 +219,13 @@ public class PerformancePanel extends JPanel {
         content.add(buildTimelineCard());
         content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
 
-        Widgets.Card latencyCard = Widgets.titledCard("Latency", latencyGraph);
+        Widgets.Card latencyCard = Widgets.titledCard(GuiLanguage.msg("gui.performance.cardLatency"), latencyGraph);
         latencyCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 220));
         latencyCard.setPreferredSize(new Dimension(600, 220));
         content.add(latencyCard);
         content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
 
-        Widgets.Card driftCard = Widgets.titledCard("Scheduler Drift", driftChart);
+        Widgets.Card driftCard = Widgets.titledCard(GuiLanguage.msg("gui.performance.cardSchedulerDrift"), driftChart);
         driftCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
         driftCard.setPreferredSize(new Dimension(600, 200));
         content.add(driftCard);
@@ -233,13 +247,13 @@ public class PerformancePanel extends JPanel {
         card.setLayout(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, Tokens.SPACE_XS));
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
 
-        card.add(Widgets.muted("Guild"));
+        card.add(Widgets.muted(GuiLanguage.msg("gui.performance.guild")));
         card.add(guildSelector);
         card.add(Box.createHorizontalStrut(Tokens.SPACE_SM));
-        card.add(Widgets.muted("Window"));
+        card.add(Widgets.muted(GuiLanguage.msg("gui.performance.windowLabel")));
         card.add(windowSelector);
 
-        JButton refreshBtn = new JButton("Refresh");
+        JButton refreshBtn = new JButton(GuiLanguage.msg("gui.performance.btnRefresh"));
         refreshBtn.setFont(Tokens.fontBody());
         refreshBtn.addActionListener(e -> refreshGuildList());
         card.add(refreshBtn);
@@ -248,15 +262,15 @@ public class PerformancePanel extends JPanel {
         card.add(healthBadge);
 
         card.add(Box.createHorizontalStrut(Tokens.SPACE_MD));
-        JButton exportJsonBtn = new JButton("Export JSON");
+        JButton exportJsonBtn = new JButton(GuiLanguage.msg("gui.performance.btnExportJson"));
         exportJsonBtn.setFont(Tokens.fontBody());
-        exportJsonBtn.setToolTipText("Export diagnostics to JSON file");
+        exportJsonBtn.setToolTipText(GuiLanguage.msg("gui.performance.tooltipExportJson"));
         exportJsonBtn.addActionListener(e -> exportToJson());
         card.add(exportJsonBtn);
 
-        JButton copySummaryBtn = new JButton("Copy Summary");
+        JButton copySummaryBtn = new JButton(GuiLanguage.msg("gui.performance.btnCopySummary"));
         copySummaryBtn.setFont(Tokens.fontBody());
-        copySummaryBtn.setToolTipText("Copy summary to clipboard for Discord");
+        copySummaryBtn.setToolTipText(GuiLanguage.msg("gui.performance.tooltipCopySummary"));
         copySummaryBtn.addActionListener(e -> copyToClipboard());
         card.add(copySummaryBtn);
 
@@ -271,7 +285,7 @@ public class PerformancePanel extends JPanel {
         overviewScroll.getVerticalScrollBar().setUnitIncrement(16);
         overviewScroll.setPreferredSize(new Dimension(600, 140));
 
-        Widgets.Card card = Widgets.titledCard("Guild Overview (click a row to select)", overviewScroll);
+        Widgets.Card card = Widgets.titledCard(GuiLanguage.msg("gui.performance.cardGuildOverview"), overviewScroll);
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
         return card;
     }
@@ -279,7 +293,7 @@ public class PerformancePanel extends JPanel {
     private Component buildStatsSection() {
         JPanel section = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_SM));
 
-        JLabel heading = new JLabel("Statistics");
+        JLabel heading = new JLabel(GuiLanguage.msg("gui.performance.headingStatistics"));
         heading.setFont(Tokens.fontHeading());
         heading.setForeground(Tokens.text());
         section.add(heading, BorderLayout.NORTH);
@@ -321,7 +335,7 @@ public class PerformancePanel extends JPanel {
         tableScroll.getVerticalScrollBar().setUnitIncrement(16);
         tableScroll.setPreferredSize(new Dimension(600, 180));
 
-        Widgets.Card card = Widgets.titledCard("Events", tableScroll);
+        Widgets.Card card = Widgets.titledCard(GuiLanguage.msg("gui.performance.cardEvents"), tableScroll);
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 240));
         return card;
     }
@@ -360,8 +374,8 @@ public class PerformancePanel extends JPanel {
                 if (handler instanceof AudioHandler ah) {
                     MetricsSnapshot snap = ah.getPerformanceMetrics().getSnapshot(selectedWindowSeconds);
                     String status = ah.getPlayer().getPlayingTrack() != null
-                        ? (ah.getPlayer().isPaused() ? "Paused" : "Playing")
-                        : "Idle";
+                        ? (ah.getPlayer().isPaused() ? GuiLanguage.msg("gui.performance.statusPaused") : GuiLanguage.msg("gui.performance.statusPlaying"))
+                        : GuiLanguage.msg("gui.performance.statusIdle");
 
                     guildOverviewModel.addRow(new Object[]{
                         g.getName(),
@@ -407,7 +421,7 @@ public class PerformancePanel extends JPanel {
 
     private void updateDisplay() {
         if (currentSnapshot == null) {
-            healthBadge.set("NO DATA", Tokens.textMuted());
+            healthBadge.set(GuiLanguage.msg("gui.performance.badgeNoData"), Tokens.textMuted());
             qualityTile.setValue("—");
             qualityTile.setValueColor(Tokens.text());
             durationTile.setValue("—");
@@ -502,7 +516,7 @@ public class PerformancePanel extends JPanel {
         for (StutterEvent e : currentSnapshot.stutterEvents()) {
             eventTableModel.addRow(new Object[]{
                 sdf.format(new Date(e.timestamp())),
-                "Stut",
+                GuiLanguage.msg("gui.performance.eventTypeStutter"),
                 e.missedFrames() + "f (" + e.durationMs() + "ms)",
                 e.severity().name().substring(0, 3)
             });
@@ -511,10 +525,10 @@ public class PerformancePanel extends JPanel {
         for (PerformanceMetrics.StuckEvent e : currentSnapshot.stuckEvents()) {
             String details = e.trackTitle() != null
                 ? truncate(e.trackTitle(), 20) + " (" + e.thresholdMs() + "ms)"
-                : "Track stuck (" + e.thresholdMs() + "ms)";
+                : GuiLanguage.msg("gui.performance.eventStuckGeneric", e.thresholdMs());
             eventTableModel.addRow(new Object[]{
                 sdf.format(new Date(e.timestamp())),
-                "Stck",
+                GuiLanguage.msg("gui.performance.eventTypeStuck"),
                 details,
                 e.severity().name().substring(0, 3)
             });
@@ -523,7 +537,7 @@ public class PerformancePanel extends JPanel {
         for (GCMonitor.GCEvent e : currentSnapshot.gcEvents()) {
             eventTableModel.addRow(new Object[]{
                 sdf.format(new Date(e.timestamp())),
-                "GC",
+                GuiLanguage.msg("gui.performance.eventTypeGc"),
                 e.collectorName().replace(" Generation", "").replace("Copy", "YG") + " (" + e.durationMs() + "ms)",
                 e.severity().name().substring(0, 3)
             });
@@ -557,14 +571,14 @@ public class PerformancePanel extends JPanel {
     private void exportToJson() {
         if (currentSnapshot == null) {
             JOptionPane.showMessageDialog(this,
-                "No metrics data available. Select a guild with active voice first.",
-                "Export Error", JOptionPane.WARNING_MESSAGE);
+                GuiLanguage.msg("gui.performance.msgNoMetricsData"),
+                GuiLanguage.msg("gui.performance.titleExportError"), JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Export Diagnostics");
-        chooser.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
+        chooser.setDialogTitle(GuiLanguage.msg("gui.performance.titleExportDiagnostics"));
+        chooser.setFileFilter(new FileNameExtensionFilter(GuiLanguage.msg("gui.performance.filterJsonFiles"), "json"));
 
         // Generate default filename with timestamp
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
@@ -580,12 +594,12 @@ public class PerformancePanel extends JPanel {
                 String json = currentSnapshot.toJson();
                 Files.writeString(file.toPath(), json);
                 JOptionPane.showMessageDialog(this,
-                    "Diagnostics exported to:\n" + file.getAbsolutePath(),
-                    "Export Successful", JOptionPane.INFORMATION_MESSAGE);
+                    GuiLanguage.msg("gui.performance.msgExportSuccess", file.getAbsolutePath()),
+                    GuiLanguage.msg("gui.performance.titleExportSuccessful"), JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this,
-                    "Failed to export: " + ex.getMessage(),
-                    "Export Error", JOptionPane.ERROR_MESSAGE);
+                    GuiLanguage.msg("gui.performance.msgExportFailed", ex.getMessage()),
+                    GuiLanguage.msg("gui.performance.titleExportError"), JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -596,8 +610,8 @@ public class PerformancePanel extends JPanel {
     private void copyToClipboard() {
         if (currentSnapshot == null) {
             JOptionPane.showMessageDialog(this,
-                "No metrics data available. Select a guild with active voice first.",
-                "Copy Error", JOptionPane.WARNING_MESSAGE);
+                GuiLanguage.msg("gui.performance.msgNoMetricsData"),
+                GuiLanguage.msg("gui.performance.titleCopyError"), JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -606,8 +620,8 @@ public class PerformancePanel extends JPanel {
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
 
         JOptionPane.showMessageDialog(this,
-            "Summary copied to clipboard!",
-            "Copied", JOptionPane.INFORMATION_MESSAGE);
+            GuiLanguage.msg("gui.performance.msgCopySuccess"),
+            GuiLanguage.msg("gui.performance.titleCopied"), JOptionPane.INFORMATION_MESSAGE);
     }
 
     /** Alpha-blended variant of a token colour, for shaded chart fills. */
@@ -641,7 +655,7 @@ public class PerformancePanel extends JPanel {
             g2.fillRect(margin, graphTop, graphW, graphH);
 
             if (currentSnapshot == null || currentSnapshot.latencyBuckets().length == 0) {
-                drawCentered(g2, "No data", w, h);
+                drawCentered(g2, GuiLanguage.msg("gui.performance.chartNoData"), w, h);
                 g2.dispose();
                 return;
             }
@@ -729,7 +743,7 @@ public class PerformancePanel extends JPanel {
                     10, new float[]{4, 4}, 0));
                 g2.drawLine(margin, p95Y, margin + graphW, p95Y);
                 g2.setStroke(new BasicStroke(1));
-                g2.drawString("p95", margin + graphW + 2, p95Y + 4);
+                g2.drawString(GuiLanguage.msg("gui.performance.chartP95Label"), margin + graphW + 2, p95Y + 4);
             }
 
             // Draw average latency line
@@ -789,14 +803,14 @@ public class PerformancePanel extends JPanel {
             g2.fillRect(margin, graphTop, graphW, graphH);
 
             if (healthSnapshot == null || healthSnapshot.isEmpty()) {
-                drawCentered(g2, "No data", w, h);
+                drawCentered(g2, GuiLanguage.msg("gui.performance.chartNoData"), w, h);
                 g2.dispose();
                 return;
             }
 
             HealthSample[] samples = healthSnapshot.samples();
             if (samples.length < 2) {
-                drawCentered(g2, "Collecting...", w, h);
+                drawCentered(g2, GuiLanguage.msg("gui.performance.chartCollecting"), w, h);
                 g2.dispose();
                 return;
             }
@@ -882,7 +896,7 @@ public class PerformancePanel extends JPanel {
     private record GuildItem(Guild guild) {
         @Override
         public String toString() {
-            return guild != null ? guild.getName() : "(No active voice)";
+            return guild != null ? guild.getName() : GuiLanguage.msg("gui.performance.noActiveVoice");
         }
     }
 }

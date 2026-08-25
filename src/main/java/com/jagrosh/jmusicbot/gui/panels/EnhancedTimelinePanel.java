@@ -21,6 +21,7 @@ import com.jagrosh.jmusicbot.audio.VoiceConnectionMonitor;
 import com.jagrosh.jmusicbot.audio.VoiceConnectionMonitor.VoiceEvent;
 
 import javax.swing.*;
+import com.jagrosh.jmusicbot.gui.GuiLanguage;
 import com.jagrosh.jmusicbot.gui.components.StyledComponents;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -64,8 +65,16 @@ public class EnhancedTimelinePanel extends JPanel {
     private static final int MARGIN_TOP = 20; // Account for TitledBorder
     private static final int MARGIN_BOTTOM = 22;
     
-    private static final String[] LAYER_NAMES = {"Track", "Frames", "Events", "Voice", "System"};
-    
+    private static String[] layerNames() {
+        return new String[] {
+            GuiLanguage.msg("gui.timeline.layerTrack"),
+            GuiLanguage.msg("gui.timeline.layerFrames"),
+            GuiLanguage.msg("gui.timeline.layerEvents"),
+            GuiLanguage.msg("gui.timeline.layerVoice"),
+            GuiLanguage.msg("gui.timeline.layerSystem")
+        };
+    }
+
     private MetricsSnapshot snapshot;
     private int windowSeconds = 60;
     private long guildId;
@@ -77,7 +86,7 @@ public class EnhancedTimelinePanel extends JPanel {
         // Set minimum size but allow growth to fill available space
         setPreferredSize(new Dimension(600, MIN_LAYER_HEIGHT * 5 + MARGIN_TOP + MARGIN_BOTTOM));
         setMinimumSize(new Dimension(300, MIN_LAYER_HEIGHT * 5 + MARGIN_TOP + MARGIN_BOTTOM));
-        setBorder(StyledComponents.createSectionBorder("Enhanced Timeline"));
+        setBorder(StyledComponents.createSectionBorder(GuiLanguage.msg("gui.timeline.title")));
         
         // Add mouse motion listener for tooltips
         addMouseMotionListener(new MouseMotionAdapter() {
@@ -142,7 +151,7 @@ public class EnhancedTimelinePanel extends JPanel {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
-        sb.append("<b>Time:</b> ").append(sdf.format(new Date(timeAtMouse))).append("<br>");
+        sb.append(GuiLanguage.msg("gui.timeline.time", sdf.format(new Date(timeAtMouse))));
         
         // Find nearby events based on layer
         switch (layerIndex) {
@@ -162,7 +171,7 @@ public class EnhancedTimelinePanel extends JPanel {
         
         for (TrackEvent e : snapshot.trackEvents()) {
             if (Math.abs(e.timestamp() - time) < 2000) {
-                sb.append("<b>Track:</b> ").append(e.type().name()).append("<br>");
+                sb.append(GuiLanguage.msg("gui.timeline.trackType", e.type().name()));
                 if (e.trackTitle() != null) {
                     sb.append(truncate(e.trackTitle(), 30)).append("<br>");
                 }
@@ -187,29 +196,29 @@ public class EnhancedTimelinePanel extends JPanel {
         }
         
         if (providedCount + missedCount > 0) {
-            sb.append("<b>Frames (±0.5s):</b><br>");
-            sb.append("Provided: ").append(providedCount).append("<br>");
-            sb.append("Missed: ").append(missedCount).append("<br>");
+            sb.append(GuiLanguage.msg("gui.timeline.framesHeader"));
+            sb.append(GuiLanguage.msg("gui.timeline.provided", providedCount));
+            sb.append(GuiLanguage.msg("gui.timeline.missed", missedCount));
         }
     }
     
     private void findNearbyStutterEvent(long time, StringBuilder sb, SimpleDateFormat sdf) {
         for (StutterEvent e : snapshot.stutterEvents()) {
             if (Math.abs(e.timestamp() - time) < 2000) {
-                sb.append("<b>Stutter:</b><br>");
-                sb.append("Missed: ").append(e.missedFrames()).append(" frames<br>");
-                sb.append("Duration: ").append(e.durationMs()).append("ms<br>");
-                sb.append("Severity: ").append(e.severity().name()).append("<br>");
+                sb.append(GuiLanguage.msg("gui.timeline.stutterHeader"));
+                sb.append(GuiLanguage.msg("gui.timeline.missedFramesCount", e.missedFrames()));
+                sb.append(GuiLanguage.msg("gui.timeline.durationMs", e.durationMs()));
+                sb.append(GuiLanguage.msg("gui.timeline.severity", e.severity().name()));
                 break;
             }
         }
-        
+
         for (StuckEvent e : snapshot.stuckEvents()) {
             if (Math.abs(e.timestamp() - time) < 2000) {
-                sb.append("<b>Stuck Event:</b><br>");
-                sb.append("Threshold: ").append(e.thresholdMs()).append("ms<br>");
+                sb.append(GuiLanguage.msg("gui.timeline.stuckHeader"));
+                sb.append(GuiLanguage.msg("gui.timeline.threshold", e.thresholdMs()));
                 if (e.trackTitle() != null) {
-                    sb.append("Track: ").append(truncate(e.trackTitle(), 25)).append("<br>");
+                    sb.append(GuiLanguage.msg("gui.timeline.trackName", truncate(e.trackTitle(), 25)));
                 }
                 break;
             }
@@ -220,12 +229,12 @@ public class EnhancedTimelinePanel extends JPanel {
         VoiceEvent[] events = VoiceConnectionMonitor.getInstance().getRecentEvents(guildId, windowSeconds);
         for (VoiceEvent e : events) {
             if (Math.abs(e.timestamp() - time) < 2000) {
-                sb.append("<b>Voice:</b> ").append(e.type().name()).append("<br>");
+                sb.append(GuiLanguage.msg("gui.timeline.voiceType", e.type().name()));
                 if (e.fromChannel() != null) {
-                    sb.append("From: ").append(e.fromChannel()).append("<br>");
+                    sb.append(GuiLanguage.msg("gui.timeline.fromChannel", e.fromChannel()));
                 }
                 if (e.toChannel() != null) {
-                    sb.append("To: ").append(e.toChannel()).append("<br>");
+                    sb.append(GuiLanguage.msg("gui.timeline.toChannel", e.toChannel()));
                 }
                 break;
             }
@@ -235,10 +244,10 @@ public class EnhancedTimelinePanel extends JPanel {
     private void findNearbyGCEvent(long time, StringBuilder sb, SimpleDateFormat sdf) {
         for (GCMonitor.GCEvent e : snapshot.gcEvents()) {
             if (Math.abs(e.timestamp() - time) < 2000) {
-                sb.append("<b>GC Event:</b><br>");
-                sb.append("Collector: ").append(e.collectorName()).append("<br>");
-                sb.append("Duration: ").append(e.durationMs()).append("ms<br>");
-                sb.append("Severity: ").append(e.severity().name()).append("<br>");
+                sb.append(GuiLanguage.msg("gui.timeline.gcHeader"));
+                sb.append(GuiLanguage.msg("gui.timeline.collector", e.collectorName()));
+                sb.append(GuiLanguage.msg("gui.timeline.durationMs", e.durationMs()));
+                sb.append(GuiLanguage.msg("gui.timeline.severity", e.severity().name()));
                 break;
             }
         }
@@ -277,9 +286,10 @@ public class EnhancedTimelinePanel extends JPanel {
         float fontSize = Math.min(14f, Math.max(11f, layerH / 2.5f));
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, fontSize));
         g2.setColor(Color.LIGHT_GRAY);
-        for (int i = 0; i < LAYER_NAMES.length; i++) {
+        String[] layerNames = layerNames();
+        for (int i = 0; i < layerNames.length; i++) {
             int y = MARGIN_TOP + i * layerH + layerH / 2 + (int)(fontSize / 3);
-            g2.drawString(LAYER_NAMES[i], 5, y);
+            g2.drawString(layerNames[i], 5, y);
         }
         
         // Draw layer separators
@@ -297,7 +307,7 @@ public class EnhancedTimelinePanel extends JPanel {
             g2.setColor(GRID_COLOR);
             g2.drawLine(x, MARGIN_TOP, x, MARGIN_TOP + graphH);
             g2.setColor(Color.GRAY);
-            String label = "-" + (windowSeconds - sec) + "s";
+            String label = GuiLanguage.msg("gui.timeline.secondsAgo", windowSeconds - sec);
             int labelWidth = g2.getFontMetrics().stringWidth(label);
             g2.drawString(label, x - labelWidth / 2, MARGIN_TOP + graphH + 14);
         }
@@ -308,11 +318,11 @@ public class EnhancedTimelinePanel extends JPanel {
         g2.drawLine(MARGIN_LEFT + graphW, MARGIN_TOP, MARGIN_LEFT + graphW, MARGIN_TOP + graphH);
         g2.setStroke(new BasicStroke(1));
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 9f));
-        g2.drawString("now", MARGIN_LEFT + graphW - 14, MARGIN_TOP + graphH + 14);
-        
+        g2.drawString(GuiLanguage.msg("gui.timeline.now"), MARGIN_LEFT + graphW - 14, MARGIN_TOP + graphH + 14);
+
         if (snapshot == null) {
             g2.setColor(Color.GRAY);
-            g2.drawString("No data", w / 2 - 20, MARGIN_TOP + graphH / 2);
+            g2.drawString(GuiLanguage.msg("gui.timeline.noData"), w / 2 - 20, MARGIN_TOP + graphH / 2);
             g2.dispose();
             return;
         }

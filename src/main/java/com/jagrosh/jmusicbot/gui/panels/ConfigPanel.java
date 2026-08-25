@@ -19,6 +19,7 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.config.io.ConfigIO;
 import com.jagrosh.jmusicbot.config.update.ConfigUpdater;
+import com.jagrosh.jmusicbot.gui.GuiLanguage;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
 import org.slf4j.Logger;
@@ -101,17 +102,17 @@ public class ConfigPanel extends JPanel {
         // Presence
         gameField = new JTextField(20);
         statusComboBox = new JComboBox<>(new String[]{"ONLINE", "IDLE", "DND", "INVISIBLE"});
-        songInStatusCheckBox = new JCheckBox("Show current song in status");
+        songInStatusCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.showCurrentSongInStatus"));
 
         // Voice
-        stayInChannelCheckBox = new JCheckBox("Stay in voice channel after queue ends");
+        stayInChannelCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.stayInChannel"));
         aloneTimeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 3600, 1));
 
         // Playback
         maxSecondsSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 86400, 60));
         maxYTPlaylistPagesSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
         skipRatioSpinner = new JSpinner(new SpinnerNumberModel(0.55, 0.0, 1.0, 0.05));
-        useYouTubeOAuthCheckBox = new JCheckBox("Use YouTube OAuth for playback");
+        useYouTubeOAuthCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.useYouTubeOAuth"));
 
         // UI/Emojis
         successEmojiField = new JTextField(5);
@@ -121,8 +122,8 @@ public class ConfigPanel extends JPanel {
         searchingEmojiField = new JTextField(5);
 
         // Other
-        npImagesCheckBox = new JCheckBox("Show YouTube thumbnails in now playing");
-        updateAlertsCheckBox = new JCheckBox("Alert owner about updates");
+        npImagesCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.showYouTubeThumbnails"));
+        updateAlertsCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.alertOwnerAboutUpdates"));
         logLevelComboBox = new JComboBox<>(new String[]{"off", "error", "warn", "info", "debug", "trace", "all"});
         playlistsFolderField = new JTextField(20);
 
@@ -150,8 +151,8 @@ public class ConfigPanel extends JPanel {
 
     private Component buildHeader() {
         JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
-        header.add(Widgets.pageTitle("Bot config"), BorderLayout.NORTH);
-        header.add(Widgets.muted("Edit config.txt and save — the bot must restart to apply changes"),
+        header.add(Widgets.pageTitle(GuiLanguage.msg("gui.config.title")), BorderLayout.NORTH);
+        header.add(Widgets.muted(GuiLanguage.msg("gui.config.subtitle")),
                 BorderLayout.SOUTH);
         return header;
     }
@@ -231,11 +232,11 @@ public class ConfigPanel extends JPanel {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
 
-        addRow(panel, gbc, 0, "Prefix", prefixField);
-        addRow(panel, gbc, 1, "Alt prefix", altPrefixField);
-        addRow(panel, gbc, 2, "Help word", helpWordField);
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.prefix"), prefixField);
+        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.altPrefix"), altPrefixField);
+        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.helpWord"), helpWordField);
 
-        return Widgets.titledCard("Commands", panel);
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.commands"), panel);
     }
 
     /**
@@ -245,11 +246,11 @@ public class ConfigPanel extends JPanel {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
 
-        addRow(panel, gbc, 0, "Game status", gameField);
-        addRow(panel, gbc, 1, "Online status", statusComboBox);
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.gameStatus"), gameField);
+        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.onlineStatus"), statusComboBox);
         addSpanningRow(panel, gbc, 2, songInStatusCheckBox);
 
-        return Widgets.titledCard("Presence", panel);
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.presence"), panel);
     }
 
     /**
@@ -260,9 +261,9 @@ public class ConfigPanel extends JPanel {
         GridBagConstraints gbc = rowConstraints();
 
         addSpanningRow(panel, gbc, 0, stayInChannelCheckBox);
-        addRow(panel, gbc, 1, "Alone time until stop (seconds)", aloneTimeSpinner);
+        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.aloneTimeUntilStop"), aloneTimeSpinner);
 
-        return Widgets.titledCard("Voice", panel);
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.voice"), panel);
     }
 
     /**
@@ -272,12 +273,12 @@ public class ConfigPanel extends JPanel {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
 
-        addRow(panel, gbc, 0, "Max track seconds (0 = unlimited)", maxSecondsSpinner);
-        addRow(panel, gbc, 1, "Skip ratio", skipRatioSpinner);
-        addRow(panel, gbc, 2, "Max YouTube playlist pages", maxYTPlaylistPagesSpinner);
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.maxTrackSeconds"), maxSecondsSpinner);
+        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.skipRatio"), skipRatioSpinner);
+        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.maxYouTubePlaylistPages"), maxYTPlaylistPagesSpinner);
         addSpanningRow(panel, gbc, 3, useYouTubeOAuthCheckBox);
 
-        return Widgets.titledCard("Playback", panel);
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.playback"), panel);
     }
 
     /**
@@ -287,13 +288,13 @@ public class ConfigPanel extends JPanel {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
 
-        addRow(panel, gbc, 0, "Success", successEmojiField);
-        addRow(panel, gbc, 1, "Warning", warningEmojiField);
-        addRow(panel, gbc, 2, "Error", errorEmojiField);
-        addRow(panel, gbc, 3, "Loading", loadingEmojiField);
-        addRow(panel, gbc, 4, "Searching", searchingEmojiField);
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.success"), successEmojiField);
+        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.warning"), warningEmojiField);
+        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.error"), errorEmojiField);
+        addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.loading"), loadingEmojiField);
+        addRow(panel, gbc, 4, GuiLanguage.msg("gui.config.searching"), searchingEmojiField);
 
-        return Widgets.titledCard("UI / Emojis", panel);
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.uiEmojis"), panel);
     }
 
     /**
@@ -305,10 +306,10 @@ public class ConfigPanel extends JPanel {
 
         addSpanningRow(panel, gbc, 0, npImagesCheckBox);
         addSpanningRow(panel, gbc, 1, updateAlertsCheckBox);
-        addRow(panel, gbc, 2, "Log level", logLevelComboBox);
-        addRow(panel, gbc, 3, "Playlists folder", playlistsFolderField);
+        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.logLevel"), logLevelComboBox);
+        addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.playlistsFolder"), playlistsFolderField);
 
-        return Widgets.titledCard("Other", panel);
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.other"), panel);
     }
 
     /**
@@ -320,19 +321,19 @@ public class ConfigPanel extends JPanel {
 
         JPanel buttonPanel = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
 
-        JButton saveButton = new JButton("Save changes");
+        JButton saveButton = new JButton(GuiLanguage.msg("gui.config.saveChanges"));
         saveButton.setFont(Tokens.fontBody());
         saveButton.putClientProperty("JButton.buttonType", "default");
         saveButton.addActionListener(e -> saveConfiguration());
         buttonPanel.add(saveButton);
 
-        JButton resetButton = new JButton("Reset to current");
+        JButton resetButton = new JButton(GuiLanguage.msg("gui.config.resetToCurrent"));
         resetButton.setFont(Tokens.fontBody());
         resetButton.addActionListener(e -> loadCurrentValues());
         buttonPanel.add(resetButton);
 
         card.add(buttonPanel, BorderLayout.NORTH);
-        card.add(Widgets.muted("Changes require a bot restart to take effect."), BorderLayout.SOUTH);
+        card.add(Widgets.muted(GuiLanguage.msg("gui.config.restartRequired")), BorderLayout.SOUTH);
 
         return card;
     }
@@ -405,8 +406,8 @@ public class ConfigPanel extends JPanel {
 
             JOptionPane.showMessageDialog(
                 this,
-                "Configuration saved successfully!\n\nPlease restart the bot for changes to take effect.\n\nBackup created: " + backupPath.getFileName(),
-                "Configuration Saved",
+                GuiLanguage.msg("gui.config.savedDialogMessage", backupPath.getFileName()),
+                GuiLanguage.msg("gui.config.savedDialogTitle"),
                 JOptionPane.INFORMATION_MESSAGE
             );
 
@@ -414,8 +415,8 @@ public class ConfigPanel extends JPanel {
             LOG.error("Failed to save configuration", ex);
             JOptionPane.showMessageDialog(
                 this,
-                "Failed to save configuration: " + ex.getMessage(),
-                "Save Error",
+                GuiLanguage.msg("gui.config.saveErrorMessage", ex.getMessage()),
+                GuiLanguage.msg("gui.config.saveErrorTitle"),
                 JOptionPane.ERROR_MESSAGE
             );
         }

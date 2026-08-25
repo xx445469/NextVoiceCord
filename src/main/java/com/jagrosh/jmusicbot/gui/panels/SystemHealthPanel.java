@@ -19,6 +19,7 @@ import com.jagrosh.jmusicbot.audio.GCMonitor;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor.HealthSample;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor.HealthSnapshot;
+import com.jagrosh.jmusicbot.gui.GuiLanguage;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
 
@@ -44,41 +45,41 @@ public class SystemHealthPanel extends JPanel {
     private final GcChartPanel gcChart;
 
     // Health indicator
-    private final Widgets.Badge statusBadge = new Widgets.Badge("NO DATA", Tokens.textMuted());
+    private final Widgets.Badge statusBadge = new Widgets.Badge(GuiLanguage.msg("gui.system.noData"), Tokens.textMuted());
 
     // Meters
     private final Widgets.Meter cpuMeter = new Widgets.Meter();
     private final Widgets.Meter heapMeter = new Widgets.Meter();
 
     // Stat tiles
-    private final Widgets.StatTile cpuTile = new Widgets.StatTile("cpu usage");
-    private final Widgets.StatTile heapTile = new Widgets.StatTile("heap memory");
-    private final Widgets.StatTile gcCountTile = new Widgets.StatTile("gc count");
-    private final Widgets.StatTile gcTimeTile = new Widgets.StatTile("gc time");
-    private final Widgets.StatTile threadsTile = new Widgets.StatTile("threads");
-    private final Widgets.StatTile allocRateTile = new Widgets.StatTile("alloc rate");
+    private final Widgets.StatTile cpuTile = new Widgets.StatTile(GuiLanguage.msg("gui.system.cpuUsage"));
+    private final Widgets.StatTile heapTile = new Widgets.StatTile(GuiLanguage.msg("gui.system.heapMemory"));
+    private final Widgets.StatTile gcCountTile = new Widgets.StatTile(GuiLanguage.msg("gui.system.gcCount"));
+    private final Widgets.StatTile gcTimeTile = new Widgets.StatTile(GuiLanguage.msg("gui.system.gcTime"));
+    private final Widgets.StatTile threadsTile = new Widgets.StatTile(GuiLanguage.msg("gui.system.threads"));
+    private final Widgets.StatTile allocRateTile = new Widgets.StatTile(GuiLanguage.msg("gui.system.allocRate"));
 
     private HealthSnapshot currentSnapshot;
     private int selectedWindowSeconds = 60;
 
     private enum WindowOption {
-        SECONDS_30(30, "30 seconds"),
-        MINUTE_1(60, "1 minute"),
-        MINUTE_2(120, "2 minutes"),
-        MINUTE_5(300, "5 minutes");
+        SECONDS_30(30, "gui.system.window30Seconds"),
+        MINUTE_1(60, "gui.system.window1Minute"),
+        MINUTE_2(120, "gui.system.window2Minutes"),
+        MINUTE_5(300, "gui.system.window5Minutes");
 
         private final int seconds;
-        private final String display;
+        private final String displayKey;
 
-        WindowOption(int seconds, String display) {
+        WindowOption(int seconds, String displayKey) {
             this.seconds = seconds;
-            this.display = display;
+            this.displayKey = displayKey;
         }
 
         public int getSeconds() { return seconds; }
 
         @Override
-        public String toString() { return display; }
+        public String toString() { return GuiLanguage.msg(displayKey); }
     }
 
     public SystemHealthPanel() {
@@ -108,8 +109,8 @@ public class SystemHealthPanel extends JPanel {
 
     private Component buildHeader() {
         JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
-        header.add(Widgets.pageTitle("System Health"), BorderLayout.NORTH);
-        header.add(Widgets.muted("Process CPU, heap memory and garbage collection over time"),
+        header.add(Widgets.pageTitle(GuiLanguage.msg("gui.system.title")), BorderLayout.NORTH);
+        header.add(Widgets.muted(GuiLanguage.msg("gui.system.subtitle")),
                 BorderLayout.SOUTH);
         return header;
     }
@@ -124,14 +125,14 @@ public class SystemHealthPanel extends JPanel {
         content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
 
         JPanel chartsRow = Widgets.transparent(new GridLayout(1, 2, Tokens.SPACE_MD, 0));
-        chartsRow.add(chartCard("CPU Usage", cpuChart));
-        chartsRow.add(chartCard("Heap Memory", heapChart));
+        chartsRow.add(chartCard(GuiLanguage.msg("gui.system.cpuUsageChart"), cpuChart));
+        chartsRow.add(chartCard(GuiLanguage.msg("gui.system.heapMemoryChart"), heapChart));
         chartsRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 220));
         chartsRow.setPreferredSize(new Dimension(600, 220));
         content.add(chartsRow);
         content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
 
-        Widgets.Card gcCard = chartCard("GC Events", gcChart);
+        Widgets.Card gcCard = chartCard(GuiLanguage.msg("gui.system.gcEvents"), gcChart);
         gcCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 220));
         gcCard.setPreferredSize(new Dimension(600, 220));
         content.add(gcCard);
@@ -150,10 +151,10 @@ public class SystemHealthPanel extends JPanel {
         card.setLayout(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, Tokens.SPACE_XS));
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
 
-        card.add(Widgets.muted("Window"));
+        card.add(Widgets.muted(GuiLanguage.msg("gui.system.window")));
         card.add(windowSelector);
 
-        JButton refreshBtn = new JButton("Refresh");
+        JButton refreshBtn = new JButton(GuiLanguage.msg("gui.system.refresh"));
         refreshBtn.setFont(Tokens.fontBody());
         refreshBtn.addActionListener(e -> refreshMetrics());
         card.add(refreshBtn);
@@ -167,7 +168,7 @@ public class SystemHealthPanel extends JPanel {
     private Component buildStatsSection() {
         JPanel section = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_SM));
 
-        JLabel heading = new JLabel("Current Stats");
+        JLabel heading = new JLabel(GuiLanguage.msg("gui.system.currentStats"));
         heading.setFont(Tokens.fontHeading());
         heading.setForeground(Tokens.text());
         section.add(heading, BorderLayout.NORTH);
@@ -217,7 +218,7 @@ public class SystemHealthPanel extends JPanel {
 
     private void updateDisplay() {
         if (currentSnapshot == null || currentSnapshot.isEmpty()) {
-            statusBadge.set("NO DATA", Tokens.textMuted());
+            statusBadge.set(GuiLanguage.msg("gui.system.noData"), Tokens.textMuted());
             cpuTile.setValue("—");
             cpuTile.setValueColor(Tokens.text());
             cpuMeter.setFraction(0);
@@ -246,7 +247,7 @@ public class SystemHealthPanel extends JPanel {
             cpuMeter.setFraction(cpu / 100.0);
             cpuMeter.setFill(cpu > 80 ? Tokens.danger() : cpu > 50 ? Tokens.warning() : Tokens.accent());
         } else {
-            cpuTile.setValue("N/A");
+            cpuTile.setValue(GuiLanguage.msg("gui.system.notAvailable"));
             cpuTile.setValueColor(Tokens.text());
             cpuMeter.setFraction(0);
             cpuMeter.setFill(Tokens.accent());
@@ -343,14 +344,14 @@ public class SystemHealthPanel extends JPanel {
             g2.drawString("0", 2, graphTop + graphH - 2);
 
             if (currentSnapshot == null || currentSnapshot.isEmpty()) {
-                drawCentered(g2, "No data", w, h);
+                drawCentered(g2, GuiLanguage.msg("gui.system.chartNoData"), w, h);
                 g2.dispose();
                 return;
             }
 
             HealthSample[] samples = currentSnapshot.samples();
             if (samples.length < 2) {
-                drawCentered(g2, "Collecting...", w, h);
+                drawCentered(g2, GuiLanguage.msg("gui.system.collecting"), w, h);
                 g2.dispose();
                 return;
             }
@@ -430,14 +431,14 @@ public class SystemHealthPanel extends JPanel {
             g2.drawString("0", 2, graphTop + graphH - 2);
 
             if (currentSnapshot == null || currentSnapshot.isEmpty()) {
-                drawCentered(g2, "No data", w, h);
+                drawCentered(g2, GuiLanguage.msg("gui.system.chartNoData"), w, h);
                 g2.dispose();
                 return;
             }
 
             HealthSample[] samples = currentSnapshot.samples();
             if (samples.length < 2) {
-                drawCentered(g2, "Collecting...", w, h);
+                drawCentered(g2, GuiLanguage.msg("gui.system.collecting"), w, h);
                 g2.dispose();
                 return;
             }
@@ -544,7 +545,7 @@ public class SystemHealthPanel extends JPanel {
 
             if (gcEvents.length == 0) {
                 g2.setColor(Tokens.textMuted());
-                g2.drawString("No GC events", w / 2 - 30, graphTop + graphH / 2);
+                g2.drawString(GuiLanguage.msg("gui.system.noGcEvents"), w / 2 - 30, graphTop + graphH / 2);
             } else {
                 // Draw GC bars
                 for (GCMonitor.GCEvent e : gcEvents) {

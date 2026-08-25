@@ -17,6 +17,7 @@ package com.jagrosh.jmusicbot.gui.panels;
 
 import com.jagrosh.jmusicbot.audio.TrackLoadingMonitor;
 import com.jagrosh.jmusicbot.audio.TrackLoadingMonitor.*;
+import com.jagrosh.jmusicbot.gui.GuiLanguage;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
 
@@ -39,11 +40,11 @@ public class SourceHealthPanel extends JPanel {
     private final JComboBox<WindowOption> windowSelector;
 
     // Stats
-    private final Widgets.StatTile totalTile = new Widgets.StatTile("loads");
-    private final Widgets.StatTile successTile = new Widgets.StatTile("success rate");
-    private final Widgets.StatTile avgTile = new Widgets.StatTile("avg load time");
-    private final Widgets.StatTile p95Tile = new Widgets.StatTile("p95 load time");
-    private final Widgets.StatTile failedTile = new Widgets.StatTile("failed");
+    private final Widgets.StatTile totalTile = new Widgets.StatTile(GuiLanguage.msg("gui.sources.loads"));
+    private final Widgets.StatTile successTile = new Widgets.StatTile(GuiLanguage.msg("gui.sources.successRate"));
+    private final Widgets.StatTile avgTile = new Widgets.StatTile(GuiLanguage.msg("gui.sources.avgLoadTime"));
+    private final Widgets.StatTile p95Tile = new Widgets.StatTile(GuiLanguage.msg("gui.sources.p95LoadTime"));
+    private final Widgets.StatTile failedTile = new Widgets.StatTile(GuiLanguage.msg("gui.sources.failed"));
 
     // Source table
     private final JTable sourceTable;
@@ -62,10 +63,10 @@ public class SourceHealthPanel extends JPanel {
     private int selectedWindowSeconds = 60;
 
     private enum WindowOption {
-        SECONDS_30(30, "30 seconds"),
-        MINUTE_1(60, "1 minute"),
-        MINUTE_5(300, "5 minutes"),
-        MINUTE_10(600, "10 minutes");
+        SECONDS_30(30, GuiLanguage.msg("gui.sources.window30Seconds")),
+        MINUTE_1(60, GuiLanguage.msg("gui.sources.window1Minute")),
+        MINUTE_5(300, GuiLanguage.msg("gui.sources.window5Minutes")),
+        MINUTE_10(600, GuiLanguage.msg("gui.sources.window10Minutes"));
 
         private final int seconds;
         private final String display;
@@ -105,7 +106,13 @@ public class SourceHealthPanel extends JPanel {
             }
         });
 
-        String[] sourceCols = {"Source", "Loads", "Success%", "Avg (ms)", "p95 (ms)"};
+        String[] sourceCols = {
+                GuiLanguage.msg("gui.sources.colSource"),
+                GuiLanguage.msg("gui.sources.colLoads"),
+                GuiLanguage.msg("gui.sources.colSuccessPercent"),
+                GuiLanguage.msg("gui.sources.colAvgMs"),
+                GuiLanguage.msg("gui.sources.colP95Ms")
+        };
         sourceTableModel = new DefaultTableModel(sourceCols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
@@ -134,7 +141,13 @@ public class SourceHealthPanel extends JPanel {
             }
         });
 
-        String[] recentCols = {"Time", "Source", "Result", "Duration", "Track/Error"};
+        String[] recentCols = {
+                GuiLanguage.msg("gui.sources.colTime"),
+                GuiLanguage.msg("gui.sources.colSource"),
+                GuiLanguage.msg("gui.sources.colResult"),
+                GuiLanguage.msg("gui.sources.colDuration"),
+                GuiLanguage.msg("gui.sources.colTrackError")
+        };
         recentLoadsModel = new DefaultTableModel(recentCols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
@@ -194,8 +207,8 @@ public class SourceHealthPanel extends JPanel {
 
     private Component buildHeader() {
         JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
-        header.add(Widgets.pageTitle("Source Health"), BorderLayout.NORTH);
-        header.add(Widgets.muted("Track loading performance across audio sources"), BorderLayout.SOUTH);
+        header.add(Widgets.pageTitle(GuiLanguage.msg("gui.sources.title")), BorderLayout.NORTH);
+        header.add(Widgets.muted(GuiLanguage.msg("gui.sources.subtitle")), BorderLayout.SOUTH);
         return header;
     }
 
@@ -210,11 +223,11 @@ public class SourceHealthPanel extends JPanel {
         JPanel top = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_MD));
 
         JPanel controls = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
-        JLabel windowLabel = Widgets.muted("Window");
+        JLabel windowLabel = Widgets.muted(GuiLanguage.msg("gui.sources.windowLabel"));
         controls.add(windowLabel);
         controls.add(windowSelector);
 
-        JButton refreshBtn = new JButton("Refresh");
+        JButton refreshBtn = new JButton(GuiLanguage.msg("gui.sources.refresh"));
         refreshBtn.setFont(Tokens.fontBody());
         refreshBtn.addActionListener(e -> refreshMetrics());
         controls.add(refreshBtn);
@@ -238,8 +251,8 @@ public class SourceHealthPanel extends JPanel {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
         JPanel charts = Widgets.transparent(new GridLayout(1, 2, Tokens.SPACE_MD, 0));
-        charts.add(Widgets.titledCard("Load time by source", loadTimeChart));
-        charts.add(Widgets.titledCard("Success rate by source", successPie));
+        charts.add(Widgets.titledCard(GuiLanguage.msg("gui.sources.loadTimeBySource"), loadTimeChart));
+        charts.add(Widgets.titledCard(GuiLanguage.msg("gui.sources.successRateBySource"), successPie));
         charts.setAlignmentX(LEFT_ALIGNMENT);
         charts.setMaximumSize(new Dimension(Integer.MAX_VALUE, 280));
         content.add(charts);
@@ -254,8 +267,8 @@ public class SourceHealthPanel extends JPanel {
         recentScroll.setPreferredSize(new Dimension(0, 260));
 
         JPanel tables = Widgets.transparent(new GridLayout(1, 2, Tokens.SPACE_MD, 0));
-        tables.add(Widgets.titledCard("Sources", sourceScroll));
-        tables.add(Widgets.titledCard("Recent loads", recentScroll));
+        tables.add(Widgets.titledCard(GuiLanguage.msg("gui.sources.sourcesCard"), sourceScroll));
+        tables.add(Widgets.titledCard(GuiLanguage.msg("gui.sources.recentLoads"), recentScroll));
         tables.setAlignmentX(LEFT_ALIGNMENT);
         tables.setMaximumSize(new Dimension(Integer.MAX_VALUE, 320));
         content.add(tables);
@@ -394,7 +407,7 @@ public class SourceHealthPanel extends JPanel {
             if (currentSnapshot == null || currentSnapshot.trackedSources().length == 0) {
                 g2.setColor(Tokens.textMuted());
                 g2.setFont(Tokens.fontSmall());
-                g2.drawString("No data", w / 2 - 20, h / 2);
+                g2.drawString(GuiLanguage.msg("gui.sources.noData"), w / 2 - 20, h / 2);
                 g2.dispose();
                 return;
             }
@@ -448,12 +461,12 @@ public class SourceHealthPanel extends JPanel {
             g2.setColor(Tokens.accent());
             g2.fillRect(w - 70, 15, 10, 10);
             g2.setColor(Tokens.textMuted());
-            g2.drawString("Avg", w - 55, 24);
+            g2.drawString(GuiLanguage.msg("gui.sources.legendAvg"), w - 55, 24);
 
             g2.setColor(Tokens.warning());
             g2.fillRect(w - 70, 30, 10, 10);
             g2.setColor(Tokens.textMuted());
-            g2.drawString("p95", w - 55, 39);
+            g2.drawString(GuiLanguage.msg("gui.sources.legendP95"), w - 55, 39);
 
             g2.dispose();
         }
@@ -474,7 +487,7 @@ public class SourceHealthPanel extends JPanel {
             if (currentSnapshot == null || currentSnapshot.loadsInWindow() == 0) {
                 g2.setColor(Tokens.textMuted());
                 g2.setFont(Tokens.fontSmall());
-                g2.drawString("No data", w / 2 - 20, h / 2);
+                g2.drawString(GuiLanguage.msg("gui.sources.noData"), w / 2 - 20, h / 2);
                 g2.dispose();
                 return;
             }
@@ -518,17 +531,17 @@ public class SourceHealthPanel extends JPanel {
             g2.setColor(Tokens.success());
             g2.fillRect(10, legendY, 10, 10);
             g2.setColor(Tokens.textMuted());
-            g2.drawString("Success: " + success, 25, legendY + 9);
+            g2.drawString(GuiLanguage.msg("gui.sources.legendSuccess", success), 25, legendY + 9);
 
             g2.setColor(Tokens.warning());
             g2.fillRect(w / 3, legendY, 10, 10);
             g2.setColor(Tokens.textMuted());
-            g2.drawString("No Match: " + noMatch, w / 3 + 15, legendY + 9);
+            g2.drawString(GuiLanguage.msg("gui.sources.legendNoMatch", noMatch), w / 3 + 15, legendY + 9);
 
             g2.setColor(Tokens.danger());
             g2.fillRect(2 * w / 3, legendY, 10, 10);
             g2.setColor(Tokens.textMuted());
-            g2.drawString("Failed: " + failed, 2 * w / 3 + 15, legendY + 9);
+            g2.drawString(GuiLanguage.msg("gui.sources.legendFailed", failed), 2 * w / 3 + 15, legendY + 9);
 
             g2.dispose();
         }

@@ -16,6 +16,7 @@
 package com.jagrosh.jmusicbot.gui.panels;
 
 import com.jagrosh.jmusicbot.gui.GuiLanguage;
+import com.jagrosh.jmusicbot.gui.GuiPreferences;
 import com.jagrosh.jmusicbot.i18n.Language;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
@@ -45,8 +46,8 @@ public class SettingsPanel extends JPanel {
 
     private Component buildHeader() {
         JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
-        header.add(Widgets.pageTitle("Preferences"), BorderLayout.NORTH);
-        header.add(Widgets.muted("How this window looks — the bot itself is unaffected"), BorderLayout.SOUTH);
+        header.add(Widgets.pageTitle(GuiLanguage.msg("gui.nav.preferences")), BorderLayout.NORTH);
+        header.add(Widgets.muted(GuiLanguage.msg("gui.preferences.subtitle")), BorderLayout.SOUTH);
         return header;
     }
 
@@ -118,6 +119,7 @@ public class SettingsPanel extends JPanel {
                 return;
             }
             GuiLanguage.set(chosen);
+            GuiPreferences.saveLanguage(chosen.name());
             // Labels created before the change keep the old text, and rebuilding the whole
             // window mid-session risks more than it fixes. Saying so is more honest than a
             // half-translated window with no explanation.
@@ -140,6 +142,7 @@ public class SettingsPanel extends JPanel {
             ThemeManager.Theme selected = (ThemeManager.Theme) themeBox.getSelectedItem();
             if (selected != null) {
                 ThemeManager.setTheme(selected);
+                GuiPreferences.saveTheme(selected.getConfigKey());
             }
         });
 
@@ -148,9 +151,17 @@ public class SettingsPanel extends JPanel {
         );
         JSpinner fontSpinner = new JSpinner(fontModel);
         fontSpinner.setFont(Tokens.fontBody());
+
+        // Held back briefly before writing. The spinner fires on every arrow click, and
+        // someone stepping 12 → 16 would otherwise rewrite config.txt four times on the way.
+        Timer fontSaveDelay = new Timer(500, e ->
+                GuiPreferences.saveFontSize((Integer) fontSpinner.getValue()));
+        fontSaveDelay.setRepeats(false);
+
         fontSpinner.addChangeListener(e -> {
             int size = (Integer) fontSpinner.getValue();
             ThemeManager.setBaseFontSize(size);
+            fontSaveDelay.restart();
         });
 
         body.add(preferenceRow(GuiLanguage.msg("gui.language.label"), buildLanguageBox()));
@@ -159,16 +170,16 @@ public class SettingsPanel extends JPanel {
         // affect what the bot says in Discord, and it does not.
         body.add(Widgets.muted(GuiLanguage.msg("gui.language.hint")));
         body.add(javax.swing.Box.createVerticalStrut(Tokens.SPACE_MD));
-        body.add(preferenceRow("Theme", themeBox));
+        body.add(preferenceRow(GuiLanguage.msg("gui.appearance.theme"), themeBox));
         body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
-        body.add(preferenceRow("Font size", fontSpinner));
+        body.add(preferenceRow(GuiLanguage.msg("gui.appearance.fontSize"), fontSpinner));
         body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
 
-        JLabel note = Widgets.muted("Applied immediately. Not saved to config.");
+        JLabel note = Widgets.muted(GuiLanguage.msg("gui.appearance.savedNote"));
         note.setAlignmentX(LEFT_ALIGNMENT);
         body.add(note);
 
-        return Widgets.titledCard("Appearance", body);
+        return Widgets.titledCard(GuiLanguage.msg("gui.section.appearance"), body);
     }
 
     /**
@@ -181,12 +192,12 @@ public class SettingsPanel extends JPanel {
         JPanel buttonPanel = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
         buttonPanel.setAlignmentX(LEFT_ALIGNMENT);
 
-        JButton openFolderButton = new JButton("Open config folder");
+        JButton openFolderButton = new JButton(GuiLanguage.msg("gui.preferences.openFolder"));
         openFolderButton.setFont(Tokens.fontBody());
         openFolderButton.addActionListener(e -> openConfigFolder());
         buttonPanel.add(openFolderButton);
 
-        JButton openFileButton = new JButton("Open config.txt");
+        JButton openFileButton = new JButton(GuiLanguage.msg("gui.preferences.openFile"));
         openFileButton.setFont(Tokens.fontBody());
         openFileButton.addActionListener(e -> openConfigFile());
         buttonPanel.add(openFileButton);
@@ -194,11 +205,11 @@ public class SettingsPanel extends JPanel {
         body.add(buttonPanel);
         body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
 
-        JLabel pathLabel = Widgets.muted("Location: " + getConfigPath());
+        JLabel pathLabel = Widgets.muted(GuiLanguage.msg("gui.preferences.location", getConfigPath()));
         pathLabel.setAlignmentX(LEFT_ALIGNMENT);
         body.add(pathLabel);
 
-        return Widgets.titledCard("Configuration", body);
+        return Widgets.titledCard(GuiLanguage.msg("gui.preferences.configuration"), body);
     }
 
     /**
@@ -208,18 +219,18 @@ public class SettingsPanel extends JPanel {
         JPanel body = Widgets.transparent(null);
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
 
-        body.add(preferenceRow("Java version", mutedValue(System.getProperty("java.version"))));
+        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.javaVersion"), mutedValue(System.getProperty("java.version"))));
         body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
-        body.add(preferenceRow("Java vendor", mutedValue(System.getProperty("java.vendor"))));
+        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.javaVendor"), mutedValue(System.getProperty("java.vendor"))));
         body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
-        body.add(preferenceRow("Operating system",
+        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.os"),
                 mutedValue(System.getProperty("os.name") + " " + System.getProperty("os.version"))));
         body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
-        body.add(preferenceRow("Current theme", mutedValue(ThemeManager.getCurrentTheme().getDisplayName())));
+        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.currentTheme"), mutedValue(ThemeManager.getCurrentTheme().getDisplayName())));
         body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
-        body.add(preferenceRow("FlatLaf", mutedValue("3.7")));
+        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.flatlaf"), mutedValue("3.7")));
 
-        return Widgets.titledCard("System information", body);
+        return Widgets.titledCard(GuiLanguage.msg("gui.preferences.systemInfo"), body);
     }
 
     private JLabel mutedValue(String text) {
@@ -255,8 +266,8 @@ public class SettingsPanel extends JPanel {
         } catch (IOException e) {
             JOptionPane.showMessageDialog(
                 this,
-                "Could not open config folder: " + e.getMessage(),
-                "Error",
+                GuiLanguage.msg("gui.preferences.cannotOpenFolder", e.getMessage()),
+                GuiLanguage.msg("gui.dialog.error"),
                 JOptionPane.ERROR_MESSAGE
             );
         }
@@ -273,16 +284,16 @@ public class SettingsPanel extends JPanel {
             } else {
                 JOptionPane.showMessageDialog(
                     this,
-                    "Config file not found: " + configFile.getAbsolutePath(),
-                    "File Not Found",
+                    GuiLanguage.msg("gui.preferences.configNotFound", configFile.getAbsolutePath()),
+                    GuiLanguage.msg("gui.dialog.notFound"),
                     JOptionPane.WARNING_MESSAGE
                 );
             }
         } catch (IOException e) {
             JOptionPane.showMessageDialog(
                 this,
-                "Could not open config file: " + e.getMessage(),
-                "Error",
+                GuiLanguage.msg("gui.preferences.cannotOpenFile", e.getMessage()),
+                GuiLanguage.msg("gui.dialog.error"),
                 JOptionPane.ERROR_MESSAGE
             );
         }

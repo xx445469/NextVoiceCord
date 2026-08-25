@@ -17,6 +17,7 @@ package com.jagrosh.jmusicbot.gui.panels;
 
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.gui.GuiLanguage;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.model.BotStatusData;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
@@ -59,8 +60,8 @@ public class StatusPanel extends JPanel {
 
     private Component buildHeader() {
         JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
-        header.add(Widgets.pageTitle("Servers"), BorderLayout.NORTH);
-        header.add(Widgets.muted("Every server this bot is connected to"), BorderLayout.SOUTH);
+        header.add(Widgets.pageTitle(GuiLanguage.msg("gui.status.title")), BorderLayout.NORTH);
+        header.add(Widgets.muted(GuiLanguage.msg("gui.status.subtitle")), BorderLayout.SOUTH);
         return header;
     }
 
@@ -121,16 +122,16 @@ public class StatusPanel extends JPanel {
         String badgeText;
         Color badgeColor;
         if (!inVoice) {
-            badgeText = "IDLE";
+            badgeText = GuiLanguage.msg("gui.status.badgeIdle");
             badgeColor = Tokens.textMuted();
         } else if (track == null) {
-            badgeText = "CONNECTED";
+            badgeText = GuiLanguage.msg("gui.status.badgeConnected");
             badgeColor = Tokens.accent();
         } else if (paused) {
-            badgeText = "PAUSED";
+            badgeText = GuiLanguage.msg("gui.status.badgePaused");
             badgeColor = Tokens.warning();
         } else {
-            badgeText = "PLAYING";
+            badgeText = GuiLanguage.msg("gui.status.badgePlaying");
             badgeColor = Tokens.success();
         }
 
@@ -142,12 +143,12 @@ public class StatusPanel extends JPanel {
         name.setForeground(Tokens.text());
         top.add(name, BorderLayout.CENTER);
 
-        top.add(Widgets.muted(guild.getId() + "  ·  " + guild.getMemberCount() + " members"), BorderLayout.EAST);
+        top.add(Widgets.muted(GuiLanguage.msg("gui.status.serverMeta", guild.getId(), guild.getMemberCount())), BorderLayout.EAST);
 
         JPanel middle = Widgets.transparent(null);
         middle.setLayout(new BoxLayout(middle, BoxLayout.Y_AXIS));
 
-        String titleText = "Nothing playing";
+        String titleText = GuiLanguage.msg("gui.status.nothingPlaying");
         Color titleColor = Tokens.textMuted();
         if (track != null) {
             String title = FormatUtil.getTrackTitle(track);
@@ -162,15 +163,15 @@ public class StatusPanel extends JPanel {
         titleLabel.setForeground(titleColor);
         titleLabel.setAlignmentX(LEFT_ALIGNMENT);
 
-        String channelText = "Not connected to voice";
+        String channelText = GuiLanguage.msg("gui.status.notConnectedToVoice");
         if (inVoice) {
             AudioChannel channel = guild.getAudioManager().getConnectedChannel();
-            channelText = channel != null ? channel.getName() : "Unknown channel";
+            channelText = channel != null ? channel.getName() : GuiLanguage.msg("gui.status.unknownChannel");
         }
 
         int queueSize = 0;
         int volume = 100;
-        String repeatText = "Off";
+        String repeatText = GuiLanguage.msg("gui.status.repeatOff");
         try {
             if (handler != null) {
                 queueSize = handler.getQueue().size();
@@ -179,13 +180,12 @@ public class StatusPanel extends JPanel {
                 volume = player.getVolume();
             }
             var repeatMode = bot.getSettingsManager().getSettings(guild).getRepeatMode();
-            repeatText = repeatMode != null ? repeatMode.getUserFriendlyName() : "Off";
+            repeatText = repeatMode != null ? repeatMode.getUserFriendlyName() : GuiLanguage.msg("gui.status.repeatOff");
         } catch (Exception ignored) {
             // Settings unavailable for this guild — fall back to the defaults above.
         }
 
-        JLabel metaLabel = Widgets.muted(channelText + "  ·  " + queueSize + " queued  ·  vol "
-                + volume + "%  ·  repeat " + repeatText);
+        JLabel metaLabel = Widgets.muted(GuiLanguage.msg("gui.status.serverMetaLine", channelText, queueSize, volume, repeatText));
         metaLabel.setAlignmentX(LEFT_ALIGNMENT);
 
         middle.add(titleLabel);
@@ -205,7 +205,7 @@ public class StatusPanel extends JPanel {
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
         card.setAlignmentX(LEFT_ALIGNMENT);
 
-        JLabel message = new JLabel("No servers connected yet.", JLabel.CENTER);
+        JLabel message = new JLabel(GuiLanguage.msg("gui.status.noServersConnected"), JLabel.CENTER);
         message.setFont(Tokens.fontBody());
         message.setForeground(Tokens.textMuted());
 

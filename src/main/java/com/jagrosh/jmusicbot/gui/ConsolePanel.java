@@ -79,7 +79,7 @@ public class ConsolePanel extends JPanel {
         topPanel.add(searchPanel, BorderLayout.CENTER);
         
         // Auto-scroll checkbox
-        autoScrollCheckbox = new JCheckBox("Auto-scroll", true);
+        autoScrollCheckbox = new JCheckBox(GuiLanguage.msg("gui.console.autoScroll"), true);
         autoScrollCheckbox.setFont(autoScrollCheckbox.getFont().deriveFont(11f));
         topPanel.add(autoScrollCheckbox, BorderLayout.EAST);
         
@@ -136,20 +136,20 @@ public class ConsolePanel extends JPanel {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         
         // Clear button
-        JButton clearButton = new JButton("Clear");
-        clearButton.setToolTipText("Clear console output");
+        JButton clearButton = new JButton(GuiLanguage.msg("gui.console.clear"));
+        clearButton.setToolTipText(GuiLanguage.msg("gui.console.clearTooltip"));
         clearButton.addActionListener(e -> clearConsole());
         toolbar.add(clearButton);
-        
+
         // Copy button
-        JButton copyButton = new JButton("Copy");
-        copyButton.setToolTipText("Copy all console output to clipboard");
+        JButton copyButton = new JButton(GuiLanguage.msg("gui.console.copy"));
+        copyButton.setToolTipText(GuiLanguage.msg("gui.console.copyTooltip"));
         copyButton.addActionListener(e -> copyToClipboard());
         toolbar.add(copyButton);
-        
+
         // Copy selection button
-        JButton copySelectionButton = new JButton("Copy Selection");
-        copySelectionButton.setToolTipText("Copy selected text to clipboard");
+        JButton copySelectionButton = new JButton(GuiLanguage.msg("gui.console.copySelection"));
+        copySelectionButton.setToolTipText(GuiLanguage.msg("gui.console.copySelectionTooltip"));
         copySelectionButton.addActionListener(e -> copySelectionToClipboard());
         toolbar.add(copySelectionButton);
         
@@ -163,9 +163,9 @@ public class ConsolePanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(4, 0));
         
         JPanel searchInputPanel = new JPanel(new BorderLayout(4, 0));
-        JLabel searchLabel = new JLabel("Search:");
+        JLabel searchLabel = new JLabel(GuiLanguage.msg("gui.console.searchLabel"));
         JTextField searchInput = new JTextField();
-        searchInput.setToolTipText("Type to search (Enter to find next, Esc to clear)");
+        searchInput.setToolTipText(GuiLanguage.msg("gui.console.searchTooltip"));
         
         searchInput.addKeyListener(new KeyAdapter() {
             @Override
@@ -189,7 +189,7 @@ public class ConsolePanel extends JPanel {
         searchInputPanel.add(searchLabel, BorderLayout.WEST);
         searchInputPanel.add(searchInput, BorderLayout.CENTER);
         
-        JLabel matchCount = new JLabel("0 matches");
+        JLabel matchCount = new JLabel(GuiLanguage.msg("gui.console.matchesFound", 0));
         matchCount.setFont(matchCount.getFont().deriveFont(11f));
         matchCount.setForeground(Color.GRAY);
         
@@ -235,7 +235,7 @@ public class ConsolePanel extends JPanel {
         clearHighlights();
         
         if (searchText == null || searchText.isEmpty()) {
-            matchCountLabel.setText("0 matches");
+            matchCountLabel.setText(GuiLanguage.msg("gui.console.matchesFound", 0));
             return;
         }
         
@@ -258,7 +258,9 @@ public class ConsolePanel extends JPanel {
             }
         }
         
-        matchCountLabel.setText(count + " match" + (count != 1 ? "es" : ""));
+        matchCountLabel.setText(count == 1
+                ? GuiLanguage.msg("gui.console.matchFound", count)
+                : GuiLanguage.msg("gui.console.matchesFound", count));
         
         // Scroll to first match
         if (count > 0) {

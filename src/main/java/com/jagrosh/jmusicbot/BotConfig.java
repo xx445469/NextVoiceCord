@@ -21,6 +21,7 @@ import static com.jagrosh.jmusicbot.config.model.ConfigOption.*;
 import static com.jagrosh.jmusicbot.config.model.ConfigOption.GUI_ENABLED;
 import static com.jagrosh.jmusicbot.config.model.ConfigOption.GUI_THEME;
 import static com.jagrosh.jmusicbot.config.model.ConfigOption.GUI_FONT_SIZE;
+import static com.jagrosh.jmusicbot.config.model.ConfigOption.GUI_LANGUAGE;
 
 import java.nio.file.Path;
 import java.util.Set;
@@ -73,6 +74,7 @@ public class BotConfig {
     private boolean proxyLavaplayer, proxyJda, proxyGithub;
     private double skipratio;
     private Language defaultLanguage;
+    private Language guiLanguage;
     private String updateRepository, updateGithubToken;
     private boolean autoUpdate;
     private int updateIntervalHours;
@@ -311,6 +313,12 @@ public class BotConfig {
         guiEnabled = GUI_ENABLED.hasValue(config) ? GUI_ENABLED.getBoolean(config) : true;
         guiTheme = GUI_THEME.getString(config);
         guiFontSize = GUI_FONT_SIZE.getInt(config);
+        // Left blank the window follows the bot's language, which is the right default: most
+        // people run the bot in the language they read. Set, it wins — the operator watching
+        // this window is not necessarily in any of the servers the bot serves.
+        guiLanguage = GUI_LANGUAGE.hasValue(config)
+                ? Language.fromCode(GUI_LANGUAGE.getString(config)).orElse(defaultLanguage)
+                : defaultLanguage;
         
         // Performance options
         nasBufferMs = NAS_BUFFER_MS.getInt(config);
@@ -648,6 +656,11 @@ public class BotConfig {
 
     public int getGuiFontSize() {
         return guiFontSize;
+    }
+
+    /** The language the desktop window is displayed in. */
+    public Language getGuiLanguage() {
+        return guiLanguage;
     }
     
     public int getNasBufferMs() {
