@@ -147,6 +147,7 @@ public record LaunchOptions(boolean noGui,
     {
         return """
                NextVoiceCord — a self-hosted Discord music bot
+               BETA: pinned to an unreleased youtube-source build.
 
                Usage: java -jar NextVoiceCord.jar [options]
 

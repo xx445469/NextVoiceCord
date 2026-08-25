@@ -320,6 +320,9 @@ public class MainFrame extends JFrame {
             
             JMusicBot's playback core, a Vocard-style interface, and 12 languages.
             
+            Beta: pinned to an unreleased youtube-source build, because the
+            published releases cannot play a large share of videos.
+            
             Theme: %s
             Java: %s
             """.formatted(

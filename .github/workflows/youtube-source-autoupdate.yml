@@ -113,6 +113,31 @@ jobs:
           echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
           echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
 
+          # A pinned commit is deliberate, and it is pinned precisely because the
+          # published releases do not work. Comparing it to a release compares a hash
+          # to a version number: they always differ, so this job would read "update
+          # available" and quietly replace a working build with the broken release it
+          # was pinned away from. The differential gate would not save it either —
+          # the incumbent is only demonstrably worse from certain networks, and CI
+          # runs from a datacenter where the broken release passes.
+          #
+          # force_version still overrides, so a deliberate move back is one dispatch away.
+          if [ -z "${{ github.event.inputs.force_version }}" ] \
+             && printf '%s' "$CURRENT" | grep -qiE 'SNAPSHOT|^[0-9a-f]{40}'; then
+            echo "update_available=false" >> "$GITHUB_OUTPUT"
+            echo "Pinned to $CURRENT, which is not a published release. Holding."
+            {
+              echo "### Holding at a pinned build"
+              echo ""
+              echo "Currently on \`$CURRENT\`; latest release is \`$LATEST\`."
+              echo ""
+              echo "This pin exists because published releases could not play a large"
+              echo "share of videos. Automatic updates stay off until it is unpinned, so"
+              echo "this job cannot undo it. Run with \`force_version\` to move deliberately."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
           if [ "$CURRENT" = "$LATEST" ]; then
             echo "update_available=false" >> "$GITHUB_OUTPUT"
             echo "Already on the latest version. Nothing to do."

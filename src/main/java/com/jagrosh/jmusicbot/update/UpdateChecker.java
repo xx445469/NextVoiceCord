@@ -251,11 +251,16 @@ public final class UpdateChecker
     }
 
     /**
-     * Compares dotted version strings numerically.
+     * Compares version strings, pre-releases included.
      *
-     * <p>String comparison is wrong here in a way that only shows up later: "0.10.0" sorts
-     * before "0.9.0" lexically, so the bot would refuse to update exactly once the version
-     * numbers grew past single digits.
+     * <p>Comparing as plain strings is wrong in a way that only appears later: "0.10.0"
+     * sorts before "0.9.0" lexically, so updates would silently stop once the numbers grew
+     * past a single digit.
+     *
+     * <p>Pre-releases follow semver: with equal numeric parts, a version carrying a suffix
+     * ranks BELOW one without. Treating the suffix as just another segment gets this
+     * backwards in both directions at once — a beta never sees the stable release that
+     * supersedes it, and a stable install "updates" itself onto a beta.
      *
      * @return true if {@code candidate} is strictly newer than {@code current}
      */
@@ -266,36 +271,92 @@ public final class UpdateChecker
             return false;
         }
 
-        String[] a = current.split("[.\\-+]");
-        String[] b = candidate.split("[.\\-+]");
+        String[] currentParts = splitVersion(current);
+        String[] candidateParts = splitVersion(candidate);
+
+        int core = compareNumeric(currentParts[0], candidateParts[0]);
+        if (core != 0)
+        {
+            return core < 0;
+        }
+
+        String currentPre = currentParts[1];
+        String candidatePre = candidateParts[1];
+
+        // Equal cores: absence of a suffix wins.
+        if (currentPre.isEmpty() || candidatePre.isEmpty())
+        {
+            return !candidatePre.isEmpty() ? false : !currentPre.isEmpty();
+        }
+
+        return compareNumeric(currentPre, candidatePre) < 0;
+    }
+
+    /** Splits "1.2.3-beta.4+build" into {"1.2.3", "beta.4"}, discarding build metadata. */
+    private static String[] splitVersion(String version)
+    {
+        String withoutBuild = version.split("\\+", 2)[0];
+        int dash = withoutBuild.indexOf('-');
+        return dash < 0
+                ? new String[] { withoutBuild, "" }
+                : new String[] { withoutBuild.substring(0, dash), withoutBuild.substring(dash + 1) };
+    }
+
+    /**
+     * Compares dot-separated segments.
+     *
+     * <p>Numeric segments compare as numbers; a numeric segment ranks below an alphanumeric
+     * one, as semver specifies, so "1" sorts before "alpha".
+     */
+    private static int compareNumeric(String left, String right)
+    {
+        String[] a = left.split("\\.");
+        String[] b = right.split("\\.");
 
         for (int i = 0; i < Math.max(a.length, b.length); i++)
         {
-            int left = numberAt(a, i);
-            int right = numberAt(b, i);
-            if (left != right)
+            String x = i < a.length ? a[i] : "0";
+            String y = i < b.length ? b[i] : "0";
+
+            Integer xn = asNumber(x);
+            Integer yn = asNumber(y);
+
+            if (xn != null && yn != null)
             {
-                return right > left;
+                if (!xn.equals(yn))
+                {
+                    return Integer.compare(xn, yn);
+                }
+            }
+            else if (xn != null)
+            {
+                return -1;
+            }
+            else if (yn != null)
+            {
+                return 1;
+            }
+            else
+            {
+                int cmp = x.compareTo(y);
+                if (cmp != 0)
+                {
+                    return cmp;
+                }
             }
         }
-        return false;
+        return 0;
     }
 
-    private static int numberAt(String[] parts, int index)
+    private static Integer asNumber(String text)
     {
-        if (index >= parts.length)
-        {
-            return 0;
-        }
         try
         {
-            return Integer.parseInt(parts[index]);
+            return Integer.valueOf(text);
         }
         catch (NumberFormatException ex)
         {
-            // A non-numeric segment such as a build suffix is treated as 0 rather than
-            // aborting the comparison, so "1.2.0-rc1" still compares sensibly against "1.2.0".
-            return 0;
+            return null;
         }
     }
 }
