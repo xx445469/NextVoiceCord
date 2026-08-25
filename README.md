@@ -28,6 +28,45 @@ Three things I wanted that no single existing bot gave me at once:
 
 ---
 
+## Translations
+
+NextVoiceCord ships 12 languages: DE, EN, ES, FR, JA, KO, PL, RU, UA, VN, ZH-CN, ZH-TW.
+
+**Only English is verified.** Every other translation is machine-generated and has not been
+checked by a native speaker. They are complete and they read fluently — which is exactly the
+problem, because that is indistinguishable from being correct. Expect unnatural phrasing,
+wrong grammatical gender, and mistranslated technical terms.
+
+The bot says so too: it logs which languages are unreviewed at startup, and each file carries
+`_meta.reviewed: false`. Nothing claims to be verified until a person verifies it.
+
+**Corrections are very welcome.** Fixing even a handful of strings in a language you speak is
+genuinely useful. Translation files live in [`src/main/resources/langs/`](src/main/resources/langs/)
+and are plain nested JSON:
+
+```json
+"player": {
+  "skipped": "Skipped!",
+  "volumeChanged": "Volume changed from `{0}` to `{1}`"
+}
+```
+
+Three rules, all enforced by CI (`python3 scripts/validate-langs.py`):
+
+1. **Keep every `{0}` `{1}` placeholder.** Reorder them freely — word order differs between
+   languages — but the same set must appear, or the message renders a literal `{1}`.
+2. **Keep `**` and `` ` `` counts matching English.** An unclosed pair swallows the rest of
+   the message in Discord.
+3. **Leave command names, config paths and enum values alone.** `/settc`, `` `linear` `` and
+   `playback.maxHistorySize` are things people type or machines parse; translating them
+   breaks the instruction they appear in.
+
+You do not have to translate a whole file. Fallback is per key, so an untranslated string
+shows in English while everything around it stays in your language. Once a language has been
+read through by someone who speaks it, set `_meta.reviewed: true`.
+
+---
+
 ## Attribution
 
 This project stands on two pieces of other people's work. Please go star them.

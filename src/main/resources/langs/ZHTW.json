@@ -1,4 +1,10 @@
 {
+  "_meta": {
+    "language": "ZHTW",
+    "englishName": "Chinese (Traditional)",
+    "reviewed": false,
+    "note": "Machine-generated, not yet reviewed by a native speaker. Corrections welcome."
+  },
   "common": {
     "errors": {
       "serverOnly": "這個功能只能在伺服器中使用！",

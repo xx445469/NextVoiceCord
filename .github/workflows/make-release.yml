@@ -50,8 +50,8 @@ jobs:
         if: ${{ github.event.inputs.is_prerelease != 'true' }}
         run: |
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          if [ "$BRANCH" != "master" ]; then
-            echo "❌ Error: Regular releases can only be created from the 'master' branch."
+          if [ "$BRANCH" != "main" ]; then
+            echo "❌ Error: Regular releases can only be created from the 'main' branch."
             echo "   Current branch: $BRANCH"
             echo "   To create a pre-release from this branch, check the 'Mark this as a pre-release' option."
             exit 1

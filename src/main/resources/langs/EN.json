@@ -1,4 +1,10 @@
 {
+  "_meta": {
+    "language": "EN",
+    "englishName": "English",
+    "reviewed": true,
+    "note": "Source language. All other files are translated from this one; edit here first."
+  },
   "common": {
     "errors": {
       "serverOnly": "This can only be used in a server!",
