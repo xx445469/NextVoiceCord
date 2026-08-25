@@ -62,7 +62,7 @@ public class SetdjCmd extends AdminCommand
             if(list.isEmpty())
                 event.reply(event.getClient().getWarning()+" " + bot.msg(event.getGuild(), "settings.dj.notFound", event.getArgs()));
             else if (list.size()>1)
-                event.reply(event.getClient().getWarning()+FormatUtil.listOfRoles(list, event.getArgs()));
+                event.reply(event.getClient().getWarning()+FormatUtil.listOfRoles(bot, event.getGuild(), list, event.getArgs()));
             else
             {
                 s.setDJRole(list.get(0));

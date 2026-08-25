@@ -103,7 +103,7 @@ public class QueueCmd extends MusicCommand
         }
 
         String successEmoji = event.getClient().getSuccess();
-        builder.setText((i1, i2) -> musicService.formatQueueTitle(queueInfo, successEmoji))
+        builder.setText((i1, i2) -> musicService.formatQueueTitle(event.getGuild(), queueInfo, successEmoji))
                 .setItems(queueInfo.tracks)
                 .setUsers(event.getAuthor())
                 .setColor(event.getSelfMember().getColors().getPrimary());

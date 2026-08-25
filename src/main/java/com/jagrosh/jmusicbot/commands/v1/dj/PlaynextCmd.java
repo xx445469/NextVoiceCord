@@ -48,7 +48,7 @@ public class PlaynextCmd extends DJCommand
     {
         if (event.getArgs().isEmpty() && event.getMessage().getAttachments().isEmpty())
         {
-            event.replyWarning("Please include a song title or URL!");
+            event.replyWarning(bot.msg(event.getGuild(), "search.errors.missingSongOrUrl"));
             return;
         }
 

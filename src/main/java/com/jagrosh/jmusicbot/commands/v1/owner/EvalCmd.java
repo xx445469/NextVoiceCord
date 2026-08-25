@@ -48,8 +48,8 @@ public class EvalCmd extends OwnerCommand
         ScriptEngine se = new ScriptEngineManager().getEngineByName(engine);
         if(se == null)
         {
-            event.replyError("The eval engine provided in the config (`"+engine+"`) doesn't exist. This could be due to an invalid "
-                    + "engine name, or the engine not existing in your version of java (`"+System.getProperty("java.version")+"`).");
+            event.replyError(bot.msg(event.getChannelType() != ChannelType.PRIVATE ? event.getGuild() : null,
+                    "owner.eval.errors.engineMissing", engine, System.getProperty("java.version")));
             return;
         }
         se.put("bot", bot);
@@ -61,12 +61,14 @@ public class EvalCmd extends OwnerCommand
         }
         try
         {
-            event.reply(event.getClient().getSuccess()+" Evaluated Successfully:\n```\n"+se.eval(event.getArgs())+" ```");
-        } 
+            event.reply(event.getClient().getSuccess()+" " + bot.msg(event.getChannelType() != ChannelType.PRIVATE ? event.getGuild() : null,
+                    "owner.eval.success", se.eval(event.getArgs())));
+        }
         catch(Exception e)
         {
-            event.reply(event.getClient().getError()+" An exception was thrown:\n```\n"+e+" ```");
+            event.reply(event.getClient().getError()+" " + bot.msg(event.getChannelType() != ChannelType.PRIVATE ? event.getGuild() : null,
+                    "owner.eval.exceptionThrown", e));
         }
     }
-    
+
 }

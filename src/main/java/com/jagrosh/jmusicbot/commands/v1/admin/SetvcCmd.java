@@ -62,7 +62,7 @@ public class SetvcCmd extends AdminCommand
             if(list.isEmpty())
                 event.reply(event.getClient().getWarning()+" " + bot.msg(event.getGuild(), "settings.voiceChannel.notFound", event.getArgs()));
             else if (list.size()>1)
-                event.reply(event.getClient().getWarning()+FormatUtil.listOfVChannels(list, event.getArgs()));
+                event.reply(event.getClient().getWarning()+FormatUtil.listOfVChannels(bot, event.getGuild(), list, event.getArgs()));
             else
             {
                 s.setVoiceChannel(list.get(0));

@@ -41,7 +41,6 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
     public static final int PLAYLISTS_PER_PAGE = 10;
     public static final int PLAYLIST_TRACKS_PER_PAGE = 10;
     private static final String FAVORITES_PLAYLIST_NAME = "favorites";
-    private static final String FAVORITES_DISPLAY_LABEL = "⭐ favorites ⭐";
 
     public PlaylistsSlashCmd(Bot bot)
     {
@@ -76,8 +75,8 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
             int playlistsOnPage = getPlaylistsOnPage(page, list.size());
             Color color = event.getMember() == null ? null : event.getMember().getColor();
 
-            MessageEmbed embed = buildPlaylistsEmbed(list, page, totalPages, 0, color);
-            List<ActionRow> components = buildPlaylistsComponents(page, totalPages, playlistsOnPage, 0, userId);
+            MessageEmbed embed = buildPlaylistsEmbed(bot, event.getGuild(), list, page, totalPages, 0, color);
+            List<ActionRow> components = buildPlaylistsComponents(bot, event.getGuild(), page, totalPages, playlistsOnPage, 0, userId);
             event.replyEmbeds(embed).setComponents(components).queue();
         }
     }
@@ -85,23 +84,24 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
     /**
      * Builds the playlists embed with paginated playlist list.
      */
-    public static MessageEmbed buildPlaylistsEmbed(List<String> playlists, int page, int totalPages,
+    public static MessageEmbed buildPlaylistsEmbed(Bot bot, net.dv8tion.jda.api.entities.Guild guild,
+                                                   List<String> playlists, int page, int totalPages,
                                                    int selectedIndex, Color memberColor)
     {
         int startIndex = (page - 1) * PLAYLISTS_PER_PAGE;
         int endIndex = Math.min(startIndex + PLAYLISTS_PER_PAGE, playlists.size());
         List<String> lineContents = playlists.subList(startIndex, endIndex).stream()
-                .map(name -> "`" + formatPlaylistDisplayLabel(name) + "`")
+                .map(name -> "`" + formatPlaylistDisplayLabel(bot, guild, name) + "`")
                 .collect(Collectors.toList());
 
         String description = PaginatedListEmbedUtil.buildNumberedListSection(
-                "**Available playlists** *(select one below to queue or play now)*", lineContents, selectedIndex, startIndex + 1);
+                bot.msg(guild, "playlist.embed.section"), lineContents, selectedIndex, startIndex + 1);
 
         EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("Playlists")
+                .setTitle(bot.msg(guild, "playlist.embed.title"))
                 .setDescription(description)
-                .addField("Entries", String.valueOf(playlists.size()), true);
-        PaginatedListEmbedUtil.applyStandardEmbedOptions(embed, "Page " + page + " of " + totalPages, memberColor);
+                .addField(bot.msg(guild, "queue.embed.entries"), String.valueOf(playlists.size()), true);
+        PaginatedListEmbedUtil.applyStandardEmbedOptions(embed, bot.msg(guild, "queue.embed.pageFooter", page, totalPages), memberColor);
         return embed.build();
     }
 
@@ -109,13 +109,14 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
      * Builds the playlist details embed with preview lines in the same style as Queue/History.
      * Preview items are shown as markdown links to avoid Discord URL unfurling and misalignment.
      */
-    public static MessageEmbed buildPlaylistDetailsEmbed(MusicService.PlaylistDetailsInfo details, Color memberColor)
+    public static MessageEmbed buildPlaylistDetailsEmbed(Bot bot, net.dv8tion.jda.api.entities.Guild guild,
+                                                         MusicService.PlaylistDetailsInfo details, Color memberColor)
     {
         int previewSize = details.previewItems.size();
         List<String> lineContents = new ArrayList<>(previewSize);
         for (String url : details.previewItems)
         {
-            String label = formatPreviewLinkLabel(url);
+            String label = formatPreviewLinkLabel(bot, guild, url);
             lineContents.add("[**" + label + "**](" + url + ")");
         }
 
@@ -123,17 +124,17 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
         if (previewSize > 0)
         {
             description.append(PaginatedListEmbedUtil.buildNumberedListSection(
-                    "**Preview** *(first " + previewSize + " entries)*", lineContents, 0, 1));
+                    bot.msg(guild, "playlist.embed.previewSection", previewSize), lineContents, 0, 1));
             if (details.hasMore)
             {
                 description.append("...");
             }
         }
 
-        String footer = previewSize > 0 ? "Preview: first " + previewSize + " entries" : null;
+        String footer = previewSize > 0 ? bot.msg(guild, "playlist.embed.previewFooter", previewSize) : null;
         EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("Playlist: " + details.playlistName)
-                .addField("Entries", String.valueOf(details.totalItems), true);
+                .setTitle(bot.msg(guild, "playlist.embed.detailsTitle", details.playlistName))
+                .addField(bot.msg(guild, "queue.embed.entries"), String.valueOf(details.totalItems), true);
         if (description.length() > 0)
         {
             embed.setDescription(description.toString());
@@ -146,7 +147,8 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
      * Builds the playlist details embed from pre-formatted track lines (e.g. from async load), in the same
      * style as Queue/History. Use this when lines are already in the format {@code `[MM:SS]` [**Title**](url)}.
      */
-    public static MessageEmbed buildPlaylistDetailsEmbed(String playlistName, int totalItems,
+    public static MessageEmbed buildPlaylistDetailsEmbed(Bot bot, net.dv8tion.jda.api.entities.Guild guild,
+                                                         String playlistName, int totalItems,
                                                          List<String> formattedLineContents, boolean hasMore,
                                                          Color memberColor)
     {
@@ -155,17 +157,17 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
         if (previewSize > 0)
         {
             description.append(PaginatedListEmbedUtil.buildNumberedListSection(
-                    "**Preview** *(first " + previewSize + " entries)*", formattedLineContents, 0, 1));
+                    bot.msg(guild, "playlist.embed.previewSection", previewSize), formattedLineContents, 0, 1));
             if (hasMore)
             {
                 description.append("...");
             }
         }
 
-        String footer = previewSize > 0 ? "Preview: first " + previewSize + " entries" : null;
+        String footer = previewSize > 0 ? bot.msg(guild, "playlist.embed.previewFooter", previewSize) : null;
         EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("Playlist: " + playlistName)
-                .addField("Entries", String.valueOf(totalItems), true);
+                .setTitle(bot.msg(guild, "playlist.embed.detailsTitle", playlistName))
+                .addField(bot.msg(guild, "queue.embed.entries"), String.valueOf(totalItems), true);
         if (description.length() > 0)
         {
             embed.setDescription(description.toString());
@@ -177,7 +179,8 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
     /**
      * Builds an interactive, paginated playlist details embed (Queue-style).
      */
-    public static MessageEmbed buildPlaylistTracksEmbed(String playlistName, int totalItems,
+    public static MessageEmbed buildPlaylistTracksEmbed(Bot bot, net.dv8tion.jda.api.entities.Guild guild,
+                                                        String playlistName, int totalItems,
                                                         int page, int totalPages,
                                                         List<String> formattedTrackLines,
                                                         int selectedTrack, boolean draftDirty,
@@ -185,33 +188,34 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
     {
         int startIndex = (page - 1) * PLAYLIST_TRACKS_PER_PAGE;
         String description = PaginatedListEmbedUtil.buildNumberedListSection(
-                "**Tracks** *(select one below)*",
+                bot.msg(guild, "playlist.embed.tracksSection"),
                 formattedTrackLines,
                 selectedTrack,
                 startIndex + 1
         );
 
         EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("Playlist: " + playlistName)
+                .setTitle(bot.msg(guild, "playlist.embed.detailsTitle", playlistName))
                 .setDescription(description)
-                .addField("Entries", String.valueOf(totalItems), true);
-        String footer = "Page " + page + " of " + totalPages;
+                .addField(bot.msg(guild, "queue.embed.entries"), String.valueOf(totalItems), true);
+        String footer = bot.msg(guild, "queue.embed.pageFooter", page, totalPages);
         if (draftDirty)
         {
-            footer += " • Unsaved changes";
+            footer += bot.msg(guild, "playlist.embed.unsavedSuffix");
         }
         PaginatedListEmbedUtil.applyStandardEmbedOptions(embed, footer, memberColor);
         return embed.build();
     }
 
     /**
-     * Returns a short label for a preview link. Extracts YouTube video ID when possible; otherwise "Link".
+     * Returns a short label for a preview link. Extracts YouTube video ID when possible; otherwise a generic label.
      */
-    private static String formatPreviewLinkLabel(String url)
+    private static String formatPreviewLinkLabel(Bot bot, net.dv8tion.jda.api.entities.Guild guild, String url)
     {
+        String linkLabel = bot.msg(guild, "playlist.embed.linkLabel");
         if (url == null)
         {
-            return "Link";
+            return linkLabel;
         }
         // YouTube: ...?v=VIDEO_ID or youtu.be/VIDEO_ID
         int v = url.indexOf("?v=");
@@ -231,14 +235,14 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
             if (!id.isEmpty())
                 return FormatUtil.filter(id.length() <= 20 ? id : id.substring(0, 17) + "...");
         }
-        return "Link";
+        return linkLabel;
     }
 
-    private static String formatPlaylistDisplayLabel(String playlistName)
+    private static String formatPlaylistDisplayLabel(Bot bot, net.dv8tion.jda.api.entities.Guild guild, String playlistName)
     {
         if (playlistName != null && playlistName.equalsIgnoreCase(FAVORITES_PLAYLIST_NAME))
         {
-            return FAVORITES_DISPLAY_LABEL;
+            return bot.msg(guild, "playlist.favoritesLabel");
         }
         return playlistName;
     }
@@ -247,7 +251,8 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
      * Builds interactive button rows for playlist list navigation and actions.
      * Component ID format: playlists_{action}_{page}_{selectedIndex}_{userId}
      */
-    public static List<ActionRow> buildPlaylistsComponents(int page, int totalPages, int playlistsOnPage,
+    public static List<ActionRow> buildPlaylistsComponents(Bot bot, net.dv8tion.jda.api.entities.Guild guild,
+                                                           int page, int totalPages, int playlistsOnPage,
                                                            int selectedIndex, long userId)
     {
         List<ActionRow> rows = new ArrayList<>();
@@ -259,12 +264,12 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
             rows.add(paginationRow);
         }
 
-        Button refreshBtn = Button.secondary(String.format(baseId, "refresh"), "Refresh").withEmoji(Emoji.fromUnicode("🔄"));
+        Button refreshBtn = Button.secondary(String.format(baseId, "refresh"), bot.msg(guild, "playlist.button.refresh")).withEmoji(Emoji.fromUnicode("🔄"));
         if (selectedIndex > 0)
         {
-            Button queueBtn = Button.secondary(String.format(baseId, "queue"), "Queue").withEmoji(Emoji.fromUnicode("➕"));
-            Button playNowBtn = Button.success(String.format(baseId, "playnow"), "Play Now").withEmoji(Emoji.fromUnicode("▶️"));
-            Button detailsBtn = Button.primary(String.format(baseId, "details"), "Details").withEmoji(Emoji.fromUnicode("ℹ️"));
+            Button queueBtn = Button.secondary(String.format(baseId, "queue"), bot.msg(guild, "history.button.queue")).withEmoji(Emoji.fromUnicode("➕"));
+            Button playNowBtn = Button.success(String.format(baseId, "playnow"), bot.msg(guild, "queue.button.playNow")).withEmoji(Emoji.fromUnicode("▶️"));
+            Button detailsBtn = Button.primary(String.format(baseId, "details"), bot.msg(guild, "playlist.button.details")).withEmoji(Emoji.fromUnicode("ℹ️"));
             rows.add(ActionRow.of(queueBtn, playNowBtn, detailsBtn, refreshBtn));
         }
         else
@@ -278,7 +283,8 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
     /**
      * Builds interactive components for playlist track-details sub-view.
      */
-    public static List<ActionRow> buildPlaylistDetailsComponents(int playlistIndex, int listPage,
+    public static List<ActionRow> buildPlaylistDetailsComponents(Bot bot, net.dv8tion.jda.api.entities.Guild guild,
+                                                                 int playlistIndex, int listPage,
                                                                  int detailsPage, int totalDetailsPages,
                                                                  int tracksOnPage, int selectedTrack,
                                                                  long userId, boolean canEdit,
@@ -290,27 +296,27 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
         List<Button> finalRowButtons = new ArrayList<>();
         if (canEdit && draftDirty)
         {
-            finalRowButtons.add(Button.success(String.format(baseId, "save"), "Save"));
-            finalRowButtons.add(Button.secondary(String.format(baseId, "discard"), "Discard"));
+            finalRowButtons.add(Button.success(String.format(baseId, "save"), bot.msg(guild, "playlist.button.save")));
+            finalRowButtons.add(Button.secondary(String.format(baseId, "discard"), bot.msg(guild, "playlist.button.discard")));
         }
         if (selectedTrack > 0)
         {
             // Selected mode: grouped 4-row layout (playback, move, utility, final state).
-            Button moveTopBtn = Button.secondary(String.format(baseId, "movetop"), "Move top")
+            Button moveTopBtn = Button.secondary(String.format(baseId, "movetop"), bot.msg(guild, "playlist.button.moveTop"))
                     .withEmoji(Emoji.fromUnicode("⏫"));
-            Button moveUpBtn = Button.secondary(String.format(baseId, "moveup"), "Up 1")
+            Button moveUpBtn = Button.secondary(String.format(baseId, "moveup"), bot.msg(guild, "playlist.button.up1"))
                     .withEmoji(Emoji.fromUnicode("⬆️"));
-            Button moveBottomBtn = Button.secondary(String.format(baseId, "movebottom"), "Move bottom")
+            Button moveBottomBtn = Button.secondary(String.format(baseId, "movebottom"), bot.msg(guild, "playlist.button.moveBottom"))
                     .withEmoji(Emoji.fromUnicode("⏬"));
-            Button moveDownBtn = Button.secondary(String.format(baseId, "movedown"), "Down 1")
+            Button moveDownBtn = Button.secondary(String.format(baseId, "movedown"), bot.msg(guild, "playlist.button.down1"))
                     .withEmoji(Emoji.fromUnicode("⬇️"));
-            Button moveToBtn = Button.secondary(String.format(baseId, "move"), "Move to")
+            Button moveToBtn = Button.secondary(String.format(baseId, "move"), bot.msg(guild, "playlist.button.moveTo"))
                     .withEmoji(Emoji.fromUnicode("↕️"));
 
-            Button queueBtn = Button.primary(String.format(baseId, "queue"), "Queue Track").withEmoji(Emoji.fromUnicode("➕"));
-            Button playNextBtn = Button.primary(String.format(baseId, "playnext"), "Play Next").withEmoji(Emoji.fromUnicode("⏭️"));
-            Button playNowBtn = Button.success(String.format(baseId, "playnow"), "Play Now").withEmoji(Emoji.fromUnicode("▶️"));
-            Button removeBtn = Button.danger(String.format(baseId, "remove"), "Remove")
+            Button queueBtn = Button.primary(String.format(baseId, "queue"), bot.msg(guild, "playlist.button.queueTrack")).withEmoji(Emoji.fromUnicode("➕"));
+            Button playNextBtn = Button.primary(String.format(baseId, "playnext"), bot.msg(guild, "queue.button.playNext")).withEmoji(Emoji.fromUnicode("⏭️"));
+            Button playNowBtn = Button.success(String.format(baseId, "playnow"), bot.msg(guild, "queue.button.playNow")).withEmoji(Emoji.fromUnicode("▶️"));
+            Button removeBtn = Button.danger(String.format(baseId, "remove"), bot.msg(guild, "queue.button.remove"))
                     .withEmoji(Emoji.fromUnicode("🗑️"));
 
             rows.add(ActionRow.of(queueBtn, playNextBtn, playNowBtn));
@@ -320,7 +326,7 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
                 rows.add(ActionRow.of(moveBottomBtn, moveDownBtn));
                 rows.add(ActionRow.of(moveToBtn, removeBtn));
             }
-            finalRowButtons.add(0, Button.danger(String.format(baseId, "unselect"), "Unselect song"));
+            finalRowButtons.add(0, Button.danger(String.format(baseId, "unselect"), bot.msg(guild, "playlist.button.unselect")));
             rows.add(ActionRow.of(finalRowButtons));
             return rows;
         }
@@ -333,12 +339,12 @@ public class PlaylistsSlashCmd extends MusicSlashCommand
         {
             rows.add(paginationRow);
         }
-        Button queueAllBtn = Button.secondary(String.format(baseId, "queueall"), "Queue Playlist")
+        Button queueAllBtn = Button.secondary(String.format(baseId, "queueall"), bot.msg(guild, "playlist.button.queuePlaylist"))
                 .withEmoji(Emoji.fromUnicode("🎵"));
-        Button playAllBtn = Button.success(String.format(baseId, "playall"), "Play Playlist")
+        Button playAllBtn = Button.success(String.format(baseId, "playall"), bot.msg(guild, "playlist.button.playPlaylist"))
                 .withEmoji(Emoji.fromUnicode("📀"));
         rows.add(ActionRow.of(queueAllBtn, playAllBtn));
-        finalRowButtons.add(0, Button.danger("playlistdetails_back_" + listPage + "_" + playlistIndex + "_" + userId, "Back"));
+        finalRowButtons.add(0, Button.danger("playlistdetails_back_" + listPage + "_" + playlistIndex + "_" + userId, bot.msg(guild, "playlist.button.back")));
         rows.add(ActionRow.of(finalRowButtons));
         return rows;
     }

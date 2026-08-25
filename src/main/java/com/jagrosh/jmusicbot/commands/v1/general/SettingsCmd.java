@@ -65,37 +65,49 @@ public class SettingsCmd extends Command
             event.getChannel()
                     .sendMessage(new MessageCreateBuilder()
                             .setComponents(SettingsPanelRenderer.buildSettingsMessageComponents(
-                                    event.getGuild(), s, bot.getConfig(), userId, invokerName))
+                                    bot, event.getGuild(), s, bot.getConfig(), userId, invokerName))
                             .useComponentsV2()
                             .build())
                     .queue();
             return;
         }
 
+        String valueNone = bot.msg(event.getGuild(), "settings.panel.valueNone");
+        String valueAny = bot.msg(event.getGuild(), "settings.panel.valueAny");
+
         MessageCreateBuilder builder = new MessageCreateBuilder()
-                .addContent(EMOJI + " **")
-                .addContent(FormatUtil.filter(event.getSelfUser().getName()))
-                .addContent("** settings:");
+                .addContent(EMOJI + " ")
+                .addContent(bot.msg(event.getGuild(), "settings.summary.header",
+                        "**" + FormatUtil.filter(event.getSelfUser().getName()) + "**"));
         TextChannel tchan = s.getTextChannel(event.getGuild());
         VoiceChannel vchan = s.getVoiceChannel(event.getGuild());
         Role role = s.getRole(event.getGuild());
         EmbedBuilder ebuilder = new EmbedBuilder()
                 .setColor(event.getSelfMember().getColors().getPrimary())
-                .setDescription("Text Channel: " + (tchan == null ? "Any" : "**#" + tchan.getName() + "**")
-                        + "\nVoice Channel: " + (vchan == null ? "Any" : vchan.getAsMention())
-                        + "\nDJ Role: " + (role == null ? "None" : "**" + role.getName() + "**")
-                        + "\nCustom Prefix: " + (s.getPrefix() == null ? "None" : "`" + s.getPrefix() + "`")
-                        + "\nRepeat Mode: " + (s.getRepeatMode() == RepeatMode.OFF
-                                ? s.getRepeatMode().getUserFriendlyName()
-                                : "**" + s.getRepeatMode().getUserFriendlyName() + "**")
-                        + "\nQueue Type: " + (s.getQueueType() == QueueType.FAIR
-                                ? s.getQueueType().getUserFriendlyName()
-                                : "**" + s.getQueueType().getUserFriendlyName() + "**")
-                        + "\nDefault Playlist: " + (s.getDefaultPlaylist() == null ? "None" : "**" + s.getDefaultPlaylist() + "**")
+                .setDescription(
+                        bot.msg(event.getGuild(), "settings.summary.textChannel",
+                                tchan == null ? valueAny : "**#" + tchan.getName() + "**")
+                        + "\n" + bot.msg(event.getGuild(), "settings.summary.voiceChannel",
+                                vchan == null ? valueAny : vchan.getAsMention())
+                        + "\n" + bot.msg(event.getGuild(), "settings.summary.djRole",
+                                role == null ? valueNone : "**" + role.getName() + "**")
+                        + "\n" + bot.msg(event.getGuild(), "settings.summary.prefix",
+                                s.getPrefix() == null ? valueNone : "`" + s.getPrefix() + "`")
+                        + "\n" + bot.msg(event.getGuild(), "settings.summary.repeatMode",
+                                s.getRepeatMode() == RepeatMode.OFF
+                                        ? s.getRepeatMode().getUserFriendlyName()
+                                        : "**" + s.getRepeatMode().getUserFriendlyName() + "**")
+                        + "\n" + bot.msg(event.getGuild(), "settings.summary.queueType",
+                                s.getQueueType() == QueueType.FAIR
+                                        ? s.getQueueType().getUserFriendlyName()
+                                        : "**" + s.getQueueType().getUserFriendlyName() + "**")
+                        + "\n" + bot.msg(event.getGuild(), "settings.summary.defaultPlaylist",
+                                s.getDefaultPlaylist() == null ? valueNone : "**" + s.getDefaultPlaylist() + "**")
                 )
-                .setFooter(event.getJDA().getGuilds().size() + " servers | "
-                        + event.getJDA().getGuilds().stream().filter(g -> g.getSelfMember().getVoiceState().getChannel() != null).count()
-                        + " audio connections", null);
+                .setFooter(bot.msg(event.getGuild(), "settings.summary.footer",
+                        event.getJDA().getGuilds().size(),
+                        event.getJDA().getGuilds().stream().filter(g -> g.getSelfMember().getVoiceState().getChannel() != null).count()),
+                        null);
         event.getChannel().sendMessage(builder.setEmbeds(ebuilder.build()).build()).queue();
     }
 }

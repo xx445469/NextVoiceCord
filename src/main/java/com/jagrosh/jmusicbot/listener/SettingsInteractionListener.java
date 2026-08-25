@@ -136,7 +136,7 @@ public class SettingsInteractionListener extends ListenerAdapter
                             .queue();
                     return;
                 }
-                Modal modal = SettingsPanelRenderer.buildModal(id.key(), id.userId());
+                Modal modal = SettingsPanelRenderer.buildModal(bot, event.getGuild(), id.key(), id.userId());
                 if (modal == null)
                 {
                     event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
@@ -227,7 +227,7 @@ public class SettingsInteractionListener extends ListenerAdapter
         event.reply(new MessageCreateBuilder()
                         .setContent(bot.msg(event.getGuild(), "settings.updated"))
                         .setComponents(SettingsPanelRenderer.buildSettingsMessageComponents(
-                                event.getGuild(), settings, bot.getConfig(), id.userId(), invokerName))
+                                bot, event.getGuild(), settings, bot.getConfig(), id.userId(), invokerName))
                         .useComponentsV2()
                         .build())
                 .setEphemeral(true)
@@ -274,7 +274,7 @@ public class SettingsInteractionListener extends ListenerAdapter
                             .setContent("")
                             .setEmbeds(List.of())
                             .setComponents(SettingsPanelRenderer.buildSettingsMessageComponents(
-                                    event.getGuild(), settings, bot.getConfig(), id.userId(), invokerName))
+                                    bot, event.getGuild(), settings, bot.getConfig(), id.userId(), invokerName))
                             .useComponentsV2()
                             .build())
                     .queue();
@@ -466,7 +466,7 @@ public class SettingsInteractionListener extends ListenerAdapter
                         .setContent("")
                         .setEmbeds(List.of())
                         .setComponents(SettingsPanelRenderer.buildSettingsMessageComponents(
-                                event.getGuild(), settings, bot.getConfig(), event.getUser().getIdLong(), invokerName))
+                                bot, event.getGuild(), settings, bot.getConfig(), event.getUser().getIdLong(), invokerName))
                         .useComponentsV2()
                         .build())
                 .queue();
@@ -487,7 +487,7 @@ public class SettingsInteractionListener extends ListenerAdapter
                                         .setContent("")
                                         .setEmbeds(List.of())
                                         .setComponents(SettingsPanelRenderer.buildSettingsMessageComponents(
-                                                guild, settings, bot.getConfig(), userId, invokerName))
+                                                bot, guild, settings, bot.getConfig(), userId, invokerName))
                                         .useComponentsV2()
                                         .build())
                                 .queue(),

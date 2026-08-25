@@ -19,6 +19,8 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.v1.OwnerCommand;
 import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 
 /**
  *
@@ -26,31 +28,35 @@ import net.dv8tion.jda.api.OnlineStatus;
  */
 public class SetstatusCmd extends OwnerCommand
 {
+    private final Bot bot;
+
     public SetstatusCmd(Bot bot)
     {
+        this.bot = bot;
         this.name = "setstatus";
         this.help = "sets the status the bot displays";
         this.arguments = "<status>";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.guildOnly = false;
     }
-    
+
     @Override
-    protected void execute(CommandEvent event) 
+    protected void execute(CommandEvent event)
     {
+        Guild guild = event.getChannelType() != ChannelType.PRIVATE ? event.getGuild() : null;
         try {
             OnlineStatus status = OnlineStatus.fromKey(event.getArgs());
             if(status==OnlineStatus.UNKNOWN)
             {
-                event.replyError("Please include one of the following statuses: `ONLINE`, `IDLE`, `DND`, `INVISIBLE`");
+                event.replyError(bot.msg(guild, "owner.setstatus.errors.invalid"));
             }
             else
             {
                 event.getJDA().getPresence().setStatus(status);
-                event.replySuccess("Set the status to `"+status.getKey().toUpperCase()+"`");
+                event.replySuccess(bot.msg(guild, "owner.setstatus.set", status.getKey().toUpperCase()));
             }
         } catch(Exception e) {
-            event.reply(event.getClient().getError()+" The status could not be set!");
+            event.reply(event.getClient().getError()+" " + bot.msg(guild, "owner.setstatus.errors.setFailed"));
         }
     }
 }

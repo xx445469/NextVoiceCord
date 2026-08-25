@@ -93,7 +93,7 @@ public class HistoryInteractionListener extends ListenerAdapter {
             return;
         }
         if (historyInfo.isDisabled()) {
-            event.editMessage(MusicService.HISTORY_DISABLED_MESSAGE).setEmbeds().setComponents().queue();
+            event.editMessage(bot.msg(event.getGuild(), "history.disabled")).setEmbeds().setComponents().queue();
             return;
         }
         if (historyInfo.isEmpty()) {
@@ -148,7 +148,7 @@ public class HistoryInteractionListener extends ListenerAdapter {
             if (newInfo == null) {
                 event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else if (newInfo.isDisabled()) {
-                event.editMessage(MusicService.HISTORY_DISABLED_MESSAGE).setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "history.disabled")).setEmbeds().setComponents().queue();
             } else if (newInfo.isEmpty()) {
                 event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else {
@@ -171,7 +171,7 @@ public class HistoryInteractionListener extends ListenerAdapter {
             if (newInfo == null) {
                 event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else if (newInfo.isDisabled()) {
-                event.editMessage(MusicService.HISTORY_DISABLED_MESSAGE).setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "history.disabled")).setEmbeds().setComponents().queue();
             } else if (newInfo.isEmpty()) {
                 event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else {
@@ -189,7 +189,7 @@ public class HistoryInteractionListener extends ListenerAdapter {
             if (newInfo == null) {
                 event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else if (newInfo.isDisabled()) {
-                event.editMessage(MusicService.HISTORY_DISABLED_MESSAGE).setEmbeds().setComponents().queue();
+                event.editMessage(bot.msg(event.getGuild(), "history.disabled")).setEmbeds().setComponents().queue();
             } else if (newInfo.isEmpty()) {
                 event.editMessage(bot.msg(event.getGuild(), "history.nowEmpty")).setEmbeds().setComponents().queue();
             } else {
@@ -248,9 +248,9 @@ public class HistoryInteractionListener extends ListenerAdapter {
     private void updateHistoryEmbed(ButtonInteractionEvent event, MusicService.HistoryInfo historyInfo,
                                     int page, int totalPages, int selectedTrack, long userId) {
         int tracksOnPage = HistorySlashCmd.getTracksOnPage(page, historyInfo.tracks.length);
-        MessageEmbed embed = HistorySlashCmd.buildHistoryEmbed(historyInfo, page, totalPages, selectedTrack,
+        MessageEmbed embed = HistorySlashCmd.buildHistoryEmbed(bot, event.getGuild(), historyInfo, page, totalPages, selectedTrack,
                 event.getMember().getColor());
-        List<ActionRow> components = HistorySlashCmd.buildHistoryComponents(page, totalPages, tracksOnPage, selectedTrack, userId);
+        List<ActionRow> components = HistorySlashCmd.buildHistoryComponents(bot, event.getGuild(), page, totalPages, tracksOnPage, selectedTrack, userId);
         event.editMessageEmbeds(embed).setComponents(components).queue();
     }
 }

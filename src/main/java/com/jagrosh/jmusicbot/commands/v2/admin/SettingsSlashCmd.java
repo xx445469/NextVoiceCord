@@ -24,7 +24,7 @@ public class SettingsSlashCmd extends AdminSlashCommand
         String invokerName = event.getMember() != null ? event.getMember().getEffectiveName() : event.getUser().getName();
         event.reply(new MessageCreateBuilder()
                         .setComponents(SettingsPanelRenderer.buildSettingsMessageComponents(
-                                event.getGuild(), settings, bot.getConfig(), userId, invokerName))
+                                bot, event.getGuild(), settings, bot.getConfig(), userId, invokerName))
                         .useComponentsV2()
                         .build())
                 .setEphemeral(true)

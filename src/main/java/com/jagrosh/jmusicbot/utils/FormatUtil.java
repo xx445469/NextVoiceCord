@@ -84,33 +84,33 @@ public class FormatUtil {
         return str.toString();
     }
     
-    public static String listOfTChannels(List<TextChannel> list, String query)
+    public static String listOfTChannels(com.jagrosh.jmusicbot.Bot bot, net.dv8tion.jda.api.entities.Guild guild, List<TextChannel> list, String query)
     {
-        String out = " Multiple text channels found matching \""+query+"\":";
+        String out = bot.msg(guild, "settings.textChannel.multipleFound", query);
         for(int i=0; i<6 && i<list.size(); i++)
             out+="\n - "+list.get(i).getName()+" (<#"+list.get(i).getId()+">)";
         if(list.size()>6)
-            out+="\n**And "+(list.size()-6)+" more...**";
+            out+=bot.msg(guild, "common.andMoreSuffix", list.size()-6);
         return out;
     }
-    
-    public static String listOfVChannels(List<VoiceChannel> list, String query)
+
+    public static String listOfVChannels(com.jagrosh.jmusicbot.Bot bot, net.dv8tion.jda.api.entities.Guild guild, List<VoiceChannel> list, String query)
     {
-        String out = " Multiple voice channels found matching \""+query+"\":";
+        String out = bot.msg(guild, "settings.voiceChannel.multipleFound", query);
         for(int i=0; i<6 && i<list.size(); i++)
             out+="\n - "+list.get(i).getAsMention()+" (ID:"+list.get(i).getId()+")";
         if(list.size()>6)
-            out+="\n**And "+(list.size()-6)+" more...**";
+            out+=bot.msg(guild, "common.andMoreSuffix", list.size()-6);
         return out;
     }
-    
-    public static String listOfRoles(List<Role> list, String query)
+
+    public static String listOfRoles(com.jagrosh.jmusicbot.Bot bot, net.dv8tion.jda.api.entities.Guild guild, List<Role> list, String query)
     {
-        String out = " Multiple roles found matching \""+query+"\":";
+        String out = bot.msg(guild, "settings.dj.multipleFound", query);
         for(int i=0; i<6 && i<list.size(); i++)
             out+="\n - "+list.get(i).getName()+" (ID:"+list.get(i).getId()+")";
         if(list.size()>6)
-            out+="\n**And "+(list.size()-6)+" more...**";
+            out+=bot.msg(guild, "common.andMoreSuffix", list.size()-6);
         return out;
     }
     

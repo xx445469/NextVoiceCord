@@ -176,7 +176,7 @@ public class QueueInteractionListener extends ListenerAdapter {
                     menuBuilder.addOption(bot.msg(event.getGuild(), "queue.moveSelect.optionLabel", i), String.valueOf(i));
                 }
             }
-            MessageEmbed embed = QueueSlashCmd.buildQueueEmbed(queueInfo, page, totalPages, selectedTrack,
+            MessageEmbed embed = QueueSlashCmd.buildQueueEmbed(bot, event.getGuild(), queueInfo, page, totalPages, selectedTrack,
                     event.getMember().getColor());
             event.editMessageEmbeds(embed)
                     .setComponents(ActionRow.of(menuBuilder.build()))
@@ -246,9 +246,9 @@ public class QueueInteractionListener extends ListenerAdapter {
         int safePage = Math.min(page, totalPages);
         int tracksOnPage = QueueSlashCmd.getTracksOnPage(safePage, queueInfo.tracks.length);
 
-        MessageEmbed embed = QueueSlashCmd.buildQueueEmbed(queueInfo, safePage, totalPages, 0,
+        MessageEmbed embed = QueueSlashCmd.buildQueueEmbed(bot, event.getGuild(), queueInfo, safePage, totalPages, 0,
                 event.getMember().getColor());
-        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(safePage, totalPages, tracksOnPage, 0, userId);
+        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(bot, event.getGuild(), safePage, totalPages, tracksOnPage, 0, userId);
 
         event.editMessageEmbeds(embed).setComponents(components).queue();
     }
@@ -256,9 +256,9 @@ public class QueueInteractionListener extends ListenerAdapter {
     private void updateQueueEmbed(ButtonInteractionEvent event, MusicService.QueueInfo queueInfo,
                                   int page, int totalPages, int selectedTrack, long userId) {
         int tracksOnPage = QueueSlashCmd.getTracksOnPage(page, queueInfo.tracks.length);
-        MessageEmbed embed = QueueSlashCmd.buildQueueEmbed(queueInfo, page, totalPages, selectedTrack,
+        MessageEmbed embed = QueueSlashCmd.buildQueueEmbed(bot, event.getGuild(), queueInfo, page, totalPages, selectedTrack,
                 event.getMember().getColor());
-        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(page, totalPages, tracksOnPage, selectedTrack, userId);
+        List<ActionRow> components = QueueSlashCmd.buildQueueComponents(bot, event.getGuild(), page, totalPages, tracksOnPage, selectedTrack, userId);
         event.editMessageEmbeds(embed).setComponents(components).queue();
     }
 }

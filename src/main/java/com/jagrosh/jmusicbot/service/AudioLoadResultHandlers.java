@@ -277,7 +277,9 @@ public final class AudioLoadResultHandlers
             {
                 LOG.info("Playlist added to queue: guild={}, name=\"{}\", tracksAdded={}/{}",
                         guild.getId(), playlist.getName(), count, playlist.getTracks().size());
-                String nameLabel = playlist.getName() == null ? "a playlist" : "playlist **" + playlist.getName() + "**";
+                String nameLabel = playlist.getName() == null
+                        ? bot.msg(guild, "search.playlistNameGeneric")
+                        : bot.msg(guild, "search.playlistNameLabeled", playlist.getName());
                 String foundMsg = bot.msg(guild, "search.playlistFoundAdded", nameLabel, playlist.getTracks().size());
                 String omittedSuffix = count < playlist.getTracks().size()
                         ? bot.getConfig().getWarning() + bot.msg(guild, "search.playlistOmittedSuffix", bot.getConfig().getMaxTime())
