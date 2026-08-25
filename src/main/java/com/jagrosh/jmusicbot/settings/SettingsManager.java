@@ -82,6 +82,12 @@ public class SettingsManager implements GuildSettingsManager<Settings>
                     // the note on Settings.language. An unrecognised code resolves to empty,
                     // which means "inherit the global default" — the same as absent. That
                     // keeps a hand-edited typo from breaking startup for that guild.
+                    if (o.has("controller_layout") && o.get("controller_layout").isArray())
+                    {
+                        settings.get(Long.parseLong(id))
+                                .applyLoadedControllerLayout(o.get("controller_layout"));
+                    }
+
                     if (o.has("language"))
                     {
                         Language.fromCode(o.get("language").asText())
@@ -165,6 +171,10 @@ public class SettingsManager implements GuildSettingsManager<Settings>
             // silently stop applying to guilds that never chose a language.
             if(s.getLanguageOverride() != null)
                 o.put("language", s.getLanguageOverride().name());
+            // Written back as parsed, so a layout using fields this version does not know
+            // about survives a load-and-save rather than being silently flattened.
+            if(s.getControllerLayoutJson() != null)
+                o.set("controller_layout", s.getControllerLayoutJson());
             obj.set(Long.toString(key), o);
         });
         try {
