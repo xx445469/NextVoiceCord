@@ -1,6 +1,7 @@
 package com.jagrosh.jmusicbot.unit.utils;
 
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.testutil.TestTranslations;
 import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.NowPlayingInfo;
@@ -337,7 +338,7 @@ class MessageFormatterTest
             int volume,
             boolean isCurrentTrackFavorited)
     {
-        Bot bot = mock(Bot.class);
+        Bot bot = TestTranslations.mockBot();
         BotConfig config = mock(BotConfig.class);
         SettingsManager settingsManager = mock(SettingsManager.class);
         Settings settings = mock(Settings.class);
@@ -372,7 +373,7 @@ class MessageFormatterTest
 
     private static String noMusicDescription(boolean minimalMessage, boolean showProgressBar)
     {
-        Bot bot = mock(Bot.class);
+        Bot bot = TestTranslations.mockBot();
         BotConfig config = mock(BotConfig.class);
         SettingsManager settingsManager = mock(SettingsManager.class);
         Settings settings = mock(Settings.class);

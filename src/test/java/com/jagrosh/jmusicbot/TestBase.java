@@ -5,6 +5,7 @@ import com.jagrosh.jmusicbot.audio.AudioLoadWrapper;
 import com.jagrosh.jmusicbot.audio.PlayerManager;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.jagrosh.jmusicbot.settings.SettingsManager;
+import com.jagrosh.jmusicbot.testutil.TestTranslations;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.JDA;
@@ -63,6 +64,12 @@ public abstract class TestBase {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        // Replaces the @Mock-created instance. Bot.msg() is varargs, and a Mockito argument
+        // matcher in that position matches exactly one argument, so calls passing none — the
+        // majority — would return null and fail every assertion on the resulting text. A mock
+        // built with a default answer sees varargs already collected, so arity stops mattering.
+        bot = TestTranslations.mockBot();
 
         // Basic Bot relationships
         when(bot.getConfig()).thenReturn(config);

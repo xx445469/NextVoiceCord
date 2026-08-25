@@ -16,6 +16,7 @@
 package com.jagrosh.jmusicbot.testutil.audio;
 
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.testutil.TestTranslations;
 import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.audio.NowPlayingHandler;
 import com.jagrosh.jmusicbot.audio.PlayerManager;
@@ -125,7 +126,7 @@ public class AudioTestFixture
     private AudioTestFixture()
     {
         // Create all mocks
-        bot = mock(Bot.class);
+        bot = TestTranslations.mockBot();
         config = mock(BotConfig.class);
         playerManager = mock(PlayerManager.class);
         settingsManager = mock(SettingsManager.class);
