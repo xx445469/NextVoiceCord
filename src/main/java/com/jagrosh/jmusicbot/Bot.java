@@ -27,6 +27,8 @@ import com.jagrosh.jmusicbot.entities.UserInteraction;
 import javax.swing.JFrame;
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader;
 import com.jagrosh.jmusicbot.i18n.Language;
+import com.jagrosh.jmusicbot.update.SelfUpdater;
+import com.jagrosh.jmusicbot.update.UpdateChecker;
 import com.jagrosh.jmusicbot.i18n.LanguageManager;
 import com.jagrosh.jmusicbot.settings.SettingsManager;
 import com.jagrosh.jmusicbot.service.MusicService;
@@ -63,6 +65,7 @@ public class Bot
     private final Instant startTime;
     private final AudioLoadWrapper audioLoadWrapper;
     private final LanguageManager languages;
+    private SelfUpdater updater;
     
     private boolean shuttingDown = false;
     private JDA jda;
@@ -102,6 +105,12 @@ public class Bot
     public BotConfig getConfig()
     {
         return config;
+    }
+
+    /** Update checker, or null before JDA is connected. */
+    public SelfUpdater getUpdater()
+    {
+        return updater;
     }
 
     /** Translation lookup. Prefer {@link #msg} for anything addressed to a guild. */
@@ -274,6 +283,17 @@ public class Bot
     public void setJDA(JDA jda)
     {
         this.jda = jda;
+
+        // Started here rather than in the constructor: deciding whether to install requires
+        // knowing whether anything is playing, and that needs a live JDA connection.
+        if (updater == null)
+        {
+            updater = new SelfUpdater(
+                    this,
+                    new UpdateChecker(config.getUpdateRepository(), config.getUpdateGithubToken()),
+                    config.isAutoUpdate());
+            updater.start(config.getUpdateIntervalHours());
+        }
     }
     
     public void setGUI(JFrame gui)
