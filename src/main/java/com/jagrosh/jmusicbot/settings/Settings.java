@@ -15,6 +15,10 @@
  */
 package com.jagrosh.jmusicbot.settings;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.jagrosh.jmusicbot.ui.controller.ControllerLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.jagrosh.jdautilities.command.GuildSettingsProvider;
 import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.i18n.Language;
@@ -32,6 +36,8 @@ import java.util.Collections;
  */
 public class Settings implements GuildSettingsProvider
 {
+    private static final Logger LOG = LoggerFactory.getLogger(Settings.class);
+
     private final SettingsManager manager;
     protected long textId;
     protected long voiceId;
@@ -54,6 +60,15 @@ public class Settings implements GuildSettingsProvider
      * inherit also matches how {@code prefix} and {@code defaultPlaylist} already behave.
      */
     private Language language;
+
+    /**
+     * This guild's controller layout, or {@code null} to use the built-in default.
+     *
+     * <p>Held as parsed JSON rather than a {@link ControllerLayout} so the settings file can
+     * round-trip a layout it does not fully understand — a layout written for a newer version
+     * survives being loaded and saved by an older one instead of being silently flattened.
+     */
+    private JsonNode controllerLayoutJson;
 
     public Settings(SettingsManager manager, String textId, String voiceId, String roleId, int volume, String defaultPlaylist, RepeatMode repeatMode, String prefix, double skipRatio, QueueType queueType, NowPlayingLayoutMode nowPlayingLayoutMode, NowPlayingButtonsMode nowPlayingButtonsMode)
     {
@@ -184,6 +199,38 @@ public class Settings implements GuildSettingsProvider
     public Language getLanguageOverride()
     {
         return language;
+    }
+
+    /**
+     * The controller layout to render for this guild.
+     *
+     * <p>Parsed on each call rather than cached: layouts are small, the panel is rebuilt at
+     * most every few seconds, and caching would need invalidating the moment an admin edits
+     * one — a stale panel after an edit is exactly the bug people report.
+     */
+    public ControllerLayout getControllerLayout()
+    {
+        return ControllerLayout.parse(controllerLayoutJson,
+                warning -> LOG.warn("Controller layout for guild {}: {}", "custom", warning));
+    }
+
+    /** Raw layout JSON, or null when this guild uses the default. Used by persistence. */
+    public JsonNode getControllerLayoutJson()
+    {
+        return controllerLayoutJson;
+    }
+
+    /** Replaces this guild's layout; null restores the default. */
+    public void setControllerLayoutJson(JsonNode layout)
+    {
+        this.controllerLayoutJson = layout;
+        this.manager.writeSettings();
+    }
+
+    /** Sets the layout without persisting, for use while loading from disk. */
+    void applyLoadedControllerLayout(JsonNode layout)
+    {
+        this.controllerLayoutJson = layout;
     }
 
     /** This guild's effective language, falling back to the global default. */

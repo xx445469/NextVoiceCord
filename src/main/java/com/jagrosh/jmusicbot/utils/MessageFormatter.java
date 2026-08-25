@@ -8,6 +8,12 @@ import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.settings.Settings;
 import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioTrack;
 import net.dv8tion.jda.api.EmbedBuilder;
+import com.jagrosh.jmusicbot.ui.controller.ControllerLayout;
+import com.jagrosh.jmusicbot.ui.controller.ControllerRenderer;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.User;
@@ -78,7 +84,7 @@ public class MessageFormatter {
 
         mb.setEmbeds(eb.build());
         if (showButtons) {
-            applyNowPlayingButtons(mb, info, repeatMode);
+            applyNowPlayingButtons(bot, mb, info, repeatMode);
         }
         return mb.build();
     }
@@ -99,7 +105,7 @@ public class MessageFormatter {
         eb.setDescription(buildPlaybackStatusDescription(bot, info, repeatMode, true));
 
         if (showButtons) {
-            applyNowPlayingButtons(mb, info, repeatMode);
+            applyNowPlayingButtons(bot, mb, info, repeatMode);
         }
 
         mb.setEmbeds(eb.build());
@@ -218,49 +224,50 @@ public class MessageFormatter {
         return null;
     }
 
-    private static void applyNowPlayingButtons(MessageCreateBuilder mb, NowPlayingInfo info, RepeatMode repeatMode) {
-        boolean canGoPrevious = info.position > 5000 || info.previousTrackCount > 0;
-        boolean canShuffle = info.queueSize > 1;
-        boolean canVolDown = info.volume > MIN_VOLUME;
-        boolean canVolUp = info.volume < MAX_VOLUME;
+    /**
+     * Applies the controller buttons.
+     *
+     * <p>Which buttons exist and how they look comes from the guild's layout; which are
+     * usable right now comes from playback state. Separating those is what lets the layout be
+     * rearranged without touching rules that are not a matter of taste — you cannot skip
+     * backwards past the start of the first track regardless of where the button sits.
+     */
+    private static void applyNowPlayingButtons(Bot bot, MessageCreateBuilder mb,
+                                               NowPlayingInfo info, RepeatMode repeatMode) {
+        Guild guild = info.guild;
 
-        Button repeatButton = switch (repeatMode) {
-            case ALL -> Button.primary(nowPlayingButtonId("repeat"), "Repeat All").withEmoji(Emoji.fromUnicode("\uD83D\uDD01")); // 🔁
-            case SINGLE -> Button.primary(nowPlayingButtonId("repeat"), "Repeat One").withEmoji(Emoji.fromUnicode("\uD83D\uDD02")); // 🔂
-            default -> Button.secondary(nowPlayingButtonId("repeat"), "Repeat").withEmoji(Emoji.fromUnicode("\uD83D\uDD01")); // 🔁
-        };
+        ControllerRenderer renderer = new ControllerRenderer(
+                NP_PREFIX,
+                controllerVariables(info, repeatMode),
+                (key, args) -> bot.msg(guild, key, args));
 
-        Button previousButton = Button.secondary(nowPlayingButtonId("previous"), "Prev").withEmoji(Emoji.fromUnicode("\u23EE")) // ⏮
-                .withDisabled(!canGoPrevious);
-        Button pauseButton = info.isPaused
-                ? Button.primary(nowPlayingButtonId("pause"), "Resume").withEmoji(Emoji.fromUnicode("\u25B6")) // ▶
-                : Button.primary(nowPlayingButtonId("pause"), "Pause").withEmoji(Emoji.fromUnicode("\u23F8")); // ⏸
-        Button shuffleButton = Button.secondary(nowPlayingButtonId("shuffle"), "Shuffle").withEmoji(Emoji.fromUnicode("\uD83D\uDD00")) // 🔀
-                .withDisabled(!canShuffle);
-        Button volumeDownButton = Button.secondary(nowPlayingButtonId("voldown"), "Vol -").withEmoji(Emoji.fromUnicode("\uD83D\uDD09")) // 🔉
-                .withDisabled(!canVolDown);
-        Button volumeUpButton = Button.secondary(nowPlayingButtonId("volup"), "Vol +").withEmoji(Emoji.fromUnicode("\uD83D\uDD0A")) // 🔊
-                .withDisabled(!canVolUp);
-        Button favoriteButton = (info.isCurrentTrackFavorited
-                ? Button.success(nowPlayingButtonId("favorite"), "Favorite")
-                : Button.secondary(nowPlayingButtonId("favorite"), "Favorite"))
-                .withEmoji(Emoji.fromUnicode("\u2B50")); // ⭐
+        ControllerRenderer.PlaybackState state = new ControllerRenderer.PlaybackState(
+                info.isPaused,
+                info.position > 5000 || info.previousTrackCount > 0,
+                info.queueSize > 1,
+                info.volume < MAX_VOLUME,
+                info.volume > MIN_VOLUME,
+                info.isCurrentTrackFavorited,
+                repeatMode == null ? "off" : repeatMode.name());
 
-        mb.setComponents(
-                ActionRow.of(
-                        previousButton,
-                        pauseButton,
-                        Button.secondary(nowPlayingButtonId("skip"), "Skip").withEmoji(Emoji.fromUnicode("\u23ED")), // ⏭
-                        Button.danger(nowPlayingButtonId("stop"), "Stop").withEmoji(Emoji.fromUnicode("\u23F9")) // ⏹
-                ),
-                ActionRow.of(
-                        shuffleButton,
-                        repeatButton,
-                        favoriteButton,
-                        volumeDownButton,
-                        volumeUpButton
-                )
-        );
+        ControllerLayout layout = bot.getSettingsManager()
+                                     .getSettings(guild)
+                                     .getControllerLayout();
+
+        List<ActionRow> rows = renderer.render(layout, state);
+        if (!rows.isEmpty()) {
+            mb.setComponents(rows);
+        }
+    }
+
+    /** Values a layout's labels may reference through template syntax. */
+    private static Map<String, String> controllerVariables(NowPlayingInfo info, RepeatMode repeatMode) {
+        Map<String, String> variables = new HashMap<>();
+        variables.put("volume", String.valueOf(info.volume));
+        variables.put("queue_length", String.valueOf(info.queueSize));
+        variables.put("loop_mode", repeatMode == null ? "Off" : repeatMode.getUserFriendlyName());
+        variables.put("track_name", info.track == null ? "None" : FormatUtil.getTrackTitle(info.track));
+        return variables;
     }
 
     private static String nowPlayingButtonId(String action) {
