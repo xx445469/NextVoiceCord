@@ -1,10 +1,61 @@
 # NextVoiceCord
 
+[![Build](https://github.com/xx445469/NextVoiceCord/actions/workflows/build-and-test.yml/badge.svg?branch=main)](https://github.com/xx445469/NextVoiceCord/actions/workflows/build-and-test.yml)
+[![Release](https://img.shields.io/github/v/release/xx445469/NextVoiceCord?include_prereleases&sort=semver&label=release)](https://github.com/xx445469/NextVoiceCord/releases)
+[![Downloads](https://img.shields.io/github/downloads/xx445469/NextVoiceCord/total?label=downloads)](https://github.com/xx445469/NextVoiceCord/releases)
+[![Java](https://img.shields.io/badge/Java-25-orange)](https://adoptium.net/)
+[![License](https://img.shields.io/github/license/xx445469/NextVoiceCord)](LICENSE)
+
 A self-hosted Discord music bot — the playback core of **JMusicBot**, wearing a
 **Vocard**-style interface, with full multi-language support and a
 continuously self-updating YouTube extraction layer.
 
-> **Status:** early development. Not yet ready for general use.
+> **Status:** beta. Usable, but pinned to an unreleased `youtube-source` build —
+> see [Beta caveat](#beta-caveat).
+
+---
+
+## Quick start
+
+Java 25 or newer is required.
+
+```bash
+# 1. Get the jar from the releases page, then generate a config
+java -jar NextVoiceCord.jar generate-config
+
+# 2. Put your bot token and owner ID in config.txt, then run it
+java -jar NextVoiceCord.jar
+```
+
+| Flag | What it does |
+|---|---|
+| *(none)* | Opens the desktop window. |
+| `--nogui` | Runs headless. Use this on a server or over SSH. |
+| `--web <port>` | Serves the web panel on that port. Works with or without `--nogui`. |
+| `generate-config` | Writes a default `config.txt` and exits. |
+
+The web panel binds `127.0.0.1` by default. To reach it from another device set
+`web.bindAddress = "0.0.0.0"` — but note it speaks plain HTTP, so the token it
+prints at startup travels in the clear on that network. Do not forward the port.
+
+### Building from source
+
+```bash
+git clone https://github.com/xx445469/NextVoiceCord.git
+cd NextVoiceCord
+mvn clean package           # jar lands in target/
+```
+
+---
+
+## Beta caveat
+
+`youtube-source`'s published releases currently cannot play a large share of
+videos, so this build pins an unreleased snapshot that can. That is why the
+version carries `-beta`.
+
+The pinned build is verified on every CI run against real playback, and the
+pin is dropped as soon as an upstream release passes the same check.
 
 ---
 
@@ -18,11 +69,13 @@ Three things I wanted that no single existing bot gave me at once:
 | **An interface worth looking at** | Vocard's data-driven controller panel, template-driven embeds, and 12-language support set the bar for how a music bot should *feel*. |
 | **YouTube extraction that doesn't rot** | `youtube-source` gets patched constantly because Google keeps changing the rules. Pinning it to a version means the bot breaks every few weeks. This project tracks it automatically. |
 
-## Planned features
+## What it does
 
 - **Vocard-style controller panel** — data-driven button layout, multi-state buttons, template-rendered embeds
-- **Per-guild customizable layouts** — editable via slash command, not just a global config file
-- **12 languages** — DE, EN, ES, FR, JA, KO, PL, RU, UA, VN, ZH-CN, ZH-TW
+- **Per-guild customizable layouts** — edited with `/controller`, not just a global config file
+- **12 languages** — DE, EN, ES, FR, JA, KO, PL, RU, UA, VN, ZH-CN, ZH-TW, set per server *and* per user
+- **A desktop window** — live status, console, per-guild playback diagnostics, system health, and config editing
+- **A web panel** — the same eight views in a browser, with playback control
 - **Daily automated `youtube-source` updates** — CI bumps, smoke-tests against real playback, and publishes only if the new version genuinely works
 - **Self-updating bot** — detects new releases, verifies, and restarts while idle
 
@@ -99,6 +152,22 @@ directly from Vocard's** `langs/` directory.
 - Licensed under the **MIT License**
 
 See [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md) for full license texts.
+
+---
+
+## Support this project
+
+NextVoiceCord is free and self-hosted; there is no paid tier and nothing is gated.
+If it saves you the trouble of running Lavalink, you can buy me a coffee:
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-adantw-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/adantw)
+
+GitHub Sponsors is being set up; the Sponsor button will appear at the top of this
+repository once it is live.
+
+Contributions are worth more than money, and the most useful one is a translation
+review — see [Translations](#translations) above. Eleven of the twelve languages
+have never been read by someone who speaks them.
 
 ---
 

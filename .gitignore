@@ -57,7 +57,10 @@ Thumbs.db
 # Backups of config.txt. The bot writes these itself every time a setting is saved
 # from the desktop window or the web panel, and they carry the Discord token verbatim.
 # /config.txt alone does not match them, which is how one nearly got committed.
-config.txt.bak
-config.txt.bak.*
+# *.bak alone is not enough: ConfigUpdater.findAvailableBackupPath appends a
+# counter when the plain .bak already exists, producing config.txt.bak1, .bak2
+# and so on. One of those was committed before this glob was widened.
+config.txt.bak*
 *.bak
+*.bak[0-9]*
 /userlanguages.json

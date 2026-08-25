@@ -1,62 +1,58 @@
 name: Make Release
 
-# Manual workflow to create a GitHub release
-# This sets the version, builds the JAR, and creates a release with tag
-# The tag will trigger docker-publish.yml to build and push the Docker image
+# Push a tag like `v0.8.0` and everything else happens automatically: checkout the
+# tagged commit, verify the tag matches pom.xml (a release whose jar reports a
+# different version than its tag is worse than no release), run the full test
+# suite, build the shaded jar, and publish a GitHub Release with generated notes.
+#
+# `workflow_dispatch` is kept only as a manual re-run of that same pipeline against
+# an *already-tagged* commit (e.g. the jar upload flaked and the release needs
+# redoing) — it does not bump pom.xml or create a tag itself. Version bumps belong
+# in a normal commit to pom.xml on main; tagging that commit is what ships it.
+#
+# Note: `docker-publish.yml` also triggers on `push: tags: v*` and runs
+# independently of this workflow (it publishes to GHCR, this publishes to GitHub
+# Releases) — see that workflow for details.
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
-      version_number:
-        description: 'Version Number (e.g., 0.6.3)'
+      tag:
+        description: 'Existing tag to (re-)release, e.g. v0.8.0. Must already exist and its commit''s pom.xml must already report this version.'
         required: true
         type: string
-      info:
-        description: 'Description of this Release'
-        required: true
-        type: string
-      is_prerelease:
-        description: 'Mark this as a pre-release (for testing)'
-        required: false
-        type: boolean
-        default: false
-      ref:
-        description: 'Branch, tag, or SHA to build from (defaults to the branch this workflow is run from)'
-        required: false
-        type: string
-        default: ''
 
-# Prevent concurrent releases
+# Prevent concurrent releases of the same tag
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.event.inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
-  build_jar:
-    name: Build JAR
+  build_and_release:
+    name: Build, Test, and Release
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      contents: write  # Required to push version commit
-    outputs:
-      release_sha: ${{ steps.set-release-sha.outputs.sha }}
+      contents: write  # Required to create the GitHub release
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.inputs.ref || github.ref }}
-          fetch-depth: 0  # Full history needed for git commands
-
-      - name: Validate branch for regular releases
-        if: ${{ github.event.inputs.is_prerelease != 'true' }}
+      - name: Resolve tag
+        id: tag
         run: |
-          BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          if [ "$BRANCH" != "main" ]; then
-            echo "❌ Error: Regular releases can only be created from the 'main' branch."
-            echo "   Current branch: $BRANCH"
-            echo "   To create a pre-release from this branch, check the 'Mark this as a pre-release' option."
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          if [[ "$TAG" != v* ]]; then
+            echo "::error::Tag '$TAG' does not start with 'v' (expected e.g. v0.8.0)."
             exit 1
           fi
-          echo "✓ Branch validation passed: $BRANCH"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Releasing tag: $TAG"
+
+      - name: Checkout tagged commit
+        uses: actions/checkout@v6
+        with:
+          ref: refs/tags/${{ steps.tag.outputs.tag }}
+          fetch-depth: 0  # Full history needed for release-notes generation and git commands
 
       - name: Set up Java Environment
         uses: actions/setup-java@v5
@@ -65,89 +61,76 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Get initial SHA (for pre-releases)
-        id: get-initial-sha
-        if: ${{ github.event.inputs.is_prerelease == 'true' }}
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-      - name: Set Version
+      - name: Verify tag matches pom.xml version
+        id: version
         run: |
-          mvn -B versions:set -DnewVersion=${{ github.event.inputs.version_number }}
-          mvn -B versions:commit
+          TAG="${{ steps.tag.outputs.tag }}"
+          TAG_VERSION="${TAG#v}"
 
-      - name: Commit version bump
-        if: ${{ github.event.inputs.is_prerelease != 'true' }}
-        id: commit-version
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Same extraction the other release-adjacent workflows use (docker-publish.yml,
+          # publish-preview-image.yml): the project's <version> is the first one in pom.xml,
+          # ahead of any dependency versions.
+          POM_VERSION=$(grep -m 1 '<version>' pom.xml | sed 's/.*<version>\([^<]*\)<\/version>.*/\1/' | tr -d ' ')
 
-          # Stage whatever the version plugin changed
-          git add pom.xml
+          echo "Tag version:      $TAG_VERSION"
+          echo "pom.xml version:  $POM_VERSION"
 
-          # If nothing is staged, don't fail the workflow
-          if git diff --cached --quiet; then
-            echo "No version changes to commit (pom.xml already at ${{ github.event.inputs.version_number }})."
-            exit 0
+          if [ "$TAG_VERSION" != "$POM_VERSION" ]; then
+            echo "::error::Tag '$TAG' (version '$TAG_VERSION') does not match pom.xml version '$POM_VERSION' at this commit. A release whose jar reports a different version than its tag can't be trusted later. Fix pom.xml and re-tag, or delete this tag and re-push it at the right commit."
+            exit 1
           fi
+          echo "Version check passed: tag and pom.xml agree on $TAG_VERSION"
 
-          git commit -m "chore: bump version to ${{ github.event.inputs.version_number }}"
-          git push
-
-
-      - name: Set release SHA output
-        id: set-release-sha
-        run: |
-          if [ "${{ github.event.inputs.is_prerelease }}" == "true" ]; then
-            echo "sha=${{ steps.get-initial-sha.outputs.sha }}" >> "$GITHUB_OUTPUT"
+          # Pre-release detection must match UpdateChecker.isNewer's rule (see
+          # src/main/java/com/jagrosh/jmusicbot/update/UpdateChecker.java#splitVersion):
+          # strip build metadata (anything after '+'), then any '-' remaining in the
+          # version marks it a pre-release. Using a second, independently-invented rule
+          # here would risk disagreeing with what the updater treats as a pre-release.
+          CORE_AND_PRE="${TAG_VERSION%%+*}"
+          if [[ "$CORE_AND_PRE" == *-* ]]; then
+            IS_PRERELEASE=true
           else
-            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            IS_PRERELEASE=false
           fi
 
-      - name: Build with Maven
+          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=$IS_PRERELEASE"
+
+      # Runs before the build because it needs no toolchain and fails fast, mirroring
+      # build-and-test.yml.
+      - name: Validate translation files
+        run: python3 scripts/validate-langs.py
+
+      # Same invocation as build-and-test.yml's "Build and Test with Coverage" step, so a
+      # release cannot pass while normal CI on this commit would have failed (or vice versa).
+      # `verify` also builds the shaded jar (maven-shade-plugin is bound to the `package`
+      # phase, which runs before `verify`).
+      - name: Build and run full test suite
         run: |
           COMMIT_TIME=$(git log -1 --format=%cI)
-          mvn --batch-mode verify -Dproject.build.outputTimestamp=$COMMIT_TIME
+          mvn --batch-mode verify -Pcoverage -Dproject.build.outputTimestamp=$COMMIT_TIME
 
       - name: Rename JAR
-        run: mv target/*-All.jar JMusicBot-${{ github.event.inputs.version_number }}.jar
-
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: jar
-          path: JMusicBot-${{ github.event.inputs.version_number }}.jar
-          if-no-files-found: error
-
-  create_release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: build_jar
-    permissions:
-      contents: write  # Required to create releases and tags
-    steps:
-      - name: Download JAR artifact
-        uses: actions/download-artifact@v7
-        with:
-          name: jar
-          path: .
+        run: mv target/*-All.jar JMusicBot-${{ steps.version.outputs.version }}.jar
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: v${{ github.event.inputs.version_number }}
-          commit: ${{ needs.build_jar.outputs.release_sha }}
-          name: v${{ github.event.inputs.version_number }}
-          draft: true
-          prerelease: ${{ github.event.inputs.is_prerelease }}
-          artifacts: "*.jar"
+          tag: ${{ steps.tag.outputs.tag }}
+          commit: ${{ github.sha }}
+          name: ${{ steps.tag.outputs.tag }}
+          draft: false
+          prerelease: ${{ steps.version.outputs.is_prerelease }}
+          generateReleaseNotes: true
+          allowUpdates: true
+          artifacts: "JMusicBot-${{ steps.version.outputs.version }}.jar"
           body: |
-            ${{ github.event.inputs.info }}
-            
-            ---
             ### Setup
-            https://jmusicbot.com/setup  
-            https://jmusicbot.com/config  
-            # Download: [JMusicBot-${{ github.event.inputs.version_number }}.jar](https://github.com/arif-banai/MusicBot/releases/download/v${{ github.event.inputs.version_number }}/JMusicBot-${{ github.event.inputs.version_number }}.jar)
+            https://jmusicbot.com/setup
+            https://jmusicbot.com/config
+
+            # Download: [JMusicBot-${{ steps.version.outputs.version }}.jar](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/JMusicBot-${{ steps.version.outputs.version }}.jar)
+
+            ---
