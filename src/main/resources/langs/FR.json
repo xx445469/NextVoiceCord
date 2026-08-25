@@ -537,5 +537,37 @@
         "engineMissing": "Le moteur d'évaluation indiqué dans la configuration (`{0}`) n'existe pas. Cela peut venir d'un nom de moteur invalide, ou du fait que le moteur n'existe pas dans ta version de Java (`{1}`)."
       }
     }
+  },
+  "controller": {
+    "editor": {
+      "title": "Mise en page du panneau de contrôle",
+      "description": "Modifie les boutons affichés sur le panneau de lecture en cours. L'aperçu ci-dessous montre ce que produit cette mise en page — les boutons sont désactivés ici.",
+      "warnings": "Certaines entrées ont été ajustées :",
+      "applied": "Mise en page mise à jour.",
+      "reset": "Mise en page réinitialisée par défaut.",
+      "field": {
+        "source": "Source",
+        "layout": "Mise en page"
+      },
+      "source": {
+        "custom": "Personnalisée",
+        "default": "Par défaut"
+      },
+      "button": {
+        "edit": "Modifier",
+        "refresh": "Actualiser",
+        "reset": "Réinitialiser"
+      },
+      "modal": {
+        "title": "Modifier la mise en page du panneau de contrôle",
+        "label": "Mise en page (JSON)",
+        "placeholder": "[ { \"back\": {}, \"play-pause\": {}, \"skip\": {} } ]"
+      },
+      "errors": {
+        "invalidJson": "Ce n'est pas un JSON valide. Chaque ligne est un objet de noms de boutons, et l'ensemble de la mise en page est une liste de lignes.",
+        "notAnArray": "Une mise en page doit être une liste de lignes, par exemple : [ { \"skip\": {} } ]",
+        "noButtons": "Cette mise en page ne contient aucun bouton utilisable, elle n'a donc pas été appliquée."
+      }
+    }
   }
 }

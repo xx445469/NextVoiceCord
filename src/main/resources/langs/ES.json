@@ -537,5 +537,37 @@
         "engineMissing": "El motor de evaluación indicado en la configuración (`{0}`) no existe. Esto puede deberse a un nombre de motor no válido o a que el motor no existe en tu versión de Java (`{1}`)."
       }
     }
+  },
+  "controller": {
+    "editor": {
+      "title": "Diseño del panel de control",
+      "description": "Edita los botones que aparecen en el panel de reproducción actual. La vista previa de abajo muestra lo que produce este diseño; aquí los botones están desactivados.",
+      "warnings": "Se ajustaron algunas entradas:",
+      "applied": "Diseño actualizado.",
+      "reset": "Diseño restablecido al predeterminado.",
+      "field": {
+        "source": "Fuente",
+        "layout": "Diseño"
+      },
+      "source": {
+        "custom": "Personalizado",
+        "default": "Predeterminado"
+      },
+      "button": {
+        "edit": "Editar",
+        "refresh": "Actualizar",
+        "reset": "Restablecer"
+      },
+      "modal": {
+        "title": "Editar diseño del panel de control",
+        "label": "Diseño (JSON)",
+        "placeholder": "[ { \"back\": {}, \"play-pause\": {}, \"skip\": {} } ]"
+      },
+      "errors": {
+        "invalidJson": "Eso no es un JSON válido. Cada fila es un objeto con nombres de botones, y todo el diseño es una lista de filas.",
+        "notAnArray": "Un diseño debe ser una lista de filas, por ejemplo: [ { \"skip\": {} } ]",
+        "noButtons": "Ese diseño no contiene botones utilizables, así que no se aplicó."
+      }
+    }
   }
 }

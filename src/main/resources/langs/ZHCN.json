@@ -537,5 +537,37 @@
         "engineMissing": "配置中指定的 eval 引擎（`{0}`）不存在。可能是引擎名称错误，或你的 Java 版本（`{1}`）中没有这个引擎。"
       }
     }
+  },
+  "controller": {
+    "editor": {
+      "title": "控制面板布局",
+      "description": "编辑播放中面板上显示的按钮。下方预览展示了这个布局最终呈现的效果——这里的按钮已禁用。",
+      "warnings": "部分项目已被调整：",
+      "applied": "布局已更新。",
+      "reset": "布局已重置为默认值。",
+      "field": {
+        "source": "来源",
+        "layout": "布局"
+      },
+      "source": {
+        "custom": "自定义",
+        "default": "默认"
+      },
+      "button": {
+        "edit": "编辑",
+        "refresh": "刷新",
+        "reset": "重置"
+      },
+      "modal": {
+        "title": "编辑控制面板布局",
+        "label": "布局（JSON）",
+        "placeholder": "[ { \"back\": {}, \"play-pause\": {}, \"skip\": {} } ]"
+      },
+      "errors": {
+        "invalidJson": "这不是有效的 JSON。每一行是一个以按钮名称为键的对象，整个布局是行的列表。",
+        "notAnArray": "布局必须是行的列表，例如：[ { \"skip\": {} } ]",
+        "noButtons": "该布局不包含任何可用的按钮，因此未被应用。"
+      }
+    }
   }
 }

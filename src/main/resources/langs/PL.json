@@ -537,5 +537,37 @@
         "engineMissing": "Silnik eval podany w konfiguracji (`{0}`) nie istnieje. Może to wynikać z nieprawidłowej nazwy silnika lub jego braku w twojej wersji javy (`{1}`)."
       }
     }
+  },
+  "controller": {
+    "editor": {
+      "title": "Układ panelu sterowania",
+      "description": "Edytuj przyciski wyświetlane na panelu odtwarzania. Podgląd poniżej pokazuje, co tworzy ten układ — przyciski są tu wyłączone.",
+      "warnings": "Niektóre wpisy zostały dostosowane:",
+      "applied": "Układ zaktualizowany.",
+      "reset": "Układ przywrócony do domyślnego.",
+      "field": {
+        "source": "Źródło",
+        "layout": "Układ"
+      },
+      "source": {
+        "custom": "Własny",
+        "default": "Domyślny"
+      },
+      "button": {
+        "edit": "Edytuj",
+        "refresh": "Odśwież",
+        "reset": "Resetuj"
+      },
+      "modal": {
+        "title": "Edytuj układ panelu sterowania",
+        "label": "Układ (JSON)",
+        "placeholder": "[ { \"back\": {}, \"play-pause\": {}, \"skip\": {} } ]"
+      },
+      "errors": {
+        "invalidJson": "To nie jest prawidłowy JSON. Każdy wiersz to obiekt z nazwami przycisków, a cały układ to lista wierszy.",
+        "notAnArray": "Układ musi być listą wierszy, na przykład: [ { \"skip\": {} } ]",
+        "noButtons": "Ten układ nie zawiera żadnych użytecznych przycisków, więc nie został zastosowany."
+      }
+    }
   }
 }

@@ -537,5 +537,37 @@
         "engineMissing": "Die in der Konfiguration angegebene Eval-Engine (`{0}`) existiert nicht. Das kann an einem ungültigen Engine-Namen liegen oder daran, dass die Engine in deiner Java-Version nicht existiert (`{1}`)."
       }
     }
+  },
+  "controller": {
+    "editor": {
+      "title": "Bedienfeld-Layout",
+      "description": "Bearbeite die Buttons, die auf dem Wird-gespielt-Panel angezeigt werden. Die Vorschau unten zeigt, was dieses Layout ergibt – die Buttons sind hier deaktiviert.",
+      "warnings": "Einige Einträge wurden angepasst:",
+      "applied": "Layout aktualisiert.",
+      "reset": "Layout auf den Standard zurückgesetzt.",
+      "field": {
+        "source": "Quelle",
+        "layout": "Layout"
+      },
+      "source": {
+        "custom": "Benutzerdefiniert",
+        "default": "Standard"
+      },
+      "button": {
+        "edit": "Bearbeiten",
+        "refresh": "Aktualisieren",
+        "reset": "Zurücksetzen"
+      },
+      "modal": {
+        "title": "Bedienfeld-Layout bearbeiten",
+        "label": "Layout (JSON)",
+        "placeholder": "[ { \"back\": {}, \"play-pause\": {}, \"skip\": {} } ]"
+      },
+      "errors": {
+        "invalidJson": "Das ist kein gültiges JSON. Jede Zeile ist ein Objekt aus Button-Namen, und das gesamte Layout ist eine Liste von Zeilen.",
+        "notAnArray": "Ein Layout muss eine Liste von Zeilen sein, zum Beispiel: [ { \"skip\": {} } ]",
+        "noButtons": "Dieses Layout enthält keine verwendbaren Buttons und wurde daher nicht übernommen."
+      }
+    }
   }
 }
