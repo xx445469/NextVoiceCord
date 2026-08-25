@@ -47,13 +47,13 @@ public class PlaybackControlsListener extends ListenerAdapter {
 
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         if (handler == null) {
-            event.reply("There is no music playing!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.noMusicPlaying")).setEphemeral(true).queue();
             return;
         }
 
         if (!event.getMember().getVoiceState().inAudioChannel()
                 || !event.getMember().getVoiceState().getChannel().equals(event.getGuild().getSelfMember().getVoiceState().getChannel())) {
-            event.reply("You must be in the same voice channel to use this!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.sameVoiceChannel")).setEphemeral(true).queue();
             return;
         }
 

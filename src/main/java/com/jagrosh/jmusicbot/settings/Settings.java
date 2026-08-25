@@ -17,6 +17,7 @@ package com.jagrosh.jmusicbot.settings;
 
 import com.jagrosh.jdautilities.command.GuildSettingsProvider;
 import com.jagrosh.jmusicbot.BotConfig;
+import com.jagrosh.jmusicbot.i18n.Language;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -43,6 +44,16 @@ public class Settings implements GuildSettingsProvider
     private double skipRatio;
     private NowPlayingLayoutMode nowPlayingLayoutMode;
     private NowPlayingButtonsMode nowPlayingButtonsMode;
+
+    /**
+     * Bot language for this guild, or {@code null} to inherit the global default.
+     *
+     * <p>Set through {@link #setLanguage} rather than a constructor parameter. Both
+     * constructors already take twelve positional arguments of mostly similar types, and a
+     * thirteenth would be easy to pass in the wrong slot with no compiler error. Null-as-
+     * inherit also matches how {@code prefix} and {@code defaultPlaylist} already behave.
+     */
+    private Language language;
 
     public Settings(SettingsManager manager, String textId, String voiceId, String roleId, int volume, String defaultPlaylist, RepeatMode repeatMode, String prefix, double skipRatio, QueueType queueType, NowPlayingLayoutMode nowPlayingLayoutMode, NowPlayingButtonsMode nowPlayingButtonsMode)
     {
@@ -163,6 +174,24 @@ public class Settings implements GuildSettingsProvider
         return nowPlayingButtonsMode.resolve(config.showNowPlayingButtons());
     }
 
+    /**
+     * This guild's configured language, or {@code null} if it inherits the global default.
+     *
+     * <p>Callers rendering a message want {@link #getLanguage(BotConfig)}, which resolves the
+     * inheritance. This accessor exists so the settings UI can tell "explicitly set to
+     * English" apart from "never configured", and so persistence only writes an override.
+     */
+    public Language getLanguageOverride()
+    {
+        return language;
+    }
+
+    /** This guild's effective language, falling back to the global default. */
+    public Language getLanguage(BotConfig config)
+    {
+        return language != null ? language : config.getDefaultLanguage();
+    }
+
     @Override
     public Collection<String> getPrefixes()
     {
@@ -210,6 +239,28 @@ public class Settings implements GuildSettingsProvider
     {
         this.prefix = prefix;
         this.manager.writeSettings();
+    }
+
+    /**
+     * Sets this guild's language.
+     *
+     * @param language the language, or {@code null} to inherit the global default
+     */
+    public void setLanguage(Language language)
+    {
+        this.language = language;
+        this.manager.writeSettings();
+    }
+
+    /**
+     * Sets the language without persisting, for use while loading from disk.
+     *
+     * <p>{@link #setLanguage} writes the settings file on every call, which during startup
+     * would mean rewriting the file once per guild for values that were just read from it.
+     */
+    void applyLoadedLanguage(Language language)
+    {
+        this.language = language;
     }
 
     public void setSkipRatio(double skipRatio)
