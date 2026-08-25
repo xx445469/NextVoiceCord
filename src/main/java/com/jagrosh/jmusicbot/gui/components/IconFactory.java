@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -112,6 +113,7 @@ public final class IconFactory {
                 // Try to load as SVG first
                 FlatSVGIcon icon = new FlatSVGIcon(type.getPath(), size, size);
                 if (icon.hasFound()) {
+                    icon.setColorFilter(themeColorFilter());
                     return icon;
                 }
             } catch (Exception e) {
@@ -160,6 +162,53 @@ public final class IconFactory {
     /**
      * Creates a simple placeholder icon when the real icon is not available.
      */
+    /**
+     * Recolours icon strokes to the current theme's foreground.
+     *
+     * <p>The SVG sources are drawn in one neutral grey. Without this they would keep that
+     * grey in every theme — legible in dark, washed out on a light background — and would
+     * not follow a theme switch made while the window is open. Mapping every colour to the
+     * label foreground keeps them readable in both, and keeps the icon set to a single
+     * source file per icon rather than one per theme.
+     */
+    private static FlatSVGIcon.ColorFilter themeColorFilter() {
+        return new FlatSVGIcon.ColorFilter(color -> {
+            Color foreground = UIManager.getColor("Label.foreground");
+            return foreground != null ? foreground : color;
+        });
+    }
+
+    /**
+     * Window icons at the sizes desktop environments ask for.
+     *
+     * <p>Several sizes are supplied rather than one scaled image: the taskbar, the window
+     * title bar and the Alt-Tab switcher each pick their own, and a single large icon
+     * downscaled by the toolkit looks noticeably muddier than one rendered at target size.
+     *
+     * @return icons ready for {@link java.awt.Window#setIconImages}, or an empty list if the
+     *         source icon is unavailable — an empty list simply leaves the default in place
+     */
+    public static java.util.List<Image> getWindowIcons() {
+        java.util.List<Image> images = new java.util.ArrayList<>();
+        for (int size : new int[] { 16, 20, 24, 32, 48, 64, 128 }) {
+            try {
+                FlatSVGIcon icon = new FlatSVGIcon(IconType.STATUS.getPath(), size, size);
+                if (!icon.hasFound()) {
+                    continue;
+                }
+                BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = image.createGraphics();
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                icon.paintIcon(null, g, 0, 0);
+                g.dispose();
+                images.add(image);
+            } catch (RuntimeException ex) {
+                LOG.debug("Could not render window icon at {}px", size);
+            }
+        }
+        return images;
+    }
+
     private static Icon createPlaceholderIcon(IconType type, int size) {
         return new Icon() {
             @Override
