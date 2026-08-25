@@ -30,6 +30,7 @@ import com.jagrosh.jmusicbot.i18n.Language;
 import com.jagrosh.jmusicbot.update.SelfUpdater;
 import com.jagrosh.jmusicbot.update.UpdateChecker;
 import com.jagrosh.jmusicbot.i18n.LanguageManager;
+import com.jagrosh.jmusicbot.i18n.UserLanguageStore;
 import com.jagrosh.jmusicbot.settings.SettingsManager;
 import com.jagrosh.jmusicbot.service.MusicService;
 import com.jagrosh.jmusicbot.service.SearchService;
@@ -65,6 +66,7 @@ public class Bot
     private final Instant startTime;
     private final AudioLoadWrapper audioLoadWrapper;
     private final LanguageManager languages;
+    private final UserLanguageStore userLanguages;
     private SelfUpdater updater;
     /** Set when --web is used, so the window can offer a link to it. */
     private com.jagrosh.jmusicbot.web.WebPanel webPanel;
@@ -83,6 +85,7 @@ public class Bot
         // Loaded before any subsystem that might need to report to a user, so no code
         // path can reach a message lookup before translations exist.
         this.languages = LanguageManager.load(config.getDefaultLanguage());
+        this.userLanguages = new UserLanguageStore();
         this.playlists = new PlaylistLoader(config);
         this.threadpool = Executors.newSingleThreadScheduledExecutor();
         this.startTime = Instant.now();
@@ -146,10 +149,51 @@ public class Bot
      */
     public String msg(Guild guild, String key, Object... arguments)
     {
-        Language language = guild == null
+        return languages.get(resolveLanguage(guild, null), key, arguments);
+    }
+
+    /**
+     * Resolves a message for a specific person.
+     *
+     * <p>Use this wherever the reply is addressed to one user — a command response, an
+     * ephemeral error. A guild's language is the right default for text everyone sees, such
+     * as the now-playing panel, but a reply to one person should be in the language that
+     * person chose.
+     *
+     * @param guild guild for context; {@code null} outside a server
+     * @param user  the person being addressed; {@code null} falls back to the guild
+     */
+    public String msgFor(Guild guild, net.dv8tion.jda.api.entities.User user,
+                         String key, Object... arguments)
+    {
+        return languages.get(resolveLanguage(guild, user), key, arguments);
+    }
+
+    /**
+     * Picks a language, most specific first.
+     *
+     * <p>A user's own choice wins over their server's, so a server can set a sensible default
+     * for its members without overriding anyone who has stated a preference.
+     */
+    private Language resolveLanguage(Guild guild, net.dv8tion.jda.api.entities.User user)
+    {
+        if (user != null)
+        {
+            Language chosen = userLanguages.get(user.getIdLong()).orElse(null);
+            if (chosen != null)
+            {
+                return chosen;
+            }
+        }
+        return guild == null
                 ? config.getDefaultLanguage()
                 : settings.getSettings(guild).getLanguage(config);
-        return languages.get(language, key, arguments);
+    }
+
+    /** Per-user language preferences. */
+    public UserLanguageStore getUserLanguages()
+    {
+        return userLanguages;
     }
     
     public SettingsManager getSettingsManager()

@@ -35,7 +35,8 @@
       "noPlayerInServer": "這個伺服器目前沒有播放器！",
       "noMusicPlaying": "目前沒有在播放音樂！",
       "noMusicPlayingToUse": "必須有音樂正在播放才能使用！"
-    }
+    },
+    "andMoreSuffix": "\n**還有 {0} 個...**"
   },
   "permissions": {
     "errors": {
@@ -171,6 +172,7 @@
       "mode": "模式",
       "pageFooter": "第 {0} / {1} 頁"
     },
+    "paginatorTitle": "目前佇列 | {0} 個項目 | `{1}` | {2}",
     "button": {
       "remove": "移除",
       "playNext": "下一首播放",
@@ -323,6 +325,8 @@
     "playlistLoadedAdditional": "\n已額外載入 **{0}** 首歌！",
     "playlistFoundAdded": "找到 {0}，共 `{1}` 個項目，已加入佇列！",
     "playlistOmittedSuffix": "\n超過允許最大長度（`{0}`）的曲目已被略過。",
+    "playlistNameGeneric": "一份播放清單",
+    "playlistNameLabeled": "播放清單 **{0}**",
     "selectMenu": {
       "placeholder": "選擇要播放的曲目",
       "optionDescriptionDuration": "長度：{0}"
@@ -411,7 +415,10 @@
       "current": "這個伺服器的機器人語言是 **{0}**。",
       "set": "這個伺服器的語言已設為 **{0}**。",
       "invalid": "未知的語言 `{0}`。可用語言：{1}",
-      "optionDescription": "{0}（{1}）"
+      "optionDescription": "{0}（{1}）",
+      "setPersonal": "你的顯示語言已設為 **{0}**。這會跟著你到這個 bot 所在的每一個伺服器。",
+      "currentPersonal": "你的顯示語言是 **{0}**。",
+      "currentInherited": "你尚未選擇語言，所以看到的是這個伺服器的設定：**{0}**。"
     },
     "prefix": {
       "cleared": "前綴已清除。",
@@ -427,21 +434,24 @@
       "cleared": "DJ 身分組已清除；只有管理員可以使用 DJ 指令。",
       "set": "擁有 **{0}** 身分組的成員現在可以使用 DJ 指令。",
       "missingArg": "請輸入身分組名稱或 NONE",
-      "notFound": "找不到符合「{0}」的身分組"
+      "notFound": "找不到符合「{0}」的身分組",
+      "multipleFound": " 找到多個符合「{0}」的身分組："
     },
     "textChannel": {
       "set": "音樂指令現在只能在 {0} 使用",
       "cleared": "音樂指令現在可以在任何頻道使用",
       "mustBeText": "請選擇文字頻道！",
       "missingArg": "請輸入文字頻道或 NONE",
-      "notFound": "找不到符合「{0}」的文字頻道"
+      "notFound": "找不到符合「{0}」的文字頻道",
+      "multipleFound": " 找到多個符合「{0}」的文字頻道："
     },
     "voiceChannel": {
       "set": "音樂現在只能在 {0} 播放",
       "cleared": "音樂現在可以在任何頻道播放",
       "mustBeVoice": "請選擇語音頻道！",
       "missingArg": "請輸入語音頻道或 NONE",
-      "notFound": "找不到符合「{0}」的語音頻道"
+      "notFound": "找不到符合「{0}」的語音頻道",
+      "multipleFound": " 找到多個符合「{0}」的語音頻道："
     },
     "skipRatio": {
       "set": "已將 *{1}* 的跳過門檻設為聽眾的 `{0}%`",

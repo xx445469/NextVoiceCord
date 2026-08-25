@@ -110,8 +110,8 @@ public class SettingsInteractionListener extends ListenerAdapter
                 if ("settc".equals(id.key()) || "setvc".equals(id.key()) || "setdj".equals(id.key()))
                 {
                     long originalPanelMessageId = event.getMessageIdLong();
-                    var menu = SettingsPanelRenderer.buildEntitySelectMenu(id.key(), id.userId(), originalPanelMessageId);
-                    var clearButton = SettingsPanelRenderer.buildEntityClearButton(id.key(), id.userId(), originalPanelMessageId);
+                    var menu = SettingsPanelRenderer.buildEntitySelectMenu(bot, event.getGuild(), id.key(), id.userId(), originalPanelMessageId);
+                    var clearButton = SettingsPanelRenderer.buildEntityClearButton(bot, event.getGuild(), id.key(), id.userId(), originalPanelMessageId);
                     if (menu == null || clearButton == null)
                     {
                         event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
