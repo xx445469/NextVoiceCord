@@ -66,7 +66,7 @@ FROM bitnami/minideb:trixie
 LABEL org.opencontainers.image.title="JMusicBot" \
       org.opencontainers.image.description="A cross-platform Discord music bot with a clean interface" \
       org.opencontainers.image.url="https://jmusicbot.com" \
-      org.opencontainers.image.source="https://github.com/arif-banai/MusicBot" \
+      org.opencontainers.image.source="https://github.com/xx445469/NextVoiceCord" \
       org.opencontainers.image.vendor="JMusicBot" \
       org.opencontainers.image.licenses="Apache-2.0"
 

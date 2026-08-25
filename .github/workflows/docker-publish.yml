@@ -26,18 +26,59 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: arif-banai/musicbot
+  # Lowercase literal rather than ${{ github.repository }}: GHCR rejects uppercase in an
+  # image name, this repository is spelled NextVoiceCord, and Actions has no lowercasing
+  # function. metadata-action would have folded the case on its own, but the buildcache ref
+  # in .github/actions/docker-build uses the value raw and would have failed the push.
+  IMAGE_NAME: xx445469/nextvoicecord
 
 jobs:
+  # Tag pushes used to skip straight to publishing. The workflow_run path is gated on
+  # "Build and Test" having succeeded, but a tag can be pushed to any commit, so tagging
+  # something untested produced an image anyway — and an image is the artefact people
+  # actually run. This job closes that gap without re-testing what was already tested.
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Validate translation files
+        run: python3 scripts/validate-langs.py
+
+      - name: Set up Java Environment
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      # Deliberately the same command as build-and-test.yml. Two workflows testing the
+      # same code by different means is two ways for the answer to differ.
+      - name: Build and Test
+        run: |
+          COMMIT_TIME=$(git log -1 --format=%cI)
+          mvn --batch-mode verify -Dproject.build.outputTimestamp=$COMMIT_TIME
+
   publish:
     name: Publish Docker Image
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    # Only run if the triggering workflow succeeded (for workflow_run events)
-    # For tag pushes, always run
+    needs: [test]
+    # always() is load-bearing: without it, `needs` on a job that was skipped skips this
+    # one too, which would kill the workflow_run path entirely. So the condition allows
+    # test to be skipped (workflow_run, already tested) but never to have failed.
     if: |
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+      always() &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped') &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')))
     
     permissions:
       contents: read

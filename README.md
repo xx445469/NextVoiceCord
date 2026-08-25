@@ -38,6 +38,26 @@ The web panel binds `127.0.0.1` by default. To reach it from another device set
 `web.bindAddress = "0.0.0.0"` — but note it speaks plain HTTP, so the token it
 prints at startup travels in the clear on that network. Do not forward the port.
 
+### Docker
+
+Images are published to GHCR on every release.
+
+```bash
+mkdir -p ./nextvoicecord && sudo chown 10001:10001 ./nextvoicecord
+
+docker run -d --name nextvoicecord \
+  -v "$PWD/nextvoicecord:/musicbot" \
+  -p 8080:8080 \
+  ghcr.io/xx445469/nextvoicecord:latest
+```
+
+The container runs as UID 10001, so the mounted directory has to be writable by it —
+that is what the `chown` is for. Put `config.txt` in that directory. `-p` is only
+needed if you want the web panel, and reaching it from outside the container also
+needs `web.bindAddress = "0.0.0.0"` in the config.
+
+There is a [`docker-compose.example.yml`](docker-compose.example.yml) to copy from.
+
 ### Building from source
 
 ```bash
@@ -45,6 +65,31 @@ git clone https://github.com/xx445469/NextVoiceCord.git
 cd NextVoiceCord
 mvn clean package           # jar lands in target/
 ```
+
+---
+
+## Configuration
+
+Everything lives in `config.txt`, which is generated with comments explaining each
+option. The two that must be set before the bot will start:
+
+| Key | What it is |
+|---|---|
+| `discord.token` | From the Bot tab of your [Discord application](https://discord.com/developers/applications) |
+| `discord.owner` | Your own Discord user ID |
+
+Worth knowing about:
+
+| Key | Default | What it does |
+|---|---|---|
+| `ui.language` | `EN` | What the bot replies in. Individual servers and users can override it. |
+| `gui.language` | *(follows `ui.language`)* | What the desktop window is in — the operator is not necessarily in any of the servers. |
+| `web.bindAddress` | `127.0.0.1` | `0.0.0.0` to reach the panel from another device. See the warning above. |
+| `web.allowConfigEdit` | `false` | Lets the web panel write `config.txt`. Off unless you want it. |
+| `updates.autoUpdate` | `false` | Self-update to new releases while idle. |
+
+Commands are discoverable from inside Discord with `/help` — it lists everything by
+category and marks what your roles do not let you run.
 
 ---
 

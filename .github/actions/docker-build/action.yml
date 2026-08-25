@@ -16,9 +16,9 @@ inputs:
     required: false
     default: 'ghcr.io'
   image-name:
-    description: 'Image name (e.g., arif-banai/musicbot)'
+    description: 'Image name (e.g., xx445469/nextvoicecord). Must be lowercase: GHCR rejects uppercase.'
     required: false
-    default: 'arif-banai/musicbot'
+    default: 'xx445469/nextvoicecord'
   token:
     description: 'GitHub token for authentication'
     required: true

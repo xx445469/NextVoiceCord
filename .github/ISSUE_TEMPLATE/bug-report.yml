@@ -51,9 +51,9 @@ body:
       options:
         - label: I have looked for information about this [within the documentation](https://jmusicbot.com/)
           required: true
-        - label: I have searched for similar issues [on the issues page](https://github.com/arif-banai/MusicBot/issues?q=is%3Aissue)
+        - label: I have searched for similar issues [on the issues page](https://github.com/xx445469/NextVoiceCord/issues?q=is%3Aissue)
           required: true
-        - label: I am using an official release from [the releases page](https://github.com/arif-banai/MusicBot/releases)
+        - label: I am using an official release from [the releases page](https://github.com/xx445469/NextVoiceCord/releases)
           required: true
   - type: input
     id: version
