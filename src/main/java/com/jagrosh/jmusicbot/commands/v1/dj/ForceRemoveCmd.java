@@ -61,7 +61,7 @@ public class ForceRemoveCmd extends DJCommand
 
         if (musicService.isQueueEmpty(event.getGuild()))
         {
-            event.replyError("There is nothing in the queue!");
+            event.replyError(bot.msg(event.getGuild(), "queue.errors.empty"));
             return;
         }
 
@@ -104,11 +104,11 @@ public class ForceRemoveCmd extends DJCommand
         int count = musicService.removeAllTracksByUser(event.getGuild(), target.getIdLong());
         if (count == 0)
         {
-            event.replyWarning("**" + target.getName() + "** doesn't have any songs in the queue!");
+            event.replyWarning(bot.msg(event.getGuild(), "queue.errors.userNoSongs", target.getName()));
         }
         else
         {
-            event.replySuccess("Successfully removed `" + count + "` entries from " + FormatUtil.formatUsername(target) + ".");
+            event.replySuccess(bot.msg(event.getGuild(), "queue.removedAllByUser", count, FormatUtil.formatUsername(target)));
         }
     }
 }

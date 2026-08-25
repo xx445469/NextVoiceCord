@@ -42,14 +42,13 @@ public class PauseSlashCmd extends DJSlashCommand
 
         if (handler.getPlayer().isPaused())
         {
-            event.reply(event.getClient().getWarning() + " The player is already paused! Use `/play` to unpause!")
+            event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "player.pauseAlready", "/play"))
                     .setEphemeral(true).queue();
             return;
         }
 
         handler.getPlayer().setPaused(true);
         String trackTitle = FormatUtil.getTrackTitle(handler.getPlayer().getPlayingTrack());
-        event.reply(event.getClient().getSuccess() + " Paused **" + trackTitle
-                + "**. Use `/play` to unpause!").queue();
+        event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "player.paused", trackTitle, "/play")).queue();
     }
 }

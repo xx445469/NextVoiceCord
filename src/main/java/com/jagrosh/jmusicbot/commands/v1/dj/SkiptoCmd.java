@@ -49,21 +49,21 @@ public class SkiptoCmd extends DJCommand
         }
         catch (NumberFormatException e)
         {
-            event.replyError("`" + event.getArgs() + "` is not a valid integer!");
+            event.replyError(bot.msg(event.getGuild(), "queue.errors.invalidPositionNotInteger", event.getArgs()));
             return;
         }
 
         int queueSize = musicService.getQueueSize(event.getGuild());
         if (index < 1 || index > queueSize)
         {
-            event.replyError("Position must be a valid integer between 1 and " + queueSize + "!");
+            event.replyError(bot.msg(event.getGuild(), "queue.errors.invalidPositionRange", queueSize));
             return;
         }
 
         String trackTitle = musicService.skipToPosition(event.getGuild(), index);
         if (trackTitle != null)
         {
-            event.replySuccess("Skipped to **" + trackTitle + "**");
+            event.replySuccess(bot.msg(event.getGuild(), "queue.skippedTo", trackTitle));
         }
     }
 }

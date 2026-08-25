@@ -53,7 +53,7 @@ public class SkiptoSlashCmd extends DJSlashCommand
 
         if (position < 1 || position > queueSize)
         {
-            event.reply(event.getClient().getError() + " Position must be a valid integer between 1 and " + queueSize + "!")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "queue.errors.invalidPositionRange", queueSize))
                     .setEphemeral(true).queue();
             return;
         }
@@ -61,7 +61,7 @@ public class SkiptoSlashCmd extends DJSlashCommand
         String trackTitle = musicService.skipToPosition(event.getGuild(), position);
         if (trackTitle != null)
         {
-            event.reply(event.getClient().getSuccess() + " Skipped to **" + trackTitle + "**").queue();
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "queue.skippedTo", trackTitle)).queue();
         }
     }
 }

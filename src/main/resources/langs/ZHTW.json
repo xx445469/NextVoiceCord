@@ -31,7 +31,6 @@
       "noMusicPlayingToUse": "必須有音樂正在播放才能使用！"
     }
   },
-
   "permissions": {
     "errors": {
       "needManageServer": "你需要「管理伺服器」權限才能變更設定。",
@@ -51,7 +50,6 @@
       "noManageMessages": "我沒有在該頻道管理訊息的權限。"
     }
   },
-
   "player": {
     "resumed": "已繼續播放 **{0}**。",
     "restarted": "已重新播放 **{0}**",
@@ -95,7 +93,6 @@
       "playlistEntryLoadError": "載入播放清單項目時發生錯誤：{0}"
     }
   },
-
   "nowplaying": {
     "contentFull": "**正在播放⋯**",
     "contentMinimal": "**正在 {0} 播放**",
@@ -144,7 +141,6 @@
       "noMusicInServer": "這個伺服器目前沒有播放音樂。"
     }
   },
-
   "queue": {
     "trackAddedNow": "已加入 **{0}**（`{1}`），將立即播放",
     "trackAddedAtPosition": "已加入 **{0}**（`{1}`）到佇列第 {2} 位",
@@ -192,10 +188,13 @@
       "invalidPositionNotInteger": "`{0}` 不是有效的整數！",
       "invalidPositionOrAll": "請提供有效的位置數字或 'all'。",
       "emptyToShuffle": "你在佇列中沒有可以隨機排序的音樂！",
-      "onlyOneToShuffle": "你在佇列中只有一首歌！"
+      "onlyOneToShuffle": "你在佇列中只有一首歌！",
+      "mentionUser": "你需要提及一位使用者！",
+      "userNotFound": "找不到該使用者！",
+      "multipleUsersFound": "找到多位符合的使用者：",
+      "twoValidIndexes": "請提供兩個有效的位置編號。"
     }
   },
-
   "history": {
     "disabled": "播放歷史紀錄已在設定中停用（playback.maxHistorySize = 0）。",
     "nowEmpty": "播放歷史紀錄已清空！",
@@ -226,7 +225,6 @@
       "emptyPlaylistName": "請輸入播放清單名稱！"
     }
   },
-
   "playlist": {
     "favoritesLabel": "⭐ 最愛 ⭐",
     "queuedFromPlaylist": "已從播放清單 `{1}` 加入 **{0}** 首歌到佇列。",
@@ -274,9 +272,42 @@
       "noUnsavedChanges": "沒有未儲存的變更。",
       "alreadyExistsChooseOther": "播放清單 `{0}` 已存在！請換一個名稱。",
       "invalidName": "請提供有效的播放清單名稱！"
+    },
+    "owner": {
+      "helpTitle": "播放清單管理指令：",
+      "created": "已成功建立播放清單 `{0}`！",
+      "deleted": "已成功刪除播放清單 `{0}`！",
+      "appended": "已成功將 {0} 個項目加入播放清單 `{1}`！",
+      "availableList": "可用的播放清單：",
+      "errors": {
+        "noName": "請提供播放清單名稱！",
+        "createFailed": "無法建立播放清單：{0}",
+        "deleteFailed": "無法刪除播放清單：{0}",
+        "appendFailed": "無法附加到播放清單：{0}",
+        "alreadyExists": "播放清單 `{0}` 已存在！",
+        "doesNotExist": "播放清單 `{0}` 不存在！",
+        "appendMissingArgs": "請提供播放清單名稱與要加入的網址！",
+        "folderMissing": "Playlists 資料夾不存在且無法建立！",
+        "loadFailed": "載入可用播放清單失敗！"
+      }
+    },
+    "autoplaylist": {
+      "cleared": "已清除 **{0}** 的預設播放清單",
+      "set": "**{0}** 的預設播放清單現在是 `{1}`",
+      "errors": {
+        "missingArg": "請提供播放清單名稱或 NONE",
+        "notFound": "找不到 `{0}.txt`！"
+      }
+    },
+    "load": {
+      "missingName": "請提供播放清單名稱。",
+      "notFound": "在 Playlists 資料夾中找不到 `{0}.txt`。",
+      "loading": "正在載入播放清單 **{0}**⋯（{1} 個項目）",
+      "noTracksLoaded": "沒有載入任何曲目！",
+      "loadedTracks": "已載入 **{0}** 首曲目！",
+      "failedHeader": "以下曲目載入失敗："
     }
   },
-
   "search": {
     "loading": "載入中⋯ `[{0}]`",
     "searching": "正在 {0} 搜尋 `{1}`⋯",
@@ -304,17 +335,17 @@
       "loadFailed": "載入時發生錯誤：{0}",
       "loadFailedGeneric": "載入曲目時發生錯誤。",
       "playlistLoadFailedOrEmpty": "播放清單 {0} 無法載入，或內容為空",
-      "playlistAllTooLong": "這份播放清單 {0}中所有項目都超過允許的最大長度（`{1}`）"
-    }
+      "playlistAllTooLong": "這份播放清單 {0}中所有項目都超過允許的最大長度（`{1}`）",
+      "missingSongOrUrl": "請提供歌曲名稱或網址！"
+    },
+    "searchingSimple": "搜尋中⋯ `[{0}]`"
   },
-
   "voting": {
     "status": "[{0} 票，需要 {1}/{2}]",
     "alreadyVoted": "你已經投過跳過這首歌的票了 `{0}`",
     "voteRegistered": "你投票跳過這首歌 `{0}`",
     "voteSkipSuccess": "你投票跳過這首歌 `{0}`\n已跳過 **{1}** {2}"
   },
-
   "settings": {
     "updated": "設定已更新。",
     "closeFailed": "關閉設定面板失敗。",
@@ -428,15 +459,77 @@
       "chooseTextChannel": "請選擇文字頻道。",
       "chooseVoiceChannel": "請選擇語音頻道。",
       "chooseRole": "請選擇身分組。"
+    },
+    "summary": {
+      "header": "{0} 的設定：",
+      "textChannel": "文字頻道：{0}",
+      "voiceChannel": "語音頻道：{0}",
+      "djRole": "DJ 身分組：{0}",
+      "prefix": "自訂前綴：{0}",
+      "repeatMode": "循環模式：{0}",
+      "queueType": "佇列類型：{0}",
+      "defaultPlaylist": "預設播放清單：{0}",
+      "footer": "{0} 個伺服器｜{1} 個音訊連線"
     }
   },
-
   "clearchannel": {
     "clearing": "正在清除頻道⋯",
     "cleared": "已清除 {0} 則訊息。",
     "error": "錯誤：{0}",
     "errors": {
       "noChannelConfigured": "這個伺服器尚未設定文字頻道。管理員可以用 `{0}` 設定。"
+    }
+  },
+  "lyrics": {
+    "errors": {
+      "removed": "歌詞功能已移除。"
+    }
+  },
+  "owner": {
+    "setname": {
+      "changed": "名稱已從 `{0}` 變更為 `{1}`",
+      "errors": {
+        "rateLimited": "名稱每小時只能變更兩次！",
+        "invalid": "該名稱無效！"
+      }
+    },
+    "setavatar": {
+      "success": "已成功變更頭像。",
+      "errors": {
+        "invalidUrl": "網址無效或未提供",
+        "setFailed": "設定頭像失敗。",
+        "loadFailed": "無法從提供的網址載入。"
+      }
+    },
+    "setgame": {
+      "playingSet": "**{0}** 現在正在玩 `{1}`",
+      "playingCleared": "**{0}** 已不再顯示遊戲狀態。",
+      "streamSet": "**{0}** 現在正在直播 `{1}`",
+      "listenSet": "**{0}** 現在正在聆聽 `{1}`",
+      "watchSet": "**{0}** 現在正在觀看 `{1}`",
+      "errors": {
+        "setFailed": "無法設定狀態！",
+        "streamMissingArgs": "請提供 Twitch 使用者名稱與要「直播」的遊戲名稱",
+        "listenMissingTitle": "請提供要聆聽的標題！",
+        "watchMissingTitle": "請提供要觀看的標題！"
+      }
+    },
+    "setstatus": {
+      "set": "已將狀態設為 `{0}`",
+      "errors": {
+        "invalid": "請提供以下其中一種狀態：`ONLINE`、`IDLE`、`DND`、`INVISIBLE`",
+        "setFailed": "無法設定狀態！"
+      }
+    },
+    "shutdown": {
+      "message": "正在關閉⋯"
+    },
+    "eval": {
+      "success": "執行成功：\n```\n{0} ```",
+      "exceptionThrown": "拋出例外：\n```\n{0} ```",
+      "errors": {
+        "engineMissing": "設定中指定的 eval 引擎（`{0}`）不存在。可能是引擎名稱錯誤，或你的 Java 版本（`{1}`）沒有這個引擎。"
+      }
     }
   }
 }

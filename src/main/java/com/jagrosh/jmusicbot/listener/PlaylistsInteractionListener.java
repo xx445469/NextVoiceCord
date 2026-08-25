@@ -74,7 +74,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
 
     private void handlePlaylistDetailsButton(ButtonInteractionEvent event)
     {
-        if (!InteractionGuards.requireGuildAndMember(event))
+        if (!InteractionGuards.requireGuildAndMember(event, bot))
         {
             return;
         }
@@ -86,7 +86,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
             ComponentIdParsers.PlaylistDetailsBackId backId = parsedBack.get();
             if (event.getUser().getIdLong() != backId.userId())
             {
-                event.reply("Only the user who ran the command can use these buttons!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.notCommandInvokerButtons")).setEphemeral(true).queue();
                 return;
             }
             MusicService.PlaylistNamesInfo namesInfo = loadPlaylistNames();
@@ -109,13 +109,13 @@ public class PlaylistsInteractionListener extends ListenerAdapter
                 ComponentIdParsers.parsePlaylistDetailsButtonId(event.getComponentId());
         if (parsed.isEmpty())
         {
-            event.reply("Invalid button state.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.invalidButtonState")).setEphemeral(true).queue();
             return;
         }
         ComponentIdParsers.PlaylistDetailsButtonId id = parsed.get();
         if (event.getUser().getIdLong() != id.userId())
         {
-            event.reply("Only the user who ran the command can use these buttons!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.notCommandInvokerButtons")).setEphemeral(true).queue();
             return;
         }
 
@@ -128,7 +128,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         List<String> playlists = playlistNamesInfo.names;
         if (id.playlistIndex() <= 0 || id.playlistIndex() > playlists.size())
         {
-            event.reply("Playlist no longer exists. Click Back and Refresh.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "playlist.errors.notFoundRefresh")).setEphemeral(true).queue();
             return;
         }
 
@@ -136,7 +136,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         MusicService.PlaylistDetailsInfo detailsInfo = bot.getMusicService().getPlaylistDetails(playlistName);
         if (detailsInfo == null)
         {
-            event.reply("Playlist no longer exists. Click Back and Refresh.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "playlist.errors.notFoundRefresh")).setEphemeral(true).queue();
             return;
         }
 
@@ -144,7 +144,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         int totalItems = bot.getMusicService().getPlaylistTrackCount(draftContext);
         if (totalItems < 0)
         {
-            event.reply("Playlist no longer exists. Click Back and Refresh.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "playlist.errors.notFoundRefresh")).setEphemeral(true).queue();
             return;
         }
         boolean canEditPlaylist = bot.getMusicService().canEditPlaylistEntries(event.getGuild(), event.getMember());
@@ -162,7 +162,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
             }
             catch (NumberFormatException e)
             {
-                event.reply("Invalid track selection.").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.invalidTrackSelection")).setEphemeral(true).queue();
                 return;
             }
             int tracksOnPage = PlaylistsSlashCmd.getPlaylistTracksOnPage(page, totalItems);
@@ -170,7 +170,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
             int lastOnPage = firstOnPage + tracksOnPage - 1;
             if (newSelectedTrack < firstOnPage || newSelectedTrack > lastOnPage)
             {
-                event.reply("That track isn't on this page!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.trackNotOnPage")).setEphemeral(true).queue();
                 return;
             }
             if (newSelectedTrack == selectedTrack)
@@ -179,7 +179,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
             }
             if (newSelectedTrack > totalItems)
             {
-                event.reply("That track doesn't exist!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.trackNoLongerExists")).setEphemeral(true).queue();
                 return;
             }
             renderPlaylistDetailsView(event, id.playlistIndex(), id.listPage(), page, newSelectedTrack, id.userId(), playlistName, draftContext);
@@ -226,7 +226,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         {
             if (!canEditPlaylist)
             {
-                event.reply("You need to be a DJ or the bot owner to edit playlists!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "permissions.errors.needDjOrOwnerEditPlaylist")).setEphemeral(true).queue();
                 return;
             }
             if (action.equals("save"))
@@ -254,7 +254,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
 
         if (selectedTrack <= 0 || selectedTrack > totalItems)
         {
-            event.reply("No track selected!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.noTrackSelected")).setEphemeral(true).queue();
             return;
         }
 
@@ -262,7 +262,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         {
             if (!canEditPlaylist)
             {
-                event.reply("You need to be a DJ or the bot owner to edit playlists!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "permissions.errors.needDjOrOwnerEditPlaylist")).setEphemeral(true).queue();
                 return;
             }
             MusicService.PlaylistDraftMutationResult removeResult = musicService.removePlaylistDraftItem(draftContext, selectedTrack);
@@ -282,7 +282,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         {
             if (!canEditPlaylist)
             {
-                event.reply("You need to be a DJ or the bot owner to edit playlists!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "permissions.errors.needDjOrOwnerEditPlaylist")).setEphemeral(true).queue();
                 return;
             }
             renderPlaylistMoveMenu(event, draftContext, id.playlistIndex(), id.listPage(), page, selectedTrack, id.userId());
@@ -298,7 +298,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         {
             if (!canEditPlaylist)
             {
-                event.reply("You need to be a DJ or the bot owner to edit playlists!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "permissions.errors.needDjOrOwnerEditPlaylist")).setEphemeral(true).queue();
                 return;
             }
             int target = switch (action)
@@ -330,7 +330,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         String selectedTrackUrl = musicService.getPlaylistTrackUrlAtPosition(draftContext, selectedTrack);
         if (selectedTrackUrl == null || selectedTrackUrl.isBlank())
         {
-            event.reply("That playlist entry could not be loaded.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "player.errors.playlistEntryLoadFailed")).setEphemeral(true).queue();
             return;
         }
 
@@ -355,7 +355,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
 
     private void handlePlaylistDetailsMoveSelect(StringSelectInteractionEvent event)
     {
-        if (!InteractionGuards.requireGuildAndMember(event))
+        if (!InteractionGuards.requireGuildAndMember(event, bot))
         {
             return;
         }
@@ -364,20 +364,20 @@ public class PlaylistsInteractionListener extends ListenerAdapter
                 ComponentIdParsers.parsePlaylistDetailsMoveSelectId(event.getComponentId());
         if (parsed.isEmpty())
         {
-            event.reply("Invalid selection state.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.invalidSelectionState")).setEphemeral(true).queue();
             return;
         }
         ComponentIdParsers.PlaylistDetailsMoveSelectId id = parsed.get();
         if (event.getUser().getIdLong() != id.userId())
         {
-            event.reply("Only the user who ran the command can use this!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.notCommandInvokerThis")).setEphemeral(true).queue();
             return;
         }
 
         MusicService musicService = bot.getMusicService();
         if (!musicService.canEditPlaylistEntries(event.getGuild(), event.getMember()))
         {
-            event.reply("You need to be a DJ or the bot owner to edit playlists!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "permissions.errors.needDjOrOwnerEditPlaylist")).setEphemeral(true).queue();
             return;
         }
 
@@ -389,7 +389,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         }
         if (id.playlistIndex() <= 0 || id.playlistIndex() > namesInfo.names.size())
         {
-            event.reply("Playlist no longer exists. Click Back and Refresh.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "playlist.errors.notFoundRefresh")).setEphemeral(true).queue();
             return;
         }
         String playlistName = namesInfo.names.get(id.playlistIndex() - 1);
@@ -401,7 +401,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         }
         catch (NumberFormatException e)
         {
-            event.reply("Invalid position selected.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.invalidPositionSelected")).setEphemeral(true).queue();
             return;
         }
 
@@ -419,7 +419,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
 
     private void handlePlaylistsButton(ButtonInteractionEvent event)
     {
-        if (!InteractionGuards.requireGuildAndMember(event))
+        if (!InteractionGuards.requireGuildAndMember(event, bot))
         {
             return;
         }
@@ -427,13 +427,13 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         Optional<ComponentIdParsers.PaginatedButtonId> parsed = ComponentIdParsers.parsePlaylistsButtonId(event.getComponentId());
         if (parsed.isEmpty())
         {
-            event.reply("Invalid button state.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.invalidButtonState")).setEphemeral(true).queue();
             return;
         }
         ComponentIdParsers.PaginatedButtonId id = parsed.get();
         if (event.getUser().getIdLong() != id.userId())
         {
-            event.reply("Only the user who ran the command can use these buttons!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.notCommandInvokerButtons")).setEphemeral(true).queue();
             return;
         }
 
@@ -446,7 +446,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         List<String> playlists = playlistNamesInfo.names;
         if (playlists.isEmpty())
         {
-            event.editMessage("There are no playlists in the Playlists folder!").setEmbeds().setComponents().queue();
+            event.editMessage(bot.msg(event.getGuild(), "playlist.errors.noneInFolder")).setEmbeds().setComponents().queue();
             return;
         }
 
@@ -467,7 +467,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
             }
             catch (NumberFormatException e)
             {
-                event.reply("Invalid playlist selection.").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.invalidPlaylistSelection")).setEphemeral(true).queue();
                 return;
             }
             int playlistsOnPage = PlaylistsSlashCmd.getPlaylistsOnPage(page, playlists.size());
@@ -475,7 +475,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
             int lastOnPage = firstOnPage + playlistsOnPage - 1;
             if (newSelectedIndex < firstOnPage || newSelectedIndex > lastOnPage)
             {
-                event.reply("That playlist isn't on this page!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.playlistNotOnPage")).setEphemeral(true).queue();
                 return;
             }
             if (newSelectedIndex == selectedIndex)
@@ -484,7 +484,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
             }
             if (newSelectedIndex > playlists.size())
             {
-                event.reply("That playlist doesn't exist!").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "common.errors.playlistNoLongerExists")).setEphemeral(true).queue();
                 return;
             }
             updatePlaylistsEmbed(event, playlists, page, totalPages, newSelectedIndex, userId);
@@ -512,7 +512,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
 
         if (selectedIndex <= 0 || selectedIndex > playlists.size())
         {
-            event.reply("No playlist selected!").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.noPlaylistSelected")).setEphemeral(true).queue();
             return;
         }
 
@@ -522,7 +522,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         {
             if (musicService.getPlaylistDetails(selectedPlaylist) == null)
             {
-                event.reply("Playlist no longer exists. Click Refresh.").setEphemeral(true).queue();
+                event.reply(bot.msg(event.getGuild(), "playlist.errors.notFoundRefreshShort")).setEphemeral(true).queue();
                 return;
             }
             MusicService.PlaylistDraftContext draftContext = buildDraftContext(event, userId, selectedPlaylist);
@@ -586,7 +586,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
         List<String> playlists = playlistNamesInfo.names;
         if (playlists.isEmpty())
         {
-            event.editMessage("There are no playlists in the Playlists folder!").setEmbeds().setComponents().queue();
+            event.editMessage(bot.msg(event.getGuild(), "playlist.errors.noneInFolder")).setEmbeds().setComponents().queue();
             return;
         }
         int totalPages = PlaylistsSlashCmd.getTotalPages(playlists.size());
@@ -652,7 +652,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
                 {
                     if (result == null)
                     {
-                        onMissingPlaylist.accept("Playlist no longer exists. Click Back and Refresh.");
+                        onMissingPlaylist.accept(bot.msg(guild, "playlist.errors.notFoundRefresh"));
                         return;
                     }
                     int totalPages = Math.max(1, PlaylistsSlashCmd.getPlaylistTrackTotalPages(result.totalItems));
@@ -687,7 +687,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
                 {
                     if (result == null)
                     {
-                        event.reply("Playlist no longer exists. Click Back and Refresh.").setEphemeral(true).queue();
+                        event.reply(bot.msg(event.getGuild(), "playlist.errors.notFoundRefresh")).setEphemeral(true).queue();
                         return;
                     }
                     int totalPages = Math.max(1, PlaylistsSlashCmd.getPlaylistTrackTotalPages(result.totalItems));
@@ -711,7 +711,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
                     StringSelectMenu.Builder menuBuilder = StringSelectMenu
                             .create("playlistdetails_move_select_" + playlistIndex + "_" + listPage + "_"
                                     + safeSelected + "_" + safePage + "_" + userId)
-                            .setPlaceholder("Select new position")
+                            .setPlaceholder(bot.msg(event.getGuild(), "queue.moveSelect.placeholder"))
                             .setMinValues(1)
                             .setMaxValues(1);
                     int maxOptions = Math.min(result.totalItems, 25);
@@ -719,7 +719,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
                     {
                         if (i != safeSelected)
                         {
-                            menuBuilder.addOption("Position " + i, String.valueOf(i));
+                            menuBuilder.addOption(bot.msg(event.getGuild(), "queue.moveSelect.optionLabel", i), String.valueOf(i));
                         }
                     }
                     String cancelMoveId = "playlistdetails_" + playlistIndex + "_" + listPage + "_cancelmove_"
@@ -727,7 +727,7 @@ public class PlaylistsInteractionListener extends ListenerAdapter
                     event.editMessageEmbeds(embed)
                             .setComponents(
                                     ActionRow.of(menuBuilder.build()),
-                                    ActionRow.of(net.dv8tion.jda.api.components.buttons.Button.secondary(cancelMoveId, "Back"))
+                                    ActionRow.of(net.dv8tion.jda.api.components.buttons.Button.secondary(cancelMoveId, bot.msg(event.getGuild(), "playlist.button.back")))
                             )
                             .queue();
                 });

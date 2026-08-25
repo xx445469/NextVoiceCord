@@ -27,21 +27,21 @@ public class NplayoutCmd extends AdminCommand
         {
             NowPlayingLayoutMode current = settings.getNowPlayingLayoutMode();
             boolean effectiveMinimal = settings.useMinimalNowPlayingMessage(bot.getConfig());
-            event.replySuccess("Now-playing layout mode is `" + current.getUserInputValue()
-                    + "` (effective: `" + (effectiveMinimal ? "minimal" : "full") + "`).");
+            event.replySuccess(bot.msg(event.getGuild(), "settings.npLayout.current",
+                    current.getUserInputValue(), effectiveMinimal ? "minimal" : "full"));
             return;
         }
 
         NowPlayingLayoutMode mode = NowPlayingLayoutMode.fromInput(event.getArgs());
         if (mode == null)
         {
-            event.replyError("Please provide one of: `full`, `minimal`, or `inherit`.");
+            event.replyError(bot.msg(event.getGuild(), "settings.npLayout.invalid"));
             return;
         }
 
         settings.setNowPlayingLayoutMode(mode);
         boolean effectiveMinimal = settings.useMinimalNowPlayingMessage(bot.getConfig());
-        event.replySuccess("Now-playing layout mode set to `" + mode.getUserInputValue()
-                + "` (effective: `" + (effectiveMinimal ? "minimal" : "full") + "`).");
+        event.replySuccess(bot.msg(event.getGuild(), "settings.npLayout.set",
+                mode.getUserInputValue(), effectiveMinimal ? "minimal" : "full"));
     }
 }

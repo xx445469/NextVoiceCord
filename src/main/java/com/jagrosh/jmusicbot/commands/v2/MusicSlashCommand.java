@@ -41,14 +41,14 @@ public abstract class MusicSlashCommand extends SlashCommand
                     @Override
                     public void onTextChannelError(TextChannel requiredChannel)
                     {
-                        event.reply(errorEmoji + " You can only use that command in " + requiredChannel.getAsMention() + "!")
+                        event.reply(errorEmoji + " " + bot.msg(event.getGuild(), "common.errors.mustBeInChannel", requiredChannel.getAsMention()))
                                 .setEphemeral(true).queue();
                     }
 
                     @Override
                     public void onNotPlayingError()
                     {
-                        event.reply(errorEmoji + " There must be music playing to use that!")
+                        event.reply(errorEmoji + " " + bot.msg(event.getGuild(), "common.errors.noMusicPlayingToUse"))
                                 .setEphemeral(true).queue();
                     }
 
@@ -56,21 +56,21 @@ public abstract class MusicSlashCommand extends SlashCommand
                     public void onNotListeningError(AudioChannel requiredChannel)
                     {
                         String channelName = requiredChannel == null ? "a voice channel" : requiredChannel.getAsMention();
-                        event.reply(errorEmoji + " You must be listening in " + channelName + " to use that!")
+                        event.reply(errorEmoji + " " + bot.msg(event.getGuild(), "common.errors.mustBeListening", channelName))
                                 .setEphemeral(true).queue();
                     }
 
                     @Override
                     public void onAfkChannelError()
                     {
-                        event.reply(errorEmoji + " You cannot use that command in an AFK channel!")
+                        event.reply(errorEmoji + " " + bot.msg(event.getGuild(), "common.errors.afkChannel"))
                                 .setEphemeral(true).queue();
                     }
 
                     @Override
                     public void onVoiceConnectError(AudioChannel channel)
                     {
-                        event.reply(errorEmoji + " I am unable to connect to " + channel.getAsMention() + "!")
+                        event.reply(errorEmoji + " " + bot.msg(event.getGuild(), "common.errors.voiceConnectFailed", channel.getAsMention()))
                                 .setEphemeral(true).queue();
                     }
                 }

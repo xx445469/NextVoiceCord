@@ -46,7 +46,7 @@ public class NowPlayingCmd extends MusicCommand
 
         if (info == null)
         {
-            event.replyWarning("There is no music playing in this server.");
+            event.replyWarning(bot.msg(event.getGuild(), "nowplaying.errors.noMusicInServer"));
             return;
         }
 

@@ -65,24 +65,24 @@ public class SettingsInteractionListener extends ListenerAdapter
 
     private void handleSettingsButton(ButtonInteractionEvent event)
     {
-        if (!InteractionGuards.requireGuildAndMember(event))
+        if (!InteractionGuards.requireGuildAndMember(event, bot))
             return;
 
         Optional<ComponentIdParsers.SettingsButtonId> parsed = ComponentIdParsers.parseSettingsButtonId(event.getComponentId());
         if (parsed.isEmpty())
         {
-            event.reply(expiredMessage()).setEphemeral(true).queue();
+            event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
             return;
         }
         ComponentIdParsers.SettingsButtonId id = parsed.get();
         if (event.getUser().getIdLong() != id.userId())
         {
-            event.reply("Only the user who opened this settings panel can use it.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.notPanelOwner")).setEphemeral(true).queue();
             return;
         }
         if (!hasSettingsPermission(event.getMember(), event.getUser().getIdLong()))
         {
-            event.reply("You need the Manage Server permission to change settings.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "permissions.errors.needManageServer")).setEphemeral(true).queue();
             return;
         }
 
@@ -93,7 +93,7 @@ public class SettingsInteractionListener extends ListenerAdapter
             case SettingsPanelRenderer.ACTION_ENUM -> {
                 if (!applyEnumUpdate(id.key(), id.value(), settings, event.getGuild()))
                 {
-                    event.reply(expiredMessage()).setEphemeral(true).queue();
+                    event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
                     return;
                 }
                 refreshPanel(event, settings);
@@ -101,7 +101,7 @@ public class SettingsInteractionListener extends ListenerAdapter
             case SettingsPanelRenderer.ACTION_TOGGLE -> {
                 if (!applyToggleCycle(id.key(), settings, event.getGuild()))
                 {
-                    event.reply(expiredMessage()).setEphemeral(true).queue();
+                    event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
                     return;
                 }
                 refreshPanel(event, settings);
@@ -114,19 +114,19 @@ public class SettingsInteractionListener extends ListenerAdapter
                     var clearButton = SettingsPanelRenderer.buildEntityClearButton(id.key(), id.userId(), originalPanelMessageId);
                     if (menu == null || clearButton == null)
                     {
-                        event.reply(expiredMessage()).setEphemeral(true).queue();
+                        event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
                         return;
                     }
                     String prompt = switch (id.key())
                     {
-                        case "settc" -> "Select a text channel:";
-                        case "setvc" -> "Select a voice channel:";
-                        case "setdj" -> "Select the DJ role:";
+                        case "settc" -> bot.msg(event.getGuild(), "settings.prompt.textChannel");
+                        case "setvc" -> bot.msg(event.getGuild(), "settings.prompt.voiceChannel");
+                        case "setdj" -> bot.msg(event.getGuild(), "settings.prompt.djRole");
                         default -> null;
                     };
                     if (prompt == null)
                     {
-                        event.reply(expiredMessage()).setEphemeral(true).queue();
+                        event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
                         return;
                     }
                     event.reply(prompt)
@@ -139,7 +139,7 @@ public class SettingsInteractionListener extends ListenerAdapter
                 Modal modal = SettingsPanelRenderer.buildModal(id.key(), id.userId());
                 if (modal == null)
                 {
-                    event.reply(expiredMessage()).setEphemeral(true).queue();
+                    event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
                     return;
                 }
                 event.replyModal(modal).queue();
@@ -147,7 +147,7 @@ public class SettingsInteractionListener extends ListenerAdapter
             case SettingsPanelRenderer.ACTION_CLEAR -> {
                 if (!applyClear(id.key(), settings))
                 {
-                    event.reply(expiredMessage()).setEphemeral(true).queue();
+                    event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
                     return;
                 }
 
@@ -161,7 +161,7 @@ public class SettingsInteractionListener extends ListenerAdapter
                     }
                     catch (NumberFormatException ex)
                     {
-                        event.reply(expiredMessage()).setEphemeral(true).queue();
+                        event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
                         return;
                     }
 
@@ -185,33 +185,33 @@ public class SettingsInteractionListener extends ListenerAdapter
                     event.getMessage().delete().queue(
                             ignored -> {
                             },
-                            err -> hook.sendMessage("Failed to close settings panel.").setEphemeral(true).queue()
+                            err -> hook.sendMessage(bot.msg(event.getGuild(), "settings.closeFailed")).setEphemeral(true).queue()
                     ));
-            default -> event.reply(expiredMessage()).setEphemeral(true).queue();
+            default -> event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
         }
     }
 
     private void handleSettingsModal(ModalInteractionEvent event)
     {
-        if (!InteractionGuards.requireGuildAndMember(event))
+        if (!InteractionGuards.requireGuildAndMember(event, bot))
             return;
 
         Optional<ComponentIdParsers.SettingsModalId> parsed = ComponentIdParsers.parseSettingsModalId(event.getModalId());
         if (parsed.isEmpty())
         {
-            event.reply(expiredMessage()).setEphemeral(true).queue();
+            event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
             return;
         }
 
         ComponentIdParsers.SettingsModalId id = parsed.get();
         if (event.getUser().getIdLong() != id.userId())
         {
-            event.reply("Only the user who opened this settings dialog can submit it.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.notModalOwner")).setEphemeral(true).queue();
             return;
         }
         if (!hasSettingsPermission(event.getMember(), event.getUser().getIdLong()))
         {
-            event.reply("You need the Manage Server permission to change settings.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "permissions.errors.needManageServer")).setEphemeral(true).queue();
             return;
         }
 
@@ -225,7 +225,7 @@ public class SettingsInteractionListener extends ListenerAdapter
 
         String invokerName = event.getMember() != null ? event.getMember().getEffectiveName() : event.getUser().getName();
         event.reply(new MessageCreateBuilder()
-                        .setContent("Settings updated.")
+                        .setContent(bot.msg(event.getGuild(), "settings.updated"))
                         .setComponents(SettingsPanelRenderer.buildSettingsMessageComponents(
                                 event.getGuild(), settings, bot.getConfig(), id.userId(), invokerName))
                         .useComponentsV2()
@@ -236,26 +236,26 @@ public class SettingsInteractionListener extends ListenerAdapter
 
     private void handleSettingsEntitySelect(EntitySelectInteractionEvent event)
     {
-        if (!InteractionGuards.requireGuildAndMember(event))
+        if (!InteractionGuards.requireGuildAndMember(event, bot))
             return;
 
         Optional<ComponentIdParsers.SettingsEntitySelectId> parsed =
                 ComponentIdParsers.parseSettingsEntitySelectId(event.getComponentId());
         if (parsed.isEmpty())
         {
-            event.reply(expiredMessage()).setEphemeral(true).queue();
+            event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
             return;
         }
 
         ComponentIdParsers.SettingsEntitySelectId id = parsed.get();
         if (event.getUser().getIdLong() != id.userId())
         {
-            event.reply("Only the user who opened this settings panel can use it.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "common.errors.notPanelOwner")).setEphemeral(true).queue();
             return;
         }
         if (!hasSettingsPermission(event.getMember(), event.getUser().getIdLong()))
         {
-            event.reply("You need the Manage Server permission to change settings.").setEphemeral(true).queue();
+            event.reply(bot.msg(event.getGuild(), "permissions.errors.needManageServer")).setEphemeral(true).queue();
             return;
         }
 
@@ -405,22 +405,22 @@ public class SettingsInteractionListener extends ListenerAdapter
             case "setskip" -> {
                 String value = SettingsPanelRenderer.modalValue(event, "setskip_value");
                 if (value.isEmpty())
-                    return "Please enter an integer between 0 and 100.";
+                    return bot.msg(guild, "settings.skipRatio.emptyError");
                 try
                 {
                     int percent = Integer.parseInt(value);
                     if (percent < 0 || percent > 100)
-                        return "Skip percentage must be between 0 and 100.";
+                        return bot.msg(guild, "settings.skipRatio.rangeError");
                     settings.setSkipRatio(percent / 100.0);
                     return null;
                 }
                 catch (NumberFormatException ex)
                 {
-                    return "Please enter an integer between 0 and 100.";
+                    return bot.msg(guild, "settings.skipRatio.emptyError");
                 }
             }
             default -> {
-                return expiredMessage();
+                return expiredMessage(guild);
             }
         }
     }
@@ -432,7 +432,7 @@ public class SettingsInteractionListener extends ListenerAdapter
             case "settc" -> {
                 var channels = event.getMentions().getChannels(TextChannel.class);
                 if (channels.isEmpty())
-                    return "Please choose a text channel.";
+                    return bot.msg(event.getGuild(), "settings.errors.chooseTextChannel");
                 TextChannel textChannel = channels.get(0);
                 settings.setTextChannel(textChannel);
                 return null;
@@ -440,7 +440,7 @@ public class SettingsInteractionListener extends ListenerAdapter
             case "setvc" -> {
                 var channels = event.getMentions().getChannels(VoiceChannel.class);
                 if (channels.isEmpty())
-                    return "Please choose a voice channel.";
+                    return bot.msg(event.getGuild(), "settings.errors.chooseVoiceChannel");
                 VoiceChannel voiceChannel = channels.get(0);
                 settings.setVoiceChannel(voiceChannel);
                 return null;
@@ -448,13 +448,13 @@ public class SettingsInteractionListener extends ListenerAdapter
             case "setdj" -> {
                 var roles = event.getMentions().getRoles();
                 if (roles.isEmpty())
-                    return "Please choose a role.";
+                    return bot.msg(event.getGuild(), "settings.errors.chooseRole");
                 Role role = roles.get(0);
                 settings.setDJRole(role);
                 return null;
             }
             default -> {
-                return expiredMessage();
+                return expiredMessage(event.getGuild());
             }
         }
     }
@@ -477,7 +477,7 @@ public class SettingsInteractionListener extends ListenerAdapter
     {
         if (guild == null || channel == null)
         {
-            hook.sendMessage(expiredMessage()).setEphemeral(true).queue();
+            hook.sendMessage(expiredMessage(null)).setEphemeral(true).queue();
             return;
         }
 
@@ -495,19 +495,19 @@ public class SettingsInteractionListener extends ListenerAdapter
                             if (err instanceof ErrorResponseException ex
                                     && ex.getErrorResponse() == ErrorResponse.UNKNOWN_MESSAGE)
                             {
-                                hook.sendMessage(expiredMessage()).setEphemeral(true).queue();
+                                hook.sendMessage(expiredMessage(guild)).setEphemeral(true).queue();
                             }
                             else
                             {
-                                hook.sendMessage("Failed to refresh settings panel. Run `/settings` again.")
+                                hook.sendMessage(bot.msg(guild, "settings.refreshFailed"))
                                         .setEphemeral(true).queue();
                             }
                         });
     }
 
-    private String expiredMessage()
+    private String expiredMessage(Guild guild)
     {
-        return "This settings panel is expired. Run `/settings` again.";
+        return bot.msg(guild, "settings.errors.panelExpired");
     }
 
     /**

@@ -36,7 +36,7 @@ public abstract class DJSlashCommand extends MusicSlashCommand
     {
         if (!DJCommand.checkDJPermission(bot, event.getGuild(), event.getMember()))
         {
-            event.reply(event.getClient().getError() + " You need to be a DJ to use this command!")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "permissions.errors.needDj"))
                     .setEphemeral(true).queue();
             return;
         }

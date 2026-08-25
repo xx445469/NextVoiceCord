@@ -29,41 +29,44 @@ import java.util.List;
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public class SetvcCmd extends AdminCommand 
+public class SetvcCmd extends AdminCommand
 {
+    private final Bot bot;
+
     public SetvcCmd(Bot bot)
     {
+        this.bot = bot;
         this.name = "setvc";
         this.help = "sets the voice channel for playing music";
         this.arguments = "<channel|NONE>";
         this.aliases = bot.getConfig().getAliases(this.name);
     }
-    
+
     @Override
-    protected void execute(CommandEvent event) 
+    protected void execute(CommandEvent event)
     {
         if(event.getArgs().isEmpty())
         {
-            event.reply(event.getClient().getError()+" Please include a voice channel or NONE");
+            event.reply(event.getClient().getError()+" " + bot.msg(event.getGuild(), "settings.voiceChannel.missingArg"));
             return;
         }
         Settings s = event.getClient().getSettingsFor(event.getGuild());
         if(event.getArgs().equalsIgnoreCase("none"))
         {
             s.setVoiceChannel(null);
-            event.reply(event.getClient().getSuccess()+" Music can now be played in any channel");
+            event.reply(event.getClient().getSuccess()+" " + bot.msg(event.getGuild(), "settings.voiceChannel.cleared"));
         }
         else
         {
             List<VoiceChannel> list = FinderUtil.findVoiceChannels(event.getArgs(), event.getGuild());
             if(list.isEmpty())
-                event.reply(event.getClient().getWarning()+" No Voice Channels found matching \""+event.getArgs()+"\"");
+                event.reply(event.getClient().getWarning()+" " + bot.msg(event.getGuild(), "settings.voiceChannel.notFound", event.getArgs()));
             else if (list.size()>1)
                 event.reply(event.getClient().getWarning()+FormatUtil.listOfVChannels(list, event.getArgs()));
             else
             {
                 s.setVoiceChannel(list.get(0));
-                event.reply(event.getClient().getSuccess()+" Music can now only be played in "+list.get(0).getAsMention());
+                event.reply(event.getClient().getSuccess()+" " + bot.msg(event.getGuild(), "settings.voiceChannel.set", list.get(0).getAsMention()));
             }
         }
     }

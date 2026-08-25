@@ -49,13 +49,13 @@ public class SetdjSlashCmd extends AdminSlashCommand
         if (event.getOption("role") == null)
         {
             settings.setDJRole(null);
-            event.reply(event.getClient().getSuccess() + " DJ role cleared; Only Admins can use the DJ commands.").queue();
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.dj.cleared")).queue();
         }
         else
         {
             Role role = event.getOption("role").getAsRole();
             settings.setDJRole(role);
-            event.reply(event.getClient().getSuccess() + " DJ commands can now be used by users with the **" + role.getName() + "** role.").queue();
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.dj.set", role.getName())).queue();
         }
     }
 }

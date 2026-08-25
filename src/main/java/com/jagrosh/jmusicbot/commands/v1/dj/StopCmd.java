@@ -42,6 +42,6 @@ public class StopCmd extends DJCommand
     public void doCommand(CommandEvent event)
     {
         musicService.stopAndClear(event.getGuild());
-        event.replySuccess("The player has stopped and the queue has been cleared.");
+        event.replySuccess(bot.msg(event.getGuild(), "player.stopped"));
     }
 }

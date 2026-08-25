@@ -53,20 +53,20 @@ public class MovetrackSlashCmd extends DJSlashCommand
 
         if (from == to)
         {
-            event.reply(event.getClient().getError() + " Can't move a track to the same position.")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "queue.errors.cannotMoveSamePosition"))
                     .setEphemeral(true).queue();
             return;
         }
 
         if (!musicService.isValidQueuePosition(event.getGuild(), from))
         {
-            event.reply(event.getClient().getError() + " `" + from + "` is not a valid position in the queue!")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "queue.errors.invalidQueuePosition", from))
                     .setEphemeral(true).queue();
             return;
         }
         if (!musicService.isValidQueuePosition(event.getGuild(), to))
         {
-            event.reply(event.getClient().getError() + " `" + to + "` is not a valid position in the queue!")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "queue.errors.invalidQueuePosition", to))
                     .setEphemeral(true).queue();
             return;
         }
@@ -74,7 +74,7 @@ public class MovetrackSlashCmd extends DJSlashCommand
         String trackTitle = musicService.moveTrackPosition(event.getGuild(), from, to);
         if (trackTitle != null)
         {
-            event.reply(event.getClient().getSuccess() + " Moved **" + trackTitle + "** from position `" + from + "` to `" + to + "`.")
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "queue.moved", trackTitle, from, to))
                     .queue();
         }
     }

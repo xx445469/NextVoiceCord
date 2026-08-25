@@ -49,25 +49,25 @@ public class MoveTrackCmd extends DJCommand
 
         if (from == to)
         {
-            event.replyError("Can't move a track to the same position.");
+            event.replyError(bot.msg(event.getGuild(), "queue.errors.cannotMoveSamePosition"));
             return;
         }
 
         if (!musicService.isValidQueuePosition(event.getGuild(), from))
         {
-            event.replyError("`" + from + "` is not a valid position in the queue!");
+            event.replyError(bot.msg(event.getGuild(), "queue.errors.invalidQueuePosition", from));
             return;
         }
         if (!musicService.isValidQueuePosition(event.getGuild(), to))
         {
-            event.replyError("`" + to + "` is not a valid position in the queue!");
+            event.replyError(bot.msg(event.getGuild(), "queue.errors.invalidQueuePosition", to));
             return;
         }
 
         String trackTitle = musicService.moveTrackPosition(event.getGuild(), from, to);
         if (trackTitle != null)
         {
-            event.replySuccess("Moved **" + trackTitle + "** from position `" + from + "` to `" + to + "`.");
+            event.replySuccess(bot.msg(event.getGuild(), "queue.moved", trackTitle, from, to));
         }
     }
 }

@@ -44,7 +44,7 @@ public class ForceskipCmd extends DJCommand
         MusicService.ForceSkipResult result = musicService.forceSkip(event.getGuild());
         if (result != null)
         {
-            event.replySuccess("Skipped **" + result.trackTitle + "** " + result.requesterInfo);
+            event.replySuccess(bot.msg(event.getGuild(), "player.forceSkipped", result.trackTitle, result.requesterInfo));
         }
     }
 }

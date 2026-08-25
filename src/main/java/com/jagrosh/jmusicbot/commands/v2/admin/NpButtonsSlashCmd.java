@@ -33,7 +33,7 @@ public class NpButtonsSlashCmd extends AdminSlashCommand
         NowPlayingButtonsMode mode = NowPlayingButtonsMode.fromInput(value);
         if (mode == null)
         {
-            event.reply(event.getClient().getError() + " Valid values are `on`, `off`, or `inherit`.")
+            event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "settings.npButtons.invalid"))
                     .setEphemeral(true).queue();
             return;
         }
@@ -41,7 +41,7 @@ public class NpButtonsSlashCmd extends AdminSlashCommand
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
         settings.setNowPlayingButtonsMode(mode);
         boolean effectiveButtons = settings.showNowPlayingButtons(bot.getConfig());
-        event.reply(event.getClient().getSuccess() + " Now-playing buttons mode set to `"
-                + mode.getUserInputValue() + "` (effective: `" + (effectiveButtons ? "on" : "off") + "`)").queue();
+        event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.npButtons.set",
+                mode.getUserInputValue(), effectiveButtons ? "on" : "off")).queue();
     }
 }

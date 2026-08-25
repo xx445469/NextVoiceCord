@@ -26,33 +26,36 @@ import com.jagrosh.jmusicbot.settings.Settings;
  */
 public class PrefixCmd extends AdminCommand
 {
+    private final Bot bot;
+
     public PrefixCmd(Bot bot)
     {
+        this.bot = bot;
         this.name = "prefix";
         this.help = "sets a server-specific prefix";
         this.arguments = "<prefix|NONE>";
         this.aliases = bot.getConfig().getAliases(this.name);
     }
-    
+
     @Override
-    protected void execute(CommandEvent event) 
+    protected void execute(CommandEvent event)
     {
         if(event.getArgs().isEmpty())
         {
-            event.replyError("Please include a prefix or NONE");
+            event.replyError(bot.msg(event.getGuild(), "settings.prefix.missing"));
             return;
         }
-        
+
         Settings s = event.getClient().getSettingsFor(event.getGuild());
         if(event.getArgs().equalsIgnoreCase("none"))
         {
             s.setPrefix(null);
-            event.replySuccess("Prefix cleared.");
+            event.replySuccess(bot.msg(event.getGuild(), "settings.prefix.cleared"));
         }
         else
         {
             s.setPrefix(event.getArgs());
-            event.replySuccess("Custom prefix set to `" + event.getArgs() + "` on *" + event.getGuild().getName() + "*");
+            event.replySuccess(bot.msg(event.getGuild(), "settings.prefix.set", event.getArgs(), event.getGuild().getName()));
         }
     }
 }

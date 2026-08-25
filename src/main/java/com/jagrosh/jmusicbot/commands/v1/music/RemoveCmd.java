@@ -48,7 +48,7 @@ public class RemoveCmd extends MusicCommand
 
         if (musicService.isQueueEmpty(event.getGuild()))
         {
-            output.replyError("There is nothing in the queue!");
+            output.replyError(bot.msg(event.getGuild(), "queue.errors.empty"));
             return;
         }
 

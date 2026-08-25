@@ -51,20 +51,20 @@ public class SetvcSlashCmd extends AdminSlashCommand
         if (event.getOption("channel") == null)
         {
             settings.setVoiceChannel(null);
-            event.reply(event.getClient().getSuccess() + " Music can now be played in any channel").queue();
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.voiceChannel.cleared")).queue();
         }
         else
         {
             GuildChannel channel = event.getOption("channel").getAsChannel();
             if (!(channel instanceof AudioChannel))
             {
-                event.reply(event.getClient().getError() + " Please select a voice channel!")
+                event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "settings.voiceChannel.mustBeVoice"))
                         .setEphemeral(true).queue();
                 return;
             }
             VoiceChannel voiceChannel = (VoiceChannel) channel;
             settings.setVoiceChannel(voiceChannel);
-            event.reply(event.getClient().getSuccess() + " Music can now only be played in " + voiceChannel.getAsMention()).queue();
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.voiceChannel.set", voiceChannel.getAsMention())).queue();
         }
     }
 }

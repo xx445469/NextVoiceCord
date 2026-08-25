@@ -66,12 +66,12 @@ public class RepeatCmd extends DJCommand
         }
         else
         {
-            event.replyError("Valid options are `off`, `all` or `single` (or leave empty to toggle between `off` and `all`)");
+            event.replyError(bot.msg(event.getGuild(), "player.errors.repeatInvalidChoice"));
             return;
         }
 
         musicService.setRepeatMode(event.getGuild(), value);
-        event.replySuccess("Repeat mode is now `" + value.getUserFriendlyName() + "`");
+        event.replySuccess(bot.msg(event.getGuild(), "player.repeatModeSet", value.getUserFriendlyName()));
     }
 
     @Override

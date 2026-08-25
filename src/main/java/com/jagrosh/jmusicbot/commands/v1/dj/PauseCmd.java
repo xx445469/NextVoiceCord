@@ -43,11 +43,11 @@ public class PauseCmd extends DJCommand
     {
         if (musicService.isPaused(event.getGuild()))
         {
-            event.replyWarning("The player is already paused! Use `" + event.getClient().getPrefix() + "play` to unpause!");
+            event.replyWarning(bot.msg(event.getGuild(), "player.pauseAlready", event.getClient().getPrefix() + "play"));
             return;
         }
 
         String trackTitle = musicService.setPaused(event.getGuild(), true);
-        event.replySuccess("Paused **" + trackTitle + "**. Type `" + event.getClient().getPrefix() + "play` to unpause!");
+        event.replySuccess(bot.msg(event.getGuild(), "player.paused", trackTitle, event.getClient().getPrefix() + "play"));
     }
 }

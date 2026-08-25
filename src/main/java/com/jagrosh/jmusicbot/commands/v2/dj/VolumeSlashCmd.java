@@ -54,14 +54,14 @@ public class VolumeSlashCmd extends DJSlashCommand
         if (event.getOption("level") == null)
         {
             // Show current volume
-            event.reply(FormatUtil.volumeIcon(currentVolume) + " Current volume is `" + currentVolume + "`").queue();
+            event.reply(FormatUtil.volumeIcon(currentVolume) + " " + bot.msg(event.getGuild(), "player.volumeCurrent", currentVolume)).queue();
         }
         else
         {
             int newVolume = (int) event.getOption("level").getAsLong();
             handler.getPlayer().setVolume(newVolume);
             settings.setVolume(newVolume);
-            event.reply(FormatUtil.volumeIcon(newVolume) + " Volume changed from `" + currentVolume + "` to `" + newVolume + "`").queue();
+            event.reply(FormatUtil.volumeIcon(newVolume) + " " + bot.msg(event.getGuild(), "player.volumeChanged", currentVolume, newVolume)).queue();
         }
     }
 }

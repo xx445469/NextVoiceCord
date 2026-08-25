@@ -75,7 +75,7 @@ public class QueueSlashCmd extends MusicSlashCommand
                 if (embed != null)
                 {
                     MessageCreateData built = new MessageCreateBuilder()
-                            .setContent(event.getClient().getWarning() + " There is no music in the queue!")
+                            .setContent(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "queue.errors.noMusicInQueue"))
                             .setEmbeds(embed.getEmbeds().get(0)).build();
                     event.reply(built).queue(hook ->
                     {
@@ -85,7 +85,7 @@ public class QueueSlashCmd extends MusicSlashCommand
                     return;
                 }
             }
-            event.reply(event.getClient().getWarning() + " There is no music in the queue!").setEphemeral(true).queue();
+            event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "queue.errors.noMusicInQueue")).setEphemeral(true).queue();
             return;
         }
 

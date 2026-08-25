@@ -28,9 +28,12 @@ import com.jagrosh.jmusicbot.settings.Settings;
  */
 public class QueueTypeCmd extends AdminCommand
 {
+    private final Bot bot;
+
     public QueueTypeCmd(Bot bot)
     {
         super();
+        this.bot = bot;
         this.name = "queuetype";
         this.help = "changes the queue type";
         this.arguments = "[" + String.join("|", QueueType.getNames()) + "]";
@@ -47,7 +50,7 @@ public class QueueTypeCmd extends AdminCommand
         if (args.isEmpty())
         {
             QueueType currentType = settings.getQueueType();
-            event.reply(currentType.getEmoji() + " Current queue type is: `" + currentType.getUserFriendlyName() + "`.");
+            event.reply(currentType.getEmoji() + " " + bot.msg(event.getGuild(), "settings.queueType.current", currentType.getUserFriendlyName()));
             return;
         }
 
@@ -57,7 +60,7 @@ public class QueueTypeCmd extends AdminCommand
         }
         catch (IllegalArgumentException e)
         {
-            event.replyError("Invalid queue type. Valid types are: [" + String.join("|", QueueType.getNames()) + "]");
+            event.replyError(bot.msg(event.getGuild(), "settings.queueType.invalid", String.join("|", QueueType.getNames())));
             return;
         }
 
@@ -70,6 +73,6 @@ public class QueueTypeCmd extends AdminCommand
                 handler.setQueueType(value);
         }
 
-        event.reply(value.getEmoji() + " Queue type was set to `" + value.getUserFriendlyName() + "`.");
+        event.reply(value.getEmoji() + " " + bot.msg(event.getGuild(), "settings.queueType.set", value.getUserFriendlyName()));
     }
 }

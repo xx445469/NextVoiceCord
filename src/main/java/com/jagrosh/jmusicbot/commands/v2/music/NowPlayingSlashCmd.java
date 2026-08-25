@@ -27,7 +27,7 @@ public class NowPlayingSlashCmd extends MusicSlashCommand
         AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
         if (handler == null)
         {
-            event.reply(event.getClient().getWarning() + " There is no music playing in this server.").setEphemeral(true).queue();
+            event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "nowplaying.errors.noMusicInServer")).setEphemeral(true).queue();
             return;
         }
 

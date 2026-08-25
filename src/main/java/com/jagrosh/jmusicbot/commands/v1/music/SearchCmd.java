@@ -67,7 +67,7 @@ public class SearchCmd extends MusicCommand
     {
         if(event.getArgs().isEmpty())
         {
-            event.replyError("Please include a query.");
+            event.replyError(bot.msg(event.getGuild(), "search.errors.missingQuery"));
             return;
         }
         String query = searchPrefix + event.getArgs();
@@ -93,39 +93,41 @@ public class SearchCmd extends MusicCommand
             if(bot.getConfig().isTooLong(track))
             {
                 String trackTitle = FormatUtil.getTrackTitle(track);
-                m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" This track (**"+trackTitle+"**) is longer than the allowed maximum: `"
-                        + TimeUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`")).queue();
+                m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" " + bot.msg(event.getGuild(), "player.errors.trackTooLong",
+                        trackTitle, TimeUtil.formatTime(track.getDuration()), bot.getConfig().getMaxTime()))).queue();
                 return;
             }
             AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
             int pos = handler.addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, event)))+1;
             String trackTitle = FormatUtil.getTrackTitle(track);
-            m.editMessage(FormatUtil.filter(event.getClient().getSuccess()+" Added **"+trackTitle
-                    +"** (`"+ TimeUtil.formatTime(track.getDuration())+"`) "+(pos==0 ? "to begin playing"
-                        : " to the queue at position "+pos))).queue();
+            String addedMsg = pos == 0
+                    ? bot.msg(event.getGuild(), "queue.trackAddedNow", trackTitle, TimeUtil.formatTime(track.getDuration()))
+                    : bot.msg(event.getGuild(), "queue.trackAddedAtPosition", trackTitle, TimeUtil.formatTime(track.getDuration()), pos);
+            m.editMessage(FormatUtil.filter(event.getClient().getSuccess()+" " + addedMsg)).queue();
         }
 
         @Override
         public void playlistLoaded(AudioPlaylist playlist)
         {
             builder.setColor(event.getSelfMember().getColor())
-                    .setText(FormatUtil.filter(event.getClient().getSuccess()+" Search results for `"+event.getArgs()+"`:"))
+                    .setText(FormatUtil.filter(event.getClient().getSuccess()+" " + bot.msg(event.getGuild(), "search.resultsHeader", event.getArgs())))
                     .setChoices(new String[0])
-                    .setSelection((msg,i) -> 
+                    .setSelection((msg,i) ->
                     {
                         AudioTrack track = playlist.getTracks().get(i-1);
                         String trackTitle = FormatUtil.getTrackTitle(track);
                         if(bot.getConfig().isTooLong(track))
                         {
-                            event.replyWarning("This track (**"+trackTitle+"**) is longer than the allowed maximum: `"
-                                    + TimeUtil.formatTime(track.getDuration())+"` > `"+bot.getConfig().getMaxTime()+"`");
+                            event.replyWarning(bot.msg(event.getGuild(), "player.errors.trackTooLong",
+                                    trackTitle, TimeUtil.formatTime(track.getDuration()), bot.getConfig().getMaxTime()));
                             return;
                         }
                         AudioHandler handler = (AudioHandler)event.getGuild().getAudioManager().getSendingHandler();
                         int pos = handler.addTrack(new QueuedTrack(track, RequestMetadata.fromResultHandler(track, event)))+1;
-                        event.replySuccess("Added **" + FormatUtil.filter(trackTitle)
-                                + "** (`" + TimeUtil.formatTime(track.getDuration()) + "`) " + (pos==0 ? "to begin playing" 
-                                    : " to the queue at position "+pos));
+                        String addedMsg = pos == 0
+                                ? bot.msg(event.getGuild(), "queue.trackAddedNow", FormatUtil.filter(trackTitle), TimeUtil.formatTime(track.getDuration()))
+                                : bot.msg(event.getGuild(), "queue.trackAddedAtPosition", FormatUtil.filter(trackTitle), TimeUtil.formatTime(track.getDuration()), pos);
+                        event.replySuccess(addedMsg);
                     })
                     .setCancel((msg) -> {})
                     .setUsers(event.getAuthor())
@@ -140,18 +142,18 @@ public class SearchCmd extends MusicCommand
         }
 
         @Override
-        public void noMatches() 
+        public void noMatches()
         {
-            m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" No results found for `"+event.getArgs()+"`.")).queue();
+            m.editMessage(FormatUtil.filter(event.getClient().getWarning()+" " + bot.msg(event.getGuild(), "search.errors.noResults", event.getArgs()))).queue();
         }
 
         @Override
-        public void loadFailed(FriendlyException throwable) 
+        public void loadFailed(FriendlyException throwable)
         {
             if(throwable.severity==Severity.COMMON)
-                m.editMessage(event.getClient().getError()+" Error loading: "+throwable.getMessage()).queue();
+                m.editMessage(event.getClient().getError()+" " + bot.msg(event.getGuild(), "search.errors.loadFailed", throwable.getMessage())).queue();
             else
-                m.editMessage(event.getClient().getError()+" Error loading track.").queue();
+                m.editMessage(event.getClient().getError()+" " + bot.msg(event.getGuild(), "search.errors.loadFailedGeneric")).queue();
         }
     }
 }

@@ -52,32 +52,32 @@ public class ClearchannelCmd extends OwnerCommand
                     @Override
                     public void onNoChannelConfigured()
                     {
-                        event.reply(event.getClient().getError() + " No text channel is configured for this server. An admin can set one with `settc`.");
+                        event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "clearchannel.errors.noChannelConfigured", "settc"));
                     }
 
                     @Override
                     public void onNoPermission()
                     {
-                        event.reply(event.getClient().getError() + " I don't have permission to manage messages in that channel.");
+                        event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "permissions.errors.noManageMessages"));
                     }
 
                     @Override
                     public void onClearingStarted()
                     {
-                        event.reply(event.getClient().getWarning() + " Clearing channel...");
+                        event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "clearchannel.clearing"));
                     }
 
                     @Override
                     public void onCleared(int count)
                     {
-                        event.getChannel().sendMessage(event.getClient().getSuccess() + " Cleared " + count + " messages.").queue();
+                        event.getChannel().sendMessage(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "clearchannel.cleared", count)).queue();
                     }
 
                     @Override
                     public void onError(Throwable t)
                     {
                         String msg = t.getMessage() != null ? t.getMessage() : t.toString();
-                        event.getChannel().sendMessage(event.getClient().getError() + " Error: " + msg).queue();
+                        event.getChannel().sendMessage(event.getClient().getError() + " " + bot.msg(event.getGuild(), "clearchannel.error", msg)).queue();
                     }
                 });
     }

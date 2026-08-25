@@ -48,13 +48,13 @@ public class PrefixSlashCmd extends AdminSlashCommand
         if (event.getOption("prefix") == null)
         {
             settings.setPrefix(null);
-            event.reply(event.getClient().getSuccess() + " Prefix cleared.").queue();
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.prefix.cleared")).queue();
         }
         else
         {
             String prefix = event.getOption("prefix").getAsString();
             settings.setPrefix(prefix);
-            event.reply(event.getClient().getSuccess() + " Custom prefix set to `" + prefix + "` on *" + event.getGuild().getName() + "*").queue();
+            event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "settings.prefix.set", prefix, event.getGuild().getName())).queue();
         }
     }
 }

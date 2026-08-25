@@ -48,7 +48,7 @@ public class PlaySlashCmd extends MusicSlashCommand
         }
 
         String args = event.getOption("query").getAsString();
-        event.reply(loadingEmoji + " Loading... `[" + args + "]`").queue(hook -> {
+        event.reply(loadingEmoji + " " + bot.msg(event.getGuild(), "search.loading", args)).queue(hook -> {
             musicService.play(event.getGuild(), event.getMember(), args, event.getTextChannel(),
                     new InteractionHookOutputAdapter(hook, event.getJDA(), event.getClient().getWarning()));
         });
