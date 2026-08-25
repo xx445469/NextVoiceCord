@@ -137,9 +137,9 @@ The `docker-build.yml` workflow builds and publishes Docker images on:
 - Version tags (e.g., `v0.6.3`) ΓåÆ tags as `:0.6.3`
 
 **Image tags:**
-- `master`: `ghcr.io/arif-banai/musicbot:latest` (+ version tag if applicable)
-- Feature branch: `ghcr.io/arif-banai/musicbot:feature-new-player-ui`
-- Version tag: `ghcr.io/arif-banai/musicbot:0.6.3`
+- `main`: `ghcr.io/xx445469/nextvoicecord:latest` (+ version tag if applicable)
+- Feature branch: `ghcr.io/xx445469/nextvoicecord:feature-new-player-ui`
+- Version tag: `ghcr.io/xx445469/nextvoicecord:0.6.3`
 
 ## Best Practices
 
@@ -200,7 +200,7 @@ The `docker-build.yml` workflow builds and publishes Docker images on:
    - Attach JAR file from workflow artifacts
 
 5. **Docker image is automatically built** from the tag
-   - Tagged as `ghcr.io/arif-banai/musicbot:0.6.3`
+   - Tagged as `ghcr.io/xx445469/nextvoicecord:0.6.3`
 
 ### Release Branch (for stabilization)
 

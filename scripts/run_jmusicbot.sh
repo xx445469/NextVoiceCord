@@ -15,12 +15,12 @@ JAVA_OPTS="${JAVA_OPTS:---enable-native-access=ALL-UNNAMED}"
 download() {
     if [ $DOWNLOAD = true ]; then
         # First, check if the latest release is a pre-release
-        LATEST_RELEASE=$(curl -s https://api.github.com/repos/arif-banai/MusicBot/releases/latest)
+        LATEST_RELEASE=$(curl -s https://api.github.com/repos/xx445469/NextVoiceCord/releases/latest)
         IS_PRERELEASE=$(echo "$LATEST_RELEASE" | grep -o '"prerelease":[^,}]*' | head -1 | grep -o 'true')
         
         if [ "$IS_PRERELEASE" = "true" ]; then
             # Latest is a pre-release, so get all releases and find the first non-prerelease
-            ALL_RELEASES=$(curl -s https://api.github.com/repos/arif-banai/MusicBot/releases?per_page=10)
+            ALL_RELEASES=$(curl -s https://api.github.com/repos/xx445469/NextVoiceCord/releases?per_page=10)
             # Find the first release block that has "prerelease": false, then extract JAR URL from it
             # This handles the JSON structure where assets are nested
             URL=$(echo "$ALL_RELEASES" | awk '
