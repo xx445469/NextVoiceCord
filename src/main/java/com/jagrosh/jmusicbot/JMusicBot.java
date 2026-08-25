@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.jagrosh.jmusicbot.audio.VoiceConnectionMonitor;
 import com.jagrosh.jmusicbot.commands.v1.CommandFactory;
 import com.jagrosh.jmusicbot.entities.Prompt;
+import com.jagrosh.jmusicbot.web.WebPanel;
 import com.jagrosh.jmusicbot.entities.UserInteraction;
 import com.jagrosh.jmusicbot.gui.MainFrame;
 import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
@@ -243,6 +244,15 @@ public class JMusicBot
         {
             JDA jda = DiscordService.createJDA(config, bot, waiter, client, userInteraction);
             bot.setJDA(jda);
+
+            // Started after the connection, not before: a panel that came up first would
+            // spend its first seconds reporting a bot that is in no servers and playing
+            // nothing, which reads as broken rather than as still starting.
+            options.webPort().ifPresent(port -> {
+                WebPanel panel = new WebPanel(bot, port);
+                panel.start();
+                Runtime.getRuntime().addShutdownHook(new Thread(panel::stop, "web-panel-shutdown"));
+            });
         }
         catch(IllegalArgumentException ex)
         {
