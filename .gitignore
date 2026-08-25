@@ -1,0 +1,36 @@
+# ---- 機密：絕對不要 commit ----
+# macOS 檔案系統不分大小寫，各種寫法都擋掉
+claude.env
+CLAUDE.ENV
+Claude.env
+*.env
+!*.env.example
+youtubetoken.txt
+config.txt
+serversettings.json
+
+# ---- 建置產物 ----
+/target/
+dependency-reduced-pom.xml
+*.jar
+!mvnw*.jar
+
+# ---- 執行期檔案 ----
+/Playlists/
+*.lock
+*.log
+/logs/
+.slashcommands.hash
+
+# ---- IDE ----
+/.idea/
+/.vscode/
+/.cursor/
+/nbproject/
+nb*.xml
+*.iml
+*.iws
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
