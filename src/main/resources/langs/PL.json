@@ -412,13 +412,7 @@
       "djRole": "Wybierz rolę DJ:"
     },
     "language": {
-      "current": "Język bota dla tego serwera to: **{0}**.",
-      "set": "Język tego serwera ustawiono na: **{0}**.",
-      "invalid": "Nieznany język `{0}`. Dostępne: {1}",
-      "optionDescription": "{0} ({1})",
-      "setPersonal": "Twój język to teraz **{0}**. Będzie towarzyszyć ci na każdym serwerze, na którym jest ten bot.",
-      "currentPersonal": "Twój język to **{0}**.",
-      "currentInherited": "Nie wybrano języka, więc widzisz język tego serwera: **{0}**."
+      "invalid": "Nieznany język `{0}`. Dostępne: {1}"
     },
     "prefix": {
       "cleared": "Prefiks wyczyszczony.",
@@ -486,6 +480,25 @@
       "queueType": "Typ kolejki: {0}",
       "defaultPlaylist": "Domyślna playlista: {0}",
       "footer": "{0} serwerów | {1} połączeń audio"
+    },
+    "personal": {
+      "title": "Twoje ustawienia",
+      "description": "Dotyczą tylko ciebie, na każdym serwerze, na którym jest ten bot.",
+      "language": {
+        "label": "Język",
+        "placeholder": "Wybierz język",
+        "following": "zgodnie z ustawieniem serwera ({0})",
+        "chosen": "**{0}**",
+        "followOption": "Zgodnie z serwerem",
+        "followHint": "Używa ustawienia tego serwera ({0})."
+      }
+    },
+    "scope": {
+      "placeholder": "Przełącz widok",
+      "server": "Ustawienia serwera",
+      "serverHint": "Dotyczy wszystkich tutaj. Wymaga uprawnienia Zarządzanie serwerem.",
+      "personal": "Moje ustawienia",
+      "personalHint": "Dotyczy tylko ciebie, na każdym serwerze."
     }
   },
   "clearchannel": {
@@ -883,7 +896,8 @@
     },
     "webPanel": {
       "cannotOpen": "Ten komputer nie może automatycznie otworzyć przeglądarki.\nAdres panelu został skopiowany do schowka.",
-      "title": "Panel WWW"
+      "title": "Panel WWW",
+      "notReady": "Panel WWW uruchamia się, gdy bot połączy się z Discordem. Spróbuj ponownie za chwilę."
     }
   }
 }

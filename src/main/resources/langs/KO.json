@@ -412,13 +412,7 @@
       "djRole": "DJ 역할을 선택하세요:"
     },
     "language": {
-      "current": "이 서버의 봇 언어는 **{0}**이에요.",
-      "set": "이 서버의 언어를 **{0}**(으)로 설정했어요.",
-      "invalid": "알 수 없는 언어예요 `{0}`. 사용 가능: {1}",
-      "optionDescription": "{0} ({1})",
-      "setPersonal": "회원님의 언어를 **{0}**(으)로 설정했어요. 이 설정은 이 봇이 있는 모든 서버에 적용돼요.",
-      "currentPersonal": "회원님의 언어가 **{0}**(으)로 설정되어 있어요.",
-      "currentInherited": "언어를 선택하지 않아서 이 서버의 언어 **{0}**이(가) 표시되고 있어요."
+      "invalid": "알 수 없는 언어예요 `{0}`. 사용 가능: {1}"
     },
     "prefix": {
       "cleared": "접두사를 초기화했어요.",
@@ -486,6 +480,25 @@
       "queueType": "대기열 유형: {0}",
       "defaultPlaylist": "기본 재생목록: {0}",
       "footer": "{0} 서버 | {1} 음성 연결"
+    },
+    "personal": {
+      "title": "내 설정",
+      "description": "이 설정은 본인에게만 적용되며, 이 봇이 있는 모든 서버에서 동일하게 적용돼요.",
+      "language": {
+        "label": "언어",
+        "placeholder": "언어 선택",
+        "following": "서버 설정을 따름 ({0})",
+        "chosen": "**{0}**",
+        "followOption": "서버 설정 따르기",
+        "followHint": "이 서버에 설정된 언어를 그대로 사용해요 ({0})."
+      }
+    },
+    "scope": {
+      "placeholder": "보기 전환",
+      "server": "서버 설정",
+      "serverHint": "여기 있는 모든 사람에게 적용돼요. 서버 관리 권한이 필요해요.",
+      "personal": "내 설정",
+      "personalHint": "본인에게만 적용되며, 모든 서버에서 동일해요."
     }
   },
   "clearchannel": {
@@ -883,7 +896,8 @@
     },
     "webPanel": {
       "cannotOpen": "이 데스크톱에서는 브라우저를 자동으로 열 수 없어요.\n패널 주소를 클립보드에 복사했어요.",
-      "title": "웹 패널"
+      "title": "웹 패널",
+      "notReady": "웹 패널은 봇이 Discord에 연결된 후에 시작돼요. 잠시 후 다시 시도해 주세요."
     }
   }
 }

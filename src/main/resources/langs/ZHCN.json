@@ -412,13 +412,7 @@
       "djRole": "选择 DJ 身份组："
     },
     "language": {
-      "current": "此服务器的机器人语言是 **{0}**。",
-      "set": "此服务器的语言已设为 **{0}**。",
-      "invalid": "未知的语言 `{0}`。可用语言：{1}",
-      "optionDescription": "{0}（{1}）",
-      "setPersonal": "你的显示语言已设为 **{0}**。这会跟随你到这个 bot 所在的每一个服务器。",
-      "currentPersonal": "你的显示语言是 **{0}**。",
-      "currentInherited": "你尚未选择语言，因此看到的是此服务器的设置：**{0}**。"
+      "invalid": "未知的语言 `{0}`。可用语言：{1}"
     },
     "prefix": {
       "cleared": "前缀已清除。",
@@ -486,6 +480,25 @@
       "queueType": "队列类型：{0}",
       "defaultPlaylist": "默认播放列表：{0}",
       "footer": "{0} 个服务器｜{1} 个音频连接"
+    },
+    "personal": {
+      "title": "你的设置",
+      "description": "这些设置只对你生效，适用于这个机器人所在的每个服务器。",
+      "language": {
+        "label": "语言",
+        "placeholder": "选择语言",
+        "following": "跟随服务器（{0}）",
+        "chosen": "**{0}**",
+        "followOption": "跟随服务器",
+        "followHint": "使用此服务器当前的设置（{0}）。"
+      }
+    },
+    "scope": {
+      "placeholder": "切换视图",
+      "server": "服务器设置",
+      "serverHint": "适用于这里的所有人。需要“管理服务器”权限。",
+      "personal": "我的设置",
+      "personalHint": "仅适用于你，在所有服务器都一样。"
     }
   },
   "clearchannel": {
@@ -883,7 +896,8 @@
     },
     "webPanel": {
       "cannotOpen": "这个桌面环境无法自动打开浏览器。\n面板地址已复制到剪贴板。",
-      "title": "网页面板"
+      "title": "网页面板",
+      "notReady": "机器人连接到 Discord 后，网页面板才会启动。请稍后再试。"
     }
   }
 }

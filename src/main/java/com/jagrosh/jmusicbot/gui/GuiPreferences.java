@@ -74,8 +74,11 @@ public final class GuiPreferences
      * <p>Edited as text rather than parsed and rewritten, because the file is full of
      * comments explaining every option and a round trip through a config library would
      * discard all of them.
+     *
+     * @param value already rendered as HOCON — quoted if it is a string
+     * @return whether the file now holds that value
      */
-    private static void write(String section, String key, String value)
+    public static boolean write(String section, String key, String value)
     {
         try
         {
@@ -83,23 +86,29 @@ public final class GuiPreferences
             if (path == null || !Files.exists(path))
             {
                 LOG.warn("No config file to save {}.{} into.", section, key);
-                return;
+                return false;
             }
 
             String content = Files.readString(path);
             String updated = apply(content, section, key, value);
 
-            if (!updated.equals(content))
+            if (updated.equals(content))
             {
-                ConfigIO.writeConfigFile(path, updated);
-                LOG.debug("Saved {}.{}", section, key);
+                // Either the section is missing entirely, or the value was already this. The
+                // second is success; the first is not, and they are told apart by re-reading.
+                return content.contains(key + " = " + value);
             }
+
+            ConfigIO.writeConfigFile(path, updated);
+            LOG.debug("Saved {}.{}", section, key);
+            return true;
         }
         catch (IOException | RuntimeException ex)
         {
             // Logged, never thrown. Failing to persist a display preference should not
             // interrupt someone who is in the middle of changing it.
             LOG.warn("Could not save {}.{}: {}", section, key, ex.toString());
+            return false;
         }
     }
 

@@ -150,7 +150,29 @@ public final class SettingsPanelRenderer
     public static List<MessageTopLevelComponent> buildSettingsMessageComponents(
             Bot bot, Guild guild, Settings settings, BotConfig config, long userId, String invokerName)
     {
+        return buildSettingsMessageComponents(bot, guild, settings, config, userId, invokerName, null);
+    }
+
+    /**
+     * @param switcherFor the person to attach the menu crossing to their own settings for, or
+     *                    {@code null} for no menu. Only passed for someone who can manage the
+     *                    server, since both of its entries have to lead somewhere they are
+     *                    allowed to go.
+     */
+    public static List<MessageTopLevelComponent> buildSettingsMessageComponents(
+            Bot bot, Guild guild, Settings settings, BotConfig config, long userId, String invokerName,
+            net.dv8tion.jda.api.entities.User switcherFor)
+    {
         List<ContainerChildComponent> children = new ArrayList<>(buildSettingsDisplayChildren(bot, guild, settings, config, invokerName, userId));
+
+        if (switcherFor != null)
+        {
+            // Inserted before the Close row, so the way out of the panel stays last.
+            children.add(children.size() - 1, Separator.createDivider(Separator.Spacing.SMALL));
+            children.add(children.size() - 1, ActionRow.of(
+                    UserSettingsPanelRenderer.scopeSelect(bot, guild, switcherFor, UserSettingsPanelRenderer.SCOPE_SERVER)));
+        }
+
         return List.of(Container.of(children));
     }
 

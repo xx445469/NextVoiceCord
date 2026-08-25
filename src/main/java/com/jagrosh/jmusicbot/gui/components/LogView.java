@@ -119,26 +119,62 @@ public final class LogView extends JTextPane
         SimpleAttributeSet style = new SimpleAttributeSet();
         boolean dark = isDarkTheme();
 
-        if (line.contains("[ERROR]"))
+        switch (levelOf(line))
         {
-            StyleConstants.setForeground(style, dark ? ERROR_DARK : ERROR_LIGHT);
-            StyleConstants.setBold(style, true);
-        }
-        else if (line.contains("[WARN]"))
-        {
-            StyleConstants.setForeground(style, dark ? WARN_DARK : WARN_LIGHT);
-        }
-        else if (line.contains("[DEBUG]") || line.contains("[TRACE]"))
-        {
-            // Pushed back rather than coloured: debug output is context, and it should not
-            // compete with the lines someone is actually looking for.
-            StyleConstants.setForeground(style, blend(foreground(), background(), 0.45f));
-        }
-        else
-        {
-            StyleConstants.setForeground(style, foreground());
+            case ERROR ->
+            {
+                StyleConstants.setForeground(style, dark ? ERROR_DARK : ERROR_LIGHT);
+                StyleConstants.setBold(style, true);
+            }
+            case WARN -> StyleConstants.setForeground(style, dark ? WARN_DARK : WARN_LIGHT);
+            case DEBUG, TRACE ->
+                // Pushed back rather than coloured: debug output is context, and it should not
+                // compete with the lines someone is actually looking for.
+                StyleConstants.setForeground(style, blend(foreground(), background(), 0.45f));
+            case INFO -> StyleConstants.setForeground(style, foreground());
         }
         return style;
+    }
+
+    /** The severities a log line can carry, in the order the console cares about them. */
+    public enum Level
+    {
+        ERROR, WARN, INFO, DEBUG, TRACE
+    }
+
+    /**
+     * Reads the level a logger would have tagged this line with, defaulting to INFO for
+     * anything that does not look like a tagged log line — a stack trace continuation, for
+     * instance, which carries no tag of its own and should read as part of the line above it
+     * rather than as unimportant.
+     *
+     * <p>Exposed as a static method rather than kept private so that other views of the same
+     * log stream (the web panel's ring buffer, for one) can agree with this one about what a
+     * given line is, instead of each guessing at the logger's format independently.
+     */
+    public static Level levelOf(String line)
+    {
+        if (line == null)
+        {
+            return Level.INFO;
+        }
+        if (line.contains("[ERROR]"))
+        {
+            return Level.ERROR;
+        }
+        if (line.contains("[WARN]"))
+        {
+            return Level.WARN;
+        }
+        if (line.contains("[DEBUG]"))
+        {
+            return Level.DEBUG;
+        }
+        if (line.contains("[TRACE]"))
+        {
+            return Level.TRACE;
+        }
+        return Level.INFO;
     }
 
     private Color foreground()

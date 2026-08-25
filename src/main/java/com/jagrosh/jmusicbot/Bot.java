@@ -70,6 +70,7 @@ public class Bot
     private SelfUpdater updater;
     /** Set when --web is used, so the window can offer a link to it. */
     private com.jagrosh.jmusicbot.web.WebPanel webPanel;
+    private java.util.Optional<Integer> webPort = java.util.Optional.empty();
     
     private boolean shuttingDown = false;
     private JDA jda;
@@ -121,6 +122,25 @@ public class Bot
     public void setWebPanel(com.jagrosh.jmusicbot.web.WebPanel webPanel)
     {
         this.webPanel = webPanel;
+    }
+
+    /**
+     * The port {@code --web} asked for, known before the panel is actually serving.
+     *
+     * <p>The panel itself only starts once Discord is connected, which is deliberate — it would
+     * otherwise spend its first seconds reporting a bot in no servers playing nothing. But the
+     * window is built before that, so asking {@link #getWebPanel()} whether to offer the
+     * shortcut always answered no, and the button never appeared. The intent is known from the
+     * start even though the server is not.
+     */
+    public java.util.Optional<Integer> getWebPort()
+    {
+        return webPort;
+    }
+
+    public void setWebPort(java.util.Optional<Integer> webPort)
+    {
+        this.webPort = webPort == null ? java.util.Optional.empty() : webPort;
     }
 
     /** Update checker, or null before JDA is connected. */

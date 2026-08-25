@@ -412,13 +412,7 @@
       "djRole": "Elige el rol de DJ:"
     },
     "language": {
-      "current": "El idioma del bot para este servidor es **{0}**.",
-      "set": "El idioma de este servidor se estableció en **{0}**.",
-      "invalid": "Idioma desconocido `{0}`. Disponibles: {1}",
-      "optionDescription": "{0} ({1})",
-      "setPersonal": "Tu idioma ahora es **{0}**. Esto te acompaña a todos los servidores en los que está este bot.",
-      "currentPersonal": "Tu idioma es **{0}**.",
-      "currentInherited": "No has elegido un idioma, así que ves el de este servidor: **{0}**."
+      "invalid": "Idioma desconocido `{0}`. Disponibles: {1}"
     },
     "prefix": {
       "cleared": "Prefijo borrado.",
@@ -486,6 +480,25 @@
       "queueType": "Tipo de cola: {0}",
       "defaultPlaylist": "Lista predeterminada: {0}",
       "footer": "{0} servidores | {1} conexiones de audio"
+    },
+    "personal": {
+      "title": "Tus ajustes",
+      "description": "Esto se aplica solo a ti, en todos los servidores donde esté este bot.",
+      "language": {
+        "label": "Idioma",
+        "placeholder": "Elige un idioma",
+        "following": "sigue al servidor ({0})",
+        "chosen": "**{0}**",
+        "followOption": "Seguir al servidor",
+        "followHint": "Usa lo que tenga configurado este servidor ({0})."
+      }
+    },
+    "scope": {
+      "placeholder": "Cambiar vista",
+      "server": "Ajustes del servidor",
+      "serverHint": "Se aplica a todos aquí. Requiere el permiso Administrar servidor.",
+      "personal": "Mis ajustes",
+      "personalHint": "Se aplica solo a ti, en todos los servidores."
     }
   },
   "clearchannel": {
@@ -883,7 +896,8 @@
     },
     "webPanel": {
       "cannotOpen": "Este equipo no puede abrir un navegador automáticamente.\nLa dirección del panel se copió al portapapeles.",
-      "title": "Panel web"
+      "title": "Panel web",
+      "notReady": "El panel web se inicia cuando el bot se conecta a Discord. Inténtalo de nuevo en un momento."
     }
   }
 }

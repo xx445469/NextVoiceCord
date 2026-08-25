@@ -226,9 +226,10 @@ public class MainFrame extends JFrame {
         sidebar.addItem("system", GuiLanguage.msg("gui.nav.system"), IconFactory.getIcon(IconFactory.IconType.REFRESH, 16));
         sidebar.addItem("sources", GuiLanguage.msg("gui.nav.sources"), IconFactory.getIcon(IconFactory.IconType.SEARCH, 16));
 
-        // Offered only when --web is actually serving. A permanently visible button that
-        // sometimes does nothing is worse than no button.
-        if (bot.getWebPanel() != null && bot.getWebPanel().getUrl().isPresent())
+        // Offered whenever --web asked for a port. The server itself does not come up until
+        // Discord is connected, so asking whether it is already serving would always answer no
+        // at this point and the entry would never appear at all.
+        if (bot.getWebPort().isPresent())
         {
             sidebar.addSection(GuiLanguage.msg("gui.section.webPanel"));
             sidebar.addAction(GuiLanguage.msg("gui.action.openInBrowser"),
@@ -249,22 +250,34 @@ public class MainFrame extends JFrame {
      * copy it out of a console that has long since scrolled past it.
      */
     private void openWebPanel() {
-        bot.getWebPanel().getUrl().ifPresent(url -> {
+        // Null until Discord connects and the panel starts. Pressing the entry during those
+        // first seconds is entirely likely, and it used to throw.
+        var panel = bot.getWebPanel();
+        var url = panel == null ? java.util.Optional.<String>empty() : panel.getUrl();
+
+        if (url.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    GuiLanguage.msg("gui.webPanel.notReady"),
+                    GuiLanguage.msg("gui.webPanel.title"), JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        url.ifPresent(address -> {
             try {
                 if (java.awt.Desktop.isDesktopSupported()
                         && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
-                    java.awt.Desktop.getDesktop().browse(java.net.URI.create(url));
+                    java.awt.Desktop.getDesktop().browse(java.net.URI.create(address));
                     return;
                 }
                 // Headless-capable desktops and some Linux setups have no BROWSE action.
                 // Putting the URL on the clipboard still saves the retyping.
-                copyToClipboard(url);
+                copyToClipboard(address);
                 JOptionPane.showMessageDialog(this,
                         GuiLanguage.msg("gui.webPanel.cannotOpen"),
                         GuiLanguage.msg("gui.webPanel.title"), JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
                 LOG.warn("Could not open the web panel: {}", ex.toString());
-                copyToClipboard(url);
+                copyToClipboard(address);
             }
         });
     }

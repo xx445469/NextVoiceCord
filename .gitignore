@@ -53,3 +53,11 @@ nb*.xml
 # ============================================================
 .DS_Store
 Thumbs.db
+
+# Backups of config.txt. The bot writes these itself every time a setting is saved
+# from the desktop window or the web panel, and they carry the Discord token verbatim.
+# /config.txt alone does not match them, which is how one nearly got committed.
+config.txt.bak
+config.txt.bak.*
+*.bak
+/userlanguages.json

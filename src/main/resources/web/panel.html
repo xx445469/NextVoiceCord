@@ -15,6 +15,8 @@
     --muted: #6b7280;
     --accent: #5865f2;
     --live: #2eb872;
+    --err: #d1293d;
+    --warn: #a35b00;
     --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .1);
   }
   @media (prefers-color-scheme: dark) {
@@ -26,37 +28,94 @@
       --muted: #939aa8;
       --accent: #7c86ff;
       --live: #3ad48a;
+      --err: #ff6b73;
+      --warn: #f5a623;
       --shadow: none;
     }
   }
 
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
     margin: 0;
-    padding: 28px 20px 56px;
     background: var(--bg);
     color: var(--text);
     font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 940px; margin: 0 auto; }
+  button, input, select, textarea { font: inherit; color: inherit; }
 
-  header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+  /* ==================== App shell ====================
+     Mobile-first: the nav is a horizontally-scrolling strip above the content. From 860px
+     up it becomes a fixed left column instead, which is when there is finally room for one. */
+  .app { display: flex; flex-direction: column; min-height: 100%; }
+
+  .sidebar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    flex: none;
+  }
+  .brand { font-weight: 650; font-size: 15px; letter-spacing: -.01em; padding: 0 10px 0 2px; white-space: nowrap; }
+  .navsection {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+    padding: 0 8px; white-space: nowrap; align-self: center;
+  }
+  .navsection::before { content: ""; display: inline-block; width: 10px; }
+  .navitem {
+    appearance: none; border: 1px solid transparent; background: transparent; color: var(--text);
+    padding: 7px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; font-size: 13.5px;
+    font-weight: 550;
+  }
+  .navitem:hover { background: var(--bg); }
+  .navitem.active { background: var(--accent); color: #fff; }
+
+  .content { flex: 1; min-width: 0; padding: 20px 16px 64px; }
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  @media (min-width: 860px) {
+    .app { flex-direction: row; }
+    .sidebar {
+      flex-direction: column; align-items: stretch; width: 216px; flex: none;
+      border-bottom: none; border-right: 1px solid var(--border); overflow-x: visible;
+      padding: 16px 10px; gap: 2px;
+    }
+    .brand { padding: 4px 10px 14px; }
+    .navsection { padding: 14px 10px 4px; }
+    .navsection::before { display: none; }
+    .navitem { text-align: left; }
+    .content { padding: 28px 28px 64px; }
+    .sidebar .livewrap { margin-top: auto; padding: 10px; }
+  }
+
+  header.pageheader { display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
   h1 { font-size: 20px; font-weight: 650; margin: 0; letter-spacing: -.01em; }
+  h2 { font-size: 16px; font-weight: 620; margin: 0 0 12px; }
+  h3 { font-size: 14px; font-weight: 620; margin: 18px 0 10px; }
   .version { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
-  .dot { margin-left: auto; display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; }
-  .dot i { width: 7px; height: 7px; border-radius: 50%; background: var(--live); display: block; }
+  .dot { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; }
+  .dot i { width: 7px; height: 7px; border-radius: 50%; background: var(--live); display: block; flex: none; }
   .dot.stale i { background: var(--muted); }
+  header.pageheader .dot { margin-left: auto; }
+
+  .view[hidden] { display: none; }
 
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 22px; }
   .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
   .stat b { display: block; font-size: 24px; font-weight: 640; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
   .stat span { color: var(--muted); font-size: 12.5px; }
 
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); margin-bottom: 14px; }
+
   .guild { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px 17px; margin-bottom: 10px; box-shadow: var(--shadow); }
-  .guild .top { display: flex; align-items: center; gap: 10px; }
+  .guild .top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .guild .name { font-weight: 580; }
   .guild .meta { color: var(--muted); font-size: 12.5px; margin-left: auto; font-variant-numeric: tabular-nums; }
+  .guild .guildid { color: var(--muted); font-size: 11.5px; margin-top: 2px; font-variant-numeric: tabular-nums; }
   .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--live); color: #fff; letter-spacing: .02em; }
   .badge.idle { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 
@@ -67,55 +126,312 @@
   .bar i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .8s linear; }
   .times { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 
+  .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .btn {
+    appearance: none; border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 560;
+  }
+  .btn:hover:not(:disabled) { border-color: var(--accent); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .vol { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+  .vol input[type=range] { width: 110px; }
+  .vol .volval { min-width: 2.4em; font-variant-numeric: tabular-nums; color: var(--text); }
+  .ctrl-result { font-size: 12.5px; color: var(--muted); min-height: 1.4em; }
+  .ctrl-result.ok { color: var(--live); }
+  .ctrl-result.err { color: var(--err); }
+
+  .search { display: flex; margin-bottom: 14px; }
+  .search input {
+    flex: 1; max-width: 320px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface); color: var(--text);
+  }
+
   .empty { color: var(--muted); text-align: center; padding: 44px 0; }
-  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 26px; }
+  .empty.small { padding: 14px 0; font-size: 13px; }
+  .banner {
+    background: var(--surface); border: 1px solid var(--warn); color: var(--text); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 16px; font-size: 13.5px;
+  }
+  .banner code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  thead th { color: var(--muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .sparkrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .sparkcard { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); }
+  .sparklabel { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+
+  .winrow { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 13px; color: var(--muted); }
+  select.winsel {
+    padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text);
+  }
+
+  .consolebox {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+    height: 64vh; min-height: 320px; overflow-y: auto;
+    font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .logline { white-space: pre-wrap; overflow-wrap: anywhere; padding: 1px 0; }
+  .logline.lvl-error { color: var(--err); }
+  .logline.lvl-warn { color: var(--warn); }
+  .logline.lvl-debug { color: var(--muted); }
+  .consolenote { font-size: 12.5px; color: var(--warn); margin-bottom: 8px; }
+  .consolenote[hidden] { display: none; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; max-width: 420px; }
+  .field.cfgfield { max-width: 560px; }
+  .fieldlabel { font-size: 13px; font-weight: 580; }
+  .field input[type=text], .field input[type=password], .field input[type=number], .field select {
+    padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text);
+  }
+  .field input:disabled, .field select:disabled { opacity: .55; cursor: not-allowed; }
+  .field input[type=checkbox] { width: 18px; height: 18px; align-self: flex-start; }
+  .hint { font-size: 12px; color: var(--muted); }
+  .formrow { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+
+  footer.foot { color: var(--muted); font-size: 12px; text-align: center; margin-top: 26px; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>NextVoiceCord</h1>
-    <span class="version" id="version"></span>
-    <span class="version" id="subtitle"></span>
-    <span class="dot" id="live"><i></i><span id="livetext">connecting</span></span>
-  </header>
+<div class="app">
+  <nav class="sidebar" id="sidebar">
+    <span class="brand">NextVoiceCord</span>
+    <button type="button" class="navitem" data-view="overview">Overview</button>
+    <button type="button" class="navitem" data-view="console">Console</button>
+    <button type="button" class="navitem" data-view="servers">Servers</button>
+    <span class="navsection">Diagnostics</span>
+    <button type="button" class="navitem" data-view="performance">Performance</button>
+    <button type="button" class="navitem" data-view="system">System</button>
+    <button type="button" class="navitem" data-view="sources">Sources</button>
+    <span class="navsection">Configure</span>
+    <button type="button" class="navitem" data-view="preferences">Preferences</button>
+    <button type="button" class="navitem" data-view="config">Bot config</button>
+    <span class="livewrap"><span class="dot" id="live"><i></i><span id="livetext">connecting</span></span></span>
+  </nav>
 
-  <div class="stats" id="stats"></div>
-  <div id="guilds"></div>
+  <main class="content">
+    <div class="wrap">
+      <header class="pageheader">
+        <h1>NextVoiceCord</h1>
+        <span class="version" id="version"></span>
+        <span class="version" id="subtitle"></span>
+      </header>
 
-  <footer>Read-only. Playback is controlled from Discord, where the bot knows who pressed what.</footer>
+      <section class="view" id="view-overview">
+        <div class="banner" id="overviewNotice" hidden>Not connected to Discord yet — playback controls are unavailable.</div>
+        <div class="stats" id="stats"></div>
+        <div id="overviewGuilds"></div>
+      </section>
+
+      <section class="view" id="view-console" hidden>
+        <h2>Console</h2>
+        <div class="consolenote" id="consoleDropped" hidden></div>
+        <div class="consolebox" id="consoleBox"></div>
+      </section>
+
+      <section class="view" id="view-servers" hidden>
+        <h2>Servers</h2>
+        <div class="banner" id="serversNotice" hidden>Not connected to Discord yet — playback controls are unavailable.</div>
+        <div class="search"><input type="search" id="serverSearch" placeholder="Filter servers by name…"></div>
+        <div class="hint" id="serversCount" style="margin-bottom:10px;"></div>
+        <div id="serversList"></div>
+      </section>
+
+      <section class="view" id="view-performance" hidden>
+        <h2>Performance</h2>
+        <div class="winrow">Window <select class="winsel" id="perfWindow" data-view="performance">
+          <option value="60">1m</option><option value="300" selected>5m</option>
+          <option value="900">15m</option><option value="3600">1h</option>
+        </select></div>
+        <div id="perfBody"></div>
+      </section>
+
+      <section class="view" id="view-system" hidden>
+        <h2>System</h2>
+        <div class="winrow">Window <select class="winsel" id="sysWindow" data-view="system">
+          <option value="60">1m</option><option value="300" selected>5m</option>
+          <option value="900">15m</option><option value="3600">1h</option>
+        </select></div>
+        <div id="sysBody"></div>
+      </section>
+
+      <section class="view" id="view-sources" hidden>
+        <h2>Sources</h2>
+        <div class="winrow">Window <select class="winsel" id="srcWindow" data-view="sources">
+          <option value="60">1m</option><option value="300" selected>5m</option>
+          <option value="900">15m</option><option value="3600">1h</option>
+        </select></div>
+        <div id="srcBody"></div>
+      </section>
+
+      <section class="view" id="view-preferences" hidden>
+        <h2>Preferences</h2>
+        <div class="hint" style="margin-bottom:14px;">Only the fields you change are sent — everything else is left as it is.</div>
+        <div id="prefsForm"></div>
+      </section>
+
+      <section class="view" id="view-config" hidden>
+        <h2>Bot config</h2>
+        <div id="cfgBody"><div class="empty small">Loading…</div></div>
+      </section>
+
+      <footer class="foot">Playback controls act immediately on the live bot. Everything else here is read-only unless you press Save.</footer>
+    </div>
+  </main>
 </div>
 
 <script>
 // The token travels in the URL because that is what makes the link the bot prints work by
 // pasting. It is kept out of the address bar afterwards so a screenshot of the panel does
-// not hand it to whoever sees the screenshot.
+// not hand it to whoever sees the screenshot. Every POST below sends it as a header instead —
+// the server refuses a query-string token on writes, deliberately, as CSRF protection.
 const token = new URLSearchParams(location.search).get('token') || '';
 if (token) history.replaceState(null, '', location.pathname);
 
 const el = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const authHeaders = extra => Object.assign({ Authorization: 'Bearer ' + token }, extra || {});
 
 let failures = 0;
-
 function setLive(ok, text) {
   el('live').className = ok ? 'dot' : 'dot stale';
   el('livetext').textContent = text;
+}
+function noteFailure() {
+  // Shown after two consecutive failures rather than the first: a single dropped poll
+  // during a restart should not make a working panel look broken.
+  if (++failures >= 2) setLive(false, 'disconnected');
+}
+function noteHttpFailure(status) {
+  setLive(false, status === 401 ? 'unauthorised' : 'error ' + status);
 }
 
 function stat(value, label) {
   return `<div class="stat"><b>${esc(value)}</b><span>${esc(label)}</span></div>`;
 }
 
-function guildCard(g, t) {
+async function postJSON(path, body) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(body)
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) { /* non-JSON error body */ }
+  return { res, data };
+}
+
+// ==================== Sparklines ====================
+// Deliberately plain: one hue (the page's own accent), no axes, no legend — a single
+// series names itself from the card title next to it, per the same reasoning a lone stat
+// tile needs no key.
+function sparkline(samples, key) {
+  if (!samples || !samples.length) return '<div class="empty small">No samples yet.</div>';
+  const vals = samples.map(s => s[key]).filter(v => v !== null && v !== undefined);
+  if (!vals.length) return '<div class="empty small">No samples yet.</div>';
+  const W = 280, H = 44, pad = 4;
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = (max - min) || 1;
+  const n = samples.length;
+  const pts = samples.map((s, i) => {
+    const v = s[key];
+    if (v === null || v === undefined) return null;
+    const x = n <= 1 ? W / 2 : pad + (i / (n - 1)) * (W - 2 * pad);
+    const y = H - pad - ((v - min) / range) * (H - 2 * pad);
+    return [x, y];
+  }).filter(Boolean);
+  const points = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const last = pts[pts.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none">
+    <polyline points="${points}" fill="none" stroke="var(--accent)" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.6" fill="var(--accent)"/>
+  </svg>`;
+}
+
+// ==================== Header ====================
+function renderHeader(d) {
+  el('version').textContent = d.version || '';
+  el('subtitle').textContent = (d.labels && d.labels.subtitle) || '';
+}
+
+// ==================== Playback controls (shared by Overview + Servers) ====================
+function controlsRow(g, connected) {
+  const disabled = connected ? '' : 'disabled';
+  const volume = Number(g.volume) || 0;
+  return `<div class="controls" data-guild="${esc(g.id)}">
+      <button type="button" class="btn ctrl-toggle" data-action="${g.paused ? 'resume' : 'pause'}" ${disabled}>${g.paused ? 'Resume' : 'Pause'}</button>
+      <button type="button" class="btn ctrl-skip" ${disabled}>Skip</button>
+      <label class="vol">Vol
+        <input type="range" class="ctrl-volume" min="0" max="150" step="1" value="${volume}" ${disabled}>
+        <span class="volval">${volume}</span>
+      </label>
+      <span class="ctrl-result" aria-live="polite"></span>
+    </div>`;
+}
+
+function setControlsBusy(wrap, busy) {
+  wrap.querySelectorAll('button, input').forEach(node => { node.disabled = busy || node.dataset.forceDisabled === '1'; });
+}
+
+async function runControl(wrap, guildId, action, value) {
+  const resultEl = wrap.querySelector('.ctrl-result');
+  setControlsBusy(wrap, true);
+  resultEl.textContent = '…';
+  resultEl.className = 'ctrl-result';
+  try {
+    const body = { action, guild: guildId };
+    if (value !== undefined) body.value = String(value);
+    const { res, data } = await postJSON('/api/control', body);
+    resultEl.textContent = (data && data.message) ? data.message : ('Request failed (' + res.status + ').');
+    resultEl.className = 'ctrl-result ' + (res.ok ? 'ok' : 'err');
+  } catch (e) {
+    resultEl.textContent = 'Network error.';
+    resultEl.className = 'ctrl-result err';
+  } finally {
+    setControlsBusy(wrap, false);
+    setTimeout(() => { if (resultEl.isConnected) resultEl.textContent = ''; }, 5000);
+  }
+}
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.ctrl-toggle, .ctrl-skip');
+  if (!btn || btn.disabled) return;
+  const wrap = btn.closest('.controls');
+  const action = btn.classList.contains('ctrl-skip') ? 'skip' : btn.dataset.action;
+  runControl(wrap, wrap.dataset.guild, action);
+});
+document.addEventListener('input', e => {
+  if (!e.target.classList.contains('ctrl-volume')) return;
+  const out = e.target.nextElementSibling;
+  if (out && out.classList.contains('volval')) out.textContent = e.target.value;
+});
+document.addEventListener('change', e => {
+  if (!e.target.classList.contains('ctrl-volume')) return;
+  const wrap = e.target.closest('.controls');
+  runControl(wrap, wrap.dataset.guild, 'volume', e.target.value);
+});
+
+// ==================== Guild cards (Overview + Servers) ====================
+function guildCard(g, t, opts) {
+  const full = !!opts.full;
+  const connected = !!opts.connected;
+
   const badge = g.playing
     ? `<span class="badge">${esc(g.paused ? (t.paused || 'paused') : (t.playing || 'playing'))}</span>`
     : '<span class="badge idle">idle</span>';
 
-  const meta = g.playing && g.channel
-    ? `${esc(g.channel)} · ${g.queue} queued · vol ${g.volume}`
-    : `${g.members} members`;
+  const bits = [];
+  if (g.playing && g.channel) bits.push(esc(g.channel));
+  bits.push(esc(g.members) + ' members');
+  if (full || g.playing) bits.push(esc(g.queue || 0) + ' queued');
+  if (g.playing) bits.push('vol ' + esc(g.volume));
+  const meta = bits.join(' · ');
 
   const track = g.playing ? `
     <div class="track">
@@ -125,47 +441,521 @@ function guildCard(g, t) {
       <div class="times"><span>${esc(g.position)}</span><span>${esc(g.duration)}</span></div>
     </div>` : '';
 
+  const controls = g.playing ? controlsRow(g, connected) : '';
+  const idBit = full ? `<div class="guildid">ID ${esc(g.id)}</div>` : '';
+
   return `<div class="guild">
-      <div class="top">${badge}<span class="name">${esc(g.name)}</span><span class="meta">${esc(meta)}</span></div>
+      <div class="top">${badge}<span class="name">${esc(g.name)}</span><span class="meta">${meta}</span></div>
+      ${idBit}
       ${track}
+      ${controls}
     </div>`;
 }
 
-async function refresh() {
+// ==================== Overview ====================
+function renderOverview(d) {
+  const t = d.labels || {};
+  el('overviewNotice').hidden = !!d.connected;
+  el('stats').innerHTML =
+      stat(d.playingCount, t.playingNow || 'playing now') +
+      stat(d.guildCount, t.servers || 'servers') +
+      stat(d.listeners, t.listeners || 'listeners') +
+      stat(d.uptime, t.uptime || 'uptime') +
+      stat(d.memoryUsedMb + ' MB', (t.memory || 'memory') + ' / ' + d.memoryMaxMb);
+  el('overviewGuilds').innerHTML = d.guilds.length
+      ? d.guilds.map(g => guildCard(g, t, { full: false, connected: d.connected })).join('')
+      : `<div class="empty">${esc(t.nothingPlaying || 'Nothing is playing right now.')}</div>`;
+}
+
+// ==================== Servers ====================
+let lastStatus = null;
+let serverFilter = '';
+
+function renderServers(d) {
+  const t = d.labels || {};
+  el('serversNotice').hidden = !!d.connected;
+  el('serversCount').textContent = d.guildCount + ' server(s) · ' + d.playingCount + ' playing';
+
+  const q = serverFilter.trim().toLowerCase();
+  const guilds = q ? d.guilds.filter(g => String(g.name || '').toLowerCase().includes(q)) : d.guilds;
+
+  el('serversList').innerHTML = guilds.length
+      ? guilds.map(g => guildCard(g, t, { full: true, connected: d.connected })).join('')
+      : `<div class="empty">${q ? 'No servers match “' + esc(q) + '”.' : esc(t.nothingPlaying || 'No servers.')}</div>`;
+}
+
+el('serverSearch').addEventListener('input', e => {
+  serverFilter = e.target.value;
+  if (lastStatus) renderServers(lastStatus);
+});
+
+async function pollStatus(view) {
   try {
-    const res = await fetch('/api/status', { headers: { Authorization: 'Bearer ' + token } });
-    if (!res.ok) {
-      setLive(false, res.status === 401 ? 'unauthorised' : 'error ' + res.status);
-      return;
-    }
+    const res = await fetch('/api/status', { headers: authHeaders() });
+    if (!res.ok) { noteHttpFailure(res.status); return; }
+    const d = await res.json();
+    failures = 0;
+    setLive(true, 'live');
+    renderHeader(d);
+    lastStatus = d;
+    if (view === 'overview') renderOverview(d);
+    else renderServers(d);
+  } catch (e) { noteFailure(); }
+}
+
+// ==================== Console ====================
+let consoleSeq = 0;
+
+function isAtBottom(box) {
+  return box.scrollHeight - box.scrollTop - box.clientHeight < 24;
+}
+
+async function pollConsole() {
+  try {
+    const res = await fetch('/api/console?since=' + consoleSeq, { headers: authHeaders() });
+    if (!res.ok) { noteHttpFailure(res.status); return; }
     const d = await res.json();
     failures = 0;
     setLive(true, 'live');
 
-    // Labels come from the server rather than being duplicated here, so the panel and the
-    // bot cannot drift into saying different things in the same language.
-    const t = d.labels || {};
-    el('version').textContent = d.version;
-    el('subtitle').textContent = t.subtitle || '';
-    el('stats').innerHTML =
-        stat(d.playingCount, t.playingNow || 'playing now') +
-        stat(d.guildCount, t.servers || 'servers') +
-        stat(d.listeners, t.listeners || 'listeners') +
-        stat(d.uptime, t.uptime || 'uptime') +
-        stat(d.memoryUsedMb + ' MB', (t.memory || 'memory') + ' / ' + d.memoryMaxMb);
+    const box = el('consoleBox');
+    if (d.lines && d.lines.length) {
+      const atBottom = isAtBottom(box);
+      const frag = document.createDocumentFragment();
+      for (const line of d.lines) {
+        const div = document.createElement('div');
+        const level = String(line.level || 'INFO').toLowerCase();
+        div.className = 'logline lvl-' + level;
+        div.textContent = line.text; // textContent — log lines are not trusted content
+        frag.appendChild(div);
+      }
+      box.appendChild(frag);
+      consoleSeq = d.latest;
 
-    el('guilds').innerHTML = d.guilds.length
-        ? d.guilds.map(g => guildCard(g, t)).join('')
-        : `<div class="empty">${esc(t.nothingPlaying || 'Nothing is playing right now.')}</div>`;
+      // Cap how much lives in the DOM. Only pruned while the viewer is at the bottom: removing
+      // rows above an anchored scroll position is invisible; doing it while someone has
+      // scrolled back to read history would yank the page out from under them.
+      if (atBottom) {
+        while (box.childElementCount > 3000) box.removeChild(box.firstChild);
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+
+    const dropNote = el('consoleDropped');
+    if (d.dropped) {
+      dropNote.hidden = false;
+      dropNote.textContent = d.dropped + ' line(s) were discarded from the buffer before this view could read them.';
+    } else {
+      dropNote.hidden = true;
+    }
+  } catch (e) { noteFailure(); }
+}
+
+// ==================== Performance / System / Sources ====================
+const winState = { performance: 300, system: 300, sources: 300 };
+
+async function pollPerformance() {
+  try {
+    const res = await fetch('/api/performance?window=' + winState.performance, { headers: authHeaders() });
+    if (!res.ok) { noteHttpFailure(res.status); return; }
+    const d = await res.json();
+    failures = 0; setLive(true, 'live');
+    renderPerformance(d);
+  } catch (e) { noteFailure(); }
+}
+
+function renderPerformance(d) {
+  if (!d.available) {
+    el('perfBody').innerHTML = '<div class="empty">No performance metrics collected yet.</div>';
+    return;
+  }
+  let html = '<div class="stats">' +
+      stat(d.totals.framesSent, 'frames sent') +
+      stat(d.totals.framesMissed, 'frames missed') +
+      stat(Number(d.totals.missRate).toFixed(2) + '%', 'miss rate') +
+      '</div>';
+
+  html += '<div class="table-wrap"><table><thead><tr><th>Guild</th><th>State</th><th>Frames sent</th>' +
+      '<th>Frames missed</th><th>Miss rate</th><th>Stutters</th><th>Stuck</th></tr></thead><tbody>';
+  if (d.guilds.length) {
+    for (const g of d.guilds) {
+      html += `<tr><td>${esc(g.name)}</td><td>${esc(g.state)}</td><td>${esc(g.framesSent)}</td>` +
+          `<td>${esc(g.framesMissed)}</td><td>${esc(Number(g.missRate).toFixed(2))}%</td>` +
+          `<td>${esc(g.stutters)}</td><td>${esc(g.stuck)}</td></tr>`;
+    }
+  } else {
+    html += '<tr><td colspan="7" class="empty small">No guilds active in this window.</td></tr>';
+  }
+  html += '</tbody></table></div>';
+
+  html += '<h3>Recent events</h3>';
+  if (d.events.length) {
+    html += '<div class="table-wrap"><table><thead><tr><th>Time</th><th>Guild</th><th>Type</th><th>Detail</th></tr></thead><tbody>';
+    for (const ev of d.events) {
+      html += `<tr><td>${esc(ev.time)}</td><td>${esc(ev.guild)}</td><td>${esc(ev.type)}</td><td>${esc(ev.detail)}</td></tr>`;
+    }
+    html += '</tbody></table></div>';
+  } else {
+    html += '<div class="empty small">No events in this window.</div>';
+  }
+  el('perfBody').innerHTML = html;
+}
+
+async function pollSystem() {
+  try {
+    const res = await fetch('/api/system?window=' + winState.system, { headers: authHeaders() });
+    if (!res.ok) { noteHttpFailure(res.status); return; }
+    const d = await res.json();
+    failures = 0; setLive(true, 'live');
+    renderSystem(d);
+  } catch (e) { noteFailure(); }
+}
+
+function renderSystem(d) {
+  if (!d.available) {
+    el('sysBody').innerHTML = '<div class="empty">No system metrics collected yet.</div>';
+    return;
+  }
+  // null (not 0) means the JVM could not report it — shown as "n/a" rather than a false zero.
+  const cpuP = (d.cpuProcess === null || d.cpuProcess === undefined) ? 'n/a' : d.cpuProcess.toFixed(1) + '%';
+  const cpuS = (d.cpuSystem === null || d.cpuSystem === undefined) ? 'n/a' : d.cpuSystem.toFixed(1) + '%';
+
+  let html = '<div class="stats">' +
+      stat(cpuP, 'process CPU') +
+      stat(cpuS, 'system CPU') +
+      stat(d.heapUsedMb + ' MB', 'heap used / ' + d.heapMaxMb) +
+      stat(d.threads, 'threads') +
+      stat(d.gcCount, 'GC count') +
+      stat(d.gcTimeMs + ' ms', 'GC time') +
+      stat(d.driftAvgMs + ' ms', 'avg drift') +
+      stat(d.driftMaxMs + ' ms', 'max drift') +
+      '</div>';
+
+  html += '<div class="sparkrow">' +
+      '<div class="sparkcard"><div class="sparklabel">CPU % over window</div>' + sparkline(d.samples, 'cpu') + '</div>' +
+      '<div class="sparkcard"><div class="sparklabel">Heap MB over window</div>' + sparkline(d.samples, 'heapMb') + '</div>' +
+      '</div>';
+  el('sysBody').innerHTML = html;
+}
+
+async function pollSources() {
+  try {
+    const res = await fetch('/api/sources?window=' + winState.sources, { headers: authHeaders() });
+    if (!res.ok) { noteHttpFailure(res.status); return; }
+    const d = await res.json();
+    failures = 0; setLive(true, 'live');
+    renderSources(d);
+  } catch (e) { noteFailure(); }
+}
+
+function renderSources(d) {
+  let html = '<div class="stats">' +
+      stat(d.totals.loaded, 'loaded') +
+      stat(d.totals.failed, 'failed') +
+      stat(d.totals.noMatches, 'no matches') +
+      stat(Number(d.totals.successPercent).toFixed(1) + '%', 'success rate') +
+      '</div>';
+
+  html += '<div class="table-wrap"><table><thead><tr><th>Source</th><th>Loaded</th><th>Failed</th>' +
+      '<th>No matches</th><th>Success %</th><th>Avg ms</th><th>p95 ms</th></tr></thead><tbody>';
+  if (d.sources.length) {
+    for (const s of d.sources) {
+      html += `<tr><td>${esc(s.name)}</td><td>${esc(s.loaded)}</td><td>${esc(s.failed)}</td>` +
+          `<td>${esc(s.noMatches)}</td><td>${esc(Number(s.successPercent).toFixed(1))}</td>` +
+          `<td>${esc(s.avgMs)}</td><td>${esc(s.p95Ms)}</td></tr>`;
+    }
+  } else {
+    html += '<tr><td colspan="7" class="empty small">No source activity in this window.</td></tr>';
+  }
+  html += '</tbody></table></div>';
+
+  html += '<h3>Recent lookups</h3>';
+  if (d.recent.length) {
+    html += '<div class="table-wrap"><table><thead><tr><th>Time</th><th>Source</th><th>Result</th><th>ms</th><th>Query</th></tr></thead><tbody>';
+    for (const r of d.recent) {
+      html += `<tr><td>${esc(r.time)}</td><td>${esc(r.source)}</td><td>${esc(r.result)}</td><td>${esc(r.ms)}</td><td>${esc(r.query)}</td></tr>`;
+    }
+    html += '</tbody></table></div>';
+  } else {
+    html += '<div class="empty small">No lookups in this window.</div>';
+  }
+  el('srcBody').innerHTML = html;
+}
+
+document.addEventListener('change', e => {
+  if (!e.target.classList.contains('winsel')) return;
+  const view = e.target.dataset.view;
+  winState[view] = Number(e.target.value) || 300;
+  if (view === 'performance') pollPerformance();
+  else if (view === 'system') pollSystem();
+  else if (view === 'sources') pollSources();
+});
+
+// ==================== Preferences ====================
+// GET /api/prefs does not exist — there is nothing to prefill theme/font size from, so those
+// start unset ("leave unchanged") and only join the request if the viewer actually picks one.
+// Language is the exception: /api/status already reports it, so it can start selected.
+const LANGUAGES = [
+  ['EN', 'English', 'English'], ['DE', 'Deutsch', 'German'], ['ES', 'Español', 'Spanish'],
+  ['FR', 'Français', 'French'], ['JA', '日本語', 'Japanese'], ['KO', '한국어', 'Korean'],
+  ['PL', 'Polski', 'Polish'], ['RU', 'Русский', 'Russian'], ['UA', 'Українська', 'Ukrainian'],
+  ['VN', 'Tiếng Việt', 'Vietnamese'], ['ZHCN', '简体中文', 'Chinese (Simplified)'],
+  ['ZHTW', '繁體中文', 'Chinese (Traditional)']
+];
+let prefsLanguage = 'EN';
+
+async function openPreferences() {
+  try {
+    const res = await fetch('/api/status', { headers: authHeaders() });
+    if (res.ok) {
+      const d = await res.json();
+      renderHeader(d);
+      if (d.language) prefsLanguage = d.language;
+    }
+  } catch (e) { /* form still renders with the EN default */ }
+  renderPreferencesForm();
+}
+
+function renderPreferencesForm() {
+  const langOptions = LANGUAGES.map(([code, native, en]) =>
+      `<option value="${code}" ${code === prefsLanguage ? 'selected' : ''}>${esc(native)} · ${esc(en)}</option>`).join('');
+  el('prefsForm').innerHTML = `
+    <label class="field">
+      <span class="fieldlabel">Language</span>
+      <select id="prefLanguage">${langOptions}</select>
+    </label>
+    <label class="field">
+      <span class="fieldlabel">Theme</span>
+      <select id="prefTheme">
+        <option value="">Leave unchanged</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="darcula">Darcula</option>
+        <option value="intellij">IntelliJ</option>
+      </select>
+    </label>
+    <label class="field">
+      <span class="fieldlabel">Font size</span>
+      <input type="number" id="prefFontSize" min="8" max="24" step="1" placeholder="Leave unchanged">
+    </label>
+    <div class="formrow">
+      <button type="button" class="btn primary" id="prefsSave">Save preferences</button>
+      <span class="ctrl-result" id="prefsResult"></span>
+    </div>`;
+}
+
+async function savePreferences() {
+  const resultEl = el('prefsResult');
+  const body = {};
+  const lang = el('prefLanguage').value;
+  if (lang && lang !== prefsLanguage) body.language = lang;
+  const theme = el('prefTheme').value;
+  if (theme) body.theme = theme;
+  const fontSize = el('prefFontSize').value;
+  if (fontSize !== '') body.fontSize = fontSize;
+
+  if (!Object.keys(body).length) {
+    resultEl.textContent = 'Nothing changed.';
+    resultEl.className = 'ctrl-result';
+    return;
+  }
+  resultEl.textContent = 'Saving…';
+  resultEl.className = 'ctrl-result';
+  try {
+    const { res, data } = await postJSON('/api/prefs', body);
+    resultEl.textContent = (data && data.message) ? data.message : ('Request failed (' + res.status + ').');
+    resultEl.className = 'ctrl-result ' + (res.ok ? 'ok' : 'err');
+    if (res.ok) {
+      if (body.language) prefsLanguage = body.language;
+      el('prefTheme').value = '';
+      el('prefFontSize').value = '';
+    }
   } catch (e) {
-    // Shown after two consecutive failures rather than the first: a single dropped poll
-    // during a restart should not make a working panel look broken.
-    if (++failures >= 2) setLive(false, 'disconnected');
+    resultEl.textContent = 'Network error.';
+    resultEl.className = 'ctrl-result err';
   }
 }
 
-refresh();
-setInterval(refresh, 3000);
+document.addEventListener('click', e => {
+  if (e.target.id === 'prefsSave') savePreferences();
+});
+
+// ==================== Bot config ====================
+let cfgData = null;
+let cfgInitial = {};
+
+async function openConfig() {
+  el('cfgBody').innerHTML = '<div class="empty small">Loading…</div>';
+  try {
+    const res = await fetch('/api/config', { headers: authHeaders() });
+    if (!res.ok) {
+      el('cfgBody').innerHTML = `<div class="empty">Could not load configuration (status ${res.status}).</div>`;
+      return;
+    }
+    cfgData = await res.json();
+    renderConfig();
+  } catch (e) {
+    el('cfgBody').innerHTML = '<div class="empty">Network error loading configuration.</div>';
+  }
+}
+
+function prettifySection(name) {
+  const n = String(name || '');
+  return n ? n.charAt(0).toUpperCase() + n.slice(1) : n;
+}
+
+function renderOptionRow(opt, rowDisabled) {
+  const id = 'cfg_' + opt.key.replace(/[^a-zA-Z0-9]/g, '_');
+  let input;
+  const readOnlyType = opt.type === 'STRING_LIST' || opt.type === 'CONFIG';
+
+  if (readOnlyType) {
+    input = `<input type="text" id="${id}" value="${esc(opt.value)}" disabled>
+      <span class="hint">Must be edited in config.txt directly.</span>`;
+  } else if (opt.secret) {
+    const placeholder = opt.value ? '•••••••• (set — leave blank to keep it)' : 'not set';
+    input = `<input type="password" id="${id}" placeholder="${esc(placeholder)}" autocomplete="new-password" ${rowDisabled ? 'disabled' : ''}>`;
+  } else if (opt.type === 'BOOLEAN') {
+    const checked = String(opt.value).toLowerCase() === 'true';
+    input = `<input type="checkbox" id="${id}" ${checked ? 'checked' : ''} ${rowDisabled ? 'disabled' : ''}>`;
+  } else if (opt.type === 'INT' || opt.type === 'LONG') {
+    input = `<input type="number" step="1" id="${id}" value="${esc(opt.value)}" ${rowDisabled ? 'disabled' : ''}>`;
+  } else if (opt.type === 'DOUBLE') {
+    input = `<input type="number" step="any" id="${id}" value="${esc(opt.value)}" ${rowDisabled ? 'disabled' : ''}>`;
+  } else {
+    input = `<input type="text" id="${id}" value="${esc(opt.value)}" ${rowDisabled ? 'disabled' : ''}>`;
+  }
+
+  const notWritable = rowDisabled && opt.writable === false
+      ? '<span class="hint">Not editable from the panel.</span>' : '';
+  const description = opt.description ? `<span class="hint">${esc(opt.description)}</span>` : '';
+
+  return `<label class="field cfgfield" data-key="${esc(opt.key)}" data-type="${esc(opt.type)}" data-secret="${opt.secret ? '1' : '0'}">
+      <span class="fieldlabel">${esc(opt.leaf)}</span>
+      ${input}
+      ${description}
+      ${notWritable}
+    </label>`;
+}
+
+function renderConfig() {
+  cfgInitial = {};
+  const disabledAll = !cfgData.editable;
+  let html = '';
+
+  if (disabledAll) {
+    html += '<div class="banner">Config editing is off — values are shown for reference only. ' +
+        'Set <code>web.allowConfigEdit = true</code> in config.txt to enable editing.</div>';
+  }
+
+  for (const section of cfgData.sections) {
+    html += `<div class="card"><h3>${esc(prettifySection(section.name))}</h3>`;
+    for (const opt of section.options) {
+      const rowDisabled = disabledAll || opt.writable === false;
+      html += renderOptionRow(opt, rowDisabled);
+      if (opt.type !== 'STRING_LIST' && opt.type !== 'CONFIG' && !opt.secret) {
+        cfgInitial[opt.key] = opt.type === 'BOOLEAN'
+            ? String(String(opt.value).toLowerCase() === 'true')
+            : String(opt.value ?? '');
+      }
+    }
+    html += '</div>';
+  }
+
+  html += `<div class="formrow">
+      <button type="button" class="btn primary" id="cfgSave" ${disabledAll ? 'disabled' : ''}>Save changes</button>
+      <span class="ctrl-result" id="cfgResult"></span>
+    </div>`;
+  el('cfgBody').innerHTML = html;
+}
+
+async function saveConfig() {
+  const resultEl = el('cfgResult');
+  const body = {};
+
+  document.querySelectorAll('.cfgfield').forEach(field => {
+    const type = field.dataset.type;
+    if (type === 'STRING_LIST' || type === 'CONFIG') return;
+    const key = field.dataset.key;
+    const secret = field.dataset.secret === '1';
+    const input = field.querySelector('input');
+    if (!input || input.disabled) return;
+
+    if (secret) {
+      // Only sent when the viewer actually typed something — the mask never round-trips.
+      if (input.value !== '') body[key] = input.value;
+      return;
+    }
+    if (type === 'BOOLEAN') {
+      const val = String(input.checked);
+      if (val !== cfgInitial[key]) body[key] = val;
+      return;
+    }
+    if (input.value !== cfgInitial[key]) body[key] = input.value;
+  });
+
+  if (!Object.keys(body).length) {
+    resultEl.textContent = 'Nothing changed.';
+    resultEl.className = 'ctrl-result';
+    return;
+  }
+
+  resultEl.textContent = 'Saving…';
+  resultEl.className = 'ctrl-result';
+  try {
+    const { res, data } = await postJSON('/api/config', body);
+    if (res.status === 403) {
+      resultEl.textContent = (data && data.message) || 'Config editing is off.';
+      resultEl.className = 'ctrl-result err';
+      return;
+    }
+    let msg = (data && data.message) ? data.message : ('Request failed (' + res.status + ').');
+    if (data && data.refused && data.refused.length) msg += ' Refused: ' + data.refused.join('; ');
+    resultEl.textContent = msg;
+    resultEl.className = 'ctrl-result ' + ((res.ok && data && data.ok) ? 'ok' : 'err');
+    if (res.ok) openConfig(); // reload so the form reflects what was actually saved
+  } catch (e) {
+    resultEl.textContent = 'Network error.';
+    resultEl.className = 'ctrl-result err';
+  }
+}
+
+document.addEventListener('click', e => {
+  if (e.target.id === 'cfgSave') saveConfig();
+});
+
+// ==================== View switching ====================
+// Only the visible view is polled — the desktop window takes the same care, because
+// refreshing metrics nobody is looking at is work done purely to be thrown away.
+const REFRESH_MS = { overview: 3000, servers: 3000, console: 2000, performance: 5000, system: 5000, sources: 5000 };
+let pollTimer = null;
+let currentView = null;
+
+const VIEW_START = {
+  overview: () => { pollStatus('overview'); pollTimer = setInterval(() => pollStatus('overview'), REFRESH_MS.overview); },
+  servers: () => { pollStatus('servers'); pollTimer = setInterval(() => pollStatus('servers'), REFRESH_MS.servers); },
+  console: () => { pollConsole(); pollTimer = setInterval(pollConsole, REFRESH_MS.console); },
+  performance: () => { pollPerformance(); pollTimer = setInterval(pollPerformance, REFRESH_MS.performance); },
+  system: () => { pollSystem(); pollTimer = setInterval(pollSystem, REFRESH_MS.system); },
+  sources: () => { pollSources(); pollTimer = setInterval(pollSources, REFRESH_MS.sources); },
+  preferences: () => { openPreferences(); },
+  config: () => { openConfig(); }
+};
+
+function showView(key) {
+  if (key === currentView || !VIEW_START[key]) return;
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  currentView = key;
+  document.querySelectorAll('.navitem').forEach(b => b.classList.toggle('active', b.dataset.view === key));
+  document.querySelectorAll('.view').forEach(v => { v.hidden = v.id !== 'view-' + key; });
+  VIEW_START[key]();
+}
+
+document.querySelectorAll('.navitem').forEach(btn => {
+  btn.addEventListener('click', () => showView(btn.dataset.view));
+});
+
+showView('overview');
 </script>
 </body>
 </html>

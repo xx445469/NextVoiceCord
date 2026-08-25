@@ -85,6 +85,8 @@ public enum ConfigOption {
     GUI_THEME("gui.theme", ConfigType.STRING, false, "GUI theme: light, dark, darcula, intellij"),
     GUI_FONT_SIZE("gui.fontSize", ConfigType.INT, false, "Base font size for GUI components (8-24)"),
     GUI_LANGUAGE("gui.language", ConfigType.STRING, false, "Language for the desktop window (blank follows ui.language)"),
+    WEB_BIND_ADDRESS("web.bindAddress", ConfigType.STRING, false, "Address the web panel listens on"),
+    WEB_ALLOW_CONFIG_EDIT("web.allowConfigEdit", ConfigType.BOOLEAN, false, "Whether the web panel may write config.txt"),
     
     // Performance options
     NAS_BUFFER_MS("performance.nasBufferMs", ConfigType.INT, false, "NAS buffer duration in ms (protects against GC pauses)"),

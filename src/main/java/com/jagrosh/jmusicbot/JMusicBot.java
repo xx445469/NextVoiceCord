@@ -29,6 +29,7 @@ import com.jagrosh.jmusicbot.utils.ConsoleUtil;
 import com.jagrosh.jmusicbot.utils.InstanceLock;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 import com.jagrosh.jmusicbot.utils.TeeOutputStream;
+import com.jagrosh.jmusicbot.web.LogBufferOutputStream;
 
 import java.io.PrintStream;
 import net.dv8tion.jda.api.JDA;
@@ -115,13 +116,23 @@ public class JMusicBot
         // If GUI ends up disabled by config, we restore original streams; otherwise we replay buffer into GUI.
         PrintStream originalOut = System.out;
         PrintStream originalErr = System.err;
+
+        // Tap every line into the web panel's log buffer from the very first one, independent
+        // of the GUI-replay buffering below. --nogui is exactly the case where the web panel
+        // is the only console there is, so this cannot be conditional on the GUI decision that
+        // has not been made yet (config is not even loaded at this point).
+        PrintStream bufferedOut = new PrintStream(new LogBufferOutputStream(originalOut), true);
+        PrintStream bufferedErr = new PrintStream(new LogBufferOutputStream(originalErr), true);
+        System.setOut(bufferedOut);
+        System.setErr(bufferedErr);
+
         TeeOutputStream teeOut = null;
         TeeOutputStream teeErr = null;
-        
+
         if (!userInteraction.isNoGUI())
         {
-            teeOut = new TeeOutputStream(originalOut);
-            teeErr = new TeeOutputStream(originalErr);
+            teeOut = new TeeOutputStream(bufferedOut);
+            teeErr = new TeeOutputStream(bufferedErr);
             System.setOut(new PrintStream(teeOut, true));
             System.setErr(new PrintStream(teeErr, true));
         }
@@ -190,22 +201,31 @@ public class JMusicBot
             try
             {
                 ConsoleUtil.redirectSystemStreamsWithReplay(earlyOutput);
+                // ConsoleUtil now owns System.out/err, pointed at the GUI's text area instead
+                // of bufferedOut/bufferedErr. Re-tap the new streams so the web panel keeps
+                // seeing the same lines the GUI console shows from here on, not just the early
+                // output already captured above.
+                System.setOut(new PrintStream(new LogBufferOutputStream(System.out), true));
+                System.setErr(new PrintStream(new LogBufferOutputStream(System.err), true));
             }
             catch (Exception e)
             {
                 LOG.warn("Could not redirect console streams to GUI. Logs may not appear in GUI console.");
-                // Restore original streams on failure
-                System.setOut(originalOut);
-                System.setErr(originalErr);
+                // Fall back to the tapped-but-unwrapped streams rather than the bare originals,
+                // so the web panel still gets output even though the GUI console failed.
+                System.setOut(bufferedOut);
+                System.setErr(bufferedErr);
             }
         }
         else
         {
-            // GUI disabled: restore original streams (discard buffer)
+            // GUI disabled: drop the GUI-replay buffer, but keep tapping into LogBuffer.
+            // This is the path --nogui takes, which is exactly when the web panel is most
+            // likely to be someone's only console.
             if (teeOut != null)
             {
-                System.setOut(originalOut);
-                System.setErr(originalErr);
+                System.setOut(bufferedOut);
+                System.setErr(bufferedErr);
             }
         }
         
@@ -213,6 +233,10 @@ public class JMusicBot
         EventWaiter waiter = new EventWaiter();
         SettingsManager settings = new SettingsManager();
         Bot bot = new Bot(waiter, config, settings, userInteraction);
+
+        // Recorded before the window is built. The panel starts later, but the window has to
+        // decide whether to offer the shortcut while it is laying out its sidebar.
+        bot.setWebPort(options.webPort());
 
         // TrackLoadingMonitor is configured via Bot.getAudioLoadWrapper() (DI pattern).
         VoiceConnectionMonitor.setEnabled(guiEnabled);

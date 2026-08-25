@@ -22,6 +22,8 @@ import static com.jagrosh.jmusicbot.config.model.ConfigOption.GUI_ENABLED;
 import static com.jagrosh.jmusicbot.config.model.ConfigOption.GUI_THEME;
 import static com.jagrosh.jmusicbot.config.model.ConfigOption.GUI_FONT_SIZE;
 import static com.jagrosh.jmusicbot.config.model.ConfigOption.GUI_LANGUAGE;
+import static com.jagrosh.jmusicbot.config.model.ConfigOption.WEB_BIND_ADDRESS;
+import static com.jagrosh.jmusicbot.config.model.ConfigOption.WEB_ALLOW_CONFIG_EDIT;
 
 import java.nio.file.Path;
 import java.util.Set;
@@ -75,6 +77,8 @@ public class BotConfig {
     private double skipratio;
     private Language defaultLanguage;
     private Language guiLanguage;
+    private String webBindAddress;
+    private boolean webAllowConfigEdit;
     private String updateRepository, updateGithubToken;
     private boolean autoUpdate;
     private int updateIntervalHours;
@@ -316,6 +320,11 @@ public class BotConfig {
         // Left blank the window follows the bot's language, which is the right default: most
         // people run the bot in the language they read. Set, it wins — the operator watching
         // this window is not necessarily in any of the servers the bot serves.
+        // Defaults chosen to be the safe ones. Reaching the panel from another device and
+        // letting it write the config are both reasonable things to want, but both widen what
+        // a leaked token is worth, so neither happens unless it was asked for.
+        webBindAddress = WEB_BIND_ADDRESS.hasValue(config) ? WEB_BIND_ADDRESS.getString(config) : "127.0.0.1";
+        webAllowConfigEdit = WEB_ALLOW_CONFIG_EDIT.hasValue(config) && WEB_ALLOW_CONFIG_EDIT.getBoolean(config);
         guiLanguage = GUI_LANGUAGE.hasValue(config)
                 ? Language.fromCode(GUI_LANGUAGE.getString(config)).orElse(defaultLanguage)
                 : defaultLanguage;
@@ -656,6 +665,16 @@ public class BotConfig {
 
     public int getGuiFontSize() {
         return guiFontSize;
+    }
+
+    /** The interface the web panel binds to. */
+    public String getWebBindAddress() {
+        return webBindAddress == null || webBindAddress.isBlank() ? "127.0.0.1" : webBindAddress;
+    }
+
+    /** Whether the web panel may write config.txt. */
+    public boolean isWebConfigEditAllowed() {
+        return webAllowConfigEdit;
     }
 
     /** The language the desktop window is displayed in. */

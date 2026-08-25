@@ -412,13 +412,7 @@
       "djRole": "Chọn vai trò DJ:"
     },
     "language": {
-      "current": "Ngôn ngữ bot cho máy chủ này là **{0}**.",
-      "set": "Ngôn ngữ cho máy chủ này đã được đặt thành **{0}**.",
-      "invalid": "Không rõ ngôn ngữ `{0}`. Các ngôn ngữ khả dụng: {1}",
-      "optionDescription": "{0} ({1})",
-      "setPersonal": "Ngôn ngữ của bạn hiện là **{0}**. Cài đặt này sẽ theo bạn vào mọi máy chủ mà bot có mặt.",
-      "currentPersonal": "Ngôn ngữ của bạn là **{0}**.",
-      "currentInherited": "Bạn chưa chọn ngôn ngữ, vì vậy bạn đang thấy ngôn ngữ của máy chủ này: **{0}**."
+      "invalid": "Không rõ ngôn ngữ `{0}`. Các ngôn ngữ khả dụng: {1}"
     },
     "prefix": {
       "cleared": "Đã xóa tiền tố.",
@@ -486,6 +480,25 @@
       "queueType": "Loại hàng đợi: {0}",
       "defaultPlaylist": "Danh sách phát mặc định: {0}",
       "footer": "{0} máy chủ | {1} kết nối âm thanh"
+    },
+    "personal": {
+      "title": "Cài đặt của bạn",
+      "description": "Các cài đặt này chỉ áp dụng cho bạn, trên mọi máy chủ mà bot này có mặt.",
+      "language": {
+        "label": "Ngôn ngữ",
+        "placeholder": "Chọn một ngôn ngữ",
+        "following": "theo máy chủ ({0})",
+        "chosen": "**{0}**",
+        "followOption": "Theo máy chủ",
+        "followHint": "Dùng ngôn ngữ mà máy chủ này đang đặt ({0})."
+      }
+    },
+    "scope": {
+      "placeholder": "Chuyển chế độ xem",
+      "server": "Cài đặt máy chủ",
+      "serverHint": "Áp dụng cho mọi người ở đây. Cần quyền Quản lý Máy chủ.",
+      "personal": "Cài đặt của tôi",
+      "personalHint": "Chỉ áp dụng cho bạn, trên mọi máy chủ."
     }
   },
   "clearchannel": {
@@ -883,7 +896,8 @@
     },
     "webPanel": {
       "cannotOpen": "Máy tính này không thể tự động mở trình duyệt.\nĐịa chỉ bảng điều khiển đã được sao chép vào khay nhớ tạm.",
-      "title": "Bảng điều khiển web"
+      "title": "Bảng điều khiển web",
+      "notReady": "Bảng điều khiển web sẽ khởi động khi bot kết nối với Discord. Vui lòng thử lại sau giây lát."
     }
   }
 }

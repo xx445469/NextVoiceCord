@@ -357,9 +357,40 @@
     "voteSkipSuccess": "You voted to skip the song `{0}`\nSkipped **{1}** {2}"
   },
   "settings": {
-    "updated": "Settings updated.",
     "closeFailed": "Failed to close settings panel.",
-    "refreshFailed": "Failed to refresh settings panel. Run `/settings` again.",
+    "dj": {
+      "cleared": "DJ role cleared; Only Admins can use the DJ commands.",
+      "set": "DJ commands can now be used by users with the **{0}** role.",
+      "missingArg": "Please include a role name or NONE",
+      "notFound": "No Roles found matching \"{0}\"",
+      "multipleFound": " Multiple roles found matching \"{0}\":"
+    },
+    "errors": {
+      "panelExpired": "This settings panel is expired. Run `/settings` again.",
+      "chooseTextChannel": "Please choose a text channel.",
+      "chooseVoiceChannel": "Please choose a voice channel.",
+      "chooseRole": "Please choose a role."
+    },
+    "language": {
+      "invalid": "Unknown language `{0}`. Available: {1}"
+    },
+    "modal": {
+      "setPrefixTitle": "Set prefix",
+      "setPrefixPlaceholder": "Custom prefix (empty clears)",
+      "setSkipTitle": "Set skip percentage",
+      "setSkipPlaceholder": "Integer from 0 to 100",
+      "labelValue": "Value"
+    },
+    "npButtons": {
+      "current": "Now-playing buttons mode is `{0}` (effective: `{1}`).",
+      "set": "Now-playing buttons mode set to `{0}` (effective: `{1}`).",
+      "invalid": "Valid values are `on`, `off`, or `inherit`."
+    },
+    "npLayout": {
+      "current": "Now-playing layout mode is `{0}` (effective: `{1}`).",
+      "set": "Now-playing layout mode set to `{0}` (effective: `{1}`).",
+      "invalid": "Valid values are `full`, `minimal`, or `inherit`."
+    },
     "panel": {
       "title": "NextVoiceCord Settings",
       "description": "Settings panel for **{0}**.\nUse the buttons below to update values.",
@@ -399,59 +430,40 @@
         "djRolePlaceholder": "Choose the DJ role"
       }
     },
-    "modal": {
-      "setPrefixTitle": "Set prefix",
-      "setPrefixPlaceholder": "Custom prefix (empty clears)",
-      "setSkipTitle": "Set skip percentage",
-      "setSkipPlaceholder": "Integer from 0 to 100",
-      "labelValue": "Value"
-    },
-    "prompt": {
-      "textChannel": "Select a text channel:",
-      "voiceChannel": "Select a voice channel:",
-      "djRole": "Select the DJ role:"
-    },
-    "language": {
-      "current": "The bot language for this server is **{0}**.",
-      "set": "Language for this server set to **{0}**.",
-      "invalid": "Unknown language `{0}`. Available: {1}",
-      "optionDescription": "{0} ({1})",
-      "setPersonal": "Your language is now **{0}**. This follows you into every server this bot is in.",
-      "currentPersonal": "Your language is **{0}**.",
-      "currentInherited": "You have not chosen a language, so you see this server's: **{0}**."
+    "personal": {
+      "title": "Your settings",
+      "description": "These apply to you alone, on every server this bot is in.",
+      "language": {
+        "label": "Language",
+        "placeholder": "Choose a language",
+        "following": "following the server ({0})",
+        "chosen": "**{0}**",
+        "followOption": "Follow the server",
+        "followHint": "Use whatever this server is set to ({0})."
+      }
     },
     "prefix": {
       "cleared": "Prefix cleared.",
       "set": "Custom prefix set to `{0}` on *{1}*",
       "missing": "Please include a prefix or NONE"
     },
+    "prompt": {
+      "textChannel": "Select a text channel:",
+      "voiceChannel": "Select a voice channel:",
+      "djRole": "Select the DJ role:"
+    },
     "queueType": {
       "current": "Current queue type is: `{0}`.",
       "set": "Queue type was set to `{0}`.",
       "invalid": "Invalid queue type. Valid types are: [{0}]"
     },
-    "dj": {
-      "cleared": "DJ role cleared; Only Admins can use the DJ commands.",
-      "set": "DJ commands can now be used by users with the **{0}** role.",
-      "missingArg": "Please include a role name or NONE",
-      "notFound": "No Roles found matching \"{0}\"",
-      "multipleFound": " Multiple roles found matching \"{0}\":"
-    },
-    "textChannel": {
-      "set": "Music commands can now only be used in {0}",
-      "cleared": "Music commands can now be used in any channel",
-      "mustBeText": "Please select a text channel!",
-      "missingArg": "Please include a text channel or NONE",
-      "notFound": "No Text Channels found matching \"{0}\"",
-      "multipleFound": " Multiple text channels found matching \"{0}\":"
-    },
-    "voiceChannel": {
-      "set": "Music can now only be played in {0}",
-      "cleared": "Music can now be played in any channel",
-      "mustBeVoice": "Please select a voice channel!",
-      "missingArg": "Please include a voice channel or NONE",
-      "notFound": "No Voice Channels found matching \"{0}\"",
-      "multipleFound": " Multiple voice channels found matching \"{0}\":"
+    "refreshFailed": "Failed to refresh settings panel. Run `/settings` again.",
+    "scope": {
+      "placeholder": "Switch view",
+      "server": "Server settings",
+      "serverHint": "Applies to everyone here. Needs Manage Server.",
+      "personal": "My settings",
+      "personalHint": "Applies only to you, on every server."
     },
     "skipRatio": {
       "set": "Skip percentage has been set to `{0}%` of listeners on *{1}*",
@@ -459,22 +471,6 @@
       "invalidNumber": "Please include an integer between 0 and 100 (default is 55). This number is the percentage of listening users that must vote to skip a song.",
       "emptyError": "Please enter an integer between 0 and 100.",
       "rangeError": "Skip percentage must be between 0 and 100."
-    },
-    "npLayout": {
-      "current": "Now-playing layout mode is `{0}` (effective: `{1}`).",
-      "set": "Now-playing layout mode set to `{0}` (effective: `{1}`).",
-      "invalid": "Valid values are `full`, `minimal`, or `inherit`."
-    },
-    "npButtons": {
-      "current": "Now-playing buttons mode is `{0}` (effective: `{1}`).",
-      "set": "Now-playing buttons mode set to `{0}` (effective: `{1}`).",
-      "invalid": "Valid values are `on`, `off`, or `inherit`."
-    },
-    "errors": {
-      "panelExpired": "This settings panel is expired. Run `/settings` again.",
-      "chooseTextChannel": "Please choose a text channel.",
-      "chooseVoiceChannel": "Please choose a voice channel.",
-      "chooseRole": "Please choose a role."
     },
     "summary": {
       "header": "{0} settings:",
@@ -486,6 +482,23 @@
       "queueType": "Queue Type: {0}",
       "defaultPlaylist": "Default Playlist: {0}",
       "footer": "{0} servers | {1} audio connections"
+    },
+    "textChannel": {
+      "set": "Music commands can now only be used in {0}",
+      "cleared": "Music commands can now be used in any channel",
+      "mustBeText": "Please select a text channel!",
+      "missingArg": "Please include a text channel or NONE",
+      "notFound": "No Text Channels found matching \"{0}\"",
+      "multipleFound": " Multiple text channels found matching \"{0}\":"
+    },
+    "updated": "Settings updated.",
+    "voiceChannel": {
+      "set": "Music can now only be played in {0}",
+      "cleared": "Music can now be played in any channel",
+      "mustBeVoice": "Please select a voice channel!",
+      "missingArg": "Please include a voice channel or NONE",
+      "notFound": "No Voice Channels found matching \"{0}\"",
+      "multipleFound": " Multiple voice channels found matching \"{0}\":"
     }
   },
   "clearchannel": {
@@ -883,6 +896,7 @@
     },
     "webPanel": {
       "cannotOpen": "This desktop cannot open a browser automatically.\nThe panel address has been copied to the clipboard.",
+      "notReady": "The web panel starts once the bot has connected to Discord. Try again in a moment.",
       "title": "Web panel"
     }
   }

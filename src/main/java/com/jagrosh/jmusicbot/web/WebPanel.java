@@ -26,31 +26,39 @@ import java.util.concurrent.Executors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jagrosh.jmusicbot.Bot;
-import com.jagrosh.jmusicbot.audio.AudioHandler;
-import com.jagrosh.jmusicbot.utils.FormatUtil;
-import com.jagrosh.jmusicbot.utils.OtherUtil;
-import com.jagrosh.jmusicbot.utils.TimeUtil;
+import com.jagrosh.jmusicbot.i18n.Language;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-
-import net.dv8tion.jda.api.entities.Guild;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The web panel: a status dashboard for the bot, served over HTTP.
+ * The web panel: the desktop window's views, served over HTTP.
  *
- * <p>Built on the JDK's own {@code HttpServer} rather than a framework. The panel serves one
- * page and two endpoints; pulling in a web stack to do that would add more to the 65 MB jar
- * than the feature is worth, and every dependency here is one more thing that has to keep
- * working for the bot to start.
+ * <p>Built on the JDK's own {@code HttpServer} rather than a framework. Pulling in a web stack
+ * would add more to the 65 MB jar than the feature is worth, and every dependency here is one
+ * more thing that has to keep working for the bot to start.
  *
- * <p>Read-only. Playback control from a browser is a different proposition to reading status:
- * it needs to answer "who did that?" in a way a shared token cannot, and Discord already
- * offers controls that know who pressed them. The panel answers "what is this bot doing right
- * now", which is the part Discord answers badly.
+ * <h2>What this is trusted with</h2>
+ *
+ * <p>The panel can read every guild the bot is in, control playback, and — when
+ * {@code web.allowConfigEdit} is on — rewrite {@code config.txt}. It speaks plain HTTP and
+ * authenticates with a single bearer token, which means anyone who can both reach the port and
+ * see the token has all of that. Three things follow, and each is enforced below rather than
+ * left to the operator:
+ *
+ * <ul>
+ *   <li>It binds {@code 127.0.0.1} unless told otherwise, so the default install is not on the
+ *       network at all.</li>
+ *   <li>Writes require the token in an {@code Authorization} header. A query-string token is
+ *       accepted for the initial page load, because that is what makes the printed link work by
+ *       pasting, but never for anything that changes state — a header cannot be forged by a
+ *       page on another site, and a URL can.</li>
+ *   <li>Secrets are never sent. Not masked in the browser; not included in the response. See
+ *       {@link WebSecrets}.</li>
+ * </ul>
  *
  * @author adan (xx445469)
  */
@@ -59,12 +67,18 @@ public final class WebPanel
     private static final Logger LOG = LoggerFactory.getLogger(WebPanel.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    /** Threads for serving. Small: this is a status page, not a service. */
-    private static final int THREADS = 2;
+    /** Small: this serves one person looking at a dashboard, not the public. */
+    private static final int THREADS = 4;
+
+    /** Refuses a body large enough to be an attack rather than a config edit. */
+    private static final int MAX_BODY_BYTES = 256 * 1024;
 
     private final Bot bot;
     private final int port;
     private final WebAuth auth;
+    private final WebRateLimit rateLimit = new WebRateLimit();
+    private final WebData data;
+    private final WebWrites writes;
     private HttpServer server;
 
     public WebPanel(Bot bot, int port)
@@ -72,6 +86,8 @@ public final class WebPanel
         this.bot = bot;
         this.port = port;
         this.auth = new WebAuth();
+        this.data = new WebData(bot);
+        this.writes = new WebWrites(bot);
     }
 
     /**
@@ -82,23 +98,72 @@ public final class WebPanel
      */
     public void start()
     {
+        String bindAddress = bot.getConfig().getWebBindAddress();
+
         try
         {
-            server = HttpServer.create(new InetSocketAddress(port), 0);
+            server = HttpServer.create(new InetSocketAddress(bindAddress, port), 0);
+
             server.createContext("/", this::handlePage);
-            server.createContext("/api/status", this::handleStatus);
+            server.createContext("/api/status", exchange -> serveJson(exchange, data::status));
+            server.createContext("/api/console", exchange -> serveJson(exchange, data::console));
+            server.createContext("/api/performance", exchange -> serveJson(exchange, data::performance));
+            server.createContext("/api/system", exchange -> serveJson(exchange, data::system));
+            server.createContext("/api/sources", exchange -> serveJson(exchange, data::sources));
+            server.createContext("/api/config", this::handleConfig);
+            server.createContext("/api/prefs", this::handlePrefs);
+            server.createContext("/api/control", this::handleControl);
+
             server.setExecutor(Executors.newFixedThreadPool(THREADS));
             server.start();
 
-            LOG.info("");
-            LOG.info("  Web panel: http://localhost:{}/?token={}", port, auth.getToken());
-            LOG.info("  The token changes every restart and is not stored anywhere.");
-            LOG.info("");
+            announce(bindAddress);
         }
         catch (IOException ex)
         {
-            LOG.warn("Could not start the web panel on port {}: {}. The bot continues without it.",
-                     port, ex.getMessage());
+            LOG.warn("Could not start the web panel on {}:{} — {}. The bot continues without it.",
+                     bindAddress, port, ex.getMessage());
+        }
+    }
+
+    /**
+     * Says what was just opened, and to whom.
+     *
+     * <p>Spelled out rather than left in the config file. Binding to every interface is a
+     * reasonable thing to want and an easy thing to forget, and the difference between "only
+     * this machine" and "everyone on this network" is not visible from a URL.
+     */
+    private void announce(String bindAddress)
+    {
+        boolean everyInterface = "0.0.0.0".equals(bindAddress) || "::".equals(bindAddress);
+        String host = everyInterface ? localAddress() : bindAddress;
+
+        LOG.info("");
+        LOG.info("  Web panel: http://{}:{}/?token={}", host, port, auth.getToken());
+        LOG.info("  The token changes every restart and is not stored anywhere.");
+
+        if (everyInterface)
+        {
+            LOG.warn("  Listening on every interface: anything on your network can reach this port.");
+            LOG.warn("  It is plain HTTP, so the token is visible to that network. Do not forward the port.");
+        }
+        if (bot.getConfig().isWebConfigEditAllowed())
+        {
+            LOG.warn("  Config editing is ON: whoever has the token can rewrite config.txt.");
+        }
+        LOG.info("");
+    }
+
+    /** Best-effort LAN address, so the printed link is one another device can actually open. */
+    private static String localAddress()
+    {
+        try
+        {
+            return java.net.InetAddress.getLocalHost().getHostAddress();
+        }
+        catch (IOException ex)
+        {
+            return "localhost";
         }
     }
 
@@ -110,9 +175,13 @@ public final class WebPanel
      */
     public java.util.Optional<String> getUrl()
     {
-        return server == null
-                ? java.util.Optional.empty()
-                : java.util.Optional.of("http://localhost:" + port + "/?token=" + auth.getToken());
+        if (server == null)
+        {
+            return java.util.Optional.empty();
+        }
+        String bind = bot.getConfig().getWebBindAddress();
+        String host = "0.0.0.0".equals(bind) || "::".equals(bind) ? "localhost" : bind;
+        return java.util.Optional.of("http://" + host + ":" + port + "/?token=" + auth.getToken());
     }
 
     /** Stops serving, if started. */
@@ -125,9 +194,11 @@ public final class WebPanel
         }
     }
 
+    // ==================== Routing ====================
+
     private void handlePage(HttpExchange exchange) throws IOException
     {
-        if (!authorised(exchange))
+        if (!authorised(exchange, false))
         {
             return;
         }
@@ -140,17 +211,131 @@ public final class WebPanel
         send(exchange, 200, "text/html; charset=utf-8", body);
     }
 
-    private void handleStatus(HttpExchange exchange) throws IOException
+    /** Read endpoints all look the same: authorise, build a payload, send it. */
+    private void serveJson(HttpExchange exchange, java.util.function.Function<HttpExchange, Object> builder)
+            throws IOException
     {
-        if (!authorised(exchange))
+        if (!authorised(exchange, false))
         {
             return;
         }
         send(exchange, 200, "application/json; charset=utf-8",
-             MAPPER.writeValueAsString(buildStatus(languageFor(exchange))));
+             MAPPER.writeValueAsString(builder.apply(exchange)));
     }
 
-    /** The status payload. Deliberately flat — the page renders it directly. */
+    private void handleConfig(HttpExchange exchange) throws IOException
+    {
+        if ("GET".equals(exchange.getRequestMethod()))
+        {
+            serveJson(exchange, e -> data.config());
+            return;
+        }
+
+        if (!"POST".equals(exchange.getRequestMethod()))
+        {
+            send(exchange, 405, "text/plain; charset=utf-8", "Method not allowed.");
+            return;
+        }
+
+        if (!authorised(exchange, true))
+        {
+            return;
+        }
+
+        if (!bot.getConfig().isWebConfigEditAllowed())
+        {
+            // Refused here rather than hidden in the page. A panel that shows the controls and
+            // then quietly ignores them is worse than one that says no.
+            send(exchange, 403, "application/json; charset=utf-8",
+                 MAPPER.writeValueAsString(Map.of(
+                         "ok", false,
+                         "reason", "disabled",
+                         "message", "Config editing is off. Set web.allowConfigEdit = true in config.txt.")));
+            return;
+        }
+
+        Map<String, String> updates = readStringMap(exchange);
+        if (updates == null)
+        {
+            send(exchange, 400, "text/plain; charset=utf-8", "Malformed request body.");
+            return;
+        }
+
+        WebWrites.Result result = writes.applyConfig(updates, clientAddress(exchange));
+        send(exchange, result.ok() ? 200 : 400, "application/json; charset=utf-8",
+             MAPPER.writeValueAsString(result.asMap()));
+    }
+
+    private void handlePrefs(HttpExchange exchange) throws IOException
+    {
+        if (!"POST".equals(exchange.getRequestMethod()))
+        {
+            send(exchange, 405, "text/plain; charset=utf-8", "Method not allowed.");
+            return;
+        }
+        if (!authorised(exchange, true))
+        {
+            return;
+        }
+
+        Map<String, String> updates = readStringMap(exchange);
+        if (updates == null)
+        {
+            send(exchange, 400, "text/plain; charset=utf-8", "Malformed request body.");
+            return;
+        }
+
+        WebWrites.Result result = writes.applyPreferences(updates, clientAddress(exchange));
+        send(exchange, result.ok() ? 200 : 400, "application/json; charset=utf-8",
+             MAPPER.writeValueAsString(result.asMap()));
+    }
+
+    private void handleControl(HttpExchange exchange) throws IOException
+    {
+        if (!"POST".equals(exchange.getRequestMethod()))
+        {
+            send(exchange, 405, "text/plain; charset=utf-8", "Method not allowed.");
+            return;
+        }
+        if (!authorised(exchange, true))
+        {
+            return;
+        }
+
+        Map<String, String> command = readStringMap(exchange);
+        if (command == null)
+        {
+            send(exchange, 400, "text/plain; charset=utf-8", "Malformed request body.");
+            return;
+        }
+
+        WebWrites.Result result = writes.control(command, clientAddress(exchange));
+        send(exchange, result.ok() ? 200 : 400, "application/json; charset=utf-8",
+             MAPPER.writeValueAsString(result.asMap()));
+    }
+
+    // ==================== Request helpers ====================
+
+    private Map<String, String> readStringMap(HttpExchange exchange)
+    {
+        try (InputStream in = exchange.getRequestBody())
+        {
+            byte[] body = in.readNBytes(MAX_BODY_BYTES + 1);
+            if (body.length > MAX_BODY_BYTES)
+            {
+                return null;
+            }
+            var type = MAPPER.getTypeFactory()
+                             .constructMapType(java.util.LinkedHashMap.class, String.class, String.class);
+            Map<String, String> parsed = MAPPER.readValue(body, type);
+            return parsed == null ? Map.of() : parsed;
+        }
+        catch (IOException | RuntimeException ex)
+        {
+            return null;
+        }
+    }
+
     /**
      * Picks the language for one request.
      *
@@ -158,21 +343,15 @@ public final class WebPanel
      * bot's default. Honouring the browser means the panel arrives already readable for most
      * people without anyone configuring anything.
      */
-    private com.jagrosh.jmusicbot.i18n.Language languageFor(HttpExchange exchange)
+    Language languageFor(HttpExchange exchange)
     {
-        String query = exchange.getRequestURI().getQuery();
-        if (query != null)
+        String explicit = queryParam(exchange, "lang");
+        if (explicit != null)
         {
-            for (String pair : query.split("&"))
+            var matched = Language.fromCode(explicit);
+            if (matched.isPresent())
             {
-                if (pair.startsWith("lang="))
-                {
-                    var explicit = com.jagrosh.jmusicbot.i18n.Language.fromCode(pair.substring(5));
-                    if (explicit.isPresent())
-                    {
-                        return explicit.get();
-                    }
-                }
+                return matched.get();
             }
         }
 
@@ -182,8 +361,7 @@ public final class WebPanel
             // "zh-TW,zh;q=0.9,en;q=0.8" — take tags in order and use the first one that maps.
             for (String tag : header.get(0).split(","))
             {
-                String code = tag.split(";")[0].trim();
-                var matched = com.jagrosh.jmusicbot.i18n.Language.fromCode(code);
+                var matched = Language.fromCode(tag.split(";")[0].trim());
                 if (matched.isPresent())
                 {
                     return matched.get();
@@ -191,137 +369,72 @@ public final class WebPanel
             }
         }
 
-        return bot.getConfig().getDefaultLanguage();
+        return bot.getConfig().getGuiLanguage();
     }
 
-    private Map<String, Object> buildStatus(com.jagrosh.jmusicbot.i18n.Language language)
-    {
-        var guilds = new java.util.ArrayList<Map<String, Object>>();
-        long listeners = 0;
-
-        if (bot.getJDA() != null)
-        {
-            for (Guild guild : bot.getJDA().getGuilds())
-            {
-                AudioHandler handler = (AudioHandler) guild.getAudioManager().getSendingHandler();
-                boolean playing = handler != null && handler.isMusicPlaying(bot.getJDA());
-
-                var entry = new java.util.LinkedHashMap<String, Object>();
-                entry.put("name", guild.getName());
-                entry.put("id", guild.getId());
-                entry.put("playing", playing);
-                entry.put("members", guild.getMemberCount());
-
-                if (playing)
-                {
-                    var track = handler.getPlayer().getPlayingTrack();
-                    entry.put("track", FormatUtil.getTrackTitle(track));
-                    entry.put("author", track.getInfo().author);
-                    entry.put("position", TimeUtil.formatTime(track.getPosition()));
-                    entry.put("duration", track.getInfo().isStream
-                            ? "LIVE"
-                            : TimeUtil.formatTime(track.getDuration()));
-                    entry.put("progress", track.getInfo().isStream || track.getDuration() <= 0
-                            ? 0
-                            : (int) (track.getPosition() * 100 / track.getDuration()));
-                    entry.put("paused", handler.getPlayer().isPaused());
-                    entry.put("volume", handler.getPlayer().getVolume());
-                    entry.put("queue", handler.getQueue().size());
-
-                    var channel = guild.getSelfMember().getVoiceState() == null
-                            ? null : guild.getSelfMember().getVoiceState().getChannel();
-                    if (channel != null)
-                    {
-                        entry.put("channel", channel.getName());
-                        // Minus the bot itself, which is in the channel but not listening.
-                        listeners += Math.max(0, channel.getMembers().size() - 1);
-                    }
-                }
-                guilds.add(entry);
-            }
-        }
-
-        // Sorted so anything playing is at the top: on a bot in many guilds, the active ones
-        // are the only rows worth scrolling to.
-        guilds.sort((a, b) -> Boolean.compare(
-                Boolean.TRUE.equals(b.get("playing")), Boolean.TRUE.equals(a.get("playing"))));
-
-        var runtime = Runtime.getRuntime();
-        // Labels travel with the data rather than being duplicated in the page, so the panel
-        // and the bot cannot drift into saying different things in the same language.
-        var labels = new java.util.LinkedHashMap<String, String>();
-        for (String key : new String[] { "playingNow", "servers", "listeners", "uptime",
-                                         "memory", "nothingPlaying", "connecting",
-                                         "playing", "paused", "subtitle" })
-        {
-            labels.put(key, bot.getLanguages().get(language, "gui.overview." + key));
-        }
-
-        var payload = new java.util.LinkedHashMap<String, Object>();
-        payload.put("labels", labels);
-        payload.put("language", language.name());
-        payload.putAll(Map.of(
-                "version", OtherUtil.getCurrentVersion(),
-                "guilds", guilds,
-                "guildCount", guilds.size(),
-                "playingCount", guilds.stream().filter(g -> Boolean.TRUE.equals(g.get("playing"))).count(),
-                "listeners", listeners,
-                "memoryUsedMb", (runtime.totalMemory() - runtime.freeMemory()) / 1048576,
-                "memoryMaxMb", runtime.maxMemory() / 1048576,
-                "uptime", formatUptime()));
-        return payload;
-    }
-
-    /** Uptime as a short human string, computed here so Bot keeps exposing only the instant. */
-    private String formatUptime()
-    {
-        long seconds = java.time.Duration.between(bot.getStartTime(), java.time.Instant.now()).toSeconds();
-        long days = seconds / 86400;
-        long hours = (seconds % 86400) / 3600;
-        long minutes = (seconds % 3600) / 60;
-
-        if (days > 0)
-        {
-            return days + "d " + hours + "h";
-        }
-        return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
-    }
-
-    /**
-     * Checks the token, from either the query string or the Authorization header.
-     *
-     * <p>The query string is what makes the printed link work by pasting; the header is what
-     * makes the JSON endpoint usable from a script without putting a credential in a URL that
-     * ends up in shell history.
-     */
-    private boolean authorised(HttpExchange exchange) throws IOException
+    static String queryParam(HttpExchange exchange, String name)
     {
         String query = exchange.getRequestURI().getQuery();
-        String supplied = null;
-
-        if (query != null)
+        if (query == null)
         {
-            for (String pair : query.split("&"))
+            return null;
+        }
+        String prefix = name + "=";
+        for (String pair : query.split("&"))
+        {
+            if (pair.startsWith(prefix))
             {
-                if (pair.startsWith("token="))
-                {
-                    supplied = java.net.URLDecoder.decode(pair.substring(6), StandardCharsets.UTF_8);
-                }
+                return java.net.URLDecoder.decode(pair.substring(prefix.length()), StandardCharsets.UTF_8);
             }
         }
+        return null;
+    }
 
-        if (supplied == null)
+    private static String clientAddress(HttpExchange exchange)
+    {
+        var remote = exchange.getRemoteAddress();
+        return remote == null || remote.getAddress() == null
+                ? "unknown"
+                : remote.getAddress().getHostAddress();
+    }
+
+    // ==================== Authentication ====================
+
+    /**
+     * Checks the token.
+     *
+     * @param mutating when true, only an {@code Authorization} header is accepted. A page on
+     *                 another site can make the browser issue a cross-origin POST carrying
+     *                 whatever is in the URL, but it cannot set this header without a preflight
+     *                 that nothing here answers — so requiring it is what stops a link from
+     *                 rewriting someone's config.
+     */
+    private boolean authorised(HttpExchange exchange, boolean mutating) throws IOException
+    {
+        String address = clientAddress(exchange);
+
+        if (rateLimit.isLockedOut(address))
         {
-            List<String> header = exchange.getRequestHeaders().get("Authorization");
-            if (header != null && !header.isEmpty() && header.get(0).startsWith("Bearer "))
-            {
-                supplied = header.get(0).substring(7);
-            }
+            send(exchange, 429, "text/plain; charset=utf-8",
+                 "Too many failed attempts. Try again later, or restart the bot for a new token.");
+            return false;
+        }
+
+        String supplied = bearerToken(exchange);
+        if (supplied == null && !mutating)
+        {
+            supplied = queryParam(exchange, "token");
         }
 
         if (auth.matches(supplied))
         {
+            rateLimit.recordSuccess(address);
             return true;
+        }
+
+        if (rateLimit.recordFailure(address))
+        {
+            LOG.warn("Web panel: too many bad tokens from {}; locking that address out.", address);
         }
 
         // The same response either way. Distinguishing "no token" from "wrong token" tells an
@@ -330,6 +443,18 @@ public final class WebPanel
              "Unauthorized. Append ?token=… using the token printed in the bot's console at startup.");
         return false;
     }
+
+    private static String bearerToken(HttpExchange exchange)
+    {
+        List<String> header = exchange.getRequestHeaders().get("Authorization");
+        if (header == null || header.isEmpty() || !header.get(0).startsWith("Bearer "))
+        {
+            return null;
+        }
+        return header.get(0).substring(7);
+    }
+
+    // ==================== Sending ====================
 
     private static byte[] readResource(String path)
     {
@@ -360,6 +485,8 @@ public final class WebPanel
         exchange.getResponseHeaders().set("X-Content-Type-Options", "nosniff");
         // Without this the token in the URL is sent to any site the page links to.
         exchange.getResponseHeaders().set("Referrer-Policy", "no-referrer");
+        // Nothing here should ever be cached: it is live status, and the page carries a token.
+        exchange.getResponseHeaders().set("Cache-Control", "no-store");
         exchange.sendResponseHeaders(status, body.length);
         try (OutputStream out = exchange.getResponseBody())
         {

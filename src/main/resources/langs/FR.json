@@ -412,13 +412,7 @@
       "djRole": "Sélectionne le rôle DJ :"
     },
     "language": {
-      "current": "La langue du bot pour ce serveur est **{0}**.",
-      "set": "La langue de ce serveur a été définie sur **{0}**.",
-      "invalid": "Langue inconnue `{0}`. Disponibles : {1}",
-      "optionDescription": "{0} ({1})",
-      "setPersonal": "Ta langue est maintenant **{0}**. Elle te suit sur tous les serveurs où ce bot est présent.",
-      "currentPersonal": "Ta langue est **{0}**.",
-      "currentInherited": "Tu n'as pas choisi de langue, tu vois donc celle de ce serveur : **{0}**."
+      "invalid": "Langue inconnue `{0}`. Disponibles : {1}"
     },
     "prefix": {
       "cleared": "Préfixe supprimé.",
@@ -486,6 +480,25 @@
       "queueType": "Type de file : {0}",
       "defaultPlaylist": "Playlist par défaut : {0}",
       "footer": "{0} serveurs | {1} connexions audio"
+    },
+    "personal": {
+      "title": "Tes paramètres",
+      "description": "Ces paramètres s'appliquent uniquement à toi, sur tous les serveurs où se trouve ce bot.",
+      "language": {
+        "label": "Langue",
+        "placeholder": "Choisis une langue",
+        "following": "suit le serveur ({0})",
+        "chosen": "**{0}**",
+        "followOption": "Suivre le serveur",
+        "followHint": "Utilise la langue définie sur ce serveur ({0})."
+      }
+    },
+    "scope": {
+      "placeholder": "Changer de vue",
+      "server": "Paramètres du serveur",
+      "serverHint": "S'applique à tout le monde ici. Nécessite la permission Gérer le serveur.",
+      "personal": "Mes paramètres",
+      "personalHint": "S'applique uniquement à toi, sur tous les serveurs."
     }
   },
   "clearchannel": {
@@ -883,7 +896,8 @@
     },
     "webPanel": {
       "cannotOpen": "Ce bureau ne peut pas ouvrir automatiquement un navigateur.\nL'adresse du panneau a été copiée dans le presse-papiers.",
-      "title": "Panneau web"
+      "title": "Panneau web",
+      "notReady": "Le panneau web démarre une fois que le bot s'est connecté à Discord. Réessaie dans un instant."
     }
   }
 }
