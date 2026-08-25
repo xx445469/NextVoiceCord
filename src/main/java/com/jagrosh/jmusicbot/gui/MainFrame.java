@@ -18,6 +18,10 @@ package com.jagrosh.jmusicbot.gui;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.GCMonitor;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor;
+import com.jagrosh.jmusicbot.gui.components.Sidebar;
+import com.jagrosh.jmusicbot.gui.panels.DashboardPanel;
+import com.jagrosh.jmusicbot.gui.theme.Tokens;
+import java.awt.CardLayout;
 import com.jagrosh.jmusicbot.gui.components.IconFactory;
 import com.jagrosh.jmusicbot.gui.components.StatusBar;
 import com.jagrosh.jmusicbot.gui.model.BotStatusData;
@@ -52,7 +56,12 @@ public class MainFrame extends JFrame {
     private static final int DEFAULT_HEIGHT = 600;
     
     private final Bot bot;
-    private final JTabbedPane tabbedPane;
+    private final Sidebar sidebar;
+    private final CardLayout contentLayout = new CardLayout();
+    private final JPanel content = new JPanel(contentLayout);
+    private final DashboardPanel dashboardPanel;
+    /** Which view is showing, so only its metrics are refreshed. */
+    private String currentView = "dashboard";
     private final ConsolePanel consolePanel;
     private final StatusPanel statusPanel;
     private final PerformancePanel performancePanel;
@@ -88,7 +97,8 @@ public class MainFrame extends JFrame {
         this.settingsPanel = new SettingsPanel();
         this.configPanel = new ConfigPanel(bot);
         this.statusBar = new StatusBar();
-        this.tabbedPane = new JTabbedPane();
+        this.dashboardPanel = new DashboardPanel(bot);
+        this.sidebar = new Sidebar(this::showView);
         
         initializeFrame();
     }
@@ -107,14 +117,18 @@ public class MainFrame extends JFrame {
         setJMenuBar(createMenuBar());
         
         // Setup tabbed pane with icons
-        setupTabbedPane();
         
         // Main layout
-        JPanel mainPanel = new JPanel(new BorderLayout(0, 6));
-        // Content sat flush against the window edge, which reads as unfinished regardless of
-        // how the panels themselves are styled.
-        mainPanel.setBorder(new EmptyBorder(8, 10, 8, 10));
-        mainPanel.add(tabbedPane, BorderLayout.CENTER);
+        setupSidebar();
+
+        content.setOpaque(true);
+        content.setBackground(Tokens.surface());
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        // No outer margin: the sidebar runs to the window edge, which is what makes it read
+        // as part of the frame rather than a floating panel.
+        mainPanel.add(sidebar, BorderLayout.WEST);
+        mainPanel.add(content, BorderLayout.CENTER);
         mainPanel.add(statusBar, BorderLayout.SOUTH);
         
         setContentPane(mainPanel);
@@ -170,20 +184,71 @@ public class MainFrame extends JFrame {
         statusBar.updateStatus(statusData, statusData.uptimeString());
         statusPanel.updateStatus(statusData);
         
-        // Update performance metrics if performance/system/sources tab is visible
-        int selectedTab = tabbedPane.getSelectedIndex();
-        if (selectedTab == 2) {
-            performancePanel.updateMetrics();
-        } else if (selectedTab == 3) {
-            systemHealthPanel.updateMetrics();
-        } else if (selectedTab == 4) {
-            sourceHealthPanel.refreshMetrics();
+        // Only the visible view is refreshed. Polling metrics for panels nobody is looking
+        // at is work done to be thrown away, and these are the expensive ones.
+        switch (currentView) {
+            case "performance" -> performancePanel.updateMetrics();
+            case "system" -> systemHealthPanel.updateMetrics();
+            case "sources" -> sourceHealthPanel.refreshMetrics();
+            default -> { }
         }
     }
     
     /**
      * Creates the menu bar with File, View, and Help menus.
      */
+    /**
+     * Builds the navigation column.
+     *
+     * <p>Grouped rather than listed flat: the first group is what you watch, the second what
+     * you configure. Seven tabs in a row could not express that difference; a column can.
+     */
+    private void setupSidebar() {
+        register("dashboard", dashboardPanel);
+        register("console", consolePanel);
+        register("status", statusPanel);
+        register("performance", performancePanel);
+        register("system", systemHealthPanel);
+        register("sources", sourceHealthPanel);
+        register("settings", settingsPanel);
+        register("config", configPanel);
+
+        sidebar.addItem("dashboard", "Overview", IconFactory.getIcon(IconFactory.IconType.STATUS, 16));
+        sidebar.addItem("console", "Console", IconFactory.getIcon(IconFactory.IconType.CONSOLE, 16));
+        sidebar.addItem("status", "Servers", IconFactory.getIcon(IconFactory.IconType.CONNECTED, 16));
+
+        sidebar.addSection("Diagnostics");
+        sidebar.addItem("performance", "Performance", IconFactory.getIcon(IconFactory.IconType.PLAY, 16));
+        sidebar.addItem("system", "System", IconFactory.getIcon(IconFactory.IconType.REFRESH, 16));
+        sidebar.addItem("sources", "Sources", IconFactory.getIcon(IconFactory.IconType.SEARCH, 16));
+
+        sidebar.addSpacer();
+        sidebar.addSection("Configure");
+        sidebar.addItem("settings", "Preferences", IconFactory.getIcon(IconFactory.IconType.SETTINGS, 16));
+        sidebar.addItem("config", "Bot config", IconFactory.getIcon(IconFactory.IconType.COPY, 16));
+    }
+
+    private void register(String key, java.awt.Component view) {
+        content.add(view, key);
+    }
+
+    /**
+     * Switches the visible view.
+     *
+     * <p>The dashboard polls once a second, so it is stopped whenever something else is
+     * showing — a hidden view that keeps working is a cost paid for nothing.
+     */
+    private void showView(String key) {
+        currentView = key;
+        contentLayout.show(content, key);
+
+        if ("dashboard".equals(key)) {
+            dashboardPanel.start();
+        } else {
+            dashboardPanel.stop();
+        }
+    }
+
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         
@@ -217,31 +282,31 @@ public class MainFrame extends JFrame {
         
         // Tab navigation
         JMenuItem consoleTab = new JMenuItem("Console");
-        consoleTab.addActionListener(e -> tabbedPane.setSelectedIndex(0));
+        consoleTab.addActionListener(e -> sidebar.select("console"));
         viewMenu.add(consoleTab);
         
         JMenuItem statusTab = new JMenuItem("Status");
-        statusTab.addActionListener(e -> tabbedPane.setSelectedIndex(1));
+        statusTab.addActionListener(e -> sidebar.select("status"));
         viewMenu.add(statusTab);
         
         JMenuItem performanceTab = new JMenuItem("Performance");
-        performanceTab.addActionListener(e -> tabbedPane.setSelectedIndex(2));
+        performanceTab.addActionListener(e -> sidebar.select("performance"));
         viewMenu.add(performanceTab);
         
         JMenuItem systemTab = new JMenuItem("System Health");
-        systemTab.addActionListener(e -> tabbedPane.setSelectedIndex(3));
+        systemTab.addActionListener(e -> sidebar.select("system"));
         viewMenu.add(systemTab);
         
         JMenuItem sourcesTab = new JMenuItem("Sources");
-        sourcesTab.addActionListener(e -> tabbedPane.setSelectedIndex(4));
+        sourcesTab.addActionListener(e -> sidebar.select("sources"));
         viewMenu.add(sourcesTab);
         
         JMenuItem settingsTab = new JMenuItem("Settings");
-        settingsTab.addActionListener(e -> tabbedPane.setSelectedIndex(5));
+        settingsTab.addActionListener(e -> sidebar.select("settings"));
         viewMenu.add(settingsTab);
         
         JMenuItem configTab = new JMenuItem("Config");
-        configTab.addActionListener(e -> tabbedPane.setSelectedIndex(6));
+        configTab.addActionListener(e -> sidebar.select("config"));
         viewMenu.add(configTab);
         
         // Help menu
@@ -262,30 +327,6 @@ public class MainFrame extends JFrame {
     /**
      * Sets up the tabbed pane with all panels.
      */
-    private void setupTabbedPane() {
-        tabbedPane.setTabPlacement(JTabbedPane.TOP);
-        
-        // Add tabs with tooltips
-        tabbedPane.addTab("Console", IconFactory.getIcon(IconFactory.IconType.CONSOLE, 16), consolePanel, "View application logs and output");
-        tabbedPane.addTab("Status", IconFactory.getIcon(IconFactory.IconType.STATUS, 16), statusPanel, "View bot status and connected guilds");
-        tabbedPane.addTab("Performance", IconFactory.getIcon(IconFactory.IconType.PLAY, 16), performancePanel, "Monitor audio processing performance");
-        tabbedPane.addTab("System", IconFactory.getIcon(IconFactory.IconType.REFRESH, 16), systemHealthPanel, "Monitor system health (CPU, memory, GC)");
-        tabbedPane.addTab("Sources", IconFactory.getIcon(IconFactory.IconType.SEARCH, 16), sourceHealthPanel, "Monitor track loading health by source");
-        tabbedPane.addTab("Settings", IconFactory.getIcon(IconFactory.IconType.SETTINGS, 16), settingsPanel, "Configure GUI settings");
-        tabbedPane.addTab("Config", IconFactory.getIcon(IconFactory.IconType.COPY, 16), configPanel, "Edit bot configuration");
-        
-        // Refresh panels when selected
-        tabbedPane.addChangeListener(e -> {
-            int selectedTab = tabbedPane.getSelectedIndex();
-            if (selectedTab == 2) {
-                performancePanel.refreshGuildList();
-            } else if (selectedTab == 3) {
-                systemHealthPanel.refreshMetrics();
-            } else if (selectedTab == 4) {
-                sourceHealthPanel.refreshMetrics();
-            }
-        });
-    }
     
     /**
      * Handles window closing - shuts down the bot gracefully.
