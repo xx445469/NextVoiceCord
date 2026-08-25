@@ -537,5 +537,37 @@
         "engineMissing": "Công cụ eval được chỉ định trong cấu hình (`{0}`) không tồn tại. Điều này có thể do tên công cụ không hợp lệ, hoặc phiên bản Java của bạn không có công cụ này (`{1}`)."
       }
     }
+  },
+  "controller": {
+    "editor": {
+      "title": "Bố cục bảng điều khiển",
+      "description": "Chỉnh sửa các nút hiển thị trên bảng đang phát. Bản xem trước bên dưới cho thấy bố cục này tạo ra gì — các nút ở đây đã bị vô hiệu hóa.",
+      "warnings": "Một số mục đã được điều chỉnh:",
+      "applied": "Đã cập nhật bố cục.",
+      "reset": "Đã đặt lại bố cục về mặc định.",
+      "field": {
+        "source": "Nguồn",
+        "layout": "Bố cục"
+      },
+      "source": {
+        "custom": "Tùy chỉnh",
+        "default": "Mặc định"
+      },
+      "button": {
+        "edit": "Sửa",
+        "refresh": "Làm mới",
+        "reset": "Đặt lại"
+      },
+      "modal": {
+        "title": "Chỉnh sửa bố cục bảng điều khiển",
+        "label": "Bố cục (JSON)",
+        "placeholder": "[ { \"back\": {}, \"play-pause\": {}, \"skip\": {} } ]"
+      },
+      "errors": {
+        "invalidJson": "Đó không phải là JSON hợp lệ. Mỗi hàng là một đối tượng gồm tên các nút, và toàn bộ bố cục là một danh sách các hàng.",
+        "notAnArray": "Bố cục phải là một danh sách các hàng, ví dụ: [ { \"skip\": {} } ]",
+        "noButtons": "Bố cục đó không chứa nút nào có thể sử dụng, nên đã không được áp dụng."
+      }
+    }
   }
 }
