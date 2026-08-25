@@ -1186,7 +1186,7 @@ public class MusicServiceTest
         void formatTrackAddedMessage_position0_nowPlaying()
         {
             // When
-            String message = musicService.formatTrackAddedMessage("Test Song", 180000, 0);
+            String message = musicService.formatTrackAddedMessage(null, "Test Song", 180000, 0);
 
             // Then
             assertTrue(message.contains("Test Song"));
@@ -1198,7 +1198,7 @@ public class MusicServiceTest
         void formatTrackAddedMessage_queuePosition()
         {
             // When
-            String message = musicService.formatTrackAddedMessage("Test Song", 180000, 5);
+            String message = musicService.formatTrackAddedMessage(null, "Test Song", 180000, 5);
 
             // Then
             assertTrue(message.contains("Test Song"));

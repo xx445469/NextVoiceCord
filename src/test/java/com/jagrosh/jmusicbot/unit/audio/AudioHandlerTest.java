@@ -17,6 +17,7 @@ package com.jagrosh.jmusicbot.unit.audio;
 
 import com.jagrosh.jmusicbot.TestBase;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.PlaybackReason;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.settings.QueueType;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
@@ -337,7 +338,8 @@ public class AudioHandlerTest extends TestBase {
         @DisplayName("setLastReason() stores reason")
         public void testSetLastReason() {
             // Just verify it doesn't throw
-            assertDoesNotThrow(() -> audioHandler.setLastReason("Test reason"));
+            assertDoesNotThrow(() -> audioHandler.setLastReason(
+                    PlaybackReason.by(PlaybackReason.Kind.SKIPPED_FORWARD, "Tester")));
         }
     }
 

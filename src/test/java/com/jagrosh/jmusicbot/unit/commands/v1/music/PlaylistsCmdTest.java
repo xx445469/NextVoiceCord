@@ -18,6 +18,7 @@ package com.jagrosh.jmusicbot.unit.commands.v1.music;
 import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.testutil.TestTranslations;
 import com.jagrosh.jmusicbot.commands.v1.music.PlaylistsCmd;
 import com.jagrosh.jmusicbot.service.MusicService;
 import net.dv8tion.jda.api.entities.Member;
@@ -43,7 +44,7 @@ class PlaylistsCmdTest
     @BeforeEach
     void setUp()
     {
-        bot = mock(Bot.class);
+        bot = TestTranslations.mockBot();
         musicService = mock(MusicService.class);
         event = mock(CommandEvent.class);
         CommandClient client = mock(CommandClient.class);

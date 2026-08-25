@@ -18,6 +18,7 @@ package com.jagrosh.jmusicbot.testutil.service;
 import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.testutil.TestTranslations;
 import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.AudioLoadWrapper;
@@ -119,7 +120,7 @@ public class ServiceTestFixture
     private ServiceTestFixture()
     {
         // Create all mocks
-        bot = mock(Bot.class);
+        bot = TestTranslations.mockBot();
         config = mock(BotConfig.class);
         playerManager = mock(PlayerManager.class);
         settingsManager = mock(SettingsManager.class);

@@ -103,12 +103,18 @@ public final class LanguageManager
      * failing startup: one bad translation file should not take the bot offline when every
      * lookup already falls back to English.
      *
-     * @param defaultLanguage language used when none is configured, and the fallback target
+     * @param defaultLanguage language used when none is configured, and the fallback target;
+     *        {@code null} resolves to {@link Language#DEFAULT}
      * @throws IllegalStateException if the default language itself fails to load, which
      *         leaves nothing to fall back to
      */
-    public static LanguageManager load(Language defaultLanguage)
+    public static LanguageManager load(Language requestedDefault)
     {
+        // Null is tolerated for the same reason an unparseable ui.language is: this module
+        // degrades rather than refuses. A missing language setting must not be the thing
+        // that stops the bot from starting, and English is always the safe answer.
+        Language defaultLanguage = requestedDefault == null ? Language.DEFAULT : requestedDefault;
+
         Map<Language, Map<String, String>> loaded = new EnumMap<>(Language.class);
         Set<Language> unreviewed = EnumSet.noneOf(Language.class);
 
