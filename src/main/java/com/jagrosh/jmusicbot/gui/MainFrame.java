@@ -18,6 +18,7 @@ package com.jagrosh.jmusicbot.gui;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.GCMonitor;
 import com.jagrosh.jmusicbot.audio.SystemHealthMonitor;
+import com.jagrosh.jmusicbot.gui.components.IconFactory;
 import com.jagrosh.jmusicbot.gui.components.StatusBar;
 import com.jagrosh.jmusicbot.gui.model.BotStatusData;
 import com.jagrosh.jmusicbot.gui.panels.ConfigPanel;
@@ -69,6 +70,11 @@ public class MainFrame extends JFrame {
      */
     public MainFrame(Bot bot) {
         super(TITLE);
+
+        // Without this the window shows the generic Java coffee cup in the taskbar,
+        // the dock and the Alt-Tab switcher — the three places a user actually looks
+        // for a running application.
+        setIconImages(IconFactory.getWindowIcons());
         this.bot = bot;
         this.startTime = Instant.now();
         
@@ -254,13 +260,13 @@ public class MainFrame extends JFrame {
         tabbedPane.setTabPlacement(JTabbedPane.TOP);
         
         // Add tabs with tooltips
-        tabbedPane.addTab("Console", null, consolePanel, "View application logs and output");
-        tabbedPane.addTab("Status", null, statusPanel, "View bot status and connected guilds");
-        tabbedPane.addTab("Performance", null, performancePanel, "Monitor audio processing performance");
-        tabbedPane.addTab("System", null, systemHealthPanel, "Monitor system health (CPU, memory, GC)");
-        tabbedPane.addTab("Sources", null, sourceHealthPanel, "Monitor track loading health by source");
-        tabbedPane.addTab("Settings", null, settingsPanel, "Configure GUI settings");
-        tabbedPane.addTab("Config", null, configPanel, "Edit bot configuration");
+        tabbedPane.addTab("Console", IconFactory.getIcon(IconFactory.IconType.CONSOLE, 16), consolePanel, "View application logs and output");
+        tabbedPane.addTab("Status", IconFactory.getIcon(IconFactory.IconType.STATUS, 16), statusPanel, "View bot status and connected guilds");
+        tabbedPane.addTab("Performance", IconFactory.getIcon(IconFactory.IconType.PLAY, 16), performancePanel, "Monitor audio processing performance");
+        tabbedPane.addTab("System", IconFactory.getIcon(IconFactory.IconType.REFRESH, 16), systemHealthPanel, "Monitor system health (CPU, memory, GC)");
+        tabbedPane.addTab("Sources", IconFactory.getIcon(IconFactory.IconType.SEARCH, 16), sourceHealthPanel, "Monitor track loading health by source");
+        tabbedPane.addTab("Settings", IconFactory.getIcon(IconFactory.IconType.SETTINGS, 16), settingsPanel, "Configure GUI settings");
+        tabbedPane.addTab("Config", IconFactory.getIcon(IconFactory.IconType.COPY, 16), configPanel, "Edit bot configuration");
         
         // Refresh panels when selected
         tabbedPane.addChangeListener(e -> {
