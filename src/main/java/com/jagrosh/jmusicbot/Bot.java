@@ -26,6 +26,8 @@ import com.jagrosh.jmusicbot.audio.TrackLoadingMonitor;
 import com.jagrosh.jmusicbot.entities.UserInteraction;
 import javax.swing.JFrame;
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader;
+import com.jagrosh.jmusicbot.i18n.Language;
+import com.jagrosh.jmusicbot.i18n.LanguageManager;
 import com.jagrosh.jmusicbot.settings.SettingsManager;
 import com.jagrosh.jmusicbot.service.MusicService;
 import com.jagrosh.jmusicbot.service.SearchService;
@@ -60,6 +62,7 @@ public class Bot
     private final UserInteraction userInteraction;
     private final Instant startTime;
     private final AudioLoadWrapper audioLoadWrapper;
+    private final LanguageManager languages;
     
     private boolean shuttingDown = false;
     private JDA jda;
@@ -72,6 +75,9 @@ public class Bot
         this.config = config;
         this.settings = settings;
         this.userInteraction = userInteraction;
+        // Loaded before any subsystem that might need to report to a user, so no code
+        // path can reach a message lookup before translations exist.
+        this.languages = LanguageManager.load(config.getDefaultLanguage());
         this.playlists = new PlaylistLoader(config);
         this.threadpool = Executors.newSingleThreadScheduledExecutor();
         this.startTime = Instant.now();
@@ -96,6 +102,32 @@ public class Bot
     public BotConfig getConfig()
     {
         return config;
+    }
+
+    /** Translation lookup. Prefer {@link #msg} for anything addressed to a guild. */
+    public LanguageManager getLanguages()
+    {
+        return languages;
+    }
+
+    /**
+     * Resolves a message key in {@code guild}'s language.
+     *
+     * <p>The single entry point message-producing code should use. Going through
+     * {@code getLanguages().get(...)} directly means resolving the guild's language at the
+     * call site, and the failure mode when that is forgotten is silent: everything renders
+     * in English and looks correct to an English-speaking developer.
+     *
+     * @param guild     guild whose language applies; {@code null} uses the global default
+     * @param key       dot-separated message key
+     * @param arguments values for {0}, {1}, ... in order
+     */
+    public String msg(Guild guild, String key, Object... arguments)
+    {
+        Language language = guild == null
+                ? config.getDefaultLanguage()
+                : settings.getSettings(guild).getLanguage(config);
+        return languages.get(language, key, arguments);
     }
     
     public SettingsManager getSettingsManager()

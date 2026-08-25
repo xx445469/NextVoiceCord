@@ -15,6 +15,8 @@
  */
 package com.jagrosh.jmusicbot;
 
+import com.jagrosh.jmusicbot.i18n.Language;
+
 import static com.jagrosh.jmusicbot.config.model.ConfigOption.*;
 import static com.jagrosh.jmusicbot.config.model.ConfigOption.GUI_ENABLED;
 import static com.jagrosh.jmusicbot.config.model.ConfigOption.GUI_THEME;
@@ -68,6 +70,7 @@ public class BotConfig {
     private String proxyHost;
     private boolean proxyLavaplayer, proxyJda, proxyGithub;
     private double skipratio;
+    private Language defaultLanguage;
     private OnlineStatus status;
     private Activity game;
     private Config aliases, transforms;
@@ -244,6 +247,14 @@ public class BotConfig {
         // set values using ConfigOption enum for type safety and standardization
         token = TOKEN.getString(config);
         prefix = PREFIX.getString(config);
+        // An unrecognised code falls back to English with a warning rather than aborting
+        // startup: a typo in one cosmetic setting should not stop the bot from running.
+        defaultLanguage = Language.fromCode(LANGUAGE.getString(config)).orElseGet(() -> {
+            LOGGER.warn("Unknown ui.language '{}'; falling back to {}. Available: {}",
+                     LANGUAGE.getString(config), Language.DEFAULT,
+                     java.util.Arrays.toString(Language.values()));
+            return Language.DEFAULT;
+        });
         // Handle altPrefix null value by defaulting to "NONE"
         altprefix = ALTPREFIX.hasValue(config) ? ALTPREFIX.getString(config) : "NONE";
         helpWord = HELP_WORD.getString(config);
@@ -390,6 +401,11 @@ public class BotConfig {
 
     public String getConfigLocation() {
         return path.toFile().getAbsolutePath();
+    }
+
+    /** Default language for servers that have not chosen one. */
+    public Language getDefaultLanguage() {
+        return defaultLanguage;
     }
 
     public String getPrefix() {

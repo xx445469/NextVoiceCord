@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jagrosh.jdautilities.command.GuildSettingsManager;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
+import com.jagrosh.jmusicbot.i18n.Language;
 import net.dv8tion.jda.api.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +77,19 @@ public class SettingsManager implements GuildSettingsManager<Settings>
                             o.has("now_playing_buttons_mode")
                                     ? NowPlayingButtonsMode.valueOfOrDefault(o.get("now_playing_buttons_mode").asText(), NowPlayingButtonsMode.INHERIT)
                                     : NowPlayingButtonsMode.INHERIT));
+
+                    // Applied after construction rather than as a constructor argument; see
+                    // the note on Settings.language. An unrecognised code resolves to empty,
+                    // which means "inherit the global default" — the same as absent. That
+                    // keeps a hand-edited typo from breaking startup for that guild.
+                    if (o.has("language"))
+                    {
+                        Language.fromCode(o.get("language").asText())
+                                .ifPresentOrElse(
+                                        lang -> settings.get(Long.parseLong(id)).applyLoadedLanguage(lang),
+                                        () -> LOG.warn("Guild {} has unknown language '{}'; using the global default.",
+                                                       id, o.get("language").asText()));
+                    }
                 }
             }
         } catch (NoSuchFileException e) {
@@ -146,6 +160,11 @@ public class SettingsManager implements GuildSettingsManager<Settings>
                 o.put("now_playing_layout_mode", s.getNowPlayingLayoutMode().name());
             if(s.getNowPlayingButtonsMode() != NowPlayingButtonsMode.INHERIT)
                 o.put("now_playing_buttons_mode", s.getNowPlayingButtonsMode().name());
+            // Only an explicit override is written. Persisting the resolved value would
+            // freeze today's global default into every guild, so a later change to it would
+            // silently stop applying to guilds that never chose a language.
+            if(s.getLanguageOverride() != null)
+                o.put("language", s.getLanguageOverride().name());
             obj.set(Long.toString(key), o);
         });
         try {
