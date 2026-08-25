@@ -102,6 +102,19 @@ public final class WebPanel
         }
     }
 
+    /**
+     * The panel's URL including its token, or empty if it is not running.
+     *
+     * <p>Includes the token because the alternative is asking someone to copy it out of a
+     * console that has since scrolled — which is the whole reason a button exists.
+     */
+    public java.util.Optional<String> getUrl()
+    {
+        return server == null
+                ? java.util.Optional.empty()
+                : java.util.Optional.of("http://localhost:" + port + "/?token=" + auth.getToken());
+    }
+
     /** Stops serving, if started. */
     public void stop()
     {

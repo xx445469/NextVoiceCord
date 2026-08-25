@@ -222,10 +222,53 @@ public class MainFrame extends JFrame {
         sidebar.addItem("system", "System", IconFactory.getIcon(IconFactory.IconType.REFRESH, 16));
         sidebar.addItem("sources", "Sources", IconFactory.getIcon(IconFactory.IconType.SEARCH, 16));
 
+        // Offered only when --web is actually serving. A permanently visible button that
+        // sometimes does nothing is worse than no button.
+        if (bot.getWebPanel() != null && bot.getWebPanel().getUrl().isPresent())
+        {
+            sidebar.addSection("Web panel");
+            sidebar.addAction("Open in browser",
+                              IconFactory.getIcon(IconFactory.IconType.SEARCH, 16),
+                              this::openWebPanel);
+        }
+
         sidebar.addSpacer();
         sidebar.addSection("Configure");
         sidebar.addItem("settings", "Preferences", IconFactory.getIcon(IconFactory.IconType.SETTINGS, 16));
         sidebar.addItem("config", "Bot config", IconFactory.getIcon(IconFactory.IconType.COPY, 16));
+    }
+
+    /**
+     * Opens the web panel in the default browser.
+     *
+     * <p>The URL carries the token, which is the point: the alternative is asking someone to
+     * copy it out of a console that has long since scrolled past it.
+     */
+    private void openWebPanel() {
+        bot.getWebPanel().getUrl().ifPresent(url -> {
+            try {
+                if (java.awt.Desktop.isDesktopSupported()
+                        && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
+                    java.awt.Desktop.getDesktop().browse(java.net.URI.create(url));
+                    return;
+                }
+                // Headless-capable desktops and some Linux setups have no BROWSE action.
+                // Putting the URL on the clipboard still saves the retyping.
+                copyToClipboard(url);
+                JOptionPane.showMessageDialog(this,
+                        "This desktop cannot open a browser automatically.\n"
+                        + "The panel address has been copied to the clipboard.",
+                        "Web panel", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                LOG.warn("Could not open the web panel: {}", ex.toString());
+                copyToClipboard(url);
+            }
+        });
+    }
+
+    private void copyToClipboard(String text) {
+        java.awt.Toolkit.getDefaultToolkit().getSystemClipboard()
+                .setContents(new java.awt.datatransfer.StringSelection(text), null);
     }
 
     private void register(String key, java.awt.Component view) {

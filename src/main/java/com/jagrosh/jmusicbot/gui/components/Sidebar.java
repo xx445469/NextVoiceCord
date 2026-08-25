@@ -99,6 +99,20 @@ public final class Sidebar extends JPanel
         add(heading);
     }
 
+    /**
+     * Adds an action rather than a view — something that happens instead of somewhere to go.
+     *
+     * <p>Styled like the navigation entries so the column reads as one list, but never takes
+     * the selected state, because nothing here stays selected.
+     */
+    public void addAction(String label, Icon icon, Runnable action)
+    {
+        Item item = new Item("__action__" + label, label, icon);
+        item.action = action;
+        add(item);
+        add(Box.createVerticalStrut(2));
+    }
+
     /** Pushes everything after it to the bottom of the column. */
     public void addSpacer()
     {
@@ -118,6 +132,8 @@ public final class Sidebar extends JPanel
     {
         private final String key;
         private final JLabel label;
+        /** Set for action entries; when present, clicking runs this instead of selecting. */
+        private Runnable action;
         private boolean selected;
         private boolean hovered;
 
@@ -144,6 +160,11 @@ public final class Sidebar extends JPanel
                 @Override
                 public void mouseClicked(MouseEvent e)
                 {
+                    if (action != null)
+                    {
+                        action.run();
+                        return;
+                    }
                     select(Item.this.key);
                 }
 
