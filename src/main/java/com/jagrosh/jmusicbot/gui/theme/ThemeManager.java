@@ -147,7 +147,54 @@ public final class ThemeManager {
     /**
      * Configures FlatLaf global settings before initialization.
      */
+    /**
+     * Settings that must be in place before the look and feel is installed.
+     *
+     * <p>Only system properties belong here. UI defaults do not: installing a FlatLaf resets
+     * the UIManager, so anything put there beforehand is discarded — which is why every
+     * {@code UIManager.put} in this class had no effect at all until the split.
+     */
     private static void configureFlatLaf() {
+        // The macOS screen menu bar and the app name shown in it are read by the toolkit at
+        // startup, long before any look and feel exists.
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+        System.setProperty("apple.awt.application.name", "NextVoiceCord");
+        // Lets the title bar adopt the theme instead of staying light above a dark window.
+        System.setProperty("apple.awt.application.appearance", "system");
+    }
+
+    /**
+     * Picks the platform's UI font, falling back only when nothing suitable exists.
+     *
+     * <p>Asking for {@code Font.SANS_SERIF} yields a generic family that is not what the
+     * rest of the desktop uses. Matching the platform font is the cheapest single change
+     * that stops a Swing window looking out of place.
+     */
+    private static Font resolveUiFont(int size) {
+        String[] preferred = {
+            "SF Pro Text", ".AppleSystemUIFont", "Helvetica Neue",   // macOS
+            "Segoe UI Variable Text", "Segoe UI",                    // Windows
+            "Inter", "Ubuntu", "Cantarell", "Noto Sans"              // Linux
+        };
+
+        java.util.Set<String> available = new java.util.HashSet<>(java.util.Arrays.asList(
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
+
+        for (String family : preferred) {
+            if (available.contains(family)) {
+                return new Font(family, Font.PLAIN, size);
+            }
+        }
+        return new Font(Font.SANS_SERIF, Font.PLAIN, size);
+    }
+    
+    /**
+     * Applies every visual default, after the look and feel is installed.
+     *
+     * <p>Must run after {@code setLookAndFeel} and again after every theme change, because
+     * installing a FlatLaf replaces the UIManager's contents wholesale.
+     */
+    private static void applyUiDefaults() {
         // --- Shape -------------------------------------------------------------
         // A single radius across every component is what makes a set of controls read as
         // one design rather than several. 10 rather than 8: at small sizes a smaller
@@ -205,37 +252,10 @@ public final class ThemeManager {
         UIManager.put("MenuItem.selectionArc", 6);
 
         // --- Platform ----------------------------------------------------------
-        System.setProperty("apple.laf.useScreenMenuBar", "true");
-        System.setProperty("apple.awt.application.name", "NextVoiceCord");
         // Lets the title bar adopt the theme instead of staying light above a dark window.
-        System.setProperty("apple.awt.application.appearance", "system");
-    }
-
-    /**
-     * Picks the platform's UI font, falling back only when nothing suitable exists.
-     *
-     * <p>Asking for {@code Font.SANS_SERIF} yields a generic family that is not what the
-     * rest of the desktop uses. Matching the platform font is the cheapest single change
-     * that stops a Swing window looking out of place.
-     */
-    private static Font resolveUiFont(int size) {
-        String[] preferred = {
-            "SF Pro Text", ".AppleSystemUIFont", "Helvetica Neue",   // macOS
-            "Segoe UI Variable Text", "Segoe UI",                    // Windows
-            "Inter", "Ubuntu", "Cantarell", "Noto Sans"              // Linux
-        };
-
-        java.util.Set<String> available = new java.util.HashSet<>(java.util.Arrays.asList(
-                GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
-
-        for (String family : preferred) {
-            if (available.contains(family)) {
-                return new Font(family, Font.PLAIN, size);
-            }
-        }
-        return new Font(Font.SANS_SERIF, Font.PLAIN, size);
-    }
     
+    }
+
     /**
      * Applies the specified theme's Look and Feel.
      */
@@ -247,6 +267,10 @@ public final class ThemeManager {
             case INTELLIJ -> new FlatIntelliJLaf();
         };
         UIManager.setLookAndFeel(laf);
+
+        // Immediately after, never before: the call above discards whatever was in the
+        // UIManager, so defaults set earlier would silently vanish.
+        applyUiDefaults();
     }
     
     /**
