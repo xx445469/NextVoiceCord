@@ -20,6 +20,7 @@ import com.jagrosh.jmusicbot.utils.ConsoleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jagrosh.jmusicbot.gui.components.LogView;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.BadLocationException;
@@ -40,7 +41,7 @@ public class ConsolePanel extends JPanel {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsolePanel.class);
     
-    private final JTextArea textArea;
+    private final LogView textArea;
     private final JScrollPane scrollPane;
     private final JTextField searchField;
     private final JCheckBox autoScrollCheckbox;
@@ -51,7 +52,9 @@ public class ConsolePanel extends JPanel {
     
     public ConsolePanel() {
         super(new BorderLayout(0, 4));
-        setBorder(new EmptyBorder(8, 8, 8, 8));
+        // Panels sat tight against the tab edge; the console is the largest surface in
+        // the window and reads as cramped without room around it.
+        setBorder(new EmptyBorder(10, 12, 12, 12));
         
         // Initialize text area with redirected streams
         textArea = ConsoleUtil.redirectSystemStreams();
@@ -71,6 +74,7 @@ public class ConsolePanel extends JPanel {
         
         // Top panel with toolbar and search
         JPanel topPanel = new JPanel(new BorderLayout(8, 0));
+        topPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
         topPanel.add(toolbar, BorderLayout.WEST);
         topPanel.add(searchPanel, BorderLayout.CENTER);
         
@@ -106,8 +110,6 @@ public class ConsolePanel extends JPanel {
     private void configureTextArea() {
         textArea.setFont(CONSOLE_FONT);
         textArea.setEditable(false);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
         textArea.setMargin(new Insets(4, 4, 4, 4));
         
         // Add caret listener for auto-scroll behavior (guarded so it never throws on EDT).
@@ -282,7 +284,7 @@ public class ConsolePanel extends JPanel {
     /**
      * Gets the underlying text area.
      */
-    public JTextArea getTextArea() {
+    public LogView getTextArea() {
         return textArea;
     }
     

@@ -16,6 +16,7 @@
 package com.jagrosh.jmusicbot.utils;
 
 import java.io.PrintStream;
+import com.jagrosh.jmusicbot.gui.components.LogView;
 import javax.swing.*;
 
 import com.jagrosh.jmusicbot.gui.TextAreaOutputStream;
@@ -33,16 +34,16 @@ import com.jagrosh.jmusicbot.gui.TextAreaOutputStream;
  */
 public class ConsoleUtil {
     private static PrintStream consoleStream;
-    private static JTextArea sharedTextArea;
+    private static LogView sharedTextArea;
     
     /**
      * Redirects System.out and System.err to a GUI text area.
      * This can be called early in startup (before GUI is fully initialized)
      * to capture logs that occur during configuration loading.
      * 
-     * @return The JTextArea that will receive the console output
+     * @return The LogView that will receive the console output
      */
-    public static JTextArea redirectSystemStreams() {
+    public static LogView redirectSystemStreams() {
         return redirectSystemStreamsWithReplay(null);
     }
     
@@ -55,18 +56,18 @@ public class ConsoleUtil {
      * text area before redirection begins, so all logs appear in order.</p>
      * 
      * @param earlyOutput Buffered output from early startup (may be null or empty)
-     * @return The JTextArea that will receive the console output
+     * @return The LogView that will receive the console output
      */
-    public static JTextArea redirectSystemStreamsWithReplay(String earlyOutput) {
+    public static LogView redirectSystemStreamsWithReplay(String earlyOutput) {
         if (sharedTextArea == null) {
-            sharedTextArea = new JTextArea();
-            sharedTextArea.setLineWrap(true);
-            sharedTextArea.setWrapStyleWord(true);
+            sharedTextArea = new LogView();
+            // LogView wraps by default and is never editable; the JTextArea-era calls that
+            // used to be here have no equivalent and are no longer needed.
             sharedTextArea.setEditable(false);
             
             // Replay buffered early output before redirecting streams
             if (earlyOutput != null && !earlyOutput.isEmpty()) {
-                sharedTextArea.append(earlyOutput);
+                sharedTextArea.appendLog(earlyOutput);
             }
             
             consoleStream = new PrintStream(new TextAreaOutputStream(sharedTextArea));
@@ -79,9 +80,9 @@ public class ConsoleUtil {
     /**
      * Gets the shared text area if redirection has been set up, or null otherwise.
      * 
-     * @return The shared JTextArea, or null if redirection hasn't been initialized
+     * @return The shared LogView, or null if redirection hasn't been initialized
      */
-    public static JTextArea getSharedTextArea() {
+    public static LogView getSharedTextArea() {
         return sharedTextArea;
     }
 }
