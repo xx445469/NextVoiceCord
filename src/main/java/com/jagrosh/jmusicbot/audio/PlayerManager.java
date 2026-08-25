@@ -51,9 +51,15 @@ public class PlayerManager extends DefaultAudioPlayerManager
         // This should be done BEFORE registering source managers
         if (config.proxyLavaplayer() && config.hasProxy()) {
             HttpHost proxy = ProxyUtil.createApacheProxy(config);
-            setHttpBuilderConfigurator(builder -> builder.setProxy(proxy));
-            LOGGER.info("Lavaplayer configured to use proxy: {}:{}", 
-                    config.getProxyHost(), config.getProxyPort());
+            org.apache.http.client.CredentialsProvider credentials =
+                    ProxyUtil.createApacheCredentials(config);
+            setHttpBuilderConfigurator(builder -> {
+                builder.setProxy(proxy);
+                if (credentials != null) {
+                    builder.setDefaultCredentialsProvider(credentials);
+                }
+            });
+            LOGGER.info("Lavaplayer configured to use proxy: {}", ProxyUtil.describe(config));
         }
         
         // Register transformative audio sources

@@ -89,6 +89,8 @@ public enum ConfigOption {
     // Proxy options
     PROXY_HOST("proxy.host", ConfigType.STRING, false, "Proxy server hostname"),
     PROXY_PORT("proxy.port", ConfigType.INT, false, "Proxy server port"),
+    PROXY_USERNAME("proxy.username", ConfigType.STRING, false, "Proxy username, if authentication is required"),
+    PROXY_PASSWORD("proxy.password", ConfigType.STRING, false, "Proxy password, if authentication is required"),
     PROXY_LAVAPLAYER("proxy.lavaplayer", ConfigType.BOOLEAN, false, "Route Lavaplayer audio requests through proxy"),
     PROXY_JDA("proxy.jda", ConfigType.BOOLEAN, false, "Route JDA Discord API traffic through proxy"),
     PROXY_GITHUB("proxy.github", ConfigType.BOOLEAN, false, "Route GitHub version checks through proxy");
