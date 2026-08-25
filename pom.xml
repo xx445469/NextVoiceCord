@@ -89,6 +89,19 @@
             <url>https://maven.lavalink.dev/releases</url>
         </repository>
         <repository>
+            <!-- youtube-source ships working fixes here long before they reach a release.
+                 1.18.2 (27 Jul) cannot play a large share of videos from a residential
+                 connection; the 19 Aug commits on main can. Pinned to an exact commit
+                 rather than a floating -SNAPSHOT, so builds stay reproducible. -->
+            <id>arbjergDevSnapshots</id>
+            <name>Lavalink Snapshots</name>
+            <url>https://maven.lavalink.dev/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
             <id>chew</id>
             <name>m2-chew</name>
             <url>https://m2.chew.pro/releases</url>
@@ -595,7 +608,7 @@
         <jdave.version>0.1.7</jdave.version>
         <udpqueue.version>0.2.12</udpqueue.version>
         <lavaplayer.version>2.2.7</lavaplayer.version>
-        <youtube-source.version>1.18.2</youtube-source.version>
+        <youtube-source.version>f45bbb7aebfcbc1c553769e04af6cd43afa8b7c3-SNAPSHOT</youtube-source.version>
         <logback.version>1.5.25</logback.version>
         <typesafe-config.version>1.4.3</typesafe-config.version>
         <jsoup.version>1.22.1</jsoup.version>

@@ -105,6 +105,9 @@ public final class YoutubeSmokeCheck
     /** Enables remote signature decoding, the same path {@code sources.youtube.useOAuth} takes. */
     public static final String REMOTE_CIPHER_FLAG = "--remote-cipher";
 
+    /** Supplies a proof-of-origin token: {@code --po-token TOKEN VISITOR_DATA}. */
+    public static final String PO_TOKEN_FLAG = "--po-token";
+
     /** Routes every request through a proxy: {@code --proxy host:port[:user:pass]}. */
     public static final String PROXY_FLAG = "--proxy";
 
@@ -168,6 +171,18 @@ public final class YoutubeSmokeCheck
             }
         }
         final String proxy = proxySpec;
+
+        // Without one, this check measures a configuration nobody runs: a poToken removes
+        // both the signature-cipher failure and the bot check, so its absence makes every
+        // result look worse than the bot's real behaviour.
+        for (int i = 0; i < args.length - 2; i++)
+        {
+            if (PO_TOKEN_FLAG.equals(args[i]))
+            {
+                dev.lavalink.youtube.clients.Web.setPoTokenAndVisitorData(args[i + 1], args[i + 2]);
+                System.out.println("po-token:       supplied");
+            }
+        }
         List<String> videoIds = new ArrayList<>();
         for (int i = 0; i < args.length; i++)
         {
@@ -176,6 +191,10 @@ public final class YoutubeSmokeCheck
                 if (PROXY_FLAG.equals(args[i]))
                 {
                     i++; // its value, not a video id
+                }
+                else if (PO_TOKEN_FLAG.equals(args[i]))
+                {
+                    i += 2; // token and visitorData, not video ids
                 }
                 continue;
             }
