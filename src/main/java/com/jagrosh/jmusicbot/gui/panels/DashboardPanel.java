@@ -34,6 +34,7 @@ import javax.swing.Timer;
 
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.gui.GuiLanguage;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
@@ -57,11 +58,11 @@ public class DashboardPanel extends JPanel
 
     private final Bot bot;
 
-    private final Widgets.StatTile playingTile = new Widgets.StatTile("playing now");
-    private final Widgets.StatTile serversTile = new Widgets.StatTile("servers");
-    private final Widgets.StatTile listenersTile = new Widgets.StatTile("listeners");
-    private final Widgets.StatTile uptimeTile = new Widgets.StatTile("uptime");
-    private final Widgets.StatTile memoryTile = new Widgets.StatTile("memory");
+    private final Widgets.StatTile playingTile = new Widgets.StatTile(GuiLanguage.msg("gui.overview.playingNow"));
+    private final Widgets.StatTile serversTile = new Widgets.StatTile(GuiLanguage.msg("gui.overview.servers"));
+    private final Widgets.StatTile listenersTile = new Widgets.StatTile(GuiLanguage.msg("gui.overview.listeners"));
+    private final Widgets.StatTile uptimeTile = new Widgets.StatTile(GuiLanguage.msg("gui.overview.uptime"));
+    private final Widgets.StatTile memoryTile = new Widgets.StatTile(GuiLanguage.msg("gui.overview.memory"));
 
     private final JPanel nowPlayingList = Widgets.transparent(null);
     private final Timer timer;
@@ -85,8 +86,8 @@ public class DashboardPanel extends JPanel
     private Component buildHeader()
     {
         JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
-        header.add(Widgets.pageTitle("Overview"), BorderLayout.NORTH);
-        header.add(Widgets.muted("Live status across every server this bot is in"), BorderLayout.SOUTH);
+        header.add(Widgets.pageTitle(GuiLanguage.msg("gui.nav.overview")), BorderLayout.NORTH);
+        header.add(Widgets.muted(GuiLanguage.msg("gui.overview.subtitle")), BorderLayout.SOUTH);
         return header;
     }
 
@@ -186,7 +187,7 @@ public class DashboardPanel extends JPanel
         long usedMb = (runtime.totalMemory() - runtime.freeMemory()) / 1048576;
         long maxMb = runtime.maxMemory() / 1048576;
         memoryTile.setValue(usedMb + " MB");
-        memoryTile.setCaption("of " + maxMb + " MB");
+        memoryTile.setCaption(GuiLanguage.msg("gui.overview.memoryOf", maxMb));
 
         nowPlayingList.revalidate();
         nowPlayingList.repaint();
@@ -209,7 +210,7 @@ public class DashboardPanel extends JPanel
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 132));
 
         JPanel top = Widgets.transparent(new BorderLayout(Tokens.SPACE_SM, 0));
-        top.add(new Widgets.Badge(handler.getPlayer().isPaused() ? "PAUSED" : "PLAYING",
+        top.add(new Widgets.Badge(GuiLanguage.msg(handler.getPlayer().isPaused() ? "gui.overview.paused" : "gui.overview.playing"),
                                   handler.getPlayer().isPaused() ? Tokens.warning() : Tokens.success()),
                 BorderLayout.WEST);
 
@@ -220,8 +221,8 @@ public class DashboardPanel extends JPanel
 
         var voice = guild.getSelfMember().getVoiceState();
         String where = voice != null && voice.getChannel() != null ? voice.getChannel().getName() : "—";
-        top.add(Widgets.muted(where + "  ·  " + handler.getQueue().size() + " queued  ·  vol "
-                              + handler.getPlayer().getVolume()), BorderLayout.EAST);
+        top.add(Widgets.muted(where + "  ·  " + GuiLanguage.msg("gui.overview.queued", handler.getQueue().size())
+                              + "  ·  " + GuiLanguage.msg("gui.overview.volume", handler.getPlayer().getVolume())), BorderLayout.EAST);
 
         JPanel middle = Widgets.transparent(null);
         middle.setLayout(new BoxLayout(middle, BoxLayout.Y_AXIS));
@@ -268,7 +269,7 @@ public class DashboardPanel extends JPanel
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
 
         JLabel message = new JLabel(
-                bot.getJDA() == null ? "Connecting to Discord…" : "Nothing is playing right now.",
+                bot.getJDA() == null ? GuiLanguage.msg("gui.overview.connecting") : GuiLanguage.msg("gui.overview.nothingPlaying"),
                 JLabel.CENTER);
         message.setFont(Tokens.fontBody());
         message.setForeground(Tokens.textMuted());

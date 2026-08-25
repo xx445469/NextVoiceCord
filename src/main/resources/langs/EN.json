@@ -579,5 +579,50 @@
         "noButtons": "That layout contains no usable buttons, so it was not applied."
       }
     }
+  },
+  "gui": {
+    "nav": {
+      "overview": "Overview",
+      "console": "Console",
+      "servers": "Servers",
+      "performance": "Performance",
+      "system": "System",
+      "sources": "Sources",
+      "preferences": "Preferences",
+      "botConfig": "Bot config"
+    },
+    "section": {
+      "diagnostics": "Diagnostics",
+      "configure": "Configure",
+      "webPanel": "Web panel",
+      "appearance": "Appearance"
+    },
+    "action": {
+      "openInBrowser": "Open in browser"
+    },
+    "overview": {
+      "subtitle": "Live status across every server this bot is in",
+      "playingNow": "playing now",
+      "servers": "servers",
+      "listeners": "listeners",
+      "uptime": "uptime",
+      "memory": "memory",
+      "memoryOf": "of {0} MB",
+      "nothingPlaying": "Nothing is playing right now.",
+      "connecting": "Connecting to Discord…",
+      "playing": "PLAYING",
+      "paused": "PAUSED",
+      "queued": "{0} queued",
+      "volume": "vol {0}"
+    },
+    "language": {
+      "label": "Display language",
+      "hint": "Changes this window only. The bot's Discord language is set per server and per user.",
+      "restartNotice": "The language has changed. Labels already on screen keep their old text until the bot is restarted."
+    },
+    "webPanel": {
+      "cannotOpen": "This desktop cannot open a browser automatically.\nThe panel address has been copied to the clipboard.",
+      "title": "Web panel"
+    }
   }
 }

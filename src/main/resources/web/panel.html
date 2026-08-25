@@ -76,6 +76,7 @@
   <header>
     <h1>NextVoiceCord</h1>
     <span class="version" id="version"></span>
+    <span class="version" id="subtitle"></span>
     <span class="dot" id="live"><i></i><span id="livetext">connecting</span></span>
   </header>
 
@@ -107,9 +108,9 @@ function stat(value, label) {
   return `<div class="stat"><b>${esc(value)}</b><span>${esc(label)}</span></div>`;
 }
 
-function guildCard(g) {
+function guildCard(g, t) {
   const badge = g.playing
-    ? '<span class="badge">playing</span>'
+    ? `<span class="badge">${esc(g.paused ? (t.paused || 'paused') : (t.playing || 'playing'))}</span>`
     : '<span class="badge idle">idle</span>';
 
   const meta = g.playing && g.channel
@@ -141,17 +142,21 @@ async function refresh() {
     failures = 0;
     setLive(true, 'live');
 
+    // Labels come from the server rather than being duplicated here, so the panel and the
+    // bot cannot drift into saying different things in the same language.
+    const t = d.labels || {};
     el('version').textContent = d.version;
+    el('subtitle').textContent = t.subtitle || '';
     el('stats').innerHTML =
-        stat(d.playingCount, 'playing now') +
-        stat(d.guildCount, 'servers') +
-        stat(d.listeners, 'listeners') +
-        stat(d.uptime, 'uptime') +
-        stat(d.memoryUsedMb + ' MB', 'memory of ' + d.memoryMaxMb);
+        stat(d.playingCount, t.playingNow || 'playing now') +
+        stat(d.guildCount, t.servers || 'servers') +
+        stat(d.listeners, t.listeners || 'listeners') +
+        stat(d.uptime, t.uptime || 'uptime') +
+        stat(d.memoryUsedMb + ' MB', (t.memory || 'memory') + ' / ' + d.memoryMaxMb);
 
     el('guilds').innerHTML = d.guilds.length
-        ? d.guilds.map(guildCard).join('')
-        : '<div class="empty">This bot is not in any servers yet.</div>';
+        ? d.guilds.map(g => guildCard(g, t)).join('')
+        : `<div class="empty">${esc(t.nothingPlaying || 'Nothing is playing right now.')}</div>`;
   } catch (e) {
     // Shown after two consecutive failures rather than the first: a single dropped poll
     // during a restart should not make a working panel look broken.

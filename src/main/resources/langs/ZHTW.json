@@ -579,5 +579,50 @@
         "noButtons": "這份佈局沒有任何可用的按鈕，因此未套用。"
       }
     }
+  },
+  "gui": {
+    "nav": {
+      "overview": "總覽",
+      "console": "主控台",
+      "servers": "伺服器",
+      "performance": "效能",
+      "system": "系統",
+      "sources": "音源",
+      "preferences": "偏好設定",
+      "botConfig": "Bot 設定"
+    },
+    "section": {
+      "diagnostics": "診斷",
+      "configure": "設定",
+      "webPanel": "網頁面板",
+      "appearance": "外觀"
+    },
+    "action": {
+      "openInBrowser": "在瀏覽器開啟"
+    },
+    "overview": {
+      "subtitle": "這個 bot 所在的每個伺服器的即時狀態",
+      "playingNow": "正在播放",
+      "servers": "伺服器",
+      "listeners": "聽眾",
+      "uptime": "運行時間",
+      "memory": "記憶體",
+      "memoryOf": "共 {0} MB",
+      "nothingPlaying": "目前沒有在播放任何內容。",
+      "connecting": "正在連線到 Discord⋯",
+      "playing": "播放中",
+      "paused": "已暫停",
+      "queued": "佇列 {0} 首",
+      "volume": "音量 {0}"
+    },
+    "language": {
+      "label": "顯示語言",
+      "hint": "只影響這個視窗。Bot 在 Discord 的語言是各伺服器、各使用者分別設定的。",
+      "restartNotice": "語言已變更。畫面上已建立的文字會維持原樣，重新啟動 bot 後才會全部更新。"
+    },
+    "webPanel": {
+      "cannotOpen": "這個桌面環境無法自動開啟瀏覽器。\n面板網址已複製到剪貼簿。",
+      "title": "網頁面板"
+    }
   }
 }
