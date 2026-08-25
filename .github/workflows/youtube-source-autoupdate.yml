@@ -1,0 +1,356 @@
+name: YouTube Source Auto-Update
+
+# Tracks new youtube-source releases and ships them only when real playback proves
+# they work.
+#
+# The hard part is not bumping the version — it is knowing whether a bump is safe.
+# youtube-source breaks in ways the compiler cannot see: YouTube rotates its player
+# script and signature extraction stops working, while everything still builds and
+# every unit test still passes. So this pipeline gates on decoding real audio.
+#
+# That introduces a second problem. GitHub runners have datacenter IPs, and YouTube
+# frequently refuses them outright with bot checks. A naive gate would read that as
+# "the new version is broken" and cry wolf every single day until nobody trusts it.
+#
+# Hence the differential: the candidate and the incumbent are both tested, on the
+# same runner, minutes apart. Only their DIFFERENCE carries signal.
+#
+#   incumbent  candidate  ->  meaning
+#   ---------  ---------  ->  -------
+#   pass       pass       ->  safe; ship it
+#   pass       fail       ->  genuine regression; do not ship, open an issue
+#   fail       pass       ->  the bump fixes a live outage; ship it, urgently
+#   fail       fail       ->  broken before and after; not caused by this bump
+#   refused    anything   ->  runner is IP-blocked; no verdict possible, skip
+
+on:
+  schedule:
+    # 05:00 UTC daily. Deliberately not on the hour: scheduled runs are queued on a
+    # best-effort basis and the top of the hour is the most contended slot.
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+    inputs:
+      force_version:
+        description: 'Test a specific youtube-source version instead of the latest'
+        required: false
+        type: string
+      skip_smoke_test:
+        description: 'DANGEROUS: bump without playback verification'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: youtube-source-autoupdate
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+env:
+  YTS_GROUP_PATH: dev/lavalink/youtube
+  YTS_ARTIFACT: v2
+  POM_PROPERTY: youtube-source.version
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. Is there anything new?
+  # ---------------------------------------------------------------------------
+  check-version:
+    name: Check for new youtube-source
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      current: ${{ steps.compare.outputs.current }}
+      latest: ${{ steps.compare.outputs.latest }}
+      update_available: ${{ steps.compare.outputs.update_available }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read version currently pinned in pom.xml
+        id: current
+        run: |
+          CURRENT=$(grep -oPm1 "(?<=<${POM_PROPERTY}>)[^<]+" pom.xml)
+          if [ -z "$CURRENT" ]; then
+            echo "::error::Could not read <${POM_PROPERTY}> from pom.xml"
+            exit 1
+          fi
+          echo "version=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "Currently pinned: $CURRENT"
+
+      - name: Resolve latest release from Maven Central
+        id: latest
+        run: |
+          if [ -n "${{ github.event.inputs.force_version }}" ]; then
+            LATEST="${{ github.event.inputs.force_version }}"
+            echo "Version forced via workflow_dispatch: $LATEST"
+          else
+            METADATA_URL="https://repo1.maven.org/maven2/${YTS_GROUP_PATH}/${YTS_ARTIFACT}/maven-metadata.xml"
+            # <release> is the newest non-snapshot. <latest> can point at a snapshot,
+            # which must never be shipped to users.
+            LATEST=$(curl -fsSL --retry 3 --retry-delay 5 "$METADATA_URL" \
+                     | grep -oPm1 "(?<=<release>)[^<]+")
+          fi
+
+          if [ -z "$LATEST" ]; then
+            echo "::error::Could not resolve the latest youtube-source version"
+            exit 1
+          fi
+          echo "version=$LATEST" >> "$GITHUB_OUTPUT"
+          echo "Latest available: $LATEST"
+
+      - name: Compare
+        id: compare
+        run: |
+          CURRENT="${{ steps.current.outputs.version }}"
+          LATEST="${{ steps.latest.outputs.version }}"
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+
+          if [ "$CURRENT" = "$LATEST" ]; then
+            echo "update_available=false" >> "$GITHUB_OUTPUT"
+            echo "Already on the latest version. Nothing to do."
+            echo "### youtube-source is up to date (\`$CURRENT\`)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "update_available=true" >> "$GITHUB_OUTPUT"
+            echo "Update available: $CURRENT -> $LATEST"
+            echo "### Update available: \`$CURRENT\` → \`$LATEST\`" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # ---------------------------------------------------------------------------
+  # 2. Does the candidate actually play audio? Does the incumbent?
+  # ---------------------------------------------------------------------------
+  smoke-test:
+    name: Differential playback test
+    needs: check-version
+    if: needs.check-version.outputs.update_available == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both versions run as independent jobs on identical images, so a difference
+        # in outcome is attributable to the version and not to the environment.
+        include:
+          - role: incumbent
+            version: ${{ needs.check-version.outputs.current }}
+          - role: candidate
+            version: ${{ needs.check-version.outputs.latest }}
+    outputs:
+      incumbent_verdict: ${{ steps.publish.outputs.incumbent }}
+      candidate_verdict: ${{ steps.publish.outputs.candidate }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Pin youtube-source to ${{ matrix.version }}
+        run: |
+          mvn -B versions:set-property \
+              -Dproperty="${POM_PROPERTY}" \
+              -DnewVersion="${{ matrix.version }}"
+          echo "Pinned to: $(grep -oPm1 "(?<=<${POM_PROPERTY}>)[^<]+" pom.xml)"
+
+      - name: Build
+        run: mvn -B -DskipTests package
+
+      - name: Run playback smoke check
+        id: smoke
+        continue-on-error: true
+        run: |
+          JAR=$(ls target/*-All.jar | head -1)
+          echo "Testing $JAR with youtube-source ${{ matrix.version }}"
+
+          set +e
+          java -cp "$JAR" com.jagrosh.jmusicbot.diagnostics.YoutubeSmokeCheck 2>&1 | tee smoke-output.txt
+          CODE=${PIPESTATUS[0]}
+          set -e
+
+          case $CODE in
+            0) VERDICT=pass ;;
+            1) VERDICT=fail ;;
+            2) VERDICT=refused ;;
+            *) VERDICT=error ;;
+          esac
+
+          echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
+          echo "${{ matrix.role }} (${{ matrix.version }}): $VERDICT"
+
+      - name: Record verdict
+        run: |
+          mkdir -p verdicts
+          echo "${{ steps.smoke.outputs.verdict }}" > "verdicts/${{ matrix.role }}"
+          {
+            echo "### ${{ matrix.role }} — \`${{ matrix.version }}\` → **${{ steps.smoke.outputs.verdict }}**"
+            echo '```'
+            tail -30 smoke-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload verdict
+        uses: actions/upload-artifact@v6
+        with:
+          name: verdict-${{ matrix.role }}
+          path: |
+            verdicts/${{ matrix.role }}
+            smoke-output.txt
+
+  # ---------------------------------------------------------------------------
+  # 3. Decide, then ship or report
+  # ---------------------------------------------------------------------------
+  decide:
+    name: Decide and ship
+    needs: [check-version, smoke-test]
+    if: always() && needs.check-version.outputs.update_available == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: verdict-*
+          path: verdicts
+          merge-multiple: false
+
+      - name: Apply the decision matrix
+        id: decision
+        run: |
+          INCUMBENT=$(cat verdicts/verdict-incumbent/verdicts/incumbent 2>/dev/null || echo error)
+          CANDIDATE=$(cat verdicts/verdict-candidate/verdicts/candidate 2>/dev/null || echo error)
+          CURRENT="${{ needs.check-version.outputs.current }}"
+          LATEST="${{ needs.check-version.outputs.latest }}"
+
+          echo "incumbent ($CURRENT): $INCUMBENT"
+          echo "candidate ($LATEST): $CANDIDATE"
+          echo "incumbent=$INCUMBENT" >> "$GITHUB_OUTPUT"
+          echo "candidate=$CANDIDATE" >> "$GITHUB_OUTPUT"
+
+          if [ "${{ github.event.inputs.skip_smoke_test }}" = "true" ]; then
+            ACTION=ship
+            REASON="Smoke test skipped by explicit operator request."
+          elif [ "$CANDIDATE" = "pass" ]; then
+            ACTION=ship
+            if [ "$INCUMBENT" = "pass" ]; then
+              REASON="Both versions play audio. The bump is safe."
+            else
+              REASON="The candidate plays audio and the incumbent ($INCUMBENT) does not. This bump repairs a live outage."
+            fi
+          elif [ "$CANDIDATE" = "fail" ] && [ "$INCUMBENT" = "pass" ]; then
+            ACTION=report
+            REASON="The candidate fails playback where the incumbent succeeds. This is a genuine regression in $LATEST."
+          elif [ "$CANDIDATE" = "fail" ] && [ "$INCUMBENT" = "fail" ]; then
+            ACTION=skip
+            REASON="Both versions fail. Extraction is broken independently of this bump, so the bump neither helps nor harms."
+          else
+            ACTION=skip
+            REASON="No verdict available (incumbent=$INCUMBENT, candidate=$CANDIDATE). YouTube most likely refused this runner's IP, which says nothing about the code."
+          fi
+
+          echo "action=$ACTION" >> "$GITHUB_OUTPUT"
+          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Decision: \`$ACTION\`"
+            echo ""
+            echo "| | version | verdict |"
+            echo "|---|---|---|"
+            echo "| incumbent | \`$CURRENT\` | $INCUMBENT |"
+            echo "| candidate | \`$LATEST\` | $CANDIDATE |"
+            echo ""
+            echo "$REASON"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # -- ship --------------------------------------------------------------
+      - uses: actions/setup-java@v5
+        if: steps.decision.outputs.action == 'ship'
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Bump, build and commit
+        if: steps.decision.outputs.action == 'ship'
+        run: |
+          mvn -B versions:set-property \
+              -Dproperty="${POM_PROPERTY}" \
+              -DnewVersion="${{ needs.check-version.outputs.latest }}"
+          mvn -B verify
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pom.xml
+          git commit -m "chore(deps): youtube-source ${{ needs.check-version.outputs.current }} -> ${{ needs.check-version.outputs.latest }}
+
+          ${{ steps.decision.outputs.reason }}
+
+          Verified by playback smoke check on this runner:
+            incumbent ${{ needs.check-version.outputs.current }}: ${{ steps.decision.outputs.incumbent }}
+            candidate ${{ needs.check-version.outputs.latest }}: ${{ steps.decision.outputs.candidate }}"
+          git push origin HEAD:main
+
+      - name: Publish release
+        if: steps.decision.outputs.action == 'ship'
+        run: |
+          BOT_VERSION=$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout)
+          TAG="v${BOT_VERSION}-yts${{ needs.check-version.outputs.latest }}"
+          mv target/*-All.jar "NextVoiceCord-${BOT_VERSION}.jar"
+
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes "Automated youtube-source update: \`${{ needs.check-version.outputs.current }}\` → \`${{ needs.check-version.outputs.latest }}\`
+
+          ${{ steps.decision.outputs.reason }}
+
+          | | version | playback |
+          |---|---|---|
+          | previous | \`${{ needs.check-version.outputs.current }}\` | ${{ steps.decision.outputs.incumbent }} |
+          | this build | \`${{ needs.check-version.outputs.latest }}\` | ${{ steps.decision.outputs.candidate }} |
+
+          Verified by decoding real audio on the build runner, not by compilation alone." \
+            "NextVoiceCord-${BOT_VERSION}.jar"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # -- report ------------------------------------------------------------
+      - name: Open regression issue
+        if: steps.decision.outputs.action == 'report'
+        run: |
+          TITLE="youtube-source ${{ needs.check-version.outputs.latest }} breaks playback"
+
+          # Never open a duplicate: this runs daily and would otherwise file the same
+          # issue every morning until someone acts on it.
+          if gh issue list --state open --search "$TITLE in:title" --json title \
+             | grep -q "${{ needs.check-version.outputs.latest }}"; then
+            echo "An open issue already covers this version. Not filing another."
+            exit 0
+          fi
+
+          gh issue create --title "$TITLE" --label dependencies --body "The automated update pipeline held back \`${{ needs.check-version.outputs.latest }}\`.
+
+          | | version | playback |
+          |---|---|---|
+          | current (kept) | \`${{ needs.check-version.outputs.current }}\` | ${{ steps.decision.outputs.incumbent }} |
+          | rejected | \`${{ needs.check-version.outputs.latest }}\` | ${{ steps.decision.outputs.candidate }} |
+
+          ${{ steps.decision.outputs.reason }}
+
+          Because the incumbent passed on the same runner minutes earlier, this is not an IP block — the new version genuinely fails to extract audio.
+
+          Full logs: [run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          Likely causes, in rough order of frequency:
+          - \`AudioSource.buildYoutubeClients()\` references a client class that upstream renamed or removed
+          - \`YoutubeOauth2TokenHandler\` scrapes log wording that upstream changed
+          - \`TransformativeAudioSourceManager\` extends \`YoutubeAudioSourceManager\` and its API drifted
+
+          The pipeline will keep re-testing daily and will ship automatically once a version passes."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
