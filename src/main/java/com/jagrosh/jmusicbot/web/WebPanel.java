@@ -106,6 +106,7 @@ public final class WebPanel
 
             server.createContext("/", this::handlePage);
             server.createContext("/api/status", exchange -> serveJson(exchange, data::status));
+            server.createContext("/api/labels", exchange -> serveJson(exchange, data::labels));
             server.createContext("/api/console", exchange -> serveJson(exchange, data::console));
             server.createContext("/api/performance", exchange -> serveJson(exchange, data::performance));
             server.createContext("/api/system", exchange -> serveJson(exchange, data::system));

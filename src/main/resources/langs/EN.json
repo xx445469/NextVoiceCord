@@ -899,5 +899,76 @@
       "notReady": "The web panel starts once the bot has connected to Discord. Try again in a moment.",
       "title": "Web panel"
     }
+  },
+  "web": {
+    "status": {
+      "connecting": "connecting",
+      "live": "live",
+      "disconnected": "disconnected",
+      "unauthorised": "unauthorised",
+      "error": "error {0}"
+    },
+    "servers": {
+      "filterPlaceholder": "Filter servers by name…",
+      "count": "{0} server(s) · {1} playing",
+      "noMatch": "No servers match “{0}”."
+    },
+    "console": {
+      "dropped": "{0} line(s) were discarded from the buffer before this view could read them."
+    },
+    "performance": {
+      "empty": "No performance metrics collected yet.",
+      "noGuildsActive": "No guilds active in this window.",
+      "noEvents": "No events in this window."
+    },
+    "system": {
+      "empty": "No system metrics collected yet.",
+      "noSamples": "No samples yet.",
+      "cpuSystem": "system CPU",
+      "driftAvg": "avg drift",
+      "driftMax": "max drift",
+      "cpuSparkLabel": "CPU % over window",
+      "heapSparkLabel": "Heap MB over window"
+    },
+    "sources": {
+      "loaded": "loaded",
+      "noMatches": "no matches",
+      "colQuery": "Query",
+      "noActivity": "No source activity in this window.",
+      "noLookups": "No lookups in this window."
+    },
+    "guild": {
+      "members": "{0} members"
+    },
+    "control": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "skip": "Skip",
+      "volume": "Vol"
+    },
+    "preferences": {
+      "hint": "Only the fields you change are sent — everything else is left as it is.",
+      "panelLanguage": "Panel language",
+      "panelLanguageHint": "Only changes how this page looks for you, in this browser. Does not touch the bot's configuration.",
+      "leaveUnchanged": "Leave unchanged",
+      "save": "Save preferences"
+    },
+    "config": {
+      "loadError": "Could not load configuration (status {0}).",
+      "networkError": "Network error loading configuration.",
+      "editingOff": "Config editing is off — values are shown for reference only. Set {0} in config.txt to enable editing.",
+      "editInFileOnly": "Must be edited in config.txt directly.",
+      "secretSet": "•••••••• (set — leave blank to keep it)",
+      "secretNotSet": "not set",
+      "notEditable": "Not editable from the panel."
+    },
+    "result": {
+      "nothingChanged": "Nothing changed.",
+      "saving": "Saving…",
+      "networkError": "Network error.",
+      "requestFailed": "Request failed ({0}).",
+      "refusedPrefix": "Refused: {0}"
+    },
+    "footer": "Playback controls act immediately on the live bot. Everything else here is read-only unless you press Save."
   }
 }

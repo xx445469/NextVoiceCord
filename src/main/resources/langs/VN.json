@@ -899,5 +899,76 @@
       "title": "Bảng điều khiển web",
       "notReady": "Bảng điều khiển web sẽ khởi động khi bot kết nối với Discord. Vui lòng thử lại sau giây lát."
     }
+  },
+  "web": {
+    "status": {
+      "connecting": "Đang kết nối",
+      "live": "Trực tuyến",
+      "disconnected": "Mất kết nối",
+      "unauthorised": "Chưa xác thực",
+      "error": "Lỗi {0}"
+    },
+    "servers": {
+      "filterPlaceholder": "Lọc máy chủ theo tên…",
+      "count": "{0} máy chủ · {1} đang phát",
+      "noMatch": "Không có máy chủ nào khớp với “{0}”."
+    },
+    "console": {
+      "dropped": "{0} dòng đã bị loại khỏi bộ đệm trước khi khung xem này kịp đọc."
+    },
+    "performance": {
+      "empty": "Chưa thu thập số liệu hiệu năng nào.",
+      "noGuildsActive": "Không có máy chủ nào hoạt động trong khung thời gian này.",
+      "noEvents": "Không có sự kiện nào trong khung thời gian này."
+    },
+    "system": {
+      "empty": "Chưa thu thập số liệu hệ thống nào.",
+      "noSamples": "Chưa có mẫu nào.",
+      "cpuSystem": "CPU hệ thống",
+      "driftAvg": "lệch TB",
+      "driftMax": "lệch tối đa",
+      "cpuSparkLabel": "CPU % trong khung thời gian",
+      "heapSparkLabel": "Heap MB trong khung thời gian"
+    },
+    "sources": {
+      "loaded": "đã tải",
+      "noMatches": "không khớp",
+      "colQuery": "Truy vấn",
+      "noActivity": "Không có hoạt động nguồn nào trong khung thời gian này.",
+      "noLookups": "Không có tra cứu nào trong khung thời gian này."
+    },
+    "guild": {
+      "members": "{0} thành viên"
+    },
+    "control": {
+      "pause": "Tạm dừng",
+      "resume": "Tiếp tục",
+      "skip": "Bỏ qua",
+      "volume": "Âm"
+    },
+    "preferences": {
+      "hint": "Chỉ những trường bạn thay đổi mới được gửi đi — mọi thứ khác giữ nguyên.",
+      "panelLanguage": "Ngôn ngữ bảng điều khiển",
+      "panelLanguageHint": "Chỉ thay đổi cách trang này hiển thị với bạn, trên trình duyệt này. Không ảnh hưởng đến cấu hình của bot.",
+      "leaveUnchanged": "Giữ nguyên",
+      "save": "Lưu tùy chọn"
+    },
+    "config": {
+      "loadError": "Không thể tải cấu hình (trạng thái {0}).",
+      "networkError": "Lỗi mạng khi tải cấu hình.",
+      "editingOff": "Chỉnh sửa cấu hình đang tắt — các giá trị chỉ hiển thị để tham khảo. Đặt {0} trong config.txt để bật chỉnh sửa.",
+      "editInFileOnly": "Phải chỉnh sửa trực tiếp trong config.txt.",
+      "secretSet": "•••••••• (đã đặt — để trống để giữ nguyên)",
+      "secretNotSet": "chưa đặt",
+      "notEditable": "Không thể chỉnh sửa từ bảng điều khiển."
+    },
+    "result": {
+      "nothingChanged": "Không có gì thay đổi.",
+      "saving": "Đang lưu…",
+      "networkError": "Lỗi mạng.",
+      "requestFailed": "Yêu cầu thất bại ({0}).",
+      "refusedPrefix": "Đã từ chối: {0}"
+    },
+    "footer": "Điều khiển phát nhạc tác động ngay lập tức lên bot đang chạy. Mọi thứ khác ở đây chỉ để xem cho đến khi bạn nhấn Lưu."
   }
 }

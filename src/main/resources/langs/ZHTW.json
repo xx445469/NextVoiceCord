@@ -899,5 +899,76 @@
       "trackType": "<b>曲目：</b>{0}<br>",
       "voiceType": "<b>語音：</b>{0}<br>"
     }
+  },
+  "web": {
+    "status": {
+      "connecting": "連線中",
+      "live": "線上",
+      "disconnected": "已斷線",
+      "unauthorised": "未授權",
+      "error": "錯誤 {0}"
+    },
+    "servers": {
+      "filterPlaceholder": "依名稱篩選伺服器…",
+      "count": "{0} 個伺服器 · {1} 個正在播放",
+      "noMatch": "沒有符合「{0}」的伺服器。"
+    },
+    "console": {
+      "dropped": "在此畫面能夠讀取之前，緩衝區中的 {0} 行已被捨棄。"
+    },
+    "performance": {
+      "empty": "尚未蒐集到效能指標。",
+      "noGuildsActive": "此時間區間內沒有活躍的伺服器。",
+      "noEvents": "此時間區間內沒有事件。"
+    },
+    "system": {
+      "empty": "尚未蒐集到系統指標。",
+      "noSamples": "尚無取樣資料。",
+      "cpuSystem": "系統 CPU",
+      "driftAvg": "平均飄移",
+      "driftMax": "最大飄移",
+      "cpuSparkLabel": "區間內 CPU %",
+      "heapSparkLabel": "區間內堆積 MB"
+    },
+    "sources": {
+      "loaded": "已載入",
+      "noMatches": "無符合項目",
+      "colQuery": "查詢",
+      "noActivity": "此時間區間內沒有來源活動。",
+      "noLookups": "此時間區間內沒有查詢紀錄。"
+    },
+    "guild": {
+      "members": "{0} 位成員"
+    },
+    "control": {
+      "pause": "暫停",
+      "resume": "繼續",
+      "skip": "下一首",
+      "volume": "音量"
+    },
+    "preferences": {
+      "hint": "只會傳送你變更過的欄位——其餘維持原狀。",
+      "panelLanguage": "面板語言",
+      "panelLanguageHint": "只會變更此頁面在這個瀏覽器中對你的顯示方式，不會影響機器人的設定。",
+      "leaveUnchanged": "保持不變",
+      "save": "儲存偏好設定"
+    },
+    "config": {
+      "loadError": "無法載入設定（狀態 {0}）。",
+      "networkError": "載入設定時發生網路錯誤。",
+      "editingOff": "設定編輯功能已關閉——目前顯示的值僅供參考。請在 config.txt 中設定 {0} 以啟用編輯。",
+      "editInFileOnly": "必須直接在 config.txt 中編輯。",
+      "secretSet": "••••••••（已設定——留空以保留原值）",
+      "secretNotSet": "未設定",
+      "notEditable": "無法透過面板編輯。"
+    },
+    "result": {
+      "nothingChanged": "沒有任何變更。",
+      "saving": "儲存中…",
+      "networkError": "網路錯誤。",
+      "requestFailed": "請求失敗（{0}）。",
+      "refusedPrefix": "已拒絕：{0}"
+    },
+    "footer": "播放控制會立即作用於正在執行的機器人。此頁面上的其他內容都是唯讀的，直到你按下儲存為止。"
   }
 }

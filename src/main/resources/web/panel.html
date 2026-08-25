@@ -200,16 +200,16 @@
 <div class="app">
   <nav class="sidebar" id="sidebar">
     <span class="brand">NextVoiceCord</span>
-    <button type="button" class="navitem" data-view="overview">Overview</button>
-    <button type="button" class="navitem" data-view="console">Console</button>
-    <button type="button" class="navitem" data-view="servers">Servers</button>
-    <span class="navsection">Diagnostics</span>
-    <button type="button" class="navitem" data-view="performance">Performance</button>
-    <button type="button" class="navitem" data-view="system">System</button>
-    <button type="button" class="navitem" data-view="sources">Sources</button>
-    <span class="navsection">Configure</span>
-    <button type="button" class="navitem" data-view="preferences">Preferences</button>
-    <button type="button" class="navitem" data-view="config">Bot config</button>
+    <button type="button" class="navitem" data-view="overview" data-i18n="gui.nav.overview">Overview</button>
+    <button type="button" class="navitem" data-view="console" data-i18n="gui.nav.console">Console</button>
+    <button type="button" class="navitem" data-view="servers" data-i18n="gui.nav.servers">Servers</button>
+    <span class="navsection" data-i18n="gui.section.diagnostics">Diagnostics</span>
+    <button type="button" class="navitem" data-view="performance" data-i18n="gui.nav.performance">Performance</button>
+    <button type="button" class="navitem" data-view="system" data-i18n="gui.nav.system">System</button>
+    <button type="button" class="navitem" data-view="sources" data-i18n="gui.nav.sources">Sources</button>
+    <span class="navsection" data-i18n="gui.section.configure">Configure</span>
+    <button type="button" class="navitem" data-view="preferences" data-i18n="gui.nav.preferences">Preferences</button>
+    <button type="button" class="navitem" data-view="config" data-i18n="gui.nav.botConfig">Bot config</button>
     <span class="livewrap"><span class="dot" id="live"><i></i><span id="livetext">connecting</span></span></span>
   </nav>
 
@@ -222,28 +222,30 @@
       </header>
 
       <section class="view" id="view-overview">
-        <div class="banner" id="overviewNotice" hidden>Not connected to Discord yet — playback controls are unavailable.</div>
+        <div class="banner" id="overviewNotice" hidden></div>
         <div class="stats" id="stats"></div>
         <div id="overviewGuilds"></div>
       </section>
 
       <section class="view" id="view-console" hidden>
-        <h2>Console</h2>
+        <h2 data-i18n="gui.nav.console">Console</h2>
         <div class="consolenote" id="consoleDropped" hidden></div>
         <div class="consolebox" id="consoleBox"></div>
       </section>
 
       <section class="view" id="view-servers" hidden>
-        <h2>Servers</h2>
-        <div class="banner" id="serversNotice" hidden>Not connected to Discord yet — playback controls are unavailable.</div>
-        <div class="search"><input type="search" id="serverSearch" placeholder="Filter servers by name…"></div>
+        <h2 data-i18n="gui.status.title">Servers</h2>
+        <p class="hint" style="margin:-8px 0 14px;" data-i18n="gui.status.subtitle">Every server this bot is connected to</p>
+        <div class="banner" id="serversNotice" hidden></div>
+        <div class="search"><input type="search" id="serverSearch" data-i18n-ph="web.servers.filterPlaceholder" placeholder="Filter servers by name…"></div>
         <div class="hint" id="serversCount" style="margin-bottom:10px;"></div>
         <div id="serversList"></div>
       </section>
 
       <section class="view" id="view-performance" hidden>
-        <h2>Performance</h2>
-        <div class="winrow">Window <select class="winsel" id="perfWindow" data-view="performance">
+        <h2 data-i18n="gui.performance.title">Performance</h2>
+        <p class="hint" style="margin:-8px 0 14px;" data-i18n="gui.performance.subtitle">Per-guild audio pipeline diagnostics — frame timing, latency and stability</p>
+        <div class="winrow"><span data-i18n="gui.performance.windowLabel">Window</span> <select class="winsel" id="perfWindow" data-view="performance">
           <option value="60">1m</option><option value="300" selected>5m</option>
           <option value="900">15m</option><option value="3600">1h</option>
         </select></div>
@@ -251,8 +253,9 @@
       </section>
 
       <section class="view" id="view-system" hidden>
-        <h2>System</h2>
-        <div class="winrow">Window <select class="winsel" id="sysWindow" data-view="system">
+        <h2 data-i18n="gui.system.title">System</h2>
+        <p class="hint" style="margin:-8px 0 14px;" data-i18n="gui.system.subtitle">Process CPU, heap memory and garbage collection over time</p>
+        <div class="winrow"><span data-i18n="gui.system.window">Window</span> <select class="winsel" id="sysWindow" data-view="system">
           <option value="60">1m</option><option value="300" selected>5m</option>
           <option value="900">15m</option><option value="3600">1h</option>
         </select></div>
@@ -260,8 +263,9 @@
       </section>
 
       <section class="view" id="view-sources" hidden>
-        <h2>Sources</h2>
-        <div class="winrow">Window <select class="winsel" id="srcWindow" data-view="sources">
+        <h2 data-i18n="gui.sources.title">Sources</h2>
+        <p class="hint" style="margin:-8px 0 14px;" data-i18n="gui.sources.subtitle">Track loading performance across audio sources</p>
+        <div class="winrow"><span data-i18n="gui.sources.windowLabel">Window</span> <select class="winsel" id="srcWindow" data-view="sources">
           <option value="60">1m</option><option value="300" selected>5m</option>
           <option value="900">15m</option><option value="3600">1h</option>
         </select></div>
@@ -269,20 +273,21 @@
       </section>
 
       <section class="view" id="view-preferences" hidden>
-        <h2>Preferences</h2>
-        <div class="hint" style="margin-bottom:14px;">Only the fields you change are sent — everything else is left as it is.</div>
+        <h2 data-i18n="gui.nav.preferences">Preferences</h2>
         <div id="prefsForm"></div>
       </section>
 
       <section class="view" id="view-config" hidden>
-        <h2>Bot config</h2>
+        <h2 data-i18n="gui.config.title">Bot config</h2>
+        <p class="hint" style="margin:-8px 0 14px;" data-i18n="gui.config.subtitle">Edit config.txt and save — the bot must restart to apply changes</p>
         <div id="cfgBody"><div class="empty small">Loading…</div></div>
       </section>
 
-      <footer class="foot">Playback controls act immediately on the live bot. Everything else here is read-only unless you press Save.</footer>
+      <footer class="foot" data-i18n="web.footer">Playback controls act immediately on the live bot. Everything else here is read-only unless you press Save.</footer>
     </div>
   </main>
 </div>
+
 
 <script>
 // The token travels in the URL because that is what makes the link the bot prints work by
@@ -297,6 +302,60 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const authHeaders = extra => Object.assign({ Authorization: 'Bearer ' + token }, extra || {});
 
+// ==================== Labels (i18n) ====================
+// The page has no translation data of its own — everything below comes from /api/labels,
+// fetched once at startup and again whenever the viewer picks a different display language.
+// LABELS carries the same gui.* keys the desktop window uses plus the web-only ones /api/labels
+// documents, so a render function can always fall back to the English text already in this file
+// if the fetch has not completed (or failed) yet.
+let LABELS = {};
+let AVAILABLE_LANGS = [];
+let currentLangCode = 'EN';
+// Which language THIS browser shows the panel in. Deliberately separate from the "Display
+// language" field further down the Preferences form: that one writes gui.language to
+// config.txt and changes the desktop window too. This is per-viewer, stored only in
+// localStorage, and never touches the bot's configuration.
+let panelLang = '';
+try { panelLang = localStorage.getItem('nvcPanelLang') || ''; } catch (e) { /* private browsing etc. */ }
+
+const L = (key, fallback) => LABELS[key] || fallback || key;
+// Positional {0}, {1}, ... substitution — matches the server's own LanguageManager so a
+// translator writing "{0}" here means the same thing it means in every other file they touch.
+const fmt = (s, ...args) => String(s).replace(/\{(\d+)\}/g, (m, i) =>
+  (args[i] !== undefined && args[i] !== null) ? args[i] : m);
+
+function withLang(path) {
+  if (!panelLang) return path;
+  return path + (path.includes('?') ? '&' : '?') + 'lang=' + encodeURIComponent(panelLang);
+}
+
+// Static chrome (nav items, headings, hints) is marked with data-i18n / data-i18n-ph in the
+// markup above and just needs its text swapped in; everything rendered from a template string
+// reads LABELS directly instead, and picks up a language change the next time it redraws.
+function applyStaticLabels() {
+  document.querySelectorAll('[data-i18n]').forEach(node => {
+    const value = LABELS[node.dataset.i18n];
+    if (value) node.textContent = value;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(node => {
+    const value = LABELS[node.dataset.i18nPh];
+    if (value) node.placeholder = value;
+  });
+}
+
+async function loadLabels() {
+  try {
+    const res = await fetch(withLang('/api/labels'), { headers: authHeaders() });
+    if (!res.ok) return;
+    const d = await res.json();
+    LABELS = d.labels || {};
+    if (d.available && d.available.length) AVAILABLE_LANGS = d.available;
+    currentLangCode = d.language || currentLangCode;
+    applyStaticLabels();
+  } catch (e) { /* the page still renders the English text already in the markup */ }
+}
+
+
 let failures = 0;
 function setLive(ok, text) {
   el('live').className = ok ? 'dot' : 'dot stale';
@@ -305,10 +364,12 @@ function setLive(ok, text) {
 function noteFailure() {
   // Shown after two consecutive failures rather than the first: a single dropped poll
   // during a restart should not make a working panel look broken.
-  if (++failures >= 2) setLive(false, 'disconnected');
+  if (++failures >= 2) setLive(false, L('web.status.disconnected', 'disconnected'));
 }
 function noteHttpFailure(status) {
-  setLive(false, status === 401 ? 'unauthorised' : 'error ' + status);
+  setLive(false, status === 401
+      ? L('web.status.unauthorised', 'unauthorised')
+      : fmt(L('web.status.error', 'error {0}'), status));
 }
 
 function stat(value, label) {
@@ -331,9 +392,10 @@ async function postJSON(path, body) {
 // series names itself from the card title next to it, per the same reasoning a lone stat
 // tile needs no key.
 function sparkline(samples, key) {
-  if (!samples || !samples.length) return '<div class="empty small">No samples yet.</div>';
+  const noSamples = `<div class="empty small">${esc(L('web.system.noSamples', 'No samples yet.'))}</div>`;
+  if (!samples || !samples.length) return noSamples;
   const vals = samples.map(s => s[key]).filter(v => v !== null && v !== undefined);
-  if (!vals.length) return '<div class="empty small">No samples yet.</div>';
+  if (!vals.length) return noSamples;
   const W = 280, H = 44, pad = 4;
   const min = Math.min(...vals), max = Math.max(...vals);
   const range = (max - min) || 1;
@@ -364,10 +426,12 @@ function renderHeader(d) {
 function controlsRow(g, connected) {
   const disabled = connected ? '' : 'disabled';
   const volume = Number(g.volume) || 0;
+  const resumeLabel = esc(L('web.control.resume', 'Resume'));
+  const pauseLabel = esc(L('web.control.pause', 'Pause'));
   return `<div class="controls" data-guild="${esc(g.id)}">
-      <button type="button" class="btn ctrl-toggle" data-action="${g.paused ? 'resume' : 'pause'}" ${disabled}>${g.paused ? 'Resume' : 'Pause'}</button>
-      <button type="button" class="btn ctrl-skip" ${disabled}>Skip</button>
-      <label class="vol">Vol
+      <button type="button" class="btn ctrl-toggle" data-action="${g.paused ? 'resume' : 'pause'}" ${disabled}>${g.paused ? resumeLabel : pauseLabel}</button>
+      <button type="button" class="btn ctrl-skip" ${disabled}>${esc(L('web.control.skip', 'Skip'))}</button>
+      <label class="vol">${esc(L('web.control.volume', 'Vol'))}
         <input type="range" class="ctrl-volume" min="0" max="150" step="1" value="${volume}" ${disabled}>
         <span class="volval">${volume}</span>
       </label>
@@ -388,10 +452,10 @@ async function runControl(wrap, guildId, action, value) {
     const body = { action, guild: guildId };
     if (value !== undefined) body.value = String(value);
     const { res, data } = await postJSON('/api/control', body);
-    resultEl.textContent = (data && data.message) ? data.message : ('Request failed (' + res.status + ').');
+    resultEl.textContent = (data && data.message) ? data.message : fmt(L('web.result.requestFailed', 'Request failed ({0}).'), res.status);
     resultEl.className = 'ctrl-result ' + (res.ok ? 'ok' : 'err');
   } catch (e) {
-    resultEl.textContent = 'Network error.';
+    resultEl.textContent = L('web.result.networkError', 'Network error.');
     resultEl.className = 'ctrl-result err';
   } finally {
     setControlsBusy(wrap, false);
@@ -424,13 +488,13 @@ function guildCard(g, t, opts) {
 
   const badge = g.playing
     ? `<span class="badge">${esc(g.paused ? (t.paused || 'paused') : (t.playing || 'playing'))}</span>`
-    : '<span class="badge idle">idle</span>';
+    : `<span class="badge idle">${esc(L('gui.performance.statusIdle', 'Idle'))}</span>`;
 
   const bits = [];
   if (g.playing && g.channel) bits.push(esc(g.channel));
-  bits.push(esc(g.members) + ' members');
-  if (full || g.playing) bits.push(esc(g.queue || 0) + ' queued');
-  if (g.playing) bits.push('vol ' + esc(g.volume));
+  bits.push(esc(fmt(L('web.guild.members', '{0} members'), g.members)));
+  if (full || g.playing) bits.push(esc(fmt(L('gui.overview.queued', '{0} queued'), g.queue || 0)));
+  if (g.playing) bits.push(esc(fmt(L('gui.overview.volume', 'vol {0}'), g.volume)));
   const meta = bits.join(' · ');
 
   const track = g.playing ? `
@@ -456,12 +520,13 @@ function guildCard(g, t, opts) {
 function renderOverview(d) {
   const t = d.labels || {};
   el('overviewNotice').hidden = !!d.connected;
+  el('overviewNotice').textContent = t.connecting || L('gui.overview.connecting', 'Connecting to Discord…');
   el('stats').innerHTML =
       stat(d.playingCount, t.playingNow || 'playing now') +
       stat(d.guildCount, t.servers || 'servers') +
       stat(d.listeners, t.listeners || 'listeners') +
       stat(d.uptime, t.uptime || 'uptime') +
-      stat(d.memoryUsedMb + ' MB', (t.memory || 'memory') + ' / ' + d.memoryMaxMb);
+      stat(d.memoryUsedMb + ' MB', fmt(L('gui.overview.memoryOf', 'of {0} MB'), d.memoryMaxMb));
   el('overviewGuilds').innerHTML = d.guilds.length
       ? d.guilds.map(g => guildCard(g, t, { full: false, connected: d.connected })).join('')
       : `<div class="empty">${esc(t.nothingPlaying || 'Nothing is playing right now.')}</div>`;
@@ -474,14 +539,15 @@ let serverFilter = '';
 function renderServers(d) {
   const t = d.labels || {};
   el('serversNotice').hidden = !!d.connected;
-  el('serversCount').textContent = d.guildCount + ' server(s) · ' + d.playingCount + ' playing';
+  el('serversNotice').textContent = t.connecting || L('gui.overview.connecting', 'Connecting to Discord…');
+  el('serversCount').textContent = fmt(L('web.servers.count', '{0} server(s) · {1} playing'), d.guildCount, d.playingCount);
 
   const q = serverFilter.trim().toLowerCase();
   const guilds = q ? d.guilds.filter(g => String(g.name || '').toLowerCase().includes(q)) : d.guilds;
 
   el('serversList').innerHTML = guilds.length
       ? guilds.map(g => guildCard(g, t, { full: true, connected: d.connected })).join('')
-      : `<div class="empty">${q ? 'No servers match “' + esc(q) + '”.' : esc(t.nothingPlaying || 'No servers.')}</div>`;
+      : `<div class="empty">${q ? esc(fmt(L('web.servers.noMatch', 'No servers match “{0}”.'), q)) : esc(t.nothingPlaying || 'No servers.')}</div>`;
 }
 
 el('serverSearch').addEventListener('input', e => {
@@ -491,11 +557,11 @@ el('serverSearch').addEventListener('input', e => {
 
 async function pollStatus(view) {
   try {
-    const res = await fetch('/api/status', { headers: authHeaders() });
+    const res = await fetch(withLang('/api/status'), { headers: authHeaders() });
     if (!res.ok) { noteHttpFailure(res.status); return; }
     const d = await res.json();
     failures = 0;
-    setLive(true, 'live');
+    setLive(true, L('web.status.live', 'live'));
     renderHeader(d);
     lastStatus = d;
     if (view === 'overview') renderOverview(d);
@@ -512,11 +578,11 @@ function isAtBottom(box) {
 
 async function pollConsole() {
   try {
-    const res = await fetch('/api/console?since=' + consoleSeq, { headers: authHeaders() });
+    const res = await fetch(withLang('/api/console?since=' + consoleSeq), { headers: authHeaders() });
     if (!res.ok) { noteHttpFailure(res.status); return; }
     const d = await res.json();
     failures = 0;
-    setLive(true, 'live');
+    setLive(true, L('web.status.live', 'live'));
 
     const box = el('consoleBox');
     if (d.lines && d.lines.length) {
@@ -544,7 +610,7 @@ async function pollConsole() {
     const dropNote = el('consoleDropped');
     if (d.dropped) {
       dropNote.hidden = false;
-      dropNote.textContent = d.dropped + ' line(s) were discarded from the buffer before this view could read them.';
+      dropNote.textContent = fmt(L('web.console.dropped', '{0} line(s) were discarded from the buffer before this view could read them.'), d.dropped);
     } else {
       dropNote.hidden = true;
     }
@@ -556,64 +622,79 @@ const winState = { performance: 300, system: 300, sources: 300 };
 
 async function pollPerformance() {
   try {
-    const res = await fetch('/api/performance?window=' + winState.performance, { headers: authHeaders() });
+    const res = await fetch(withLang('/api/performance?window=' + winState.performance), { headers: authHeaders() });
     if (!res.ok) { noteHttpFailure(res.status); return; }
     const d = await res.json();
-    failures = 0; setLive(true, 'live');
+    failures = 0; setLive(true, L('web.status.live', 'live'));
     renderPerformance(d);
   } catch (e) { noteFailure(); }
 }
 
+// The desktop performance table translates these two enum-ish columns; the "Result" values
+// Sources renders further down (LOADED / NO_MATCHES / LOAD_FAILED) are left as-is because the
+// desktop table does the same — see SourceHealthPanel, which only colours them, never localises.
+function perfStateLabel(state) {
+  return state === 'playing' ? L('gui.performance.statusPlaying', 'Playing')
+       : state === 'paused' ? L('gui.performance.statusPaused', 'Paused')
+       : L('gui.performance.statusIdle', 'Idle');
+}
+function perfEventTypeLabel(type) {
+  return type === 'stutter' ? L('gui.performance.eventTypeStutter', 'Stut')
+       : type === 'stuck' ? L('gui.performance.eventTypeStuck', 'Stck')
+       : type === 'gc' ? L('gui.performance.eventTypeGc', 'GC')
+       : type;
+}
+
 function renderPerformance(d) {
   if (!d.available) {
-    el('perfBody').innerHTML = '<div class="empty">No performance metrics collected yet.</div>';
+    el('perfBody').innerHTML = `<div class="empty">${esc(L('web.performance.empty', 'No performance metrics collected yet.'))}</div>`;
     return;
   }
   let html = '<div class="stats">' +
-      stat(d.totals.framesSent, 'frames sent') +
-      stat(d.totals.framesMissed, 'frames missed') +
-      stat(Number(d.totals.missRate).toFixed(2) + '%', 'miss rate') +
+      stat(d.totals.framesSent, L('gui.performance.statFrames', 'frames')) +
+      stat(d.totals.framesMissed, L('gui.performance.statMissedFrames', 'missed frames')) +
+      stat(Number(d.totals.missRate).toFixed(2) + '%', L('gui.performance.colMissRate', 'Miss Rate')) +
       '</div>';
 
-  html += '<div class="table-wrap"><table><thead><tr><th>Guild</th><th>State</th><th>Frames sent</th>' +
-      '<th>Frames missed</th><th>Miss rate</th><th>Stutters</th><th>Stuck</th></tr></thead><tbody>';
+  html += `<div class="table-wrap"><table><thead><tr><th>${esc(L('gui.performance.guild', 'Guild'))}</th><th>${esc(L('gui.performance.colStatus', 'Status'))}</th><th>${esc(L('gui.performance.statFrames', 'frames'))}</th>` +
+      `<th>${esc(L('gui.performance.statMissedFrames', 'missed frames'))}</th><th>${esc(L('gui.performance.colMissRate', 'Miss Rate'))}</th><th>${esc(L('gui.performance.colStutters', 'Stutters'))}</th><th>${esc(L('gui.performance.colStuck', 'Stuck'))}</th></tr></thead><tbody>`;
   if (d.guilds.length) {
     for (const g of d.guilds) {
-      html += `<tr><td>${esc(g.name)}</td><td>${esc(g.state)}</td><td>${esc(g.framesSent)}</td>` +
+      html += `<tr><td>${esc(g.name)}</td><td>${esc(perfStateLabel(g.state))}</td><td>${esc(g.framesSent)}</td>` +
           `<td>${esc(g.framesMissed)}</td><td>${esc(Number(g.missRate).toFixed(2))}%</td>` +
           `<td>${esc(g.stutters)}</td><td>${esc(g.stuck)}</td></tr>`;
     }
   } else {
-    html += '<tr><td colspan="7" class="empty small">No guilds active in this window.</td></tr>';
+    html += `<tr><td colspan="7" class="empty small">${esc(L('web.performance.noGuildsActive', 'No guilds active in this window.'))}</td></tr>`;
   }
   html += '</tbody></table></div>';
 
-  html += '<h3>Recent events</h3>';
+  html += `<h3>${esc(L('gui.performance.cardEvents', 'Events'))}</h3>`;
   if (d.events.length) {
-    html += '<div class="table-wrap"><table><thead><tr><th>Time</th><th>Guild</th><th>Type</th><th>Detail</th></tr></thead><tbody>';
+    html += `<div class="table-wrap"><table><thead><tr><th>${esc(L('gui.performance.colTime', 'Time'))}</th><th>${esc(L('gui.performance.guild', 'Guild'))}</th><th>${esc(L('gui.performance.colType', 'Type'))}</th><th>${esc(L('gui.performance.colDetails', 'Details'))}</th></tr></thead><tbody>`;
     for (const ev of d.events) {
-      html += `<tr><td>${esc(ev.time)}</td><td>${esc(ev.guild)}</td><td>${esc(ev.type)}</td><td>${esc(ev.detail)}</td></tr>`;
+      html += `<tr><td>${esc(ev.time)}</td><td>${esc(ev.guild)}</td><td>${esc(perfEventTypeLabel(ev.type))}</td><td>${esc(ev.detail)}</td></tr>`;
     }
     html += '</tbody></table></div>';
   } else {
-    html += '<div class="empty small">No events in this window.</div>';
+    html += `<div class="empty small">${esc(L('web.performance.noEvents', 'No events in this window.'))}</div>`;
   }
   el('perfBody').innerHTML = html;
 }
 
 async function pollSystem() {
   try {
-    const res = await fetch('/api/system?window=' + winState.system, { headers: authHeaders() });
+    const res = await fetch(withLang('/api/system?window=' + winState.system), { headers: authHeaders() });
     if (!res.ok) { noteHttpFailure(res.status); return; }
     const d = await res.json();
-    failures = 0; setLive(true, 'live');
+    failures = 0; setLive(true, L('web.status.live', 'live'));
     renderSystem(d);
   } catch (e) { noteFailure(); }
 }
 
 function renderSystem(d) {
   if (!d.available) {
-    el('sysBody').innerHTML = '<div class="empty">No system metrics collected yet.</div>';
+    el('sysBody').innerHTML = `<div class="empty">${esc(L('web.system.empty', 'No system metrics collected yet.'))}</div>`;
     return;
   }
   // null (not 0) means the JVM could not report it — shown as "n/a" rather than a false zero.
@@ -621,43 +702,43 @@ function renderSystem(d) {
   const cpuS = (d.cpuSystem === null || d.cpuSystem === undefined) ? 'n/a' : d.cpuSystem.toFixed(1) + '%';
 
   let html = '<div class="stats">' +
-      stat(cpuP, 'process CPU') +
-      stat(cpuS, 'system CPU') +
-      stat(d.heapUsedMb + ' MB', 'heap used / ' + d.heapMaxMb) +
-      stat(d.threads, 'threads') +
-      stat(d.gcCount, 'GC count') +
-      stat(d.gcTimeMs + ' ms', 'GC time') +
-      stat(d.driftAvgMs + ' ms', 'avg drift') +
-      stat(d.driftMaxMs + ' ms', 'max drift') +
+      stat(cpuP, L('gui.system.cpuUsage', 'process CPU')) +
+      stat(cpuS, L('web.system.cpuSystem', 'system CPU')) +
+      stat(d.heapUsedMb + ' / ' + d.heapMaxMb + ' MB', L('gui.system.heapMemory', 'heap memory')) +
+      stat(d.threads, L('gui.system.threads', 'threads')) +
+      stat(d.gcCount, L('gui.system.gcCount', 'gc count')) +
+      stat(d.gcTimeMs + ' ms', L('gui.system.gcTime', 'gc time')) +
+      stat(d.driftAvgMs + ' ms', L('web.system.driftAvg', 'avg drift')) +
+      stat(d.driftMaxMs + ' ms', L('web.system.driftMax', 'max drift')) +
       '</div>';
 
   html += '<div class="sparkrow">' +
-      '<div class="sparkcard"><div class="sparklabel">CPU % over window</div>' + sparkline(d.samples, 'cpu') + '</div>' +
-      '<div class="sparkcard"><div class="sparklabel">Heap MB over window</div>' + sparkline(d.samples, 'heapMb') + '</div>' +
+      `<div class="sparkcard"><div class="sparklabel">${esc(L('web.system.cpuSparkLabel', 'CPU % over window'))}</div>` + sparkline(d.samples, 'cpu') + '</div>' +
+      `<div class="sparkcard"><div class="sparklabel">${esc(L('web.system.heapSparkLabel', 'Heap MB over window'))}</div>` + sparkline(d.samples, 'heapMb') + '</div>' +
       '</div>';
   el('sysBody').innerHTML = html;
 }
 
 async function pollSources() {
   try {
-    const res = await fetch('/api/sources?window=' + winState.sources, { headers: authHeaders() });
+    const res = await fetch(withLang('/api/sources?window=' + winState.sources), { headers: authHeaders() });
     if (!res.ok) { noteHttpFailure(res.status); return; }
     const d = await res.json();
-    failures = 0; setLive(true, 'live');
+    failures = 0; setLive(true, L('web.status.live', 'live'));
     renderSources(d);
   } catch (e) { noteFailure(); }
 }
 
 function renderSources(d) {
   let html = '<div class="stats">' +
-      stat(d.totals.loaded, 'loaded') +
-      stat(d.totals.failed, 'failed') +
-      stat(d.totals.noMatches, 'no matches') +
-      stat(Number(d.totals.successPercent).toFixed(1) + '%', 'success rate') +
+      stat(d.totals.loaded, L('web.sources.loaded', 'loaded')) +
+      stat(d.totals.failed, L('gui.sources.failed', 'failed')) +
+      stat(d.totals.noMatches, L('web.sources.noMatches', 'no matches')) +
+      stat(Number(d.totals.successPercent).toFixed(1) + '%', L('gui.sources.successRate', 'success rate')) +
       '</div>';
 
-  html += '<div class="table-wrap"><table><thead><tr><th>Source</th><th>Loaded</th><th>Failed</th>' +
-      '<th>No matches</th><th>Success %</th><th>Avg ms</th><th>p95 ms</th></tr></thead><tbody>';
+  html += `<div class="table-wrap"><table><thead><tr><th>${esc(L('gui.sources.colSource', 'Source'))}</th><th>${esc(L('web.sources.loaded', 'loaded'))}</th><th>${esc(L('gui.sources.failed', 'failed'))}</th>` +
+      `<th>${esc(L('web.sources.noMatches', 'no matches'))}</th><th>${esc(L('gui.sources.colSuccessPercent', 'Success%'))}</th><th>${esc(L('gui.sources.colAvgMs', 'Avg (ms)'))}</th><th>${esc(L('gui.sources.colP95Ms', 'p95 (ms)'))}</th></tr></thead><tbody>`;
   if (d.sources.length) {
     for (const s of d.sources) {
       html += `<tr><td>${esc(s.name)}</td><td>${esc(s.loaded)}</td><td>${esc(s.failed)}</td>` +
@@ -665,19 +746,19 @@ function renderSources(d) {
           `<td>${esc(s.avgMs)}</td><td>${esc(s.p95Ms)}</td></tr>`;
     }
   } else {
-    html += '<tr><td colspan="7" class="empty small">No source activity in this window.</td></tr>';
+    html += `<tr><td colspan="7" class="empty small">${esc(L('web.sources.noActivity', 'No source activity in this window.'))}</td></tr>`;
   }
   html += '</tbody></table></div>';
 
-  html += '<h3>Recent lookups</h3>';
+  html += `<h3>${esc(L('gui.sources.recentLoads', 'Recent loads'))}</h3>`;
   if (d.recent.length) {
-    html += '<div class="table-wrap"><table><thead><tr><th>Time</th><th>Source</th><th>Result</th><th>ms</th><th>Query</th></tr></thead><tbody>';
+    html += `<div class="table-wrap"><table><thead><tr><th>${esc(L('gui.sources.colTime', 'Time'))}</th><th>${esc(L('gui.sources.colSource', 'Source'))}</th><th>${esc(L('gui.sources.colResult', 'Result'))}</th><th>${esc(L('gui.sources.colDuration', 'Duration'))}</th><th>${esc(L('web.sources.colQuery', 'Query'))}</th></tr></thead><tbody>`;
     for (const r of d.recent) {
       html += `<tr><td>${esc(r.time)}</td><td>${esc(r.source)}</td><td>${esc(r.result)}</td><td>${esc(r.ms)}</td><td>${esc(r.query)}</td></tr>`;
     }
     html += '</tbody></table></div>';
   } else {
-    html += '<div class="empty small">No lookups in this window.</div>';
+    html += `<div class="empty small">${esc(L('web.sources.noLookups', 'No lookups in this window.'))}</div>`;
   }
   el('srcBody').innerHTML = html;
 }
@@ -695,18 +776,23 @@ document.addEventListener('change', e => {
 // GET /api/prefs does not exist — there is nothing to prefill theme/font size from, so those
 // start unset ("leave unchanged") and only join the request if the viewer actually picks one.
 // Language is the exception: /api/status already reports it, so it can start selected.
-const LANGUAGES = [
-  ['EN', 'English', 'English'], ['DE', 'Deutsch', 'German'], ['ES', 'Español', 'Spanish'],
-  ['FR', 'Français', 'French'], ['JA', '日本語', 'Japanese'], ['KO', '한국어', 'Korean'],
-  ['PL', 'Polski', 'Polish'], ['RU', 'Русский', 'Russian'], ['UA', 'Українська', 'Ukrainian'],
-  ['VN', 'Tiếng Việt', 'Vietnamese'], ['ZHCN', '简体中文', 'Chinese (Simplified)'],
-  ['ZHTW', '繁體中文', 'Chinese (Traditional)']
-];
+//
+// Two different language pickers live on this page and they are not the same setting:
+//  - "Panel language" (panelLang) only changes how THIS PAGE reads, for this browser. It is
+//    never sent to /api/prefs and never touches config.txt.
+//  - "Display language" (prefsLanguage) is the desktop window's own gui.language, exposed here
+//    so it can be changed remotely; saving it calls /api/prefs exactly as it always has.
+const FALLBACK_LANGS = [{ code: 'EN', native: 'English', english: 'English' }];
 let prefsLanguage = 'EN';
+
+function langOptionsHtml(selectedCode) {
+  const langs = AVAILABLE_LANGS.length ? AVAILABLE_LANGS : FALLBACK_LANGS;
+  return langs.map(l => `<option value="${esc(l.code)}" ${l.code === selectedCode ? 'selected' : ''}>${esc(l.native)} · ${esc(l.english)}</option>`).join('');
+}
 
 async function openPreferences() {
   try {
-    const res = await fetch('/api/status', { headers: authHeaders() });
+    const res = await fetch(withLang('/api/status'), { headers: authHeaders() });
     if (res.ok) {
       const d = await res.json();
       renderHeader(d);
@@ -717,30 +803,40 @@ async function openPreferences() {
 }
 
 function renderPreferencesForm() {
-  const langOptions = LANGUAGES.map(([code, native, en]) =>
-      `<option value="${code}" ${code === prefsLanguage ? 'selected' : ''}>${esc(native)} · ${esc(en)}</option>`).join('');
+  const unchanged = esc(L('web.preferences.leaveUnchanged', 'Leave unchanged'));
   el('prefsForm').innerHTML = `
-    <label class="field">
-      <span class="fieldlabel">Language</span>
-      <select id="prefLanguage">${langOptions}</select>
-    </label>
-    <label class="field">
-      <span class="fieldlabel">Theme</span>
-      <select id="prefTheme">
-        <option value="">Leave unchanged</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-        <option value="darcula">Darcula</option>
-        <option value="intellij">IntelliJ</option>
-      </select>
-    </label>
-    <label class="field">
-      <span class="fieldlabel">Font size</span>
-      <input type="number" id="prefFontSize" min="8" max="24" step="1" placeholder="Leave unchanged">
-    </label>
-    <div class="formrow">
-      <button type="button" class="btn primary" id="prefsSave">Save preferences</button>
-      <span class="ctrl-result" id="prefsResult"></span>
+    <div class="card">
+      <label class="field">
+        <span class="fieldlabel">${esc(L('web.preferences.panelLanguage', 'Panel language'))}</span>
+        <select id="panelLangSelect">${langOptionsHtml(panelLang || currentLangCode)}</select>
+      </label>
+      <div class="hint">${esc(L('web.preferences.panelLanguageHint', "Only changes how this page looks for you, in this browser. Does not touch the bot's configuration."))}</div>
+    </div>
+    <div class="card">
+      <div class="hint" style="margin-bottom:14px;">${esc(L('web.preferences.hint', 'Only the fields you change are sent — everything else is left as it is.'))}</div>
+      <label class="field">
+        <span class="fieldlabel">${esc(L('gui.language.label', 'Display language'))}</span>
+        <select id="prefLanguage">${langOptionsHtml(prefsLanguage)}</select>
+      </label>
+      <div class="hint" style="margin:-8px 0 14px;">${esc(L('gui.language.hint', "Changes this window only. The bot's Discord language is set per server and per user."))}</div>
+      <label class="field">
+        <span class="fieldlabel">${esc(L('gui.appearance.theme', 'Theme'))}</span>
+        <select id="prefTheme">
+          <option value="">${unchanged}</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="darcula">Darcula</option>
+          <option value="intellij">IntelliJ</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="fieldlabel">${esc(L('gui.appearance.fontSize', 'Font size'))}</span>
+        <input type="number" id="prefFontSize" min="8" max="24" step="1" placeholder="${unchanged}">
+      </label>
+      <div class="formrow">
+        <button type="button" class="btn primary" id="prefsSave">${esc(L('web.preferences.save', 'Save preferences'))}</button>
+        <span class="ctrl-result" id="prefsResult"></span>
+      </div>
     </div>`;
 }
 
@@ -755,15 +851,15 @@ async function savePreferences() {
   if (fontSize !== '') body.fontSize = fontSize;
 
   if (!Object.keys(body).length) {
-    resultEl.textContent = 'Nothing changed.';
+    resultEl.textContent = L('web.result.nothingChanged', 'Nothing changed.');
     resultEl.className = 'ctrl-result';
     return;
   }
-  resultEl.textContent = 'Saving…';
+  resultEl.textContent = L('web.result.saving', 'Saving…');
   resultEl.className = 'ctrl-result';
   try {
     const { res, data } = await postJSON('/api/prefs', body);
-    resultEl.textContent = (data && data.message) ? data.message : ('Request failed (' + res.status + ').');
+    resultEl.textContent = (data && data.message) ? data.message : fmt(L('web.result.requestFailed', 'Request failed ({0}).'), res.status);
     resultEl.className = 'ctrl-result ' + (res.ok ? 'ok' : 'err');
     if (res.ok) {
       if (body.language) prefsLanguage = body.language;
@@ -771,7 +867,7 @@ async function savePreferences() {
       el('prefFontSize').value = '';
     }
   } catch (e) {
-    resultEl.textContent = 'Network error.';
+    resultEl.textContent = L('web.result.networkError', 'Network error.');
     resultEl.className = 'ctrl-result err';
   }
 }
@@ -780,27 +876,47 @@ document.addEventListener('click', e => {
   if (e.target.id === 'prefsSave') savePreferences();
 });
 
+// The panel-language picker takes effect immediately — it is a local display preference, not a
+// change to anything the bot owns, so there is nothing to "save" and no request to send besides
+// re-fetching labels and status in the newly chosen language.
+document.addEventListener('change', e => {
+  if (e.target.id !== 'panelLangSelect') return;
+  panelLang = e.target.value;
+  try { localStorage.setItem('nvcPanelLang', panelLang); } catch (err) { /* private browsing etc. */ }
+  loadLabels().then(refreshCurrentView);
+});
+
 // ==================== Bot config ====================
 let cfgData = null;
 let cfgInitial = {};
 
+// A handful of section prefixes match a titled card the desktop config panel already has a
+// name for; the rest (discord, web, logging, ...) are internal config namespaces the desktop
+// panel does not curate into a section of its own, so they fall back to a capitalised slug.
+const CONFIG_SECTION_KEYS = {
+  commands: 'gui.config.commands', presence: 'gui.config.presence',
+  voice: 'gui.config.voice', playback: 'gui.config.playback', ui: 'gui.config.uiEmojis'
+};
+
 async function openConfig() {
-  el('cfgBody').innerHTML = '<div class="empty small">Loading…</div>';
+  el('cfgBody').innerHTML = `<div class="empty small">${esc(L('gui.config.loading', 'Loading'))}…</div>`;
   try {
-    const res = await fetch('/api/config', { headers: authHeaders() });
+    const res = await fetch(withLang('/api/config'), { headers: authHeaders() });
     if (!res.ok) {
-      el('cfgBody').innerHTML = `<div class="empty">Could not load configuration (status ${res.status}).</div>`;
+      el('cfgBody').innerHTML = `<div class="empty">${esc(fmt(L('web.config.loadError', 'Could not load configuration (status {0}).'), res.status))}</div>`;
       return;
     }
     cfgData = await res.json();
     renderConfig();
   } catch (e) {
-    el('cfgBody').innerHTML = '<div class="empty">Network error loading configuration.</div>';
+    el('cfgBody').innerHTML = `<div class="empty">${esc(L('web.config.networkError', 'Network error loading configuration.'))}</div>`;
   }
 }
 
 function prettifySection(name) {
   const n = String(name || '');
+  const key = CONFIG_SECTION_KEYS[n];
+  if (key) return L(key, n);
   return n ? n.charAt(0).toUpperCase() + n.slice(1) : n;
 }
 
@@ -811,9 +927,11 @@ function renderOptionRow(opt, rowDisabled) {
 
   if (readOnlyType) {
     input = `<input type="text" id="${id}" value="${esc(opt.value)}" disabled>
-      <span class="hint">Must be edited in config.txt directly.</span>`;
+      <span class="hint">${esc(L('web.config.editInFileOnly', 'Must be edited in config.txt directly.'))}</span>`;
   } else if (opt.secret) {
-    const placeholder = opt.value ? '•••••••• (set — leave blank to keep it)' : 'not set';
+    const placeholder = opt.value
+        ? L('web.config.secretSet', '•••••••• (set — leave blank to keep it)')
+        : L('web.config.secretNotSet', 'not set');
     input = `<input type="password" id="${id}" placeholder="${esc(placeholder)}" autocomplete="new-password" ${rowDisabled ? 'disabled' : ''}>`;
   } else if (opt.type === 'BOOLEAN') {
     const checked = String(opt.value).toLowerCase() === 'true';
@@ -827,7 +945,7 @@ function renderOptionRow(opt, rowDisabled) {
   }
 
   const notWritable = rowDisabled && opt.writable === false
-      ? '<span class="hint">Not editable from the panel.</span>' : '';
+      ? `<span class="hint">${esc(L('web.config.notEditable', 'Not editable from the panel.'))}</span>` : '';
   const description = opt.description ? `<span class="hint">${esc(opt.description)}</span>` : '';
 
   return `<label class="field cfgfield" data-key="${esc(opt.key)}" data-type="${esc(opt.type)}" data-secret="${opt.secret ? '1' : '0'}">
@@ -844,8 +962,13 @@ function renderConfig() {
   let html = '';
 
   if (disabledAll) {
-    html += '<div class="banner">Config editing is off — values are shown for reference only. ' +
-        'Set <code>web.allowConfigEdit = true</code> in config.txt to enable editing.</div>';
+    // The {0} in the template is substituted with a fixed, untranslated <code> literal rather
+    // than going through fmt(): it is the actual config key/value someone needs to type, not
+    // prose, and it must survive as real markup rather than being escaped away with the rest
+    // of the sentence.
+    const template = esc(L('web.config.editingOff',
+        'Config editing is off — values are shown for reference only. Set {0} in config.txt to enable editing.'));
+    html += `<div class="banner">${template.replace('{0}', '<code>web.allowConfigEdit = true</code>')}</div>`;
   }
 
   for (const section of cfgData.sections) {
@@ -863,7 +986,7 @@ function renderConfig() {
   }
 
   html += `<div class="formrow">
-      <button type="button" class="btn primary" id="cfgSave" ${disabledAll ? 'disabled' : ''}>Save changes</button>
+      <button type="button" class="btn primary" id="cfgSave" ${disabledAll ? 'disabled' : ''}>${esc(L('gui.config.saveChanges', 'Save changes'))}</button>
       <span class="ctrl-result" id="cfgResult"></span>
     </div>`;
   el('cfgBody').innerHTML = html;
@@ -895,27 +1018,28 @@ async function saveConfig() {
   });
 
   if (!Object.keys(body).length) {
-    resultEl.textContent = 'Nothing changed.';
+    resultEl.textContent = L('web.result.nothingChanged', 'Nothing changed.');
     resultEl.className = 'ctrl-result';
     return;
   }
 
-  resultEl.textContent = 'Saving…';
+  resultEl.textContent = L('web.result.saving', 'Saving…');
   resultEl.className = 'ctrl-result';
   try {
     const { res, data } = await postJSON('/api/config', body);
     if (res.status === 403) {
-      resultEl.textContent = (data && data.message) || 'Config editing is off.';
+      resultEl.textContent = (data && data.message)
+          || fmt(L('web.config.editingOff', 'Config editing is off — values are shown for reference only. Set {0} in config.txt to enable editing.'), 'web.allowConfigEdit = true');
       resultEl.className = 'ctrl-result err';
       return;
     }
-    let msg = (data && data.message) ? data.message : ('Request failed (' + res.status + ').');
-    if (data && data.refused && data.refused.length) msg += ' Refused: ' + data.refused.join('; ');
+    let msg = (data && data.message) ? data.message : fmt(L('web.result.requestFailed', 'Request failed ({0}).'), res.status);
+    if (data && data.refused && data.refused.length) msg += ' ' + fmt(L('web.result.refusedPrefix', 'Refused: {0}'), data.refused.join('; '));
     resultEl.textContent = msg;
     resultEl.className = 'ctrl-result ' + ((res.ok && data && data.ok) ? 'ok' : 'err');
     if (res.ok) openConfig(); // reload so the form reflects what was actually saved
   } catch (e) {
-    resultEl.textContent = 'Network error.';
+    resultEl.textContent = L('web.result.networkError', 'Network error.');
     resultEl.className = 'ctrl-result err';
   }
 }
@@ -931,16 +1055,32 @@ const REFRESH_MS = { overview: 3000, servers: 3000, console: 2000, performance: 
 let pollTimer = null;
 let currentView = null;
 
-const VIEW_START = {
-  overview: () => { pollStatus('overview'); pollTimer = setInterval(() => pollStatus('overview'), REFRESH_MS.overview); },
-  servers: () => { pollStatus('servers'); pollTimer = setInterval(() => pollStatus('servers'), REFRESH_MS.servers); },
-  console: () => { pollConsole(); pollTimer = setInterval(pollConsole, REFRESH_MS.console); },
-  performance: () => { pollPerformance(); pollTimer = setInterval(pollPerformance, REFRESH_MS.performance); },
-  system: () => { pollSystem(); pollTimer = setInterval(pollSystem, REFRESH_MS.system); },
-  sources: () => { pollSources(); pollTimer = setInterval(pollSources, REFRESH_MS.sources); },
-  preferences: () => { openPreferences(); },
-  config: () => { openConfig(); }
+// One-shot poll/render per view, with no interval attached — VIEW_START below wraps the ones
+// that repeat. Kept separate so a language change can redraw just the visible view once,
+// without tearing down and re-registering whatever interval is already running for it.
+const VIEW_REFRESH = {
+  overview: () => pollStatus('overview'),
+  servers: () => pollStatus('servers'),
+  console: () => pollConsole(),
+  performance: () => pollPerformance(),
+  system: () => pollSystem(),
+  sources: () => pollSources(),
+  preferences: () => openPreferences(),
+  config: () => openConfig()
 };
+
+const VIEW_START = {};
+for (const view of Object.keys(VIEW_REFRESH)) {
+  const refresh = VIEW_REFRESH[view];
+  const intervalMs = REFRESH_MS[view];
+  VIEW_START[view] = intervalMs
+      ? () => { refresh(); pollTimer = setInterval(refresh, intervalMs); }
+      : refresh;
+}
+
+function refreshCurrentView() {
+  if (currentView && VIEW_REFRESH[currentView]) VIEW_REFRESH[currentView]();
+}
 
 function showView(key) {
   if (key === currentView || !VIEW_START[key]) return;
@@ -955,7 +1095,9 @@ document.querySelectorAll('.navitem').forEach(btn => {
   btn.addEventListener('click', () => showView(btn.dataset.view));
 });
 
-showView('overview');
+// Labels are fetched once before the first view renders, so nothing ever flashes from English
+// to a translation after the fact — the very first paint is already in the right language.
+loadLabels().then(() => showView('overview'));
 </script>
 </body>
 </html>

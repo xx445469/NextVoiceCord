@@ -899,5 +899,76 @@
       "title": "Panel WWW",
       "notReady": "Panel WWW uruchamia się, gdy bot połączy się z Discordem. Spróbuj ponownie za chwilę."
     }
+  },
+  "web": {
+    "status": {
+      "connecting": "Łączenie…",
+      "live": "Na żywo",
+      "disconnected": "Rozłączono",
+      "unauthorised": "Brak autoryzacji",
+      "error": "Błąd {0}"
+    },
+    "servers": {
+      "filterPlaceholder": "Filtruj serwery po nazwie…",
+      "count": "{0} serwer(y) · {1} odtwarza",
+      "noMatch": "Żaden serwer nie pasuje do „{0}”."
+    },
+    "console": {
+      "dropped": "{0} linia(e) zostały odrzucone z bufora, zanim ten widok mógł je odczytać."
+    },
+    "performance": {
+      "empty": "Nie zebrano jeszcze żadnych metryk wydajności.",
+      "noGuildsActive": "Brak aktywnych serwerów w tym oknie.",
+      "noEvents": "Brak zdarzeń w tym oknie."
+    },
+    "system": {
+      "empty": "Nie zebrano jeszcze żadnych metryk systemowych.",
+      "noSamples": "Brak próbek jeszcze.",
+      "cpuSystem": "CPU systemu",
+      "driftAvg": "śr. dryf",
+      "driftMax": "maks. dryf",
+      "cpuSparkLabel": "CPU % w oknie",
+      "heapSparkLabel": "Heap MB w oknie"
+    },
+    "sources": {
+      "loaded": "wczytano",
+      "noMatches": "brak wyników",
+      "colQuery": "Zapytanie",
+      "noActivity": "Brak aktywności źródeł w tym oknie.",
+      "noLookups": "Brak zapytań w tym oknie."
+    },
+    "guild": {
+      "members": "{0} członków"
+    },
+    "control": {
+      "pause": "Pauza",
+      "resume": "Wznów",
+      "skip": "Pomiń",
+      "volume": "Gł."
+    },
+    "preferences": {
+      "hint": "Wysyłane są tylko zmienione pola — reszta zostaje bez zmian.",
+      "panelLanguage": "Język panelu",
+      "panelLanguageHint": "Zmienia tylko wygląd tej strony dla ciebie, w tej przeglądarce. Nie wpływa na konfigurację bota.",
+      "leaveUnchanged": "Pozostaw bez zmian",
+      "save": "Zapisz preferencje"
+    },
+    "config": {
+      "loadError": "Nie udało się wczytać konfiguracji (status {0}).",
+      "networkError": "Błąd sieci podczas wczytywania konfiguracji.",
+      "editingOff": "Edycja konfiguracji jest wyłączona — wartości są pokazane tylko poglądowo. Ustaw {0} w config.txt, aby włączyć edycję.",
+      "editInFileOnly": "Trzeba edytować bezpośrednio w config.txt.",
+      "secretSet": "•••••••• (ustawiono — zostaw puste, aby zachować)",
+      "secretNotSet": "nie ustawiono",
+      "notEditable": "Nieedytowalne z poziomu panelu."
+    },
+    "result": {
+      "nothingChanged": "Nic się nie zmieniło.",
+      "saving": "Zapisywanie…",
+      "networkError": "Błąd sieci.",
+      "requestFailed": "Żądanie nieudane ({0}).",
+      "refusedPrefix": "Odrzucono: {0}"
+    },
+    "footer": "Sterowanie odtwarzaniem działa natychmiast na żywym bocie. Wszystko inne tutaj jest tylko do odczytu, dopóki nie naciśniesz Zapisz."
   }
 }

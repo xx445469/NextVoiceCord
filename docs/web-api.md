@@ -26,6 +26,20 @@ All responses are `application/json; charset=utf-8`.
 
 Non-playing guilds omit the playback fields. Guilds sort playing-first.
 
+## GET /api/labels
+
+```json
+{ "language": "ZHTW",
+  "available": [ { "code": "ZHTW", "native": "繁體中文", "english": "Traditional Chinese" } ],
+  "labels": { "gui.nav.overview": "總覽", "web.control.pause": "暫停", "...": "..." } }
+```
+
+Every string the page's own chrome needs (nav, headings, table columns, empty states, button
+captions), resolved for the caller's language the same way `/api/status`'s `labels` field is.
+`available` lists only languages that actually loaded. The page has no translation data of its
+own — it fetches this once at startup and again whenever the viewer picks a different display
+language, then renders from what comes back.
+
 ## GET /api/console?since=<seq>&limit=<n>
 
 ```json

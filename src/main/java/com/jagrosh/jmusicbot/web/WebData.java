@@ -101,6 +101,102 @@ final class WebData
 
     private static final int MAX_WINDOW_SECONDS = 3600;
 
+    /**
+     * Every label the page's own chrome needs, resolved fresh per request by
+     * {@link #labels(HttpExchange)}.
+     *
+     * <p>Almost all of this is {@code gui.*} — the same keys the desktop window's own panels
+     * already use, so the web panel says exactly what the desktop window says rather than
+     * maintaining a second, inevitably-diverging translation of the same eight views. Only
+     * concepts the desktop window has no equivalent for — the polling status dot, the playback
+     * buttons a Swing dashboard never needed, empty states unique to a browser tab that can be
+     * closed and reopened mid-download — live under {@code web.*} instead, in {@code EN.json}
+     * only; the other eleven languages pick those up from a separate translation pass.
+     */
+    private static final String[] PAGE_KEYS = {
+            // Sidebar navigation and section labels.
+            "gui.nav.overview", "gui.nav.console", "gui.nav.servers", "gui.nav.performance",
+            "gui.nav.system", "gui.nav.sources", "gui.nav.preferences", "gui.nav.botConfig",
+            "gui.section.diagnostics", "gui.section.configure",
+
+            // Overview / Servers.
+            "gui.overview.connecting", "gui.overview.queued", "gui.overview.volume",
+            "gui.overview.memoryOf", "gui.status.title", "gui.status.subtitle",
+
+            // Performance.
+            "gui.performance.title", "gui.performance.subtitle", "gui.performance.windowLabel",
+            "gui.performance.guild", "gui.performance.colStatus", "gui.performance.colMissRate",
+            "gui.performance.colStutters", "gui.performance.colStuck", "gui.performance.statFrames",
+            "gui.performance.statMissedFrames", "gui.performance.cardEvents", "gui.performance.colTime",
+            "gui.performance.colType", "gui.performance.colDetails", "gui.performance.statusIdle",
+            "gui.performance.statusPlaying", "gui.performance.statusPaused",
+            "gui.performance.eventTypeStutter", "gui.performance.eventTypeStuck", "gui.performance.eventTypeGc",
+
+            // System.
+            "gui.system.title", "gui.system.subtitle", "gui.system.window", "gui.system.cpuUsage",
+            "gui.system.heapMemory", "gui.system.threads", "gui.system.gcCount", "gui.system.gcTime",
+
+            // Sources.
+            "gui.sources.title", "gui.sources.subtitle", "gui.sources.windowLabel",
+            "gui.sources.colSource", "gui.sources.failed", "gui.sources.successRate",
+            "gui.sources.colSuccessPercent", "gui.sources.colAvgMs", "gui.sources.colP95Ms",
+            "gui.sources.colTime", "gui.sources.colResult", "gui.sources.colDuration",
+            "gui.sources.recentLoads",
+
+            // Preferences / appearance.
+            "gui.language.label", "gui.language.hint", "gui.appearance.theme", "gui.appearance.fontSize",
+
+            // Bot config.
+            "gui.config.title", "gui.config.subtitle", "gui.config.loading", "gui.config.saveChanges",
+            "gui.config.commands", "gui.config.presence", "gui.config.voice", "gui.config.playback",
+            "gui.config.uiEmojis",
+
+            // Web-only: the polling status dot.
+            "web.status.connecting", "web.status.live", "web.status.disconnected",
+            "web.status.unauthorised", "web.status.error",
+
+            // Web-only: Servers view search.
+            "web.servers.filterPlaceholder", "web.servers.count", "web.servers.noMatch",
+
+            // Web-only: Console ring-buffer note.
+            "web.console.dropped",
+
+            // Web-only: Performance empty states.
+            "web.performance.empty", "web.performance.noGuildsActive", "web.performance.noEvents",
+
+            // Web-only: System empty states and stats the desktop page does not break out.
+            "web.system.empty", "web.system.noSamples", "web.system.cpuSystem",
+            "web.system.driftAvg", "web.system.driftMax", "web.system.cpuSparkLabel",
+            "web.system.heapSparkLabel",
+
+            // Web-only: Sources stats/columns the desktop page does not break out, and empty states.
+            "web.sources.loaded", "web.sources.noMatches", "web.sources.colQuery",
+            "web.sources.noActivity", "web.sources.noLookups",
+
+            // Web-only: guild card member count.
+            "web.guild.members",
+
+            // Web-only: playback controls (the desktop dashboard is read-only; only the panel
+            // needs button captions for them).
+            "web.control.pause", "web.control.resume", "web.control.skip", "web.control.volume",
+
+            // Web-only: Preferences page furniture.
+            "web.preferences.hint", "web.preferences.panelLanguage", "web.preferences.panelLanguageHint",
+            "web.preferences.leaveUnchanged", "web.preferences.save",
+
+            // Web-only: Bot config page furniture.
+            "web.config.loadError", "web.config.networkError", "web.config.editingOff",
+            "web.config.editInFileOnly", "web.config.secretSet", "web.config.secretNotSet",
+            "web.config.notEditable",
+
+            // Web-only: shared form-result feedback.
+            "web.result.nothingChanged", "web.result.saving", "web.result.networkError",
+            "web.result.requestFailed", "web.result.refusedPrefix",
+
+            // Web-only: footer.
+            "web.footer",
+    };
+
     private final Bot bot;
 
     WebData(Bot bot)
@@ -206,6 +302,52 @@ final class WebData
             empty.put("memoryMaxMb", 0);
             empty.put("uptime", "");
             return empty;
+        }
+    }
+
+    // ==================== /api/labels ====================
+
+    /**
+     * Every string the page's own interface needs, in the caller's language, plus the list of
+     * languages there are strings for at all.
+     *
+     * <p>The page has no translation data of its own — it cannot, there is nothing running in
+     * the browser that could read a classpath resource — so it fetches this once at startup and
+     * again whenever the viewer picks a different display language, then renders from what comes
+     * back rather than doing any lookup itself.
+     */
+    Object labels(HttpExchange exchange)
+    {
+        try
+        {
+            Language language = languageFor(exchange);
+
+            var labels = new LinkedHashMap<String, String>();
+            for (String key : PAGE_KEYS)
+            {
+                labels.put(key, bot.getLanguages().get(language, key));
+            }
+
+            List<Map<String, String>> available = new ArrayList<>();
+            for (Language lang : bot.getLanguages().getAvailableLanguages())
+            {
+                var entry = new LinkedHashMap<String, String>();
+                entry.put("code", lang.name());
+                entry.put("native", lang.getNativeName());
+                entry.put("english", lang.getEnglishName());
+                available.add(entry);
+            }
+
+            var payload = new LinkedHashMap<String, Object>();
+            payload.put("language", language.name());
+            payload.put("available", available);
+            payload.put("labels", labels);
+            return payload;
+        }
+        catch (RuntimeException ex)
+        {
+            LOG.warn("Web panel: could not build /api/labels: {}", ex.toString());
+            return Map.of("language", "EN", "available", List.of(), "labels", Map.of());
         }
     }
 

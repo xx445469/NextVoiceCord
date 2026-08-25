@@ -899,5 +899,76 @@
       "title": "Web-Panel",
       "notReady": "Das Webpanel startet, sobald der Bot mit Discord verbunden ist. Versuch es gleich noch einmal."
     }
+  },
+  "web": {
+    "status": {
+      "connecting": "Verbindet",
+      "live": "Live",
+      "disconnected": "Getrennt",
+      "unauthorised": "Nicht autorisiert",
+      "error": "Fehler {0}"
+    },
+    "servers": {
+      "filterPlaceholder": "Server nach Namen filtern…",
+      "count": "{0} Server · {1} spielt(en)",
+      "noMatch": "Keine Server passen zu „{0}“."
+    },
+    "console": {
+      "dropped": "{0} Zeile(n) wurden aus dem Puffer verworfen, bevor diese Ansicht sie lesen konnte."
+    },
+    "performance": {
+      "empty": "Noch keine Performance-Metriken erfasst.",
+      "noGuildsActive": "In diesem Zeitfenster sind keine Guilds aktiv.",
+      "noEvents": "Keine Ereignisse in diesem Zeitfenster."
+    },
+    "system": {
+      "empty": "Noch keine Systemmetriken erfasst.",
+      "noSamples": "Noch keine Messwerte.",
+      "cpuSystem": "System-CPU",
+      "driftAvg": "Ø Drift",
+      "driftMax": "Max. Drift",
+      "cpuSparkLabel": "CPU % im Zeitfenster",
+      "heapSparkLabel": "Heap MB im Zeitfenster"
+    },
+    "sources": {
+      "loaded": "geladen",
+      "noMatches": "keine Treffer",
+      "colQuery": "Anfrage",
+      "noActivity": "Keine Quellenaktivität in diesem Zeitfenster.",
+      "noLookups": "Keine Abfragen in diesem Zeitfenster."
+    },
+    "guild": {
+      "members": "{0} Mitglieder"
+    },
+    "control": {
+      "pause": "Pause",
+      "resume": "Fortsetzen",
+      "skip": "Skip",
+      "volume": "Vol"
+    },
+    "preferences": {
+      "hint": "Nur geänderte Felder werden gesendet — alles andere bleibt unverändert.",
+      "panelLanguage": "Panel-Sprache",
+      "panelLanguageHint": "Ändert nur, wie diese Seite für dich in diesem Browser aussieht. Betrifft nicht die Konfiguration des Bots.",
+      "leaveUnchanged": "Unverändert lassen",
+      "save": "Einstellungen speichern"
+    },
+    "config": {
+      "loadError": "Konfiguration konnte nicht geladen werden (Status {0}).",
+      "networkError": "Netzwerkfehler beim Laden der Konfiguration.",
+      "editingOff": "Die Konfigurationsbearbeitung ist deaktiviert — Werte werden nur zur Ansicht angezeigt. Setze {0} in config.txt, um die Bearbeitung zu aktivieren.",
+      "editInFileOnly": "Muss direkt in config.txt bearbeitet werden.",
+      "secretSet": "•••••••• (gesetzt — leer lassen, um es zu behalten)",
+      "secretNotSet": "nicht gesetzt",
+      "notEditable": "Nicht über das Panel bearbeitbar."
+    },
+    "result": {
+      "nothingChanged": "Nichts geändert.",
+      "saving": "Speichert…",
+      "networkError": "Netzwerkfehler.",
+      "requestFailed": "Anfrage fehlgeschlagen ({0}).",
+      "refusedPrefix": "Abgelehnt: {0}"
+    },
+    "footer": "Wiedergabesteuerung wirkt sofort auf den laufenden Bot. Alles andere hier ist schreibgeschützt, bis du auf Speichern drückst."
   }
 }

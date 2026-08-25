@@ -899,5 +899,76 @@
       "title": "Panneau web",
       "notReady": "Le panneau web démarre une fois que le bot s'est connecté à Discord. Réessaie dans un instant."
     }
+  },
+  "web": {
+    "status": {
+      "connecting": "Connexion…",
+      "live": "En direct",
+      "disconnected": "Déconnecté",
+      "unauthorised": "Non autorisé",
+      "error": "Erreur {0}"
+    },
+    "servers": {
+      "filterPlaceholder": "Filtrer les serveurs par nom…",
+      "count": "{0} serveur(s) · {1} en lecture",
+      "noMatch": "Aucun serveur ne correspond à « {0} »."
+    },
+    "console": {
+      "dropped": "{0} ligne(s) ont été supprimées du buffer avant que cette vue ne puisse les lire."
+    },
+    "performance": {
+      "empty": "Aucune métrique de performance collectée pour l'instant.",
+      "noGuildsActive": "Aucun serveur actif dans cette fenêtre.",
+      "noEvents": "Aucun événement dans cette fenêtre."
+    },
+    "system": {
+      "empty": "Aucune métrique système collectée pour l'instant.",
+      "noSamples": "Aucun échantillon pour l'instant.",
+      "cpuSystem": "CPU système",
+      "driftAvg": "dérive moy.",
+      "driftMax": "dérive max.",
+      "cpuSparkLabel": "CPU % sur la fenêtre",
+      "heapSparkLabel": "Heap Mo sur la fenêtre"
+    },
+    "sources": {
+      "loaded": "chargé",
+      "noMatches": "aucune correspondance",
+      "colQuery": "Requête",
+      "noActivity": "Aucune activité de source dans cette fenêtre.",
+      "noLookups": "Aucune recherche dans cette fenêtre."
+    },
+    "guild": {
+      "members": "{0} membres"
+    },
+    "control": {
+      "pause": "Pause",
+      "resume": "Reprendre",
+      "skip": "Passer",
+      "volume": "Vol"
+    },
+    "preferences": {
+      "hint": "Seuls les champs que tu modifies sont envoyés — tout le reste reste inchangé.",
+      "panelLanguage": "Langue du panneau",
+      "panelLanguageHint": "Change uniquement l'apparence de cette page pour toi, dans ce navigateur. Ne touche pas à la configuration du bot.",
+      "leaveUnchanged": "Laisser inchangé",
+      "save": "Enregistrer les préférences"
+    },
+    "config": {
+      "loadError": "Impossible de charger la configuration (statut {0}).",
+      "networkError": "Erreur réseau lors du chargement de la configuration.",
+      "editingOff": "L'édition de la config est désactivée — les valeurs sont affichées à titre indicatif uniquement. Définis {0} dans config.txt pour activer l'édition.",
+      "editInFileOnly": "Doit être modifié directement dans config.txt.",
+      "secretSet": "•••••••• (défini — laisse vide pour le conserver)",
+      "secretNotSet": "non défini",
+      "notEditable": "Non modifiable depuis le panneau."
+    },
+    "result": {
+      "nothingChanged": "Rien n'a changé.",
+      "saving": "Enregistrement…",
+      "networkError": "Erreur réseau.",
+      "requestFailed": "Requête échouée ({0}).",
+      "refusedPrefix": "Refusé : {0}"
+    },
+    "footer": "Les contrôles de lecture agissent immédiatement sur le bot en direct. Tout le reste ici est en lecture seule tant que tu n'appuies pas sur Enregistrer."
   }
 }

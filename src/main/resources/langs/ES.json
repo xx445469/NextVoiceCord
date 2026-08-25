@@ -899,5 +899,76 @@
       "title": "Panel web",
       "notReady": "El panel web se inicia cuando el bot se conecta a Discord. Inténtalo de nuevo en un momento."
     }
+  },
+  "web": {
+    "status": {
+      "connecting": "Conectando…",
+      "live": "En vivo",
+      "disconnected": "Desconectado",
+      "unauthorised": "No autorizado",
+      "error": "Error {0}"
+    },
+    "servers": {
+      "filterPlaceholder": "Filtrar servidores por nombre…",
+      "count": "{0} servidor(es) · {1} reproduciendo",
+      "noMatch": "Ningún servidor coincide con «{0}»."
+    },
+    "console": {
+      "dropped": "Se descartaron {0} línea(s) del búfer antes de que esta vista pudiera leerlas."
+    },
+    "performance": {
+      "empty": "Aún no se han recopilado métricas de rendimiento.",
+      "noGuildsActive": "No hay servidores activos en esta ventana.",
+      "noEvents": "No hay eventos en esta ventana."
+    },
+    "system": {
+      "empty": "Aún no se han recopilado métricas del sistema.",
+      "noSamples": "Aún no hay muestras.",
+      "cpuSystem": "CPU del sistema",
+      "driftAvg": "desvío prom.",
+      "driftMax": "desvío máx.",
+      "cpuSparkLabel": "CPU % en la ventana",
+      "heapSparkLabel": "Heap MB en la ventana"
+    },
+    "sources": {
+      "loaded": "cargado",
+      "noMatches": "sin coincidencias",
+      "colQuery": "Consulta",
+      "noActivity": "No hay actividad de fuentes en esta ventana.",
+      "noLookups": "No hay búsquedas en esta ventana."
+    },
+    "guild": {
+      "members": "{0} miembros"
+    },
+    "control": {
+      "pause": "Pausa",
+      "resume": "Reanudar",
+      "skip": "Saltar",
+      "volume": "Vol"
+    },
+    "preferences": {
+      "hint": "Solo se envían los campos que cambies — todo lo demás queda igual.",
+      "panelLanguage": "Idioma del panel",
+      "panelLanguageHint": "Solo cambia cómo se ve esta página para ti, en este navegador. No afecta la configuración del bot.",
+      "leaveUnchanged": "Dejar sin cambios",
+      "save": "Guardar preferencias"
+    },
+    "config": {
+      "loadError": "No se pudo cargar la configuración (estado {0}).",
+      "networkError": "Error de red al cargar la configuración.",
+      "editingOff": "La edición de configuración está desactivada — los valores se muestran solo como referencia. Define {0} en config.txt para habilitar la edición.",
+      "editInFileOnly": "Debe editarse directamente en config.txt.",
+      "secretSet": "•••••••• (definido — deja en blanco para conservarlo)",
+      "secretNotSet": "no definido",
+      "notEditable": "No editable desde el panel."
+    },
+    "result": {
+      "nothingChanged": "Nada cambió.",
+      "saving": "Guardando…",
+      "networkError": "Error de red.",
+      "requestFailed": "Solicitud fallida ({0}).",
+      "refusedPrefix": "Rechazado: {0}"
+    },
+    "footer": "Los controles de reproducción actúan de inmediato sobre el bot en vivo. Todo lo demás aquí es de solo lectura hasta que presiones Guardar."
   }
 }

@@ -899,5 +899,76 @@
       "title": "Webパネル",
       "notReady": "ウェブパネルはボットがDiscordに接続すると起動します。しばらくしてからもう一度お試しください。"
     }
+  },
+  "web": {
+    "status": {
+      "connecting": "接続中",
+      "live": "ライブ",
+      "disconnected": "切断済み",
+      "unauthorised": "未認証",
+      "error": "エラー {0}"
+    },
+    "servers": {
+      "filterPlaceholder": "サーバー名で絞り込み…",
+      "count": "サーバー {0} 件 · 再生中 {1} 件",
+      "noMatch": "「{0}」に一致するサーバーはありません。"
+    },
+    "console": {
+      "dropped": "このビューが読み込む前に、バッファから {0} 行が破棄されました。"
+    },
+    "performance": {
+      "empty": "パフォーマンス指標はまだ収集されていません。",
+      "noGuildsActive": "この期間内にアクティブなギルドはありません。",
+      "noEvents": "この期間内にイベントはありません。"
+    },
+    "system": {
+      "empty": "システム指標はまだ収集されていません。",
+      "noSamples": "まだサンプルがありません。",
+      "cpuSystem": "システムCPU",
+      "driftAvg": "平均ドリフト",
+      "driftMax": "最大ドリフト",
+      "cpuSparkLabel": "期間内のCPU %",
+      "heapSparkLabel": "期間内のヒープ MB"
+    },
+    "sources": {
+      "loaded": "読み込み済み",
+      "noMatches": "一致なし",
+      "colQuery": "クエリ",
+      "noActivity": "この期間内にソースのアクティビティはありません。",
+      "noLookups": "この期間内に検索はありません。"
+    },
+    "guild": {
+      "members": "メンバー {0} 人"
+    },
+    "control": {
+      "pause": "一時停止",
+      "resume": "再開",
+      "skip": "スキップ",
+      "volume": "音量"
+    },
+    "preferences": {
+      "hint": "変更したフィールドのみ送信されます — それ以外はそのまま維持されます。",
+      "panelLanguage": "パネル言語",
+      "panelLanguageHint": "このブラウザでのあなたへの表示のみを変更します。ボットの設定には影響しません。",
+      "leaveUnchanged": "変更しない",
+      "save": "設定を保存"
+    },
+    "config": {
+      "loadError": "設定を読み込めませんでした（ステータス {0}）。",
+      "networkError": "設定の読み込み中にネットワークエラーが発生しました。",
+      "editingOff": "設定の編集はオフになっています — 値は参考として表示されるのみです。編集を有効にするには config.txt で {0} を設定してください。",
+      "editInFileOnly": "config.txt で直接編集する必要があります。",
+      "secretSet": "••••••••（設定済み — 空欄のままにすると維持されます）",
+      "secretNotSet": "未設定",
+      "notEditable": "パネルからは編集できません。"
+    },
+    "result": {
+      "nothingChanged": "変更はありません。",
+      "saving": "保存中…",
+      "networkError": "ネットワークエラーです。",
+      "requestFailed": "リクエストが失敗しました（{0}）。",
+      "refusedPrefix": "拒否されました: {0}"
+    },
+    "footer": "再生コントロールは稼働中のボットに即座に反映されます。それ以外はすべて、保存を押すまでは読み取り専用です。"
   }
 }

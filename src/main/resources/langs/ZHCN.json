@@ -899,5 +899,76 @@
       "title": "网页面板",
       "notReady": "机器人连接到 Discord 后，网页面板才会启动。请稍后再试。"
     }
+  },
+  "web": {
+    "status": {
+      "connecting": "连接中",
+      "live": "在线",
+      "disconnected": "已断开",
+      "unauthorised": "未授权",
+      "error": "错误 {0}"
+    },
+    "servers": {
+      "filterPlaceholder": "按名称筛选服务器…",
+      "count": "{0} 个服务器 · {1} 个正在播放",
+      "noMatch": "没有与“{0}”匹配的服务器。"
+    },
+    "console": {
+      "dropped": "在此视图能够读取之前，缓冲区中的 {0} 行已被丢弃。"
+    },
+    "performance": {
+      "empty": "尚未收集到性能指标。",
+      "noGuildsActive": "此时间窗口内没有活跃的服务器。",
+      "noEvents": "此时间窗口内没有事件。"
+    },
+    "system": {
+      "empty": "尚未收集到系统指标。",
+      "noSamples": "暂无采样数据。",
+      "cpuSystem": "系统 CPU",
+      "driftAvg": "平均漂移",
+      "driftMax": "最大漂移",
+      "cpuSparkLabel": "窗口内 CPU %",
+      "heapSparkLabel": "窗口内堆内存 MB"
+    },
+    "sources": {
+      "loaded": "已加载",
+      "noMatches": "无匹配项",
+      "colQuery": "查询",
+      "noActivity": "此时间窗口内没有来源活动。",
+      "noLookups": "此时间窗口内没有查询记录。"
+    },
+    "guild": {
+      "members": "{0} 名成员"
+    },
+    "control": {
+      "pause": "暂停",
+      "resume": "继续",
+      "skip": "下一首",
+      "volume": "音量"
+    },
+    "preferences": {
+      "hint": "只会发送你修改过的字段——其余内容保持不变。",
+      "panelLanguage": "面板语言",
+      "panelLanguageHint": "仅更改此页面在该浏览器中对你的显示方式，不会影响机器人的配置。",
+      "leaveUnchanged": "保持不变",
+      "save": "保存偏好设置"
+    },
+    "config": {
+      "loadError": "无法加载配置（状态 {0}）。",
+      "networkError": "加载配置时发生网络错误。",
+      "editingOff": "配置编辑功能已关闭——当前显示的值仅供参考。请在 config.txt 中设置 {0} 以启用编辑。",
+      "editInFileOnly": "必须直接在 config.txt 中编辑。",
+      "secretSet": "••••••••（已设置——留空以保留原值）",
+      "secretNotSet": "未设置",
+      "notEditable": "无法在面板中编辑。"
+    },
+    "result": {
+      "nothingChanged": "没有任何更改。",
+      "saving": "保存中…",
+      "networkError": "网络错误。",
+      "requestFailed": "请求失败（{0}）。",
+      "refusedPrefix": "已拒绝：{0}"
+    },
+    "footer": "播放控制会立即作用于正在运行的机器人。此页面上的其他内容均为只读，直到你按下保存。"
   }
 }

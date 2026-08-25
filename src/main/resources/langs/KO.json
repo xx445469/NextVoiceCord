@@ -899,5 +899,76 @@
       "title": "웹 패널",
       "notReady": "웹 패널은 봇이 Discord에 연결된 후에 시작돼요. 잠시 후 다시 시도해 주세요."
     }
+  },
+  "web": {
+    "status": {
+      "connecting": "연결 중",
+      "live": "실시간",
+      "disconnected": "연결 끊김",
+      "unauthorised": "권한 없음",
+      "error": "오류 {0}"
+    },
+    "servers": {
+      "filterPlaceholder": "서버 이름으로 필터링…",
+      "count": "서버 {0}개 · 재생 중 {1}개",
+      "noMatch": "“{0}”와(과) 일치하는 서버가 없어요."
+    },
+    "console": {
+      "dropped": "이 화면이 읽기 전에 버퍼에서 {0}줄이 삭제됐어요."
+    },
+    "performance": {
+      "empty": "아직 수집된 성능 지표가 없어요.",
+      "noGuildsActive": "이 구간에 활성화된 길드가 없어요.",
+      "noEvents": "이 구간에 이벤트가 없어요."
+    },
+    "system": {
+      "empty": "아직 수집된 시스템 지표가 없어요.",
+      "noSamples": "아직 샘플이 없어요.",
+      "cpuSystem": "시스템 CPU",
+      "driftAvg": "평균 드리프트",
+      "driftMax": "최대 드리프트",
+      "cpuSparkLabel": "구간별 CPU %",
+      "heapSparkLabel": "구간별 힙 MB"
+    },
+    "sources": {
+      "loaded": "로드됨",
+      "noMatches": "일치 항목 없음",
+      "colQuery": "쿼리",
+      "noActivity": "이 구간에 소스 활동이 없어요.",
+      "noLookups": "이 구간에 조회가 없어요."
+    },
+    "guild": {
+      "members": "멤버 {0}명"
+    },
+    "control": {
+      "pause": "일시정지",
+      "resume": "재생",
+      "skip": "건너뛰기",
+      "volume": "음량"
+    },
+    "preferences": {
+      "hint": "변경한 항목만 전송돼요 — 나머지는 그대로 유지돼요.",
+      "panelLanguage": "패널 언어",
+      "panelLanguageHint": "이 브라우저에서 회원님에게 보이는 화면만 바뀌어요. 봇 설정에는 영향을 주지 않아요.",
+      "leaveUnchanged": "변경하지 않음",
+      "save": "환경설정 저장"
+    },
+    "config": {
+      "loadError": "설정을 불러올 수 없어요 (상태 {0}).",
+      "networkError": "설정을 불러오는 중 네트워크 오류가 발생했어요.",
+      "editingOff": "설정 편집이 꺼져 있어요 — 값은 참고용으로만 표시돼요. 편집을 사용하려면 config.txt에서 {0}을(를) 설정하세요.",
+      "editInFileOnly": "config.txt에서 직접 수정해야 해요.",
+      "secretSet": "•••••••• (설정됨 — 비워 두면 그대로 유지돼요)",
+      "secretNotSet": "설정 안 됨",
+      "notEditable": "패널에서는 수정할 수 없어요."
+    },
+    "result": {
+      "nothingChanged": "변경된 내용이 없어요.",
+      "saving": "저장 중…",
+      "networkError": "네트워크 오류예요.",
+      "requestFailed": "요청이 실패했어요 ({0}).",
+      "refusedPrefix": "거부됨: {0}"
+    },
+    "footer": "재생 컨트롤은 실행 중인 봇에 즉시 적용돼요. 그 외 항목은 저장을 누르기 전까지 읽기 전용이에요."
   }
 }
