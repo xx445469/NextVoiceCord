@@ -537,5 +537,37 @@
         "engineMissing": "設定中指定的 eval 引擎（`{0}`）不存在。可能是引擎名稱錯誤，或你的 Java 版本（`{1}`）沒有這個引擎。"
       }
     }
+  },
+  "controller": {
+    "editor": {
+      "title": "控制面板佈局",
+      "description": "編輯播放中面板顯示的按鈕。下方是這份佈局實際產生的預覽 —— 這裡的按鈕已停用。",
+      "warnings": "部分項目已被調整：",
+      "applied": "佈局已更新。",
+      "reset": "佈局已重設為預設值。",
+      "field": {
+        "source": "來源",
+        "layout": "佈局"
+      },
+      "source": {
+        "custom": "自訂",
+        "default": "預設"
+      },
+      "button": {
+        "edit": "編輯",
+        "refresh": "重新整理",
+        "reset": "重設"
+      },
+      "modal": {
+        "title": "編輯控制面板佈局",
+        "label": "佈局（JSON）",
+        "placeholder": "[ { \"back\": {}, \"play-pause\": {}, \"skip\": {} } ]"
+      },
+      "errors": {
+        "invalidJson": "這不是有效的 JSON。每一列是一個以按鈕名稱為鍵的物件，整份佈局則是列的陣列。",
+        "notAnArray": "佈局必須是列的陣列，例如：[ { \"skip\": {} } ]",
+        "noButtons": "這份佈局沒有任何可用的按鈕，因此未套用。"
+      }
+    }
   }
 }
