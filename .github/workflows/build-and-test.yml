@@ -1,14 +1,14 @@
 name: Build and Test
 
-# Build and test on PRs and master pushes
+# Build and test on PRs and main pushes
 # This workflow does NOT publish Docker images - that's handled by docker-publish.yml
 on:
   pull_request:
     branches:
-      - master  # PRs targeting trunk
+      - main  # PRs targeting trunk
   push:
     branches:
-      - master  # Direct pushes to master
+      - main  # Direct pushes to main
     paths-ignore:
       - '.github/**'  # Ignore GitHub config changes (workflows, actions, templates, etc.)
       - 'README.md'
@@ -34,6 +34,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      # Runs before the build because it needs no toolchain and fails fast. A broken
+      # translation file is otherwise close to invisible: per-key fallback means it still
+      # renders, just in English, and a bad placeholder only surfaces as a literal "{1}"
+      # in a message someone eventually screenshots.
+      - name: Validate translation files
+        run: python3 scripts/validate-langs.py
 
       - name: Set up Java Environment
         uses: actions/setup-java@v5

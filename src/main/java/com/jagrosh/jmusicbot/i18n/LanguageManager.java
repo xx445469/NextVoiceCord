@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -83,11 +84,15 @@ public final class LanguageManager
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final Map<Language, Map<String, String>> translations;
+    private final Set<Language> unreviewed;
     private final Language defaultLanguage;
 
-    private LanguageManager(Map<Language, Map<String, String>> translations, Language defaultLanguage)
+    private LanguageManager(Map<Language, Map<String, String>> translations,
+                            Set<Language> unreviewed,
+                            Language defaultLanguage)
     {
         this.translations = translations;
+        this.unreviewed = unreviewed;
         this.defaultLanguage = defaultLanguage;
     }
 
@@ -105,6 +110,7 @@ public final class LanguageManager
     public static LanguageManager load(Language defaultLanguage)
     {
         Map<Language, Map<String, String>> loaded = new EnumMap<>(Language.class);
+        Set<Language> unreviewed = EnumSet.noneOf(Language.class);
 
         for (Language language : Language.values())
         {
@@ -118,6 +124,10 @@ public final class LanguageManager
                     continue;
                 }
                 loaded.put(language, entries);
+                if (!readReviewedFlag(language))
+                {
+                    unreviewed.add(language);
+                }
                 LOG.debug("Loaded {} translation keys for {}", entries.size(), language);
             }
             catch (IOException | RuntimeException ex)
@@ -136,7 +146,8 @@ public final class LanguageManager
         }
 
         reportCoverage(loaded, defaultLanguage);
-        return new LanguageManager(loaded, defaultLanguage);
+        reportReviewStatus(unreviewed);
+        return new LanguageManager(loaded, unreviewed, defaultLanguage);
     }
 
     /**
@@ -172,6 +183,47 @@ public final class LanguageManager
         }
     }
 
+    /**
+     * Reads {@code _meta.reviewed} from a translation file.
+     *
+     * <p>Absent metadata counts as unreviewed. Defaulting the other way would mean a file
+     * added without metadata quietly claims to be verified.
+     */
+    private static boolean readReviewedFlag(Language language)
+    {
+        try (InputStream in = LanguageManager.class.getClassLoader()
+                                                   .getResourceAsStream(language.getResourcePath()))
+        {
+            if (in == null)
+            {
+                return false;
+            }
+            JsonNode meta = MAPPER.readTree(in).path("_meta").path("reviewed");
+            return meta.isBoolean() && meta.asBoolean();
+        }
+        catch (IOException | RuntimeException ex)
+        {
+            return false;
+        }
+    }
+
+    /**
+     * Warns the operator which languages are machine-generated.
+     *
+     * <p>An unreviewed translation is indistinguishable from a good one at a glance — it
+     * renders fluently and completely. Saying so at startup is the only point where whoever
+     * runs the bot finds out before their users do.
+     */
+    private static void reportReviewStatus(Set<Language> unreviewed)
+    {
+        if (unreviewed.isEmpty())
+        {
+            return;
+        }
+        LOG.warn("Machine-generated, not reviewed by a native speaker: {}. "
+                 + "Wording may be unnatural or wrong. Corrections welcome.", unreviewed);
+    }
+
     private static Map<String, String> readLanguageFile(Language language) throws IOException
     {
         try (InputStream in = LanguageManager.class.getClassLoader()
@@ -192,6 +244,14 @@ public final class LanguageManager
     {
         node.fields().forEachRemaining(field ->
         {
+            // Underscore-prefixed top-level entries are file metadata, not messages. Keeping
+            // them out of the key set matters: otherwise "_meta.reviewed" would count toward
+            // coverage and show up as an orphan key in every language whose metadata differs.
+            if (prefix.isEmpty() && field.getKey().startsWith("_"))
+            {
+                return;
+            }
+
             String key = prefix.isEmpty() ? field.getKey() : prefix + "." + field.getKey();
             JsonNode value = field.getValue();
             if (value.isObject())
@@ -328,6 +388,23 @@ public final class LanguageManager
             }
         }
         return Integer.parseInt(text);
+    }
+
+    /**
+     * Languages whose translations are machine-generated and unverified.
+     *
+     * <p>Exposed so the interface can label them, rather than presenting every language as
+     * equally trustworthy.
+     */
+    public Set<Language> getUnreviewedLanguages()
+    {
+        return Collections.unmodifiableSet(unreviewed);
+    }
+
+    /** Whether {@code language} has been reviewed by a native speaker. */
+    public boolean isReviewed(Language language)
+    {
+        return translations.containsKey(language) && !unreviewed.contains(language);
     }
 
     /** Languages that loaded successfully. */

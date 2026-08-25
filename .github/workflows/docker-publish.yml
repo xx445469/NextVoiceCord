@@ -1,19 +1,19 @@
 name: Publish Docker Image
 
 # Docker publishing workflow - gated by successful build-and-test completion
-# This ensures images are only published after tests pass on master
+# This ensures images are only published after tests pass on main
 on:
-  # Triggered after successful build-and-test on master
+  # Triggered after successful build-and-test on main
   # Note: The branches filter checks workflow_run.head_branch, which is the source branch
-  # of the triggering workflow. For PRs targeting master, head_branch is the PR source
-  # branch (not master), so this filter already excludes PR-triggered builds. Only direct
-  # pushes to master will have head_branch == 'master' and trigger this workflow.
+  # of the triggering workflow. For PRs targeting main, head_branch is the PR source
+  # branch (not main), so this filter already excludes PR-triggered builds. Only direct
+  # pushes to main will have head_branch == 'main' and trigger this workflow.
   workflow_run:
     workflows: ["Build and Test"]
     types:
       - completed
     branches:
-      - master
+      - main
   # Also trigger on version tags (v*) for releases
   push:
     tags:
@@ -59,13 +59,13 @@ jobs:
           SHA_SHORT=$(git rev-parse --short HEAD)
           TIMESTAMP=$(git log -1 --format=%cI)
           
-          # Determine if this is a tag build or master branch build
+          # Determine if this is a tag build or main branch build
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_type }}" == "tag" ]]; then
             # For tag builds, use the git tag version (strip 'v' prefix)
             VERSION="${GITHUB_REF#refs/tags/v}"
             IS_TAG_BUILD="true"
           else
-            # For master builds, use pom.xml version
+            # For main builds, use pom.xml version
             VERSION="$POM_VERSION"
             IS_TAG_BUILD="false"
           fi
@@ -96,7 +96,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # Tag rules:
           # - For tag builds: version tag (from git tag) + sha tag
-          # - For master builds: latest + sha + version (if not SNAPSHOT)
+          # - For main builds: latest + sha + version (if not SNAPSHOT)
           tags: |
             type=raw,value=${{ steps.metadata.outputs.version }},enable=${{ steps.metadata.outputs.is_tag_build == 'true' }}
             type=raw,value=latest,enable=${{ steps.metadata.outputs.is_tag_build == 'false' }}
