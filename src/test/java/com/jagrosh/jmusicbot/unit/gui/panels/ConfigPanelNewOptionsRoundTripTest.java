@@ -23,6 +23,7 @@ import com.jagrosh.jmusicbot.BaseConfigTest;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.audio.AudioSource;
+import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.panels.ConfigPanel;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPasswordField;
 import javax.swing.JSpinner;
@@ -101,6 +103,15 @@ class ConfigPanelNewOptionsRoundTripTest extends BaseConfigTest
                 bandcamp = false
               }
               maxHistorySize = 40
+            }
+            """;
+
+    // Same shape, plus a "gui" block: GuiPreferences.write can only update a key inside a
+    // section that already exists in the file, so the advanced-section-persistence test below
+    // needs one present, unlike every other test in this class.
+    private static final String CONFIG_TEMPLATE_WITH_GUI = CONFIG_TEMPLATE + """
+            gui {
+              language = ""
             }
             """;
 
@@ -206,6 +217,73 @@ class ConfigPanelNewOptionsRoundTripTest extends BaseConfigTest
         assertTrue(reloaded.isAudioSourceEnabled(AudioSource.BANDCAMP));
     }
 
+    @Test
+    @DisplayName("a value set inside a collapsed advanced section still survives buildUpdatesMap and reload")
+    void editedFieldInCollapsedSectionRoundTripsThroughSave() throws Exception
+    {
+        // This is the obvious way tiering the panel breaks: a field whose row sits inside a
+        // Widgets.CollapsibleCard that nobody has opened this session must still be read and
+        // written correctly, exactly like every field in a section that was never touched
+        // before tiering existed.
+        Path configFile = createTempConfigFile(CONFIG_TEMPLATE);
+        setConfigFileProperty(configFile);
+
+        BotConfig config = new BotConfig(mockUserInteraction);
+        config.load();
+
+        Bot bot = mock(Bot.class);
+        when(bot.getConfig()).thenReturn(config);
+
+        ConfigPanel panel = new ConfigPanel(bot);
+
+        Widgets.CollapsibleCard performanceCard = advancedSection(panel, "performance");
+        assertFalse(performanceCard.isBodyVisible(),
+                "performance is an advanced section that nothing opened yet, so it should start collapsed");
+
+        setSpinner(panel, "frameBufferMsSpinner", 3500);
+
+        Map<String, String> updates = buildUpdatesMap(panel);
+        assertEquals("3500", updates.get("performance.frameBufferMs"));
+
+        String updatedContent = applyConfigUpdates(panel, readFileContent(configFile), updates);
+        writeFileContent(configFile, updatedContent);
+
+        BotConfig reloaded = new BotConfig(mockUserInteraction);
+        reloaded.load();
+        assertEquals(3500, reloaded.getFrameBufferMs());
+
+        // Setting a value in the collapsed section did not quietly expand it.
+        assertFalse(performanceCard.isBodyVisible());
+    }
+
+    @Test
+    @DisplayName("opening an advanced section is remembered: a panel built fresh against the same file reopens it")
+    void advancedSectionExpansionPersistsAcrossPanelInstances() throws Exception
+    {
+        Path configFile = createTempConfigFile(CONFIG_TEMPLATE_WITH_GUI);
+        setConfigFileProperty(configFile);
+
+        BotConfig config = new BotConfig(mockUserInteraction);
+        config.load();
+
+        Bot bot = mock(Bot.class);
+        when(bot.getConfig()).thenReturn(config);
+
+        ConfigPanel first = new ConfigPanel(bot);
+        Widgets.CollapsibleCard firstPerformanceCard = advancedSection(first, "performance");
+        assertFalse(firstPerformanceCard.isBodyVisible());
+
+        clickHeader(firstPerformanceCard);
+        assertTrue(firstPerformanceCard.isBodyVisible());
+
+        // A second panel, built fresh against the same config.txt, should see that choice —
+        // the same "written immediately" guarantee GuiPreferencesTest checks for theme/font/
+        // language, applied to which advanced sections were left open.
+        ConfigPanel second = new ConfigPanel(bot);
+        Widgets.CollapsibleCard secondPerformanceCard = advancedSection(second, "performance");
+        assertTrue(secondPerformanceCard.isBodyVisible());
+    }
+
     private ConfigPanel buildPanel(String content) throws IOException
     {
         Path configFile = createTempConfigFile(content);
@@ -218,6 +296,21 @@ class ConfigPanelNewOptionsRoundTripTest extends BaseConfigTest
         when(bot.getConfig()).thenReturn(config);
 
         return new ConfigPanel(bot);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Widgets.CollapsibleCard advancedSection(ConfigPanel panel, String key) throws ReflectiveOperationException
+    {
+        Map<String, Widgets.CollapsibleCard> sections =
+                (Map<String, Widgets.CollapsibleCard>) fieldValue(panel, "advancedSections");
+        return sections.get(key);
+    }
+
+    private static void clickHeader(Widgets.CollapsibleCard card) throws ReflectiveOperationException
+    {
+        Field field = Widgets.CollapsibleCard.class.getDeclaredField("header");
+        field.setAccessible(true);
+        ((JButton) field.get(card)).doClick();
     }
 
     @SuppressWarnings("unchecked")

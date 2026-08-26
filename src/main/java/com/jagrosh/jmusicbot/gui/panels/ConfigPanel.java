@@ -21,29 +21,46 @@ import com.jagrosh.jmusicbot.audio.AudioSource;
 import com.jagrosh.jmusicbot.config.io.ConfigIO;
 import com.jagrosh.jmusicbot.config.update.ConfigUpdater;
 import com.jagrosh.jmusicbot.gui.GuiLanguage;
+import com.jagrosh.jmusicbot.gui.GuiPreferences;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
+import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
 import com.jagrosh.jmusicbot.i18n.Language;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Configuration panel for viewing and editing bot configuration.
  * Allows editing of every option in {@link com.jagrosh.jmusicbot.config.model.ConfigOption}.
+ *
+ * <p>Two tiers, not two tabs: the settings someone would plausibly change in their first month
+ * are shown as ordinary cards; the rest sit behind {@link Widgets.CollapsibleCard} headings that
+ * start collapsed but stay in the same scroll, so nothing has moved to a separate screen someone
+ * has to guess about. A section's collapsed/expanded state is remembered across restarts (see
+ * {@link #loadExpandedAdvancedSections()} / {@link #onAdvancedSectionToggled}), and the filter
+ * box at the top hides whichever rows — common or advanced — do not match what was typed, against
+ * both the row's label and its config key.
  *
  * <p>Secrets (the Discord token, the update GitHub token, the YouTube poToken pair) use
  * {@link JPasswordField} rather than a plain text field, on the same reasoning as the Proxy
@@ -72,6 +89,9 @@ public class ConfigPanel extends JPanel {
             "MUSIC", "WEB", "WEBEMBEDDED", "ANDROID", "ANDROIDVR", "ANDROIDMUSIC",
             "IOS", "MWEB", "TV", "TVHTML5SIMPLY"
     };
+
+    /** The key {@link #loadExpandedAdvancedSections()} / {@link GuiPreferences} persist under. */
+    private static final String EXPANDED_SECTIONS_KEY = "configPanelAdvancedSections";
 
     private final BotConfig config;
 
@@ -108,7 +128,7 @@ public class ConfigPanel extends JPanel {
     private final JComboBox<String> logLevelComboBox;
     private final JTextField playlistsFolderField;
 
-    // Proxy section
+    // Proxy section (advanced)
     private final JTextField proxyHostField;
     private final JSpinner proxyPortSpinner;
     private final JTextField proxyUsernameField;
@@ -131,7 +151,9 @@ public class ConfigPanel extends JPanel {
     private final JCheckBox npShowButtonsCheckBox;
     private final JCheckBox npShowProgressBarCheckBox;
 
-    // YouTube Advanced section — playback.youtube.poToken/visitorData/clients
+    // YouTube Advanced section — playback.youtube.poToken/visitorData; the clients list itself
+    // (playback.youtube.clients) lives in the common YouTube section below, not here — see
+    // createYoutubeClientsSection.
     private final JPasswordField youtubePoTokenField;
     private final JPasswordField youtubeVisitorDataField;
     private final DefaultListModel<String> youtubeClientsModel;
@@ -148,26 +170,35 @@ public class ConfigPanel extends JPanel {
     private final JSpinner clearChannelAgeDaysSpinner;
     private final JTextArea aliasesTextArea;
 
-    // Updates section — updates.repository/autoUpdate/checkIntervalHours/githubToken
+    // Updates section — updates.autoUpdate is common; repository/checkIntervalHours/githubToken
+    // are advanced (see createUpdatesAdvancedSection).
     private final JTextField updateRepositoryField;
     private final JCheckBox updateAutoUpdateCheckBox;
     private final JSpinner updateCheckIntervalSpinner;
     private final JPasswordField updateGithubTokenField;
 
-    // Dangerous section — dangerous.evalEngine, dangerous.eval
+    // Dangerous section (advanced) — dangerous.evalEngine, dangerous.eval
     private final JTextField evalEngineField;
     private final JCheckBox evalCheckBox;
 
-    // GUI & Web section — gui.enabled/fontSize/language, web.bindAddress/allowConfigEdit
+    // Appearance (common) — gui.theme/fontSize/language.
+    // GUI & Web Advanced — gui.enabled, web.bindAddress/allowConfigEdit.
     private final JCheckBox guiEnabledCheckBox;
     private final JSpinner guiFontSizeSpinner;
     private final JComboBox<String> guiLanguageComboBox;
+    private final JComboBox<ThemeManager.Theme> guiThemeComboBox;
     private final JTextField webBindAddressField;
     private final JCheckBox webAllowConfigEditCheckBox;
 
-    // Performance section — performance.nasBufferMs/frameBufferMs
+    // Performance section (advanced) — performance.nasBufferMs/frameBufferMs
     private final JSpinner nasBufferMsSpinner;
     private final JSpinner frameBufferMsSpinner;
+
+    // Search / tiering bookkeeping — see the class javadoc.
+    private JTextField searchField;
+    private final List<FilterSection> filterSections = new ArrayList<>();
+    private final Map<String, Widgets.CollapsibleCard> advancedSections = new LinkedHashMap<>();
+    private final Set<String> expandedAdvancedSections;
 
     /**
      * Creates the configuration panel.
@@ -176,6 +207,9 @@ public class ConfigPanel extends JPanel {
      */
     public ConfigPanel(Bot bot) {
         this.config = bot.getConfig();
+        // Read before any section is built: createXAdvancedSection() below consults this to
+        // decide whether that section starts open or collapsed.
+        this.expandedAdvancedSections = new LinkedHashSet<>(loadExpandedAdvancedSections());
 
         setLayout(new BorderLayout(0, Tokens.SPACE_MD));
         setOpaque(false);
@@ -274,9 +308,10 @@ public class ConfigPanel extends JPanel {
         evalEngineField = new JTextField(15);
         evalCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.useEval"));
 
-        // GUI & Web
+        // Appearance / GUI & Web
         guiEnabledCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.guiEnabled"));
         guiFontSizeSpinner = new JSpinner(new SpinnerNumberModel(12, 8, 24, 1));
+        guiThemeComboBox = new JComboBox<>(ThemeManager.Theme.values());
         guiLanguageComboBox = new JComboBox<>(guiLanguageChoices());
         guiLanguageComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -301,7 +336,7 @@ public class ConfigPanel extends JPanel {
                 proxyPasswordField, discordTokenField, youtubePoTokenField, youtubeVisitorDataField,
                 updateRepositoryField, updateGithubTokenField, evalEngineField, webBindAddressField);
         applyFieldStyle(statusComboBox, logLevelComboBox, botLanguageComboBox, guiLanguageComboBox,
-                youtubeClientsAddComboBox);
+                guiThemeComboBox, youtubeClientsAddComboBox);
         applyFieldStyle(songInStatusCheckBox, stayInChannelCheckBox, useYouTubeOAuthCheckBox,
                 npImagesCheckBox, updateAlertsCheckBox, proxyLavaplayerCheckBox, proxyJdaCheckBox,
                 proxyGithubCheckBox, npMinimalMessageCheckBox, npShowButtonsCheckBox,
@@ -361,50 +396,82 @@ public class ConfigPanel extends JPanel {
     private Component buildHeader() {
         JPanel header = Widgets.transparent(new BorderLayout(0, Tokens.SPACE_XS));
         header.add(Widgets.pageTitle(GuiLanguage.msg("gui.config.title")), BorderLayout.NORTH);
-        header.add(Widgets.muted(GuiLanguage.msg("gui.config.subtitle")),
-                BorderLayout.SOUTH);
+
+        JPanel bottom = Widgets.transparent(null);
+        bottom.setLayout(new BoxLayout(bottom, BoxLayout.Y_AXIS));
+        JLabel subtitle = Widgets.muted(GuiLanguage.msg("gui.config.subtitle"));
+        subtitle.setAlignmentX(LEFT_ALIGNMENT);
+        bottom.add(subtitle);
+        bottom.add(Box.createVerticalStrut(Tokens.SPACE_SM));
+        bottom.add(buildSearchRow());
+        header.add(bottom, BorderLayout.SOUTH);
+
         return header;
+    }
+
+    /**
+     * The filter box: hides rows — common or advanced — that match neither their label nor
+     * their config key as the reader types. With 57 options spread across nearly twenty cards,
+     * this is what keeps "I know what it's called" from turning into a manual scroll.
+     */
+    private Component buildSearchRow() {
+        JPanel row = Widgets.transparent(new BorderLayout(Tokens.SPACE_SM, 0));
+        row.setAlignmentX(LEFT_ALIGNMENT);
+
+        JLabel label = new JLabel(GuiLanguage.msg("gui.config.searchLabel"));
+        label.setFont(Tokens.fontBody());
+        label.setForeground(Tokens.textMuted());
+        row.add(label, BorderLayout.WEST);
+
+        searchField = new JTextField();
+        searchField.setFont(Tokens.fontBody());
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                applyFilter();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                applyFilter();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                applyFilter();
+            }
+        });
+        row.add(searchField, BorderLayout.CENTER);
+
+        return row;
     }
 
     private Component buildScrollArea() {
         JPanel content = Widgets.transparent(null);
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
-        content.add(createCommandsSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createPresenceSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createVoiceSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createPlaybackSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createEmojisSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createOtherSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createProxySection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createDiscordSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createLocalizationSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createNowPlayingSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createYoutubeAdvancedSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createPlaybackAdvancedSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createCommandsAdvancedSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createUpdatesSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createDangerousSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createGuiWebSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createPerformanceSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        content.add(createAdvancedReadOnlySection());
+        // Common settings — shown as ordinary cards, in the same order the panel always had.
+        addSection(content, createCommandsSection());
+        addSection(content, createPresenceSection());
+        addSection(content, createVoiceSection());
+        addSection(content, createPlaybackSection());
+        addSection(content, createEmojisSection());
+        addSection(content, createOtherSection());
+        addSection(content, createProxySection());
+        addSection(content, createDiscordSection());
+        addSection(content, createLocalizationSection());
+        addSection(content, createNowPlayingSection());
+        addSection(content, createYoutubeClientsSection());
+        addSection(content, createYoutubeAdvancedSection());
+        addSection(content, createPlaybackAdvancedSection());
+        addSection(content, createCommandsAdvancedSection());
+        addSection(content, createUpdatesSection());
+        addSection(content, createUpdatesAdvancedSection());
+        addSection(content, createDangerousSection());
+        addSection(content, createAppearanceSection());
+        addSection(content, createGuiWebAdvancedSection());
+        addSection(content, createPerformanceSection());
+        addSection(content, createAdvancedReadOnlySection());
 
         JScrollPane scrollPane = new JScrollPane(content);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -413,6 +480,13 @@ public class ConfigPanel extends JPanel {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         return scrollPane;
+    }
+
+    private void addSection(JPanel content, Component section) {
+        if (content.getComponentCount() > 0) {
+            content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        }
+        content.add(section);
     }
 
     /** A form panel: label column left, control column right, growing horizontally. */
@@ -429,7 +503,12 @@ public class ConfigPanel extends JPanel {
         return gbc;
     }
 
-    private void addRow(JPanel panel, GridBagConstraints gbc, int row, String label, JComponent control) {
+    /**
+     * Adds a label/control row and returns it as a {@link FilterRow}, searchable on both the
+     * label text and {@code configKey}.
+     */
+    private FilterRow addRow(JPanel panel, GridBagConstraints gbc, int row, String label,
+                              JComponent control, String configKey) {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.gridwidth = 1;
@@ -446,9 +525,18 @@ public class ConfigPanel extends JPanel {
         gbc.insets = new Insets(gbc.insets.top, 0, gbc.insets.bottom, 0);
         panel.add(control, gbc);
         gbc.insets = new Insets(gbc.insets.top, 0, gbc.insets.bottom, Tokens.SPACE_MD);
+
+        return new FilterRow(label, configKey, l, control);
     }
 
-    private void addSpanningRow(JPanel panel, GridBagConstraints gbc, int row, JComponent control) {
+    /**
+     * Adds a single control spanning both columns (a checkbox, a warning, a composite editor)
+     * and returns it as a {@link FilterRow}. {@code configKey} may be {@code null} for a row
+     * that only ever exists merged into another one via {@link FilterRow#merge} — a warning or
+     * note label that has no config key of its own.
+     */
+    private FilterRow addSpanningRow(JPanel panel, GridBagConstraints gbc, int row,
+                                      JComponent control, String configKey) {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.gridwidth = 2;
@@ -456,6 +544,27 @@ public class ConfigPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panel.add(control, gbc);
         gbc.gridwidth = 1;
+
+        String label = control instanceof JCheckBox ? ((JCheckBox) control).getText() : "";
+        return new FilterRow(label, configKey, control);
+    }
+
+    /** Registers a section's rows with the search filter. {@code collapsible} is null for a common section. */
+    private void registerSection(Component card, Widgets.CollapsibleCard collapsible, List<FilterRow> rows) {
+        filterSections.add(new FilterSection(card, collapsible, rows));
+    }
+
+    /**
+     * Wraps {@code body} in a {@link Widgets.CollapsibleCard}, starting expanded only if
+     * {@code key} was left open last session, and wires its toggle back into
+     * {@link #onAdvancedSectionToggled} so that choice is remembered for next time.
+     */
+    private Widgets.CollapsibleCard advancedCard(String key, String title, JPanel body) {
+        Widgets.CollapsibleCard card = new Widgets.CollapsibleCard(
+                title, body, expandedAdvancedSections.contains(key));
+        card.onToggle(expanded -> onAdvancedSectionToggled(key, expanded));
+        advancedSections.put(key, card);
+        return card;
     }
 
     /**
@@ -464,12 +573,15 @@ public class ConfigPanel extends JPanel {
     private Component createCommandsSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.prefix"), prefixField);
-        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.altPrefix"), altPrefixField);
-        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.helpWord"), helpWordField);
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.prefix"), prefixField, "commands.prefix"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.altPrefix"), altPrefixField, "commands.altPrefix"));
+        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.helpWord"), helpWordField, "commands.help"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.commands"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.commands"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /**
@@ -478,12 +590,15 @@ public class ConfigPanel extends JPanel {
     private Component createPresenceSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.gameStatus"), gameField);
-        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.onlineStatus"), statusComboBox);
-        addSpanningRow(panel, gbc, 2, songInStatusCheckBox);
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.gameStatus"), gameField, "presence.game"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.onlineStatus"), statusComboBox, "presence.status"));
+        rows.add(addSpanningRow(panel, gbc, 2, songInStatusCheckBox, "presence.songInStatus"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.presence"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.presence"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /**
@@ -492,11 +607,15 @@ public class ConfigPanel extends JPanel {
     private Component createVoiceSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addSpanningRow(panel, gbc, 0, stayInChannelCheckBox);
-        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.aloneTimeUntilStop"), aloneTimeSpinner);
+        rows.add(addSpanningRow(panel, gbc, 0, stayInChannelCheckBox, "voice.stayInChannel"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.aloneTimeUntilStop"), aloneTimeSpinner,
+                "voice.aloneTimeUntilStopSeconds"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.voice"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.voice"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /**
@@ -505,13 +624,19 @@ public class ConfigPanel extends JPanel {
     private Component createPlaybackSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.maxTrackSeconds"), maxSecondsSpinner);
-        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.skipRatio"), skipRatioSpinner);
-        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.maxYouTubePlaylistPages"), maxYTPlaylistPagesSpinner);
-        addSpanningRow(panel, gbc, 3, useYouTubeOAuthCheckBox);
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.maxTrackSeconds"), maxSecondsSpinner,
+                "playback.maxTrackSeconds"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.skipRatio"), skipRatioSpinner,
+                "playback.skipRatio"));
+        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.maxYouTubePlaylistPages"), maxYTPlaylistPagesSpinner,
+                "playback.maxYouTubePlaylistPages"));
+        rows.add(addSpanningRow(panel, gbc, 3, useYouTubeOAuthCheckBox, "playback.youtube.useOAuth"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.playback"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.playback"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /**
@@ -520,14 +645,17 @@ public class ConfigPanel extends JPanel {
     private Component createEmojisSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.success"), successEmojiField);
-        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.warning"), warningEmojiField);
-        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.error"), errorEmojiField);
-        addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.loading"), loadingEmojiField);
-        addRow(panel, gbc, 4, GuiLanguage.msg("gui.config.searching"), searchingEmojiField);
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.success"), successEmojiField, "ui.emojis.success"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.warning"), warningEmojiField, "ui.emojis.warning"));
+        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.error"), errorEmojiField, "ui.emojis.error"));
+        rows.add(addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.loading"), loadingEmojiField, "ui.emojis.loading"));
+        rows.add(addRow(panel, gbc, 4, GuiLanguage.msg("gui.config.searching"), searchingEmojiField, "ui.emojis.searching"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.uiEmojis"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.uiEmojis"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /**
@@ -536,36 +664,46 @@ public class ConfigPanel extends JPanel {
     private Component createOtherSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addSpanningRow(panel, gbc, 0, npImagesCheckBox);
-        addSpanningRow(panel, gbc, 1, updateAlertsCheckBox);
-        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.logLevel"), logLevelComboBox);
-        addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.playlistsFolder"), playlistsFolderField);
+        rows.add(addSpanningRow(panel, gbc, 0, npImagesCheckBox, "nowPlaying.images"));
+        rows.add(addSpanningRow(panel, gbc, 1, updateAlertsCheckBox, "updates.alerts"));
+        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.logLevel"), logLevelComboBox, "logging.level"));
+        rows.add(addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.playlistsFolder"), playlistsFolderField,
+                "paths.playlistsFolder"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.other"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.other"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /**
-     * Creates the Proxy configuration section.
+     * Creates the Proxy configuration section (advanced).
      *
      * <p>The three checkboxes are labelled by what they route rather than by their raw config
      * keys — "lavaplayer", "jda" and "github" mean nothing to someone who has not read the
      * source, but "audio playback", "Discord connection" and "update checks" are the things
      * they actually chose to proxy or not.
+     *
+     * <p>Collapsed by default: a proxy is infrastructure someone already knows they need,
+     * rather than something a first run prompts anyone to go looking for.
      */
     private Component createProxySection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.proxyHost"), proxyHostField);
-        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.proxyPort"), proxyPortSpinner);
-        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.proxyUsername"), proxyUsernameField);
-        addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.proxyPassword"), proxyPasswordField);
-        addSpanningRow(panel, gbc, 4, proxyLavaplayerCheckBox);
-        addSpanningRow(panel, gbc, 5, proxyJdaCheckBox);
-        addSpanningRow(panel, gbc, 6, proxyGithubCheckBox);
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.proxyHost"), proxyHostField, "proxy.host"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.proxyPort"), proxyPortSpinner, "proxy.port"));
+        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.proxyUsername"), proxyUsernameField, "proxy.username"));
+        rows.add(addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.proxyPassword"), proxyPasswordField, "proxy.password"));
+        rows.add(addSpanningRow(panel, gbc, 4, proxyLavaplayerCheckBox, "proxy.lavaplayer"));
+        rows.add(addSpanningRow(panel, gbc, 5, proxyJdaCheckBox, "proxy.jda"));
+        rows.add(addSpanningRow(panel, gbc, 6, proxyGithubCheckBox, "proxy.github"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.proxy"), panel);
+        Widgets.CollapsibleCard card = advancedCard("proxy", GuiLanguage.msg("gui.config.proxy"), panel);
+        registerSection(card, card, rows);
+        return card;
     }
 
     /**
@@ -574,17 +712,23 @@ public class ConfigPanel extends JPanel {
      * <p>Both are required fields the bot cannot start without. The token in particular is
      * shown masked, exactly like the proxy password above, and carries an explicit warning:
      * unlike most settings on this panel, getting it wrong does not degrade a feature — it
-     * stops the bot from starting at all.
+     * stops the bot from starting at all. Common, never collapsed, and the warning is merged
+     * into the token's own {@link FilterRow} so the two can never be shown or hidden apart.
      */
     private Component createDiscordSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.discordToken"), discordTokenField);
-        addSpanningRow(panel, gbc, 1, warningLabel(GuiLanguage.msg("gui.config.discordTokenWarning")));
-        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.discordOwner"), discordOwnerSpinner);
+        FilterRow tokenRow = addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.discordToken"), discordTokenField,
+                "discord.token");
+        tokenRow.merge(addSpanningRow(panel, gbc, 1, warningLabel(GuiLanguage.msg("gui.config.discordTokenWarning")), null));
+        rows.add(tokenRow);
+        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.discordOwner"), discordOwnerSpinner, "discord.owner"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.discord"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.discord"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /**
@@ -596,10 +740,13 @@ public class ConfigPanel extends JPanel {
     private Component createLocalizationSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.botLanguage"), botLanguageComboBox);
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.botLanguage"), botLanguageComboBox, "ui.language"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.localization"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.localization"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /**
@@ -608,31 +755,37 @@ public class ConfigPanel extends JPanel {
     private Component createNowPlayingSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addSpanningRow(panel, gbc, 0, npMinimalMessageCheckBox);
-        addSpanningRow(panel, gbc, 1, npShowButtonsCheckBox);
-        addSpanningRow(panel, gbc, 2, npShowProgressBarCheckBox);
+        rows.add(addSpanningRow(panel, gbc, 0, npMinimalMessageCheckBox, "nowPlaying.minimalMessage"));
+        rows.add(addSpanningRow(panel, gbc, 1, npShowButtonsCheckBox, "nowPlaying.showButtons"));
+        rows.add(addSpanningRow(panel, gbc, 2, npShowProgressBarCheckBox, "nowPlaying.showProgressBar"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.nowPlaying"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.nowPlaying"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /**
-     * Creates the YouTube Advanced configuration section: poToken, visitorData, clients.
+     * Creates the common YouTube section: playback.youtube.clients only.
      *
      * <p>The clients list is the setting users most often need to change — YouTube breaks
-     * individual InnerTube clients rather than all at once — so it gets a real ordered editor
-     * rather than a read-only dump, built from {@link #KNOWN_YOUTUBE_CLIENTS}, a known and
-     * bounded set of names read from {@code AudioSource.clientByName}.
+     * individual InnerTube clients rather than all at once — so unlike poToken/visitorData
+     * below it is common, not advanced, and gets a real ordered editor rather than a read-only
+     * dump, built from {@link #KNOWN_YOUTUBE_CLIENTS}, a known and bounded set of names read
+     * from {@code AudioSource.clientByName}.
      */
-    private Component createYoutubeAdvancedSection() {
+    private Component createYoutubeClientsSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.youtubePoToken"), youtubePoTokenField);
-        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.youtubeVisitorData"), youtubeVisitorDataField);
-        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.youtubeClients"), buildYoutubeClientsEditor());
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.youtubeClients"), buildYoutubeClientsEditor(),
+                "playback.youtube.clients"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.youtubeAdvanced"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.youtube"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /** The ordered list, add/remove/reorder controls for playback.youtube.clients. */
@@ -694,131 +847,233 @@ public class ConfigPanel extends JPanel {
     }
 
     /**
-     * Creates the Playback Advanced section: maxHistorySize and the audioSources checkboxes.
+     * Creates the YouTube Advanced section (advanced): playback.youtube.poToken/visitorData.
+     *
+     * <p>Both are opaque tokens scraped from a browser session rather than something typed by
+     * hand day to day, which is what keeps them out of the common tier even though the client
+     * list two sections up, from the same {@code playback.youtube.*} family, is common.
+     */
+    private Component createYoutubeAdvancedSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
+
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.youtubePoToken"), youtubePoTokenField,
+                "playback.youtube.poToken"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.youtubeVisitorData"), youtubeVisitorDataField,
+                "playback.youtube.visitorData"));
+
+        Widgets.CollapsibleCard card = advancedCard("youtubeAdvanced", GuiLanguage.msg("gui.config.youtubeAdvanced"), panel);
+        registerSection(card, card, rows);
+        return card;
+    }
+
+    /**
+     * Creates the Playback Advanced section (advanced): maxHistorySize and the audioSources
+     * checkboxes.
      */
     private Component createPlaybackAdvancedSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
         int row = 0;
 
-        addRow(panel, gbc, row++, GuiLanguage.msg("gui.config.maxHistorySize"), maxHistorySizeSpinner);
+        rows.add(addRow(panel, gbc, row++, GuiLanguage.msg("gui.config.maxHistorySize"), maxHistorySizeSpinner,
+                "playback.maxHistorySize"));
 
         JLabel audioSourcesLabel = new JLabel(GuiLanguage.msg("gui.config.audioSources"));
         audioSourcesLabel.setFont(Tokens.fontBody());
         audioSourcesLabel.setForeground(Tokens.textMuted());
-        addSpanningRow(panel, gbc, row++, audioSourcesLabel);
+        FilterRow audioSourcesLabelRow = addSpanningRow(panel, gbc, row++, audioSourcesLabel, null);
 
         JPanel sourcesGrid = Widgets.transparent(new GridLayout(0, 2, Tokens.SPACE_SM, 0));
         for (JCheckBox checkBox : audioSourceCheckBoxes.values()) {
             sourcesGrid.add(checkBox);
         }
-        addSpanningRow(panel, gbc, row, sourcesGrid);
+        FilterRow sourcesRow = addSpanningRow(panel, gbc, row, sourcesGrid, "playback.audioSources");
+        rows.add(sourcesRow.merge(audioSourcesLabelRow));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.playbackAdvanced"), panel);
+        Widgets.CollapsibleCard card = advancedCard("playbackAdvanced", GuiLanguage.msg("gui.config.playbackAdvanced"), panel);
+        registerSection(card, card, rows);
+        return card;
     }
 
     /**
-     * Creates the Commands Advanced section: clearChannel limits.
+     * Creates the Commands Advanced section (advanced): clearChannel limits.
      */
     private Component createCommandsAdvancedSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.clearChannelDeleteLimit"), clearChannelDeleteLimitSpinner);
-        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.clearChannelAgeDays"), clearChannelAgeDaysSpinner);
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.clearChannelDeleteLimit"), clearChannelDeleteLimitSpinner,
+                "commands.clearChannel.deleteLimit"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.clearChannelAgeDays"), clearChannelAgeDaysSpinner,
+                "commands.clearChannel.ageDays"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.commandsAdvanced"), panel);
+        Widgets.CollapsibleCard card = advancedCard("commandsAdvanced", GuiLanguage.msg("gui.config.commandsAdvanced"), panel);
+        registerSection(card, card, rows);
+        return card;
     }
 
     /**
-     * Creates the Updates section.
+     * Creates the common Updates section: updates.autoUpdate only. The repository, check
+     * interval and GitHub token live in {@link #createUpdatesAdvancedSection()} instead.
      */
     private Component createUpdatesSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.updateRepository"), updateRepositoryField);
-        addSpanningRow(panel, gbc, 1, updateAutoUpdateCheckBox);
-        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.updateCheckIntervalHours"), updateCheckIntervalSpinner);
-        addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.updateGithubToken"), updateGithubTokenField);
+        rows.add(addSpanningRow(panel, gbc, 0, updateAutoUpdateCheckBox, "updates.autoUpdate"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.updates"), panel);
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.updates"), panel);
+        registerSection(card, null, rows);
+        return card;
     }
 
     /**
-     * Creates the Dangerous section: dangerous.evalEngine, dangerous.eval.
+     * Creates the Updates Advanced section (advanced): repository, check interval, GitHub token.
+     */
+    private Component createUpdatesAdvancedSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
+
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.updateRepository"), updateRepositoryField,
+                "updates.repository"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.updateCheckIntervalHours"), updateCheckIntervalSpinner,
+                "updates.checkIntervalHours"));
+        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.updateGithubToken"), updateGithubTokenField,
+                "updates.githubToken"));
+
+        Widgets.CollapsibleCard card = advancedCard("updatesAdvanced", GuiLanguage.msg("gui.config.updatesAdvanced"), panel);
+        registerSection(card, card, rows);
+        return card;
+    }
+
+    /**
+     * Creates the Dangerous section (advanced): dangerous.evalEngine, dangerous.eval.
      *
      * <p>eval is not presented as an ordinary toggle. What it turns on is the bot owner running
      * arbitrary code in the bot's own process — anything the host machine can do, the eval
      * command can do — so the checkbox is paired with a warning in the danger color that says
-     * so plainly, rather than relying on the setting's name to communicate the risk.
+     * so plainly, rather than relying on the setting's name to communicate the risk. The warning
+     * is merged into the checkbox's own {@link FilterRow}: opening this section, collapsed or
+     * filtered or not, never shows the checkbox without it.
      */
     private Component createDangerousSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.evalEngine"), evalEngineField);
-        addSpanningRow(panel, gbc, 1, evalCheckBox);
-        addSpanningRow(panel, gbc, 2, warningLabel(GuiLanguage.msg("gui.config.evalWarning")));
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.evalEngine"), evalEngineField, "dangerous.evalEngine"));
+        FilterRow evalRow = addSpanningRow(panel, gbc, 1, evalCheckBox, "dangerous.eval");
+        evalRow.merge(addSpanningRow(panel, gbc, 2, warningLabel(GuiLanguage.msg("gui.config.evalWarning")), null));
+        rows.add(evalRow);
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.dangerous"), panel);
+        Widgets.CollapsibleCard card = advancedCard("dangerous", GuiLanguage.msg("gui.config.dangerous"), panel);
+        registerSection(card, card, rows);
+        return card;
     }
 
     /**
-     * Creates the GUI & Web section: gui.enabled/fontSize/language, web.bindAddress/allowConfigEdit.
+     * Creates the common Appearance section: gui.theme, gui.language, gui.fontSize.
+     *
+     * <p>These three govern only how this desktop window looks and speaks to the person running
+     * it, never the bot itself — the same class of setting the Preferences page already applies
+     * instantly and saves through {@link GuiPreferences}. They are kept here too, editable the
+     * same way as every other option and covered by the same save/restore round trip, so this
+     * panel's claim to show every option stays true without sending someone to a second screen
+     * to find gui.theme.
+     */
+    private Component createAppearanceSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
+
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.guiTheme"), guiThemeComboBox, "gui.theme"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.guiLanguage"), guiLanguageComboBox, "gui.language"));
+        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.guiFontSize"), guiFontSizeSpinner, "gui.fontSize"));
+
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.appearance"), panel);
+        registerSection(card, null, rows);
+        return card;
+    }
+
+    /**
+     * Creates the GUI & Web Advanced section (advanced): gui.enabled, web.bindAddress,
+     * web.allowConfigEdit.
      *
      * <p>web.allowConfigEdit gets the same treatment as dangerous.eval above, for the same
      * reason: reference.conf itself calls out that turning it on lets anyone holding the web
      * panel's token change config.txt, so the checkbox here says so too rather than reading
-     * like any other flag.
+     * like any other flag — merged into the same {@link FilterRow} so the warning can never be
+     * shown or hidden apart from it.
      */
-    private Component createGuiWebSection() {
+    private Component createGuiWebAdvancedSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addSpanningRow(panel, gbc, 0, guiEnabledCheckBox);
-        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.guiFontSize"), guiFontSizeSpinner);
-        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.guiLanguage"), guiLanguageComboBox);
-        addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.webBindAddress"), webBindAddressField);
-        addSpanningRow(panel, gbc, 4, webAllowConfigEditCheckBox);
-        addSpanningRow(panel, gbc, 5, warningLabel(GuiLanguage.msg("gui.config.webAllowConfigEditWarning")));
+        rows.add(addSpanningRow(panel, gbc, 0, guiEnabledCheckBox, "gui.enabled"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.webBindAddress"), webBindAddressField, "web.bindAddress"));
+        FilterRow allowEditRow = addSpanningRow(panel, gbc, 2, webAllowConfigEditCheckBox, "web.allowConfigEdit");
+        allowEditRow.merge(addSpanningRow(panel, gbc, 3,
+                warningLabel(GuiLanguage.msg("gui.config.webAllowConfigEditWarning")), null));
+        rows.add(allowEditRow);
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.guiWeb"), panel);
+        Widgets.CollapsibleCard card = advancedCard("guiWebAdvanced", GuiLanguage.msg("gui.config.guiWeb"), panel);
+        registerSection(card, card, rows);
+        return card;
     }
 
     /**
-     * Creates the Performance section: performance.nasBufferMs, performance.frameBufferMs.
+     * Creates the Performance section (advanced): performance.nasBufferMs, performance.frameBufferMs.
      */
     private Component createPerformanceSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.nasBufferMs"), nasBufferMsSpinner);
-        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.frameBufferMs"), frameBufferMsSpinner);
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.nasBufferMs"), nasBufferMsSpinner,
+                "performance.nasBufferMs"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.frameBufferMs"), frameBufferMsSpinner,
+                "performance.frameBufferMs"));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.performance"), panel);
+        Widgets.CollapsibleCard card = advancedCard("performance", GuiLanguage.msg("gui.config.performance"), panel);
+        registerSection(card, card, rows);
+        return card;
     }
 
     /**
-     * Creates the read-only "Advanced (config.txt only)" section.
+     * Creates the read-only "Advanced (config.txt only)" section (advanced).
      *
      * <p>commands.aliases and playback.transforms are nested structures — serialising either of
      * them out of a single text field is exactly what {@code WebWrites.validate} refuses
      * STRING_LIST/CONFIG options for ("must be edited in config.txt directly"), because
      * guessing at how to flatten one back into HOCON is how a config file gets corrupted. Shown
      * here read-only, rendered as HOCON, rather than an editor that could silently mangle
-     * either one.
+     * either one. Each note is merged with its own text area into one {@link FilterRow}.
      */
     private Component createAdvancedReadOnlySection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
 
-        addSpanningRow(panel, gbc, 0, noteLabel(GuiLanguage.msg("gui.config.aliasesReadOnlyNote")));
-        addSpanningRow(panel, gbc, 1, new JScrollPane(aliasesTextArea));
-        addSpanningRow(panel, gbc, 2, noteLabel(GuiLanguage.msg("gui.config.transformsReadOnlyNote")));
-        addSpanningRow(panel, gbc, 3, new JScrollPane(transformsTextArea));
+        FilterRow aliasesRow = addSpanningRow(panel, gbc, 0, noteLabel(GuiLanguage.msg("gui.config.aliasesReadOnlyNote")),
+                "commands.aliases");
+        aliasesRow.merge(addSpanningRow(panel, gbc, 1, new JScrollPane(aliasesTextArea), null));
+        rows.add(aliasesRow);
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.config.advancedReadOnly"), panel);
+        FilterRow transformsRow = addSpanningRow(panel, gbc, 2,
+                noteLabel(GuiLanguage.msg("gui.config.transformsReadOnlyNote")), "playback.transforms");
+        transformsRow.merge(addSpanningRow(panel, gbc, 3, new JScrollPane(transformsTextArea), null));
+        rows.add(transformsRow);
+
+        Widgets.CollapsibleCard card = advancedCard("advancedReadOnly", GuiLanguage.msg("gui.config.advancedReadOnly"), panel);
+        registerSection(card, card, rows);
+        return card;
     }
 
     /** A short callout in the danger color, for a control whose plain label understates the risk. */
@@ -967,8 +1222,9 @@ public class ConfigPanel extends JPanel {
         evalEngineField.setText(config.getEvalEngine());
         evalCheckBox.setSelected(config.useEval());
 
-        // GUI & Web
+        // Appearance / GUI & Web
         guiEnabledCheckBox.setSelected(config.getGuiEnabled());
+        guiThemeComboBox.setSelectedItem(ThemeManager.Theme.fromConfigKey(config.getGuiTheme()));
         guiFontSizeSpinner.setValue(config.getGuiFontSize());
         // The raw value, not getGuiLanguage(): that getter resolves a blank config value against
         // ui.language, which would make "left blank" and "pinned to whatever ui.language
@@ -1126,8 +1382,9 @@ public class ConfigPanel extends JPanel {
         updates.put("dangerous.evalEngine", quoteString(evalEngineField.getText()));
         updates.put("dangerous.eval", String.valueOf(evalCheckBox.isSelected()));
 
-        // GUI & Web
+        // Appearance / GUI & Web
         updates.put("gui.enabled", String.valueOf(guiEnabledCheckBox.isSelected()));
+        updates.put("gui.theme", quoteString(((ThemeManager.Theme) guiThemeComboBox.getSelectedItem()).getConfigKey()));
         updates.put("gui.fontSize", String.valueOf(guiFontSizeSpinner.getValue()));
         updates.put("gui.language", quoteString((String) guiLanguageComboBox.getSelectedItem()));
         updates.put("web.bindAddress", quoteString(webBindAddressField.getText()));
@@ -1154,7 +1411,9 @@ public class ConfigPanel extends JPanel {
      *
      * <p>The only STRING_LIST field this panel writes: playback.youtube.clients is built from
      * the ordered editor above, out of a known and bounded set of names, rather than parsed out
-     * of free text — which is what makes writing it back out safe.
+     * of free text — which is what makes writing it back out safe. Reused by
+     * {@link #onAdvancedSectionToggled} for the same reason: the set of open advanced sections
+     * is also a small, known, safely-quotable set of names.
      */
     private String formatStringList(List<String> values) {
         StringBuilder sb = new StringBuilder("[ ");
@@ -1260,5 +1519,129 @@ public class ConfigPanel extends JPanel {
         // Fallback: simple pattern match for the key
         String pattern = "(?m)^(\\s*" + java.util.regex.Pattern.quote(leafKey) + "\\s*=\\s*)([^\r\n]+)";
         return content.replaceFirst(pattern, "$1" + java.util.regex.Matcher.quoteReplacement(value));
+    }
+
+    /**
+     * Reads which advanced sections were left open last session, straight out of config.txt.
+     *
+     * <p>Independent of {@link BotConfig}, which merges the user's file against
+     * {@code reference.conf} defaults and has no getter for a key that is not a real
+     * {@link com.jagrosh.jmusicbot.config.model.ConfigOption} — this is a UI preference, the
+     * same kind {@link GuiPreferences} already persists for theme/font/language, not a setting
+     * that affects the bot itself. Missing key, missing file, or a file that fails to parse all
+     * come back as "nothing was open," which is also this panel's default.
+     */
+    private Set<String> loadExpandedAdvancedSections() {
+        try {
+            Path path = ConfigIO.getConfigPath();
+            if (path == null || !Files.exists(path)) {
+                return new LinkedHashSet<>();
+            }
+            Config raw = ConfigFactory.parseFile(path.toFile());
+            String fullKey = "gui." + EXPANDED_SECTIONS_KEY;
+            if (!raw.hasPath(fullKey)) {
+                return new LinkedHashSet<>();
+            }
+            return new LinkedHashSet<>(raw.getStringList(fullKey));
+        } catch (RuntimeException ex) {
+            LOG.warn("Could not read saved advanced-section expand state: {}", ex.toString());
+            return new LinkedHashSet<>();
+        }
+    }
+
+    /**
+     * Persists which advanced sections are open, through {@link GuiPreferences} — the same
+     * write-immediately mechanism the Preferences page already uses for theme/font/language,
+     * rather than a new storage path of its own. Runs on every toggle rather than waiting for
+     * Save: opening a section is not something someone thinks of as "a config edit" they need
+     * to remember to save, the same reasoning {@link GuiPreferences} documents for its own
+     * fields.
+     */
+    private void onAdvancedSectionToggled(String key, boolean expanded) {
+        if (expanded) {
+            expandedAdvancedSections.add(key);
+        } else {
+            expandedAdvancedSections.remove(key);
+        }
+        GuiPreferences.write("gui", EXPANDED_SECTIONS_KEY, formatStringList(new ArrayList<>(expandedAdvancedSections)));
+    }
+
+    /**
+     * Hides whichever registered rows do not match {@code searchField}'s text, against both
+     * the row's label and its config key; a card with no matching row at all is hidden too. An
+     * advanced section with a match is shown open for the duration of the search without
+     * changing its stored preference — see {@link Widgets.CollapsibleCard#setFilterExpanded}.
+     * Clearing the box puts everything back exactly where it was.
+     */
+    private void applyFilter() {
+        String query = searchField.getText().trim().toLowerCase(Locale.ROOT);
+        boolean filtering = !query.isEmpty();
+
+        for (FilterSection section : filterSections) {
+            boolean anyMatch = false;
+            for (FilterRow row : section.rows) {
+                boolean matches = !filtering || row.matches(query);
+                row.setVisible(matches);
+                anyMatch |= matches;
+            }
+            section.card.setVisible(anyMatch);
+            if (section.collapsible != null) {
+                if (filtering) {
+                    section.collapsible.setFilterExpanded(anyMatch);
+                } else {
+                    section.collapsible.clearFilterOverride();
+                }
+            }
+        }
+
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * One filterable unit: usually a label and its control, sometimes a control alone (a
+     * spanning checkbox), and occasionally several components a warning or note has been
+     * {@link #merge}d into — everything that must show or hide together stays in one FilterRow
+     * so the filter can never separate a field from the warning attached to it.
+     */
+    private static final class FilterRow {
+        private final List<JComponent> parts = new ArrayList<>();
+        private final String haystack;
+
+        FilterRow(String label, String configKey, JComponent... initialParts) {
+            String key = configKey == null ? "" : configKey;
+            String text = label == null ? "" : label;
+            this.haystack = (text + " " + key).toLowerCase(Locale.ROOT);
+            parts.addAll(Arrays.asList(initialParts));
+        }
+
+        /** Folds another row's components into this one, so they always show or hide together. */
+        FilterRow merge(FilterRow other) {
+            parts.addAll(other.parts);
+            return this;
+        }
+
+        boolean matches(String query) {
+            return haystack.contains(query);
+        }
+
+        void setVisible(boolean visible) {
+            for (JComponent part : parts) {
+                part.setVisible(visible);
+            }
+        }
+    }
+
+    /** A card and the {@link FilterRow}s inside it, plus its {@link Widgets.CollapsibleCard} if it has one. */
+    private static final class FilterSection {
+        final Component card;
+        final Widgets.CollapsibleCard collapsible;
+        final List<FilterRow> rows;
+
+        FilterSection(Component card, Widgets.CollapsibleCard collapsible, List<FilterRow> rows) {
+            this.card = card;
+            this.collapsible = collapsible;
+            this.rows = rows;
+        }
     }
 }
