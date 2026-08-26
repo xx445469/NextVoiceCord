@@ -392,24 +392,6 @@
       "invalid": "Valid values are `full`, `minimal`, or `inherit`."
     },
     "panel": {
-      "title": "NextVoiceCord Settings",
-      "description": "Settings panel for **{0}**.\nUse the buttons below to update values.",
-      "valueNone": "None",
-      "valueAny": "Any",
-      "skipDefault": "Default (`55%`)",
-      "footerNamed": "Only {0} can use these controls.",
-      "footerGeneric": "Only the command invoker can use these controls.",
-      "field": {
-        "textChannel": "Text Channel",
-        "voiceChannel": "Voice Channel",
-        "djRole": "DJ Role",
-        "prefix": "Prefix",
-        "skipRatio": "Skip Ratio",
-        "queueType": "Queue Type",
-        "nowPlaying": "Now-Playing",
-        "layout": "Layout",
-        "buttons": "Buttons"
-      },
       "button": {
         "toggleQueue": "Toggle Queue",
         "toggleLayout": "Toggle Layout",
@@ -424,11 +406,32 @@
         "clearDj": "Clear DJ",
         "close": "Close"
       },
+      "description": "Settings panel for **{0}**.\nUse the buttons below to update values.",
+      "field": {
+        "buttons": "Buttons",
+        "djRole": "DJ Role",
+        "language": "Language",
+        "layout": "Layout",
+        "nowPlaying": "Now-Playing",
+        "prefix": "Prefix",
+        "queueType": "Queue Type",
+        "skipRatio": "Skip Ratio",
+        "textChannel": "Text Channel",
+        "voiceChannel": "Voice Channel"
+      },
+      "footerGeneric": "Only the command invoker can use these controls.",
+      "footerNamed": "Only {0} can use these controls.",
+      "languageHint": "What the bot says here, unless someone has chosen their own in their settings.",
       "select": {
+        "djRolePlaceholder": "Choose the DJ role",
+        "languagePlaceholder": "Choose the server language",
         "textChannelPlaceholder": "Choose a text channel",
-        "voiceChannelPlaceholder": "Choose a voice channel",
-        "djRolePlaceholder": "Choose the DJ role"
-      }
+        "voiceChannelPlaceholder": "Choose a voice channel"
+      },
+      "skipDefault": "Default (`55%`)",
+      "title": "NextVoiceCord Settings",
+      "valueAny": "Any",
+      "valueNone": "None"
     },
     "personal": {
       "title": "Your settings",

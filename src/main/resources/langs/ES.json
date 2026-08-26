@@ -377,7 +377,8 @@
         "queueType": "Tipo de cola",
         "nowPlaying": "Reproduciendo ahora",
         "layout": "Diseño",
-        "buttons": "Botones"
+        "buttons": "Botones",
+        "language": "Idioma"
       },
       "button": {
         "toggleQueue": "Alternar cola",
@@ -396,8 +397,10 @@
       "select": {
         "textChannelPlaceholder": "Elige un canal de texto",
         "voiceChannelPlaceholder": "Elige un canal de voz",
-        "djRolePlaceholder": "Elige el rol de DJ"
-      }
+        "djRolePlaceholder": "Elige el rol de DJ",
+        "languagePlaceholder": "Elige el idioma del servidor"
+      },
+      "languageHint": "El idioma que usa el bot aquí, a menos que alguien haya elegido el suyo en sus ajustes."
     },
     "modal": {
       "setPrefixTitle": "Definir prefijo",

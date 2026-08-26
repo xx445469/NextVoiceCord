@@ -377,7 +377,8 @@
         "queueType": "Тип черги",
         "nowPlaying": "Зараз грає",
         "layout": "Розкладка",
-        "buttons": "Кнопки"
+        "buttons": "Кнопки",
+        "language": "Мова"
       },
       "button": {
         "toggleQueue": "Перемкнути тип черги",
@@ -396,8 +397,10 @@
       "select": {
         "textChannelPlaceholder": "Обери текстовий канал",
         "voiceChannelPlaceholder": "Обери голосовий канал",
-        "djRolePlaceholder": "Обери роль DJ"
-      }
+        "djRolePlaceholder": "Обери роль DJ",
+        "languagePlaceholder": "Обери мову сервера"
+      },
+      "languageHint": "Мова, якою бот спілкується тут, якщо тільки хтось не обрав свою в налаштуваннях."
     },
     "modal": {
       "setPrefixTitle": "Задати префікс",

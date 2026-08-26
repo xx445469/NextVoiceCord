@@ -68,19 +68,35 @@ class SettingsPanelRendererTest
         var guild = Mockito.mock(net.dv8tion.jda.api.entities.Guild.class);
         Mockito.when(guild.getName()).thenReturn("test guild");
 
+        // A real config always resolves a language; the mock has to say so too, or the panel
+        // is being tested against a state the running bot never reaches.
+        var config = Mockito.mock(com.jagrosh.jmusicbot.BotConfig.class);
+        Mockito.when(config.getDefaultLanguage()).thenReturn(com.jagrosh.jmusicbot.i18n.Language.EN);
+
         List<MessageTopLevelComponent> components = SettingsPanelRenderer.buildSettingsMessageComponents(i18nBot,
-                guild, settings, Mockito.mock(com.jagrosh.jmusicbot.BotConfig.class), 123L, "tester");
+                guild, settings, config, 123L, "tester");
         assertEquals(1, components.size());
         assertTrue(components.get(0) instanceof Container);
         Container container = (Container) components.get(0);
         long actionRows = container.getComponents().stream()
                 .filter(c -> c.getType() == Component.Type.ACTION_ROW)
                 .count();
-        assertEquals(5, actionRows);
+        assertEquals(6, actionRows);
+
+        // Counting rows says a row went missing, not which. The server language control was
+        // lost once already, when the command that used to own it was folded into this panel,
+        // so name it explicitly.
+        boolean hasLanguageMenu = container.getComponents().stream()
+                .filter(c -> c.getType() == Component.Type.ACTION_ROW)
+                .map(c -> (net.dv8tion.jda.api.components.actionrow.ActionRow) c)
+                .flatMap(row -> row.getComponents().stream())
+                .anyMatch(c -> c instanceof net.dv8tion.jda.api.components.selections.StringSelectMenu m
+                        && m.getCustomId() != null && m.getCustomId().startsWith("settings_lang_"));
+        assertTrue(hasLanguageMenu, "the server language menu must be on the settings panel");
         long separators = container.getComponents().stream()
                 .filter(c -> c.getType() == Component.Type.SEPARATOR)
                 .count();
-        assertEquals(4, separators);
+        assertEquals(5, separators);
 
         List<ActionRow> rows = container.getComponents().stream()
                 .filter(c -> c.getType() == Component.Type.ACTION_ROW)

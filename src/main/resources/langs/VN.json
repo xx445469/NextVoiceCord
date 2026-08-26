@@ -377,7 +377,8 @@
         "queueType": "Loại hàng đợi",
         "nowPlaying": "Đang phát",
         "layout": "Bố cục",
-        "buttons": "Các nút"
+        "buttons": "Các nút",
+        "language": "Ngôn ngữ"
       },
       "button": {
         "toggleQueue": "Chuyển đổi loại hàng đợi",
@@ -396,8 +397,10 @@
       "select": {
         "textChannelPlaceholder": "Chọn một kênh văn bản",
         "voiceChannelPlaceholder": "Chọn một kênh thoại",
-        "djRolePlaceholder": "Chọn vai trò DJ"
-      }
+        "djRolePlaceholder": "Chọn vai trò DJ",
+        "languagePlaceholder": "Chọn ngôn ngữ máy chủ"
+      },
+      "languageHint": "Ngôn ngữ bot dùng ở đây, trừ khi ai đó đã chọn ngôn ngữ riêng trong cài đặt của họ."
     },
     "modal": {
       "setPrefixTitle": "Đặt tiền tố",

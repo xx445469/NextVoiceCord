@@ -377,7 +377,8 @@
         "queueType": "Тип очереди",
         "nowPlaying": "Плеер",
         "layout": "Макет",
-        "buttons": "Кнопки"
+        "buttons": "Кнопки",
+        "language": "Язык"
       },
       "button": {
         "toggleQueue": "Переключить очередь",
@@ -396,8 +397,10 @@
       "select": {
         "textChannelPlaceholder": "Выбери текстовый канал",
         "voiceChannelPlaceholder": "Выбери голосовой канал",
-        "djRolePlaceholder": "Выбери роль DJ"
-      }
+        "djRolePlaceholder": "Выбери роль DJ",
+        "languagePlaceholder": "Выбери язык сервера"
+      },
+      "languageHint": "Язык, на котором бот говорит здесь, если только кто-то не выбрал свой в настройках."
     },
     "modal": {
       "setPrefixTitle": "Задать префикс",

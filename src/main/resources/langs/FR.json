@@ -377,7 +377,8 @@
         "queueType": "Type de file",
         "nowPlaying": "Lecture en cours",
         "layout": "Mise en page",
-        "buttons": "Boutons"
+        "buttons": "Boutons",
+        "language": "Langue"
       },
       "button": {
         "toggleQueue": "Basculer la file",
@@ -396,8 +397,10 @@
       "select": {
         "textChannelPlaceholder": "Choisir un salon textuel",
         "voiceChannelPlaceholder": "Choisir un salon vocal",
-        "djRolePlaceholder": "Choisir le rôle DJ"
-      }
+        "djRolePlaceholder": "Choisir le rôle DJ",
+        "languagePlaceholder": "Choisir la langue du serveur"
+      },
+      "languageHint": "La langue utilisée ici par le bot, sauf si quelqu'un a choisi la sienne dans ses paramètres."
     },
     "modal": {
       "setPrefixTitle": "Définir le préfixe",

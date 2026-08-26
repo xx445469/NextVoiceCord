@@ -63,6 +63,62 @@ public class SettingsInteractionListener extends ListenerAdapter
         handleSettingsEntitySelect(event);
     }
 
+    /**
+     * The server-wide language menu.
+     *
+     * <p>Gated on Manage Server like everything else under {@code settings_}, because this
+     * decides what the bot says to everyone here who has not chosen their own language.
+     */
+    @Override
+    public void onStringSelectInteraction(
+            @NotNull net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent event)
+    {
+        if (!event.getComponentId().startsWith("settings_lang_"))
+            return;
+
+        if (!InteractionGuards.requireGuildAndMember(event, bot))
+            return;
+
+        long owner;
+        try
+        {
+            owner = Long.parseLong(event.getComponentId().substring("settings_lang_".length()));
+        }
+        catch (NumberFormatException ex)
+        {
+            event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
+            return;
+        }
+
+        if (event.getUser().getIdLong() != owner)
+        {
+            event.reply(bot.msg(event.getGuild(), "common.errors.notPanelOwner")).setEphemeral(true).queue();
+            return;
+        }
+        if (!hasSettingsPermission(event.getMember(), event.getUser().getIdLong()))
+        {
+            event.reply(bot.msg(event.getGuild(), "permissions.errors.needManageServer")).setEphemeral(true).queue();
+            return;
+        }
+
+        String chosen = event.getValues().isEmpty() ? null : event.getValues().get(0);
+        com.jagrosh.jmusicbot.i18n.Language language =
+                chosen == null ? null : com.jagrosh.jmusicbot.i18n.Language.fromCode(chosen).orElse(null);
+
+        if (language == null || !bot.getLanguages().getAvailableLanguages().contains(language))
+        {
+            event.reply(expiredMessage(event.getGuild())).setEphemeral(true).queue();
+            return;
+        }
+
+        Settings settings = bot.getSettingsManager().getSettings(event.getGuild());
+        settings.setLanguage(language);
+
+        // Redrawn after the change, so the panel comes back in the new language — the
+        // shortest possible proof it took effect.
+        refreshPanel(event, settings);
+    }
+
     private void handleSettingsButton(ButtonInteractionEvent event)
     {
         if (!InteractionGuards.requireGuildAndMember(event, bot))
@@ -459,7 +515,15 @@ public class SettingsInteractionListener extends ListenerAdapter
         }
     }
 
-    private void refreshPanel(ButtonInteractionEvent event, Settings settings)
+    /**
+     * Redraws the panel in place.
+     *
+     * <p>Takes the common supertype rather than a button event, because the language menu
+     * needs the same redraw and a select is not a button.
+     */
+    private void refreshPanel(
+            net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent event,
+            Settings settings)
     {
         String invokerName = event.getMember() != null ? event.getMember().getEffectiveName() : event.getUser().getName();
         event.editMessage(new MessageEditBuilder()

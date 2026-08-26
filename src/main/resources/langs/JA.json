@@ -377,7 +377,8 @@
         "queueType": "キュータイプ",
         "nowPlaying": "再生中パネル",
         "layout": "レイアウト",
-        "buttons": "ボタン"
+        "buttons": "ボタン",
+        "language": "言語"
       },
       "button": {
         "toggleQueue": "キュー切替",
@@ -396,8 +397,10 @@
       "select": {
         "textChannelPlaceholder": "テキストチャンネルを選択",
         "voiceChannelPlaceholder": "ボイスチャンネルを選択",
-        "djRolePlaceholder": "DJロールを選択"
-      }
+        "djRolePlaceholder": "DJロールを選択",
+        "languagePlaceholder": "サーバーの言語を選択"
+      },
+      "languageHint": "ここでボットが使用する言語です。本人が自分の設定で別の言語を選んでいなければ、この言語になります。"
     },
     "modal": {
       "setPrefixTitle": "プレフィックスを設定",

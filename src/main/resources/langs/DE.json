@@ -377,7 +377,8 @@
         "queueType": "Warteschlangentyp",
         "nowPlaying": "Wird-gespielt",
         "layout": "Layout",
-        "buttons": "Buttons"
+        "buttons": "Buttons",
+        "language": "Sprache"
       },
       "button": {
         "toggleQueue": "Warteschl. umschalten",
@@ -396,8 +397,10 @@
       "select": {
         "textChannelPlaceholder": "Textkanal wählen",
         "voiceChannelPlaceholder": "Sprachkanal wählen",
-        "djRolePlaceholder": "DJ-Rolle wählen"
-      }
+        "djRolePlaceholder": "DJ-Rolle wählen",
+        "languagePlaceholder": "Serversprache wählen"
+      },
+      "languageHint": "Das spricht der Bot hier, außer jemand hat in den eigenen Einstellungen eine andere Sprache gewählt."
     },
     "modal": {
       "setPrefixTitle": "Präfix setzen",

@@ -359,7 +359,60 @@ public final class SettingsPanelRenderer
                         TextDisplay.of(bot.msg(guild, "settings.panel.field.buttons") + ": " + nowPlayingButtons)
                 ),
                 Separator.createDivider(Separator.Spacing.SMALL),
+                TextDisplay.of(bot.msg(guild, "settings.panel.field.language") + ": **"
+                        + effectiveLanguage(settings, config).getNativeName() + "**\n"
+                        + bot.msg(guild, "settings.panel.languageHint")),
+                ActionRow.of(serverLanguageSelect(bot, guild, settings, config, userId)),
+                Separator.createDivider(Separator.Spacing.SMALL),
                 ActionRow.of(close)
         );
+    }
+
+    /**
+     * The language everyone on this server sees unless they have chosen their own.
+     *
+     * <p>Lives here rather than in a command of its own. It used to be {@code /language
+     * scope:server}; folding that command into this panel is what removed the only way to set
+     * it, until this went in.
+     *
+     * <p>Each option is labelled in its own language — 日本語 rather than Japanese — because
+     * someone changing away from a language they cannot read has to recognise their own to
+     * find it.
+     */
+    private static net.dv8tion.jda.api.components.selections.StringSelectMenu serverLanguageSelect(
+            Bot bot, Guild guild, Settings settings, BotConfig config, long userId)
+    {
+        var menu = net.dv8tion.jda.api.components.selections.StringSelectMenu
+                .create(languageSelectId(userId))
+                .setPlaceholder(bot.msg(guild, "settings.panel.select.languagePlaceholder"));
+
+        // Only languages whose file loaded. Offering a missing one would let someone pick a
+        // language that then renders entirely in English.
+        for (com.jagrosh.jmusicbot.i18n.Language option : bot.getLanguages().getAvailableLanguages())
+        {
+            menu.addOption(option.getNativeName(), option.name(), option.getEnglishName());
+        }
+
+        menu.setDefaultValues(effectiveLanguage(settings, config).name());
+        return menu.build();
+    }
+
+    /**
+     * This guild's language, never null.
+     *
+     * <p>It cannot be null in a running bot — the config always resolves one. But this panel
+     * renders a dozen unrelated settings, and a null here would throw and take all of them off
+     * the screen rather than showing one wrong word.
+     */
+    private static com.jagrosh.jmusicbot.i18n.Language effectiveLanguage(Settings settings, BotConfig config)
+    {
+        com.jagrosh.jmusicbot.i18n.Language language = settings.getLanguage(config);
+        return language == null ? com.jagrosh.jmusicbot.i18n.Language.DEFAULT : language;
+    }
+
+    /** Component id for the server language menu. */
+    public static String languageSelectId(long userId)
+    {
+        return "settings_lang_" + userId;
     }
 }

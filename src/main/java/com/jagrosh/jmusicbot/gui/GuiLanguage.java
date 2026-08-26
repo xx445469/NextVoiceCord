@@ -55,6 +55,7 @@ public final class GuiLanguage
     {
         languages = manager;
         current = initial == null ? Language.DEFAULT : initial;
+        tellTheThemeWhatToRender();
     }
 
     /** The language the window is currently showing. */
@@ -71,6 +72,7 @@ public final class GuiLanguage
             return;
         }
         current = language;
+        tellTheThemeWhatToRender();
         // A copy, because a listener relabelling a panel may add or remove listeners as it
         // rebuilds — iterating the live list would fail halfway through the update.
         for (Consumer<Language> listener : new ArrayList<>(listeners))
@@ -95,6 +97,22 @@ public final class GuiLanguage
     public static String msg(String key, Object... arguments)
     {
         return languages == null ? key : languages.get(current, key, arguments);
+    }
+
+    /**
+     * Hands the theme a sample of the language so it can check the font can draw it.
+     *
+     * <p>The interface font is chosen before any of this runs, and on Linux the candidates are
+     * Latin-only families. Picking one and then asking it to render Chinese produces a row of
+     * empty boxes, which is what this exists to prevent.
+     *
+     * <p>Uses a real translated string rather than a hard-coded specimen, so the check is
+     * against the script the window will actually contain.
+     */
+    private static void tellTheThemeWhatToRender()
+    {
+        String sample = languages == null ? "" : languages.get(current, "gui.nav.overview");
+        com.jagrosh.jmusicbot.gui.theme.ThemeManager.setRequiredGlyphs(sample);
     }
 
     /** Languages that loaded, for the picker. */

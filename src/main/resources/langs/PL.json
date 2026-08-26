@@ -377,7 +377,8 @@
         "queueType": "Typ kolejki",
         "nowPlaying": "Panel odtwarzania",
         "layout": "Układ",
-        "buttons": "Przyciski"
+        "buttons": "Przyciski",
+        "language": "Język"
       },
       "button": {
         "toggleQueue": "Przełącz typ kolejki",
@@ -396,8 +397,10 @@
       "select": {
         "textChannelPlaceholder": "Wybierz kanał tekstowy",
         "voiceChannelPlaceholder": "Wybierz kanał głosowy",
-        "djRolePlaceholder": "Wybierz rolę DJ"
-      }
+        "djRolePlaceholder": "Wybierz rolę DJ",
+        "languagePlaceholder": "Wybierz język serwera"
+      },
+      "languageHint": "Język, którego bot używa tutaj, chyba że ktoś wybrał inny w swoich ustawieniach."
     },
     "modal": {
       "setPrefixTitle": "Ustaw prefiks",

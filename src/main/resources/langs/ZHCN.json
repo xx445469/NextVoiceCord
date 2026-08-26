@@ -377,7 +377,8 @@
         "queueType": "队列类型",
         "nowPlaying": "播放中面板",
         "layout": "布局",
-        "buttons": "按钮"
+        "buttons": "按钮",
+        "language": "语言"
       },
       "button": {
         "toggleQueue": "切换队列类型",
@@ -396,8 +397,10 @@
       "select": {
         "textChannelPlaceholder": "选择文字频道",
         "voiceChannelPlaceholder": "选择语音频道",
-        "djRolePlaceholder": "选择 DJ 身份组"
-      }
+        "djRolePlaceholder": "选择 DJ 身份组",
+        "languagePlaceholder": "选择服务器语言"
+      },
+      "languageHint": "机器人在这里使用的语言，除非有人在自己的设置中选择了其他语言。"
     },
     "modal": {
       "setPrefixTitle": "设置前缀",

@@ -377,7 +377,8 @@
         "queueType": "佇列類型",
         "nowPlaying": "播放中面板",
         "layout": "版面",
-        "buttons": "按鈕"
+        "buttons": "按鈕",
+        "language": "語言"
       },
       "button": {
         "toggleQueue": "切換佇列類型",
@@ -396,8 +397,10 @@
       "select": {
         "textChannelPlaceholder": "選擇文字頻道",
         "voiceChannelPlaceholder": "選擇語音頻道",
-        "djRolePlaceholder": "選擇 DJ 身分組"
-      }
+        "djRolePlaceholder": "選擇 DJ 身分組",
+        "languagePlaceholder": "選擇伺服器語言"
+      },
+      "languageHint": "機器人在這裡所使用的語言，除非有人在自己的設定中選擇了不同的語言。"
     },
     "modal": {
       "setPrefixTitle": "設定前綴",

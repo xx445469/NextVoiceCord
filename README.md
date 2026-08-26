@@ -5,6 +5,7 @@
 [![Downloads](https://img.shields.io/github/downloads/xx445469/NextVoiceCord/total?label=downloads)](https://github.com/xx445469/NextVoiceCord/releases)
 [![Java](https://img.shields.io/badge/Java-25-orange)](https://adoptium.net/)
 [![License](https://img.shields.io/github/license/xx445469/NextVoiceCord)](LICENSE)
+[![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-blue)](CHANGELOG.md)
 
 A self-hosted Discord music bot — the playback core of **JMusicBot**, wearing a
 **Vocard**-style interface, with full multi-language support and a

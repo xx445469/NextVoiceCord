@@ -164,30 +164,75 @@ public final class ThemeManager {
     }
 
     /**
+     * Text the interface font has to be able to render.
+     *
+     * <p>Set once the display language is known. Until then it is empty, which every font
+     * passes — the window is built before {@code GuiLanguage} is initialised, so a stricter
+     * default would reject the platform font on an English system for no reason.
+     */
+    private static volatile String requiredGlyphs = "";
+
+    /**
+     * Tells the theme which script the window has to display, and re-picks the font if the
+     * current one cannot.
+     *
+     * <p>Called when the display language is chosen and whenever it changes. The font is
+     * selected before the language is known, so without this the window keeps whatever was
+     * picked for Latin text and renders the new language as empty boxes.
+     */
+    public static void setRequiredGlyphs(String sample) {
+        String next = sample == null ? "" : sample;
+        if (next.equals(requiredGlyphs)) {
+            return;
+        }
+        requiredGlyphs = next;
+        applyUiDefaults();
+        updateAllWindows();
+    }
+
+    /**
      * Picks the platform's UI font, falling back only when nothing suitable exists.
      *
      * <p>Asking for {@code Font.SANS_SERIF} yields a generic family that is not what the
      * rest of the desktop uses. Matching the platform font is the cheapest single change
      * that stops a Swing window looking out of place.
+     *
+     * <p>But only among fonts that can render the language on screen. The Linux candidates
+     * here — Inter, Ubuntu, Cantarell, Noto Sans — are Latin-only families, so on Linux the
+     * platform font was chosen and then asked to draw Chinese, which comes out as a row of
+     * boxes. (Noto Sans CJK is a different family from Noto Sans; having the latter installed
+     * says nothing about the former.) macOS hid this because its system font covers CJK.
+     *
+     * <p>The last resort is the logical family rather than a named one, because that is the
+     * only thing the JVM composes across several physical fonts to cover missing glyphs.
      */
     private static Font resolveUiFont(int size) {
         String[] preferred = {
             "SF Pro Text", ".AppleSystemUIFont", "Helvetica Neue",   // macOS
             "Segoe UI Variable Text", "Segoe UI",                    // Windows
-            "Inter", "Ubuntu", "Cantarell", "Noto Sans"              // Linux
+            "Inter", "Ubuntu", "Cantarell", "Noto Sans",             // Linux, Latin-only
+            // Named CJK families, tried before giving up on a platform look entirely.
+            "Noto Sans CJK TC", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR",
+            "Source Han Sans", "WenQuanYi Micro Hei", "Microsoft JhengHei", "PingFang TC"
         };
 
         java.util.Set<String> available = new java.util.HashSet<>(java.util.Arrays.asList(
                 GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
 
+        String sample = requiredGlyphs;
+
         for (String family : preferred) {
-            if (available.contains(family)) {
-                return new Font(family, Font.PLAIN, size);
+            if (!available.contains(family)) {
+                continue;
+            }
+            Font candidate = new Font(family, Font.PLAIN, size);
+            if (sample.isEmpty() || candidate.canDisplayUpTo(sample) < 0) {
+                return candidate;
             }
         }
         return new Font(Font.SANS_SERIF, Font.PLAIN, size);
     }
-    
+
     /**
      * Applies every visual default, after the look and feel is installed.
      *
