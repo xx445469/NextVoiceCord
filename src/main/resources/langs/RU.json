@@ -696,7 +696,12 @@
       "youtubeClientsRemove": "Удалить",
       "youtubeClientsUp": "Переместить вверх",
       "youtubePoToken": "Токен подтверждения источника",
-      "youtubeVisitorData": "Данные посетителя"
+      "youtubeVisitorData": "Данные посетителя",
+      "appearance": "Внешний вид и язык",
+      "guiTheme": "Тема",
+      "searchLabel": "Фильтр настроек",
+      "updatesAdvanced": "Обновления (Дополнительно)",
+      "youtube": "YouTube"
     },
     "console": {
       "autoScroll": "Автопрокрутка",

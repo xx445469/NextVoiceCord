@@ -7,6 +7,28 @@ follow [semantic versioning](https://semver.org/spec/v2.0.0.html). Dates are ISO
 
 ## [Unreleased]
 
+## [0.8.1-beta.1] — 2026-08-26
+
+### Added
+
+- **Spotify links.** Track, album, playlist and artist links are read through Spotify's Web API
+  and each track is then found and played from YouTube. It does **not** play Spotify audio and
+  cannot — those streams are DRM-protected with no public API, and the Web Playback SDK only
+  works inside a browser for a signed-in Premium user. Every message says so.
+
+  Needs `spotify.clientId` and `spotify.clientSecret`; blank leaves the feature off. Both are
+  registered as secrets, so the web panel never sends them.
+
+  Playlists read 100 tracks and albums 50 — Spotify's own per-page maxima — and report the real
+  total when they stop short rather than silently loading a prefix. Tracks resolve sequentially,
+  never in parallel. Tracks with no YouTube match are counted and reported.
+
+  Artist links fall back to search: Spotify closed `/artists/{id}/top-tracks` to applications
+  registered after November 2024 while leaving `/artists` and `/search` open to the same token,
+  so a correctly configured app fails on exactly that one call. Only 403 triggers the fallback —
+  a 500 still fails, rather than hiding a real problem behind substituted results.
+
+
 ### Fixed
 
 - **No playlist could be loaded from YouTube.** Reported as a YouTube Music problem; it was
@@ -80,5 +102,6 @@ published releases cannot play a large share of videos.
 - The web panel accepts a query-string token for reads but requires an `Authorization` header
   for anything that changes state, so a link cannot rewrite someone's configuration.
 
-[Unreleased]: https://github.com/xx445469/NextVoiceCord/compare/v0.8.0-beta.1...HEAD
+[Unreleased]: https://github.com/xx445469/NextVoiceCord/compare/v0.8.1-beta.1...HEAD
+[0.8.1-beta.1]: https://github.com/xx445469/NextVoiceCord/releases/tag/v0.8.1-beta.1
 [0.8.0-beta.1]: https://github.com/xx445469/NextVoiceCord/releases/tag/v0.8.0-beta.1

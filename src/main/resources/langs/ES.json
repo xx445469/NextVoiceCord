@@ -696,7 +696,12 @@
       "youtubeClientsRemove": "Eliminar",
       "youtubeClientsUp": "Subir",
       "youtubePoToken": "Token de prueba de origen",
-      "youtubeVisitorData": "Datos del visitante"
+      "youtubeVisitorData": "Datos del visitante",
+      "appearance": "Apariencia e idioma",
+      "guiTheme": "Tema",
+      "searchLabel": "Filtrar ajustes",
+      "updatesAdvanced": "Actualizaciones (Avanzado)",
+      "youtube": "YouTube"
     },
     "console": {
       "autoScroll": "Desplazamiento automático",

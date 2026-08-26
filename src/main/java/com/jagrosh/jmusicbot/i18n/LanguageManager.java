@@ -318,9 +318,16 @@ public final class LanguageManager
             }
         }
 
-        if (language != defaultLanguage)
+        // English, not the configured default. English is the language every key is defined
+        // in; the default is whatever the operator picked. Falling back to the default meant
+        // that setting ui.language to anything else fell back to that same language and found
+        // nothing — so the per-key fallback the project promises worked only for people who
+        // had left it on English, and everyone else saw raw keys like gui.config.lavalinkEngine
+        // wherever a translation was missing.
+        if (language != Language.DEFAULT)
         {
-            String fallback = translations.get(defaultLanguage).get(key);
+            Map<String, String> english = translations.get(Language.DEFAULT);
+            String fallback = english == null ? null : english.get(key);
             if (fallback != null)
             {
                 return fallback;
@@ -328,8 +335,8 @@ public final class LanguageManager
         }
 
         // Logged at warn because an undefined key is a bug in the calling code, not a
-        // translation gap: it is absent even from the language that defines everything.
-        LOG.warn("No translation for key '{}' in any language, including {}", key, defaultLanguage);
+        // translation gap: it is absent even from English, which defines everything.
+        LOG.warn("No translation for key '{}' in any language, including {}", key, Language.DEFAULT);
         return key;
     }
 

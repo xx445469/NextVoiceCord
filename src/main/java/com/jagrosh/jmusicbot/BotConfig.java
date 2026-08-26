@@ -76,6 +76,7 @@ public class BotConfig {
     private String proxyHost, proxyUsername, proxyPassword;
     private String youtubePoToken, youtubeVisitorData;
     private java.util.List<String> youtubeClients;
+    private String spotifyClientId, spotifyClientSecret;
     private boolean proxyLavaplayer, proxyJda, proxyGithub;
     private double skipratio;
     private Language defaultLanguage;
@@ -268,6 +269,8 @@ public class BotConfig {
         youtubePoToken = YOUTUBE_PO_TOKEN.getString(config);
         youtubeVisitorData = YOUTUBE_VISITOR_DATA.getString(config);
         youtubeClients = YOUTUBE_CLIENTS.getStringList(config);
+        spotifyClientId = SPOTIFY_CLIENT_ID.getString(config);
+        spotifyClientSecret = SPOTIFY_CLIENT_SECRET.getString(config);
         proxyUsername = PROXY_USERNAME.getString(config);
         proxyPassword = PROXY_PASSWORD.getString(config);
         updateRepository = UPDATE_REPOSITORY.getString(config);
@@ -528,6 +531,22 @@ public class BotConfig {
     public boolean hasYoutubePoToken() {
         return youtubePoToken != null && !youtubePoToken.isBlank()
                 && youtubeVisitorData != null && !youtubeVisitorData.isBlank();
+    }
+
+    /** Spotify Web API client ID, or empty if Spotify link support is not configured. */
+    public String getSpotifyClientId() {
+        return spotifyClientId;
+    }
+
+    /** Spotify Web API client secret, or empty if Spotify link support is not configured. */
+    public String getSpotifyClientSecret() {
+        return spotifyClientSecret;
+    }
+
+    /** Whether both Spotify credentials are set, enabling Spotify link support. */
+    public boolean hasSpotifyCredentials() {
+        return spotifyClientId != null && !spotifyClientId.isBlank()
+                && spotifyClientSecret != null && !spotifyClientSecret.isBlank();
     }
 
     public String getPrefix() {

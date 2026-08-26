@@ -1,11 +1,10 @@
 # ============================================================
 #  機密：絕對不要 commit
 # ============================================================
-# macOS 檔案系統不分大小寫，各種寫法都擋
-claude.env
-CLAUDE.ENV
-Claude.env
+# 環境檔一律不進版控（大小寫皆擋，Linux 上大小寫敏感所以分開列）
 *.env
+*.ENV
+*.Env
 !*.env.example
 youtubetoken.txt
 
@@ -65,6 +64,6 @@ config.txt.bak*
 *.bak[0-9]*
 /userlanguages.json
 
-# Scratch worktrees created for isolated agent runs. They are full checkouts of this
-# same repository, so committing one nests a copy of the repo inside itself.
-.claude/worktrees/
+# Scratch worktrees used during development. They are full checkouts of this same
+# repository, so committing one nests a copy of the repo inside itself.
+/.*/worktrees/

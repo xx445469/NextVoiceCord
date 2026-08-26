@@ -737,7 +737,12 @@
       "youtubeClientsRemove": "移除",
       "youtubeClientsUp": "上移",
       "youtubePoToken": "來源證明權杖",
-      "youtubeVisitorData": "訪客資料"
+      "youtubeVisitorData": "訪客資料",
+      "appearance": "外觀與語言",
+      "guiTheme": "主題",
+      "searchLabel": "篩選設定",
+      "updatesAdvanced": "更新（進階）",
+      "youtube": "YouTube"
     },
     "console": {
       "autoScroll": "自動捲動",

@@ -20,6 +20,8 @@ import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.PlaybackReason;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
+import com.jagrosh.jmusicbot.spotify.SpotifyAudioPlaylist;
+import com.jagrosh.jmusicbot.spotify.SpotifyUrlParser;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -51,6 +53,19 @@ public final class AudioLoadResultHandlers
     private AudioLoadResultHandlers()
     {
         // Utility class - prevent instantiation
+    }
+
+    /**
+     * A translated note to append to a track-added message when the user's original request
+     * was a Spotify link. Empty for anything else.
+     *
+     * <p>{@code args} is the raw command text the user typed, before any "ytsearch:" rewriting —
+     * exactly what {@link SpotifyUrlParser} needs, and independent of whether the track actually
+     * came from {@code SpotifyAudioSourceManager} or the fallback path.
+     */
+    private static String spotifyDisclosure(Bot bot, Guild guild, String args)
+    {
+        return SpotifyUrlParser.isSpotifyReference(args) ? bot.msg(guild, "spotify.disclosure") : "";
     }
 
     /**
@@ -160,7 +175,8 @@ public final class AudioLoadResultHandlers
                 return;
             }
 
-            String addMsg = FormatUtil.filter(bot.getConfig().getSuccess() + " " + result.formattedMessage);
+            String addMsg = FormatUtil.filter(bot.getConfig().getSuccess() + " " + result.formattedMessage
+                    + spotifyDisclosure(bot, guild, args));
             if (playlist == null || !guild.getSelfMember().hasPermission(channel, Permission.MESSAGE_ADD_REACTION))
             {
                 output.editMessage(addMsg);
@@ -273,6 +289,10 @@ public final class AudioLoadResultHandlers
                 output.editMessage(FormatUtil.filter(bot.getConfig().getWarning() + " "
                         + bot.msg(guild, "search.errors.playlistAllTooLong", nameSuffix, bot.getConfig().getMaxTime())));
             }
+            else if (playlist instanceof SpotifyAudioPlaylist spotify)
+            {
+                handleSpotifyPlaylistLoadResult(spotify, count);
+            }
             else
             {
                 LOG.info("Playlist added to queue: guild={}, name=\"{}\", tracksAdded={}/{}",
@@ -286,6 +306,45 @@ public final class AudioLoadResultHandlers
                         : "";
                 output.editMessage(FormatUtil.filter(bot.getConfig().getSuccess() + " " + foundMsg + omittedSuffix));
             }
+        }
+
+        /**
+         * Reports a Spotify album/playlist/artist load: how many of the tracks Spotify listed
+         * were actually matched and queued, how many had no YouTube match, and whether the
+         * link's paging cap was hit — so the numbers in the summary never look like a bug.
+         */
+        private void handleSpotifyPlaylistLoadResult(SpotifyAudioPlaylist spotify, int count)
+        {
+            String summaryKey = switch (spotify.getEntityType())
+            {
+                case ALBUM -> "spotify.albumSummary";
+                case ARTIST -> "spotify.artistSummary";
+                case TRACK, PLAYLIST -> "spotify.playlistSummary";
+            };
+
+            StringBuilder message = new StringBuilder(
+                    bot.msg(guild, summaryKey, spotify.getSpotifyName(), count, spotify.getTracksConsidered()));
+
+            if (spotify.getFailedMatches() > 0)
+            {
+                message.append(bot.msg(guild, "spotify.summaryFailedSuffix", spotify.getFailedMatches()));
+            }
+            if (spotify.isCapped())
+            {
+                message.append(bot.msg(guild, "spotify.summaryCappedSuffix",
+                        spotify.getTotalAvailable(), spotify.getCapLimit()));
+            }
+            if (count < spotify.getTracks().size())
+            {
+                message.append(bot.getConfig().getWarning())
+                        .append(bot.msg(guild, "search.playlistOmittedSuffix", bot.getConfig().getMaxTime()));
+            }
+
+            LOG.info("Spotify {} added to queue: guild={}, name=\"{}\", tracksAdded={}/{}, failedMatches={}, capped={}",
+                    spotify.getEntityType(), guild.getId(), spotify.getSpotifyName(), count,
+                    spotify.getTracksConsidered(), spotify.getFailedMatches(), spotify.isCapped());
+
+            output.editMessage(FormatUtil.filter(bot.getConfig().getSuccess() + " " + message));
         }
     }
 
@@ -323,7 +382,8 @@ public final class AudioLoadResultHandlers
                 return;
             }
 
-            output.editMessage(FormatUtil.filter(bot.getConfig().getSuccess() + " " + result.formattedMessage));
+            output.editMessage(FormatUtil.filter(bot.getConfig().getSuccess() + " " + result.formattedMessage
+                    + spotifyDisclosure(bot, guild, args)));
         }
 
         @Override

@@ -361,6 +361,14 @@
     },
     "searchingSimple": "Searching... `[{0}]`"
   },
+  "spotify": {
+    "disclosure": " (matched via YouTube search — not the original Spotify audio)",
+    "albumSummary": "Spotify album **{0}**: added {1} of {2} tracks, matched via YouTube.",
+    "playlistSummary": "Spotify playlist **{0}**: added {1} of {2} tracks, matched via YouTube.",
+    "artistSummary": "Spotify artist **{0}** top tracks: added {1} of {2}, matched via YouTube.",
+    "summaryFailedSuffix": "\n{0} track(s) had no match on YouTube and were skipped.",
+    "summaryCappedSuffix": "\nSpotify reports {0} tracks in total; only the first {1} were checked."
+  },
   "voting": {
     "status": "[{0} votes, {1}/{2} needed]",
     "alreadyVoted": "You already voted to skip this song `{0}`",

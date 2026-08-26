@@ -696,7 +696,12 @@
       "youtubeClientsRemove": "移除",
       "youtubeClientsUp": "上移",
       "youtubePoToken": "来源证明令牌",
-      "youtubeVisitorData": "访客数据"
+      "youtubeVisitorData": "访客数据",
+      "appearance": "外观与语言",
+      "guiTheme": "主题",
+      "searchLabel": "筛选设置",
+      "updatesAdvanced": "更新（高级）",
+      "youtube": "YouTube"
     },
     "console": {
       "autoScroll": "自动滚动",

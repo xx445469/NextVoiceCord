@@ -696,7 +696,12 @@
       "youtubeClientsRemove": "삭제",
       "youtubeClientsUp": "위로 이동",
       "youtubePoToken": "출처 증명 토큰",
-      "youtubeVisitorData": "방문자 데이터"
+      "youtubeVisitorData": "방문자 데이터",
+      "appearance": "외관 및 언어",
+      "guiTheme": "테마",
+      "searchLabel": "필터 설정",
+      "updatesAdvanced": "업데이트 (고급)",
+      "youtube": "YouTube"
     },
     "console": {
       "autoScroll": "자동 스크롤",

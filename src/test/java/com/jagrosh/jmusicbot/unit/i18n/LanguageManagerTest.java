@@ -34,6 +34,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -216,5 +217,22 @@ class LanguageManagerTest
             indices.add(Integer.parseInt(matcher.group(1)));
         }
         return indices;
+    }
+
+    @Test
+    @DisplayName("an untranslated key falls back to English whatever the default language is")
+    void fallsBackToEnglishNotToTheConfiguredDefault()
+    {
+        // The fallback used to target the configured default language, so setting ui.language
+        // to anything but English made it fall back to that same language, find nothing, and
+        // render the raw key. The per-key fallback this project promises worked only for
+        // people who had left the default on English.
+        for (Language configured : new Language[] { Language.EN, Language.ZHTW, Language.JA })
+        {
+            LanguageManager manager = LanguageManager.load(configured);
+            String value = manager.get(Language.ZHTW, "gui.nav.overview");
+            assertNotEquals("gui.nav.overview", value,
+                    "a key present in English must resolve when the default is " + configured);
+        }
     }
 }
