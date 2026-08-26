@@ -417,6 +417,7 @@ class BotConfigUnitTest extends BaseConfigTest {
                 discord.owner = 123456789
                 playback.audioSources {
                   youtube = true
+                  spotify = false
                   soundcloud = true
                   bandcamp = false
                   vimeo = true
@@ -430,15 +431,15 @@ class BotConfigUnitTest extends BaseConfigTest {
                 """;
             Path configFile = createTempConfigFile(configContent);
             setConfigFileProperty(configFile);
-            
+
             BotConfig config = new BotConfig(mockUserInteraction);
             config.load();
-            
+
             Set<AudioSource> sources = config.getEnabledAudioSources();
-            
-            // Should have 8 sources enabled (10 total - 2 disabled)
+
+            // Should have 8 sources enabled (11 total - 3 disabled: bandcamp, beam, spotify)
             assertEquals(8, sources.size(), "Should have 8 sources enabled");
-            
+
             // Enabled sources
             assertTrue(config.isAudioSourceEnabled(AudioSource.YOUTUBE));
             assertTrue(config.isAudioSourceEnabled(AudioSource.SOUNDCLOUD));
@@ -448,14 +449,16 @@ class BotConfigUnitTest extends BaseConfigTest {
             assertTrue(config.isAudioSourceEnabled(AudioSource.NICO));
             assertTrue(config.isAudioSourceEnabled(AudioSource.HTTP));
             assertTrue(config.isAudioSourceEnabled(AudioSource.LOCAL));
-            
+
             // Disabled sources
             assertFalse(config.isAudioSourceEnabled(AudioSource.BANDCAMP),
                 "Bandcamp should be disabled when set to false");
             assertFalse(config.isAudioSourceEnabled(AudioSource.BEAM),
                 "Beam should be disabled when set to false");
+            assertFalse(config.isAudioSourceEnabled(AudioSource.SPOTIFY),
+                "Spotify should be disabled when set to false");
         }
-        
+
         @Test
         @DisplayName("All sources enabled when all set to false (fallback behavior)")
         void allSourcesEnabledWhenAllSetToFalse() throws IOException {
@@ -467,6 +470,7 @@ class BotConfigUnitTest extends BaseConfigTest {
                 discord.owner = 123456789
                 playback.audioSources {
                   youtube = false
+                  spotify = false
                   soundcloud = false
                   bandcamp = false
                   vimeo = false
@@ -652,6 +656,7 @@ class BotConfigUnitTest extends BaseConfigTest {
                 discord.owner = 123456789
                 playback.audioSources {
                   youtube = false
+                  spotify = false
                   soundcloud = true
                   bandcamp = false
                   vimeo = true

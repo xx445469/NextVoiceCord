@@ -65,7 +65,9 @@ public enum ConfigOption {
     YOUTUBE_PO_TOKEN("playback.youtube.poToken", ConfigType.STRING, false, "YouTube proof-of-origin token"),
     YOUTUBE_VISITOR_DATA("playback.youtube.visitorData", ConfigType.STRING, false, "Visitor data the poToken was minted for"),
     YOUTUBE_CLIENTS("playback.youtube.clients", ConfigType.STRING_LIST, false, "InnerTube clients to try, in order"),
-    
+    SPOTIFY_CLIENT_ID("spotify.clientId", ConfigType.STRING, false, "Spotify Web API client ID; blank disables Spotify link support"),
+    SPOTIFY_CLIENT_SECRET("spotify.clientSecret", ConfigType.STRING, false, "Spotify Web API client secret; blank disables Spotify link support"),
+
     // Numeric options
     MAX_SECONDS("playback.maxTrackSeconds", ConfigType.LONG, false, "Maximum track length in seconds (0 = no limit)"),
     MAX_YT_PLAYLIST_PAGES("playback.maxYouTubePlaylistPages", ConfigType.INT, false, "Maximum YouTube playlist pages to load"),

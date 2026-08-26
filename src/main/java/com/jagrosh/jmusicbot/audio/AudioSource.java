@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jagrosh.jmusicbot.BotConfig;
+import com.jagrosh.jmusicbot.spotify.SpotifyAudioSourceManager;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 
 /**
@@ -87,6 +88,22 @@ public enum AudioSource
         (manager, config) -> {
             YoutubeAudioSourceManager yt = setupYoutubeAudioSourceManager(config);
             manager.registerSourceManager(yt);
+        }
+    ),
+    SPOTIFY(
+        "spotify",
+        "Spotify track/album/playlist/artist links, matched and played from YouTube",
+        15,
+        (manager, config) -> {
+            if (config.hasSpotifyCredentials())
+            {
+                manager.registerSourceManager(new SpotifyAudioSourceManager(config));
+            }
+            else
+            {
+                LoggerFactory.getLogger(AudioSource.class).info(
+                        "Spotify link support is off: set spotify.clientId and spotify.clientSecret to enable it.");
+            }
         }
     ),
     SOUNDCLOUD(
