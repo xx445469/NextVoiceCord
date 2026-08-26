@@ -368,6 +368,47 @@ public class SlashCommandRegistryTest {
         assertNotEquals(hash1, hash2, "Hash should change when a description localisation changes");
     }
 
+    @Test
+    void testHashCalculation_ChangesWhenNameLocalizationsChange() throws IOException {
+        // Given: a command whose name/description/options never change, only its name
+        // localisations — the case a localised command name introduces. If the hash only looked
+        // at getName()/getDescription()/getDescriptionLocalizations(), a translated-name edit
+        // would never reach Discord.
+        when(commandClient.getSlashCommands()).thenReturn(List.of(slashCommand));
+        when(slashCommandData.getDescriptionLocalizations()).thenReturn(emptyLocalizations());
+        when(slashCommandData.getNameLocalizations())
+                .thenReturn(localizationsOf(DiscordLocale.CHINESE_TAIWAN, "播放"));
+
+        ArgumentCaptor<Consumer<List<Command>>> successCaptor = ArgumentCaptor.forClass(Consumer.class);
+        doNothing().when(commandListUpdateAction).queue(successCaptor.capture(), any());
+
+        SlashCommandRegistry.registerIfChanged(jda, commandClient);
+        successCaptor.getValue().accept(Collections.emptyList());
+
+        Path hashFile = tempDir.resolve(HASH_FILE_NAME);
+        String hash1 = Files.readString(hashFile, StandardCharsets.UTF_8).trim();
+
+        // Same name, same description, same options — only the Chinese (Taiwan) name
+        // localisation text changes, as a translation-file edit would produce.
+        reset(jda, commandListUpdateAction);
+        when(jda.updateCommands()).thenReturn(commandListUpdateAction);
+        when(commandListUpdateAction.addCommands(anyCollection())).thenReturn(commandListUpdateAction);
+        when(slashCommandData.getNameLocalizations())
+                .thenReturn(localizationsOf(DiscordLocale.CHINESE_TAIWAN, "再生"));
+
+        ArgumentCaptor<Consumer<List<Command>>> successCaptor2 = ArgumentCaptor.forClass(Consumer.class);
+        doNothing().when(commandListUpdateAction).queue(successCaptor2.capture(), any());
+
+        SlashCommandRegistry.registerIfChanged(jda, commandClient);
+
+        // Then: registration must run again — a translated-name change is a real change.
+        verify(jda).updateCommands();
+        successCaptor2.getValue().accept(Collections.emptyList());
+
+        String hash2 = Files.readString(hashFile, StandardCharsets.UTF_8).trim();
+        assertNotEquals(hash1, hash2, "Hash should change when a name localisation changes");
+    }
+
     private static LocalizationMap emptyLocalizations() {
         return new LocalizationMap(text -> { });
     }

@@ -1070,100 +1070,132 @@
   },
   "commands": {
     "help": {
-      "description": "대화형 명령어 목록을 표시해요"
+      "description": "대화형 명령어 목록을 표시해요",
+      "name": "도움말"
     },
     "nowplaying": {
-      "description": "현재 재생 중인 곡을 표시해요"
+      "description": "현재 재생 중인 곡을 표시해요",
+      "name": "재생중"
     },
     "np": {
-      "description": "현재 재생 중인 곡을 표시해요"
+      "description": "현재 재생 중인 곡을 표시해요",
+      "name": "np"
     },
     "play": {
-      "description": "지정한 곡을 재생해요"
+      "description": "지정한 곡을 재생해요",
+      "name": "재생"
     },
     "playlists": {
-      "description": "사용 가능한 재생목록을 표시해요"
+      "description": "사용 가능한 재생목록을 표시해요",
+      "name": "재생목록"
     },
     "queue": {
-      "description": "현재 대기열을 표시해요"
+      "description": "현재 대기열을 표시해요",
+      "name": "대기열"
     },
     "history": {
-      "description": "최근 재생한 트랙을 표시해요 (기록 대기열)"
+      "description": "최근 재생한 트랙을 표시해요 (기록 대기열)",
+      "name": "기록"
     },
     "remove": {
-      "description": "대기열에서 곡을 제거해요"
+      "description": "대기열에서 곡을 제거해요",
+      "name": "삭제"
     },
     "search": {
-      "description": "지정한 검색어로 YouTube를 검색해요"
+      "description": "지정한 검색어로 YouTube를 검색해요",
+      "name": "검색"
     },
     "seek": {
-      "description": "현재 곡의 재생 위치를 이동해요"
+      "description": "현재 곡의 재생 위치를 이동해요",
+      "name": "탐색"
     },
     "shuffle": {
-      "description": "내가 추가한 곡을 섞어요"
+      "description": "내가 추가한 곡을 섞어요",
+      "name": "셔플"
     },
     "skip": {
-      "description": "현재 곡 건너뛰기에 투표해요"
+      "description": "현재 곡 건너뛰기에 투표해요",
+      "name": "스킵"
     },
     "forceremove": {
-      "description": "특정 사용자가 추가한 항목을 대기열에서 모두 제거해요"
+      "description": "특정 사용자가 추가한 항목을 대기열에서 모두 제거해요",
+      "name": "강제삭제"
     },
     "forceskip": {
-      "description": "현재 곡을 건너뛰어요"
+      "description": "현재 곡을 건너뛰어요",
+      "name": "강제스킵"
     },
     "movetrack": {
-      "description": "대기열의 트랙을 다른 위치로 이동해요"
+      "description": "대기열의 트랙을 다른 위치로 이동해요",
+      "name": "트랙이동"
     },
     "pause": {
-      "description": "현재 곡을 일시정지해요"
+      "description": "현재 곡을 일시정지해요",
+      "name": "일시정지"
     },
     "playnext": {
-      "description": "한 곡을 다음 순서로 재생해요"
+      "description": "한 곡을 다음 순서로 재생해요",
+      "name": "다음재생"
     },
     "repeat": {
-      "description": "끝난 곡을 대기열에 다시 추가해요"
+      "description": "끝난 곡을 대기열에 다시 추가해요",
+      "name": "반복"
     },
     "skipto": {
-      "description": "지정한 곡으로 건너뛰어요"
+      "description": "지정한 곡으로 건너뛰어요",
+      "name": "스킵이동"
     },
     "stop": {
-      "description": "현재 곡을 멈추고 대기열을 비워요"
+      "description": "현재 곡을 멈추고 대기열을 비워요",
+      "name": "정지"
     },
     "volume": {
-      "description": "플레이어 음량을 설정하거나 표시해요"
+      "description": "플레이어 음량을 설정하거나 표시해요",
+      "name": "음량"
     },
     "prefix": {
-      "description": "서버 전용 접두사를 설정해요"
+      "description": "서버 전용 접두사를 설정해요",
+      "name": "접두사"
     },
     "controller": {
-      "description": "이 서버의 재생 중 컨트롤 패널을 커스터마이즈해요"
+      "description": "이 서버의 재생 중 컨트롤 패널을 커스터마이즈해요",
+      "name": "컨트롤러"
     },
     "queuetype": {
-      "description": "대기열 유형을 변경해요"
+      "description": "대기열 유형을 변경해요",
+      "name": "대기열유형"
     },
     "nplayout": {
-      "description": "이 서버의 재생 중 레이아웃 모드를 설정해요"
+      "description": "이 서버의 재생 중 레이아웃 모드를 설정해요",
+      "name": "재생표시"
     },
     "npbuttons": {
-      "description": "이 서버의 재생 중 메시지에 버튼 포함 여부를 설정해요"
+      "description": "이 서버의 재생 중 메시지에 버튼 포함 여부를 설정해요",
+      "name": "재생버튼"
     },
     "setdj": {
-      "description": "특정 음악 명령어에 사용할 DJ 역할을 설정해요"
+      "description": "특정 음악 명령어에 사용할 DJ 역할을 설정해요",
+      "name": "dj설정"
     },
     "settc": {
-      "description": "음악 명령어에 사용할 텍스트 채널을 설정해요"
+      "description": "음악 명령어에 사용할 텍스트 채널을 설정해요",
+      "name": "텍스트채널설정"
     },
     "setvc": {
-      "description": "음악 재생에 사용할 음성 채널을 설정해요"
+      "description": "음악 재생에 사용할 음성 채널을 설정해요",
+      "name": "음성채널설정"
     },
     "setskip": {
-      "description": "서버 전용 건너뛰기 비율을 설정해요"
+      "description": "서버 전용 건너뛰기 비율을 설정해요",
+      "name": "스킵설정"
     },
     "settings": {
-      "description": "설정 패널을 열어요"
+      "description": "설정 패널을 열어요",
+      "name": "설정"
     },
     "clearchannel": {
-      "description": "/settc로 설정한 명령어 채널의 메시지를 모두 삭제해요 (소유자 전용)"
+      "description": "/settc로 설정한 명령어 채널의 메시지를 모두 삭제해요 (소유자 전용)",
+      "name": "채널초기화"
     }
   }
 }

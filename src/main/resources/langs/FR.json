@@ -1070,100 +1070,132 @@
   },
   "commands": {
     "help": {
-      "description": "affiche une liste interactive des commandes"
+      "description": "affiche une liste interactive des commandes",
+      "name": "aide"
     },
     "nowplaying": {
-      "description": "affiche la chanson en cours de lecture"
+      "description": "affiche la chanson en cours de lecture",
+      "name": "en-cours"
     },
     "np": {
-      "description": "affiche la chanson en cours de lecture"
+      "description": "affiche la chanson en cours de lecture",
+      "name": "np"
     },
     "play": {
-      "description": "joue la chanson indiquée"
+      "description": "joue la chanson indiquée",
+      "name": "jouer"
     },
     "playlists": {
-      "description": "affiche les playlists disponibles"
+      "description": "affiche les playlists disponibles",
+      "name": "playlists"
     },
     "queue": {
-      "description": "affiche la file d'attente actuelle"
+      "description": "affiche la file d'attente actuelle",
+      "name": "file"
     },
     "history": {
-      "description": "affiche les titres récemment joués (historique)"
+      "description": "affiche les titres récemment joués (historique)",
+      "name": "historique"
     },
     "remove": {
-      "description": "retire une chanson de la file d'attente"
+      "description": "retire une chanson de la file d'attente",
+      "name": "retirer"
     },
     "search": {
-      "description": "recherche une requête sur YouTube"
+      "description": "recherche une requête sur YouTube",
+      "name": "recherche"
     },
     "seek": {
-      "description": "avance ou recule dans la chanson en cours"
+      "description": "avance ou recule dans la chanson en cours",
+      "name": "positionner"
     },
     "shuffle": {
-      "description": "mélange les chansons que tu as ajoutées"
+      "description": "mélange les chansons que tu as ajoutées",
+      "name": "aléatoire"
     },
     "skip": {
-      "description": "vote pour passer la chanson en cours"
+      "description": "vote pour passer la chanson en cours",
+      "name": "passer"
     },
     "forceremove": {
-      "description": "retire toutes les entrées d'un utilisateur de la file d'attente"
+      "description": "retire toutes les entrées d'un utilisateur de la file d'attente",
+      "name": "forceretirer"
     },
     "forceskip": {
-      "description": "passe la chanson en cours"
+      "description": "passe la chanson en cours",
+      "name": "forcepasser"
     },
     "movetrack": {
-      "description": "déplace un titre de la file d'attente à une autre position"
+      "description": "déplace un titre de la file d'attente à une autre position",
+      "name": "déplacer-piste"
     },
     "pause": {
-      "description": "met en pause la chanson en cours"
+      "description": "met en pause la chanson en cours",
+      "name": "pause"
     },
     "playnext": {
-      "description": "joue une chanson juste après celle-ci"
+      "description": "joue une chanson juste après celle-ci",
+      "name": "jouer-ensuite"
     },
     "repeat": {
-      "description": "rajoute la musique à la file une fois terminée"
+      "description": "rajoute la musique à la file une fois terminée",
+      "name": "répéter"
     },
     "skipto": {
-      "description": "saute jusqu'à la chanson indiquée"
+      "description": "saute jusqu'à la chanson indiquée",
+      "name": "aller-à"
     },
     "stop": {
-      "description": "arrête la chanson en cours et vide la file d'attente"
+      "description": "arrête la chanson en cours et vide la file d'attente",
+      "name": "stop"
     },
     "volume": {
-      "description": "définit ou affiche le volume du lecteur"
+      "description": "définit ou affiche le volume du lecteur",
+      "name": "volume"
     },
     "prefix": {
-      "description": "définit un préfixe propre au serveur"
+      "description": "définit un préfixe propre au serveur",
+      "name": "préfixe"
     },
     "controller": {
-      "description": "personnalise le panneau de contrôle de lecture pour ce serveur"
+      "description": "personnalise le panneau de contrôle de lecture pour ce serveur",
+      "name": "contrôleur"
     },
     "queuetype": {
-      "description": "change le type de file d'attente"
+      "description": "change le type de file d'attente",
+      "name": "type-file"
     },
     "nplayout": {
-      "description": "définit le mode de mise en page « lecture en cours » pour ce serveur"
+      "description": "définit le mode de mise en page « lecture en cours » pour ce serveur",
+      "name": "np-affichage"
     },
     "npbuttons": {
-      "description": "définit si les messages « lecture en cours » incluent des boutons ici"
+      "description": "définit si les messages « lecture en cours » incluent des boutons ici",
+      "name": "np-boutons"
     },
     "setdj": {
-      "description": "définit le rôle DJ pour certaines commandes musicales"
+      "description": "définit le rôle DJ pour certaines commandes musicales",
+      "name": "setdj"
     },
     "settc": {
-      "description": "définit le salon textuel pour les commandes musicales"
+      "description": "définit le salon textuel pour les commandes musicales",
+      "name": "settc"
     },
     "setvc": {
-      "description": "définit le salon vocal pour la lecture de musique"
+      "description": "définit le salon vocal pour la lecture de musique",
+      "name": "setvc"
     },
     "setskip": {
-      "description": "définit un pourcentage de vote propre au serveur"
+      "description": "définit un pourcentage de vote propre au serveur",
+      "name": "setskip"
     },
     "settings": {
-      "description": "ouvre le panneau de paramètres"
+      "description": "ouvre le panneau de paramètres",
+      "name": "paramètres"
     },
     "clearchannel": {
-      "description": "efface tous les messages du salon défini avec /settc (propriétaire uniquement)"
+      "description": "efface tous les messages du salon défini avec /settc (propriétaire uniquement)",
+      "name": "vider-salon"
     }
   }
 }

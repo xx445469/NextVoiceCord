@@ -17,11 +17,15 @@ package com.jagrosh.jmusicbot.gui.panels;
 
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.BotConfig;
+import com.jagrosh.jmusicbot.audio.AudioSource;
 import com.jagrosh.jmusicbot.config.io.ConfigIO;
 import com.jagrosh.jmusicbot.config.update.ConfigUpdater;
 import com.jagrosh.jmusicbot.gui.GuiLanguage;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
+import com.jagrosh.jmusicbot.i18n.Language;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigRenderOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,19 +35,43 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Configuration panel for viewing and editing bot configuration.
- * Allows editing of safe configuration options and saving to config.txt.
- * Sensitive options (token, owner) and dangerous options (eval) are excluded.
+ * Allows editing of every option in {@link com.jagrosh.jmusicbot.config.model.ConfigOption}.
+ *
+ * <p>Secrets (the Discord token, the update GitHub token, the YouTube poToken pair) use
+ * {@link JPasswordField} rather than a plain text field, on the same reasoning as the Proxy
+ * section below: a value masked in the web panel and printed in plain text here would make
+ * that masking theatre. {@code dangerous.eval} is shown with an explicit, unmissable warning
+ * rather than as an ordinary checkbox, because what it enables is arbitrary code execution.
+ * {@code commands.aliases} and {@code playback.transforms} are nested structures that are shown
+ * read-only rather than through a text field that could silently corrupt them on save — the same
+ * reasoning the web panel's {@code WebWrites.validate} uses to refuse editing them at all.
  *
  * @author Arif Banai (arif-banai)
  */
 public class ConfigPanel extends JPanel {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigPanel.class);
+
+    /**
+     * Known InnerTube client names, in the canonical (underscore-free) form
+     * {@code AudioSource.clientByName} matches against. Offered as suggestions in the "add" box
+     * only — the list itself holds whatever strings were loaded from config.txt, including the
+     * underscored spellings the comment above {@code playback.youtube.clients} documents, so a
+     * value written by hand is preserved exactly rather than silently dropped because it isn't
+     * one of these.
+     */
+    private static final String[] KNOWN_YOUTUBE_CLIENTS = {
+            "MUSIC", "WEB", "WEBEMBEDDED", "ANDROID", "ANDROIDVR", "ANDROIDMUSIC",
+            "IOS", "MWEB", "TV", "TVHTML5SIMPLY"
+    };
 
     private final BotConfig config;
 
@@ -90,6 +118,56 @@ public class ConfigPanel extends JPanel {
     private final JCheckBox proxyLavaplayerCheckBox;
     private final JCheckBox proxyJdaCheckBox;
     private final JCheckBox proxyGithubCheckBox;
+
+    // Discord section — discord.token, discord.owner
+    private final JPasswordField discordTokenField;
+    private final JSpinner discordOwnerSpinner;
+
+    // Localization section — ui.language
+    private final JComboBox<String> botLanguageComboBox;
+
+    // Now Playing section — nowPlaying.minimalMessage/showButtons/showProgressBar
+    private final JCheckBox npMinimalMessageCheckBox;
+    private final JCheckBox npShowButtonsCheckBox;
+    private final JCheckBox npShowProgressBarCheckBox;
+
+    // YouTube Advanced section — playback.youtube.poToken/visitorData/clients
+    private final JPasswordField youtubePoTokenField;
+    private final JPasswordField youtubeVisitorDataField;
+    private final DefaultListModel<String> youtubeClientsModel;
+    private final JList<String> youtubeClientsJList;
+    private final JComboBox<String> youtubeClientsAddComboBox;
+
+    // Playback Advanced section — playback.maxHistorySize, playback.audioSources, playback.transforms
+    private final JSpinner maxHistorySizeSpinner;
+    private final Map<AudioSource, JCheckBox> audioSourceCheckBoxes;
+    private final JTextArea transformsTextArea;
+
+    // Commands Advanced section — commands.clearChannel.*, commands.aliases
+    private final JSpinner clearChannelDeleteLimitSpinner;
+    private final JSpinner clearChannelAgeDaysSpinner;
+    private final JTextArea aliasesTextArea;
+
+    // Updates section — updates.repository/autoUpdate/checkIntervalHours/githubToken
+    private final JTextField updateRepositoryField;
+    private final JCheckBox updateAutoUpdateCheckBox;
+    private final JSpinner updateCheckIntervalSpinner;
+    private final JPasswordField updateGithubTokenField;
+
+    // Dangerous section — dangerous.evalEngine, dangerous.eval
+    private final JTextField evalEngineField;
+    private final JCheckBox evalCheckBox;
+
+    // GUI & Web section — gui.enabled/fontSize/language, web.bindAddress/allowConfigEdit
+    private final JCheckBox guiEnabledCheckBox;
+    private final JSpinner guiFontSizeSpinner;
+    private final JComboBox<String> guiLanguageComboBox;
+    private final JTextField webBindAddressField;
+    private final JCheckBox webAllowConfigEditCheckBox;
+
+    // Performance section — performance.nasBufferMs/frameBufferMs
+    private final JSpinner nasBufferMsSpinner;
+    private final JSpinner frameBufferMsSpinner;
 
     /**
      * Creates the configuration panel.
@@ -147,16 +225,96 @@ public class ConfigPanel extends JPanel {
         proxyJdaCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.proxyJda"));
         proxyGithubCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.proxyGithub"));
 
+        // Discord — a spinner rather than a text field for the owner id: a Discord snowflake
+        // is unquoted in HOCON, so a spinner backed by a Long model is what keeps a stray
+        // non-digit character from ever reaching the file and breaking the parse.
+        discordTokenField = new JPasswordField(20);
+        discordOwnerSpinner = new JSpinner(new SpinnerNumberModel(0L, 0L, Long.MAX_VALUE, 1L));
+
+        // Localization
+        botLanguageComboBox = new JComboBox<>(languageCodes());
+
+        // Now Playing
+        npMinimalMessageCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.npMinimalMessage"));
+        npShowButtonsCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.npShowButtons"));
+        npShowProgressBarCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.npShowProgressBar"));
+
+        // YouTube Advanced
+        youtubePoTokenField = new JPasswordField(20);
+        youtubeVisitorDataField = new JPasswordField(20);
+        youtubeClientsModel = new DefaultListModel<>();
+        youtubeClientsJList = new JList<>(youtubeClientsModel);
+        youtubeClientsJList.setVisibleRowCount(4);
+        youtubeClientsJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        youtubeClientsAddComboBox = new JComboBox<>(KNOWN_YOUTUBE_CLIENTS);
+
+        // Playback Advanced — one checkbox per known AudioSource, which is what
+        // playback.audioSources actually is: a nested map of booleans over a fixed, known key
+        // set. That fixed set is what makes checkboxes a genuine round trip rather than a
+        // guess, unlike commands.aliases or playback.transforms below.
+        maxHistorySizeSpinner = new JSpinner(new SpinnerNumberModel(40, 0, 100000, 10));
+        audioSourceCheckBoxes = new LinkedHashMap<>();
+        for (AudioSource source : AudioSource.valuesSortedByPriority()) {
+            audioSourceCheckBoxes.put(source, new JCheckBox(source.getDescription()));
+        }
+        transformsTextArea = readOnlyConfigArea();
+
+        // Commands Advanced
+        clearChannelDeleteLimitSpinner = new JSpinner(new SpinnerNumberModel(50, 0, 100000, 10));
+        clearChannelAgeDaysSpinner = new JSpinner(new SpinnerNumberModel(14, 0, 36500, 1));
+        aliasesTextArea = readOnlyConfigArea();
+
+        // Updates
+        updateRepositoryField = new JTextField(20);
+        updateAutoUpdateCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.updateAutoUpdate"));
+        updateCheckIntervalSpinner = new JSpinner(new SpinnerNumberModel(6, 1, 8760, 1));
+        updateGithubTokenField = new JPasswordField(20);
+
+        // Dangerous
+        evalEngineField = new JTextField(15);
+        evalCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.useEval"));
+
+        // GUI & Web
+        guiEnabledCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.guiEnabled"));
+        guiFontSizeSpinner = new JSpinner(new SpinnerNumberModel(12, 8, 24, 1));
+        guiLanguageComboBox = new JComboBox<>(guiLanguageChoices());
+        guiLanguageComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                            boolean isSelected, boolean cellHasFocus) {
+                String display = (value == null || ((String) value).isEmpty())
+                        ? GuiLanguage.msg("gui.config.guiLanguageFollowLabel")
+                        : (String) value;
+                return super.getListCellRendererComponent(list, display, index, isSelected, cellHasFocus);
+            }
+        });
+        webBindAddressField = new JTextField(20);
+        webAllowConfigEditCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.webAllowConfigEdit"));
+
+        // Performance
+        nasBufferMsSpinner = new JSpinner(new SpinnerNumberModel(800, 0, 60000, 100));
+        frameBufferMsSpinner = new JSpinner(new SpinnerNumberModel(2000, 0, 60000, 100));
+
         applyFieldStyle(prefixField, altPrefixField, helpWordField, gameField,
                 successEmojiField, warningEmojiField, errorEmojiField, loadingEmojiField,
                 searchingEmojiField, playlistsFolderField, proxyHostField, proxyUsernameField,
-                proxyPasswordField);
-        applyFieldStyle(statusComboBox, logLevelComboBox);
+                proxyPasswordField, discordTokenField, youtubePoTokenField, youtubeVisitorDataField,
+                updateRepositoryField, updateGithubTokenField, evalEngineField, webBindAddressField);
+        applyFieldStyle(statusComboBox, logLevelComboBox, botLanguageComboBox, guiLanguageComboBox,
+                youtubeClientsAddComboBox);
         applyFieldStyle(songInStatusCheckBox, stayInChannelCheckBox, useYouTubeOAuthCheckBox,
                 npImagesCheckBox, updateAlertsCheckBox, proxyLavaplayerCheckBox, proxyJdaCheckBox,
-                proxyGithubCheckBox);
+                proxyGithubCheckBox, npMinimalMessageCheckBox, npShowButtonsCheckBox,
+                npShowProgressBarCheckBox, updateAutoUpdateCheckBox, evalCheckBox, guiEnabledCheckBox,
+                webAllowConfigEditCheckBox);
         applyFieldStyle(aloneTimeSpinner, maxSecondsSpinner, maxYTPlaylistPagesSpinner, skipRatioSpinner,
-                proxyPortSpinner);
+                proxyPortSpinner, discordOwnerSpinner, maxHistorySizeSpinner, clearChannelDeleteLimitSpinner,
+                clearChannelAgeDaysSpinner, updateCheckIntervalSpinner, guiFontSizeSpinner,
+                nasBufferMsSpinner, frameBufferMsSpinner);
+        applyFieldStyle(youtubeClientsJList, aliasesTextArea, transformsTextArea);
+        for (JCheckBox checkBox : audioSourceCheckBoxes.values()) {
+            applyFieldStyle(checkBox);
+        }
 
         add(buildHeader(), BorderLayout.NORTH);
         add(buildScrollArea(), BorderLayout.CENTER);
@@ -170,6 +328,34 @@ public class ConfigPanel extends JPanel {
         for (JComponent c : components) {
             c.setFont(Tokens.fontBody());
         }
+    }
+
+    /** Every language code this build ships translations for, in declaration order. */
+    private static String[] languageCodes() {
+        Language[] languages = Language.values();
+        String[] codes = new String[languages.length];
+        for (int i = 0; i < languages.length; i++) {
+            codes[i] = languages[i].name();
+        }
+        return codes;
+    }
+
+    /** Language codes plus a leading blank entry meaning "follow ui.language". */
+    private static String[] guiLanguageChoices() {
+        String[] codes = languageCodes();
+        String[] choices = new String[codes.length + 1];
+        choices[0] = "";
+        System.arraycopy(codes, 0, choices, 1, codes.length);
+        return choices;
+    }
+
+    /** A non-editable, monospaced area for showing a nested config value as HOCON text. */
+    private JTextArea readOnlyConfigArea() {
+        JTextArea area = new JTextArea(5, 30);
+        area.setEditable(false);
+        area.setLineWrap(false);
+        area.setFont(Tokens.fontMono());
+        return area;
     }
 
     private Component buildHeader() {
@@ -197,6 +383,28 @@ public class ConfigPanel extends JPanel {
         content.add(createOtherSection());
         content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
         content.add(createProxySection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createDiscordSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createLocalizationSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createNowPlayingSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createYoutubeAdvancedSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createPlaybackAdvancedSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createCommandsAdvancedSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createUpdatesSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createDangerousSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createGuiWebSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createPerformanceSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createAdvancedReadOnlySection());
 
         JScrollPane scrollPane = new JScrollPane(content);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -361,6 +569,279 @@ public class ConfigPanel extends JPanel {
     }
 
     /**
+     * Creates the Discord configuration section: discord.token, discord.owner.
+     *
+     * <p>Both are required fields the bot cannot start without. The token in particular is
+     * shown masked, exactly like the proxy password above, and carries an explicit warning:
+     * unlike most settings on this panel, getting it wrong does not degrade a feature — it
+     * stops the bot from starting at all.
+     */
+    private Component createDiscordSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.discordToken"), discordTokenField);
+        addSpanningRow(panel, gbc, 1, warningLabel(GuiLanguage.msg("gui.config.discordTokenWarning")));
+        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.discordOwner"), discordOwnerSpinner);
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.discord"), panel);
+    }
+
+    /**
+     * Creates the Localization section: ui.language, the language the bot speaks on Discord.
+     *
+     * <p>Separate from gui.language below, which is what this desktop window itself is shown
+     * in — the two are independent on purpose (see {@link GuiLanguage}).
+     */
+    private Component createLocalizationSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.botLanguage"), botLanguageComboBox);
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.localization"), panel);
+    }
+
+    /**
+     * Creates the Now Playing configuration section.
+     */
+    private Component createNowPlayingSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addSpanningRow(panel, gbc, 0, npMinimalMessageCheckBox);
+        addSpanningRow(panel, gbc, 1, npShowButtonsCheckBox);
+        addSpanningRow(panel, gbc, 2, npShowProgressBarCheckBox);
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.nowPlaying"), panel);
+    }
+
+    /**
+     * Creates the YouTube Advanced configuration section: poToken, visitorData, clients.
+     *
+     * <p>The clients list is the setting users most often need to change — YouTube breaks
+     * individual InnerTube clients rather than all at once — so it gets a real ordered editor
+     * rather than a read-only dump, built from {@link #KNOWN_YOUTUBE_CLIENTS}, a known and
+     * bounded set of names read from {@code AudioSource.clientByName}.
+     */
+    private Component createYoutubeAdvancedSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.youtubePoToken"), youtubePoTokenField);
+        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.youtubeVisitorData"), youtubeVisitorDataField);
+        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.youtubeClients"), buildYoutubeClientsEditor());
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.youtubeAdvanced"), panel);
+    }
+
+    /** The ordered list, add/remove/reorder controls for playback.youtube.clients. */
+    private JPanel buildYoutubeClientsEditor() {
+        JPanel wrapper = Widgets.transparent(new BorderLayout(Tokens.SPACE_SM, 0));
+
+        JScrollPane listScroll = new JScrollPane(youtubeClientsJList);
+        listScroll.setPreferredSize(new Dimension(200, 90));
+        wrapper.add(listScroll, BorderLayout.CENTER);
+
+        JPanel controls = Widgets.transparent(new GridLayout(0, 1, 0, Tokens.SPACE_XS));
+
+        JButton addButton = new JButton(GuiLanguage.msg("gui.config.youtubeClientsAdd"));
+        addButton.setFont(Tokens.fontSmall());
+        addButton.addActionListener(e -> {
+            String choice = (String) youtubeClientsAddComboBox.getSelectedItem();
+            if (choice != null && !youtubeClientsModel.contains(choice)) {
+                youtubeClientsModel.addElement(choice);
+            }
+        });
+
+        JButton removeButton = new JButton(GuiLanguage.msg("gui.config.youtubeClientsRemove"));
+        removeButton.setFont(Tokens.fontSmall());
+        removeButton.addActionListener(e -> {
+            int index = youtubeClientsJList.getSelectedIndex();
+            if (index >= 0) {
+                youtubeClientsModel.remove(index);
+            }
+        });
+
+        JButton upButton = new JButton(GuiLanguage.msg("gui.config.youtubeClientsUp"));
+        upButton.setFont(Tokens.fontSmall());
+        upButton.addActionListener(e -> moveSelectedYoutubeClient(-1));
+
+        JButton downButton = new JButton(GuiLanguage.msg("gui.config.youtubeClientsDown"));
+        downButton.setFont(Tokens.fontSmall());
+        downButton.addActionListener(e -> moveSelectedYoutubeClient(1));
+
+        controls.add(youtubeClientsAddComboBox);
+        controls.add(addButton);
+        controls.add(removeButton);
+        controls.add(upButton);
+        controls.add(downButton);
+
+        wrapper.add(controls, BorderLayout.EAST);
+        return wrapper;
+    }
+
+    /** Moves the selected client up (-1) or down (+1) in the ordered list, if it can move. */
+    private void moveSelectedYoutubeClient(int direction) {
+        int index = youtubeClientsJList.getSelectedIndex();
+        int target = index + direction;
+        if (index < 0 || target < 0 || target >= youtubeClientsModel.size()) {
+            return;
+        }
+        String value = youtubeClientsModel.remove(index);
+        youtubeClientsModel.add(target, value);
+        youtubeClientsJList.setSelectedIndex(target);
+    }
+
+    /**
+     * Creates the Playback Advanced section: maxHistorySize and the audioSources checkboxes.
+     */
+    private Component createPlaybackAdvancedSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+        int row = 0;
+
+        addRow(panel, gbc, row++, GuiLanguage.msg("gui.config.maxHistorySize"), maxHistorySizeSpinner);
+
+        JLabel audioSourcesLabel = new JLabel(GuiLanguage.msg("gui.config.audioSources"));
+        audioSourcesLabel.setFont(Tokens.fontBody());
+        audioSourcesLabel.setForeground(Tokens.textMuted());
+        addSpanningRow(panel, gbc, row++, audioSourcesLabel);
+
+        JPanel sourcesGrid = Widgets.transparent(new GridLayout(0, 2, Tokens.SPACE_SM, 0));
+        for (JCheckBox checkBox : audioSourceCheckBoxes.values()) {
+            sourcesGrid.add(checkBox);
+        }
+        addSpanningRow(panel, gbc, row, sourcesGrid);
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.playbackAdvanced"), panel);
+    }
+
+    /**
+     * Creates the Commands Advanced section: clearChannel limits.
+     */
+    private Component createCommandsAdvancedSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.clearChannelDeleteLimit"), clearChannelDeleteLimitSpinner);
+        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.clearChannelAgeDays"), clearChannelAgeDaysSpinner);
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.commandsAdvanced"), panel);
+    }
+
+    /**
+     * Creates the Updates section.
+     */
+    private Component createUpdatesSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.updateRepository"), updateRepositoryField);
+        addSpanningRow(panel, gbc, 1, updateAutoUpdateCheckBox);
+        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.updateCheckIntervalHours"), updateCheckIntervalSpinner);
+        addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.updateGithubToken"), updateGithubTokenField);
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.updates"), panel);
+    }
+
+    /**
+     * Creates the Dangerous section: dangerous.evalEngine, dangerous.eval.
+     *
+     * <p>eval is not presented as an ordinary toggle. What it turns on is the bot owner running
+     * arbitrary code in the bot's own process — anything the host machine can do, the eval
+     * command can do — so the checkbox is paired with a warning in the danger color that says
+     * so plainly, rather than relying on the setting's name to communicate the risk.
+     */
+    private Component createDangerousSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.evalEngine"), evalEngineField);
+        addSpanningRow(panel, gbc, 1, evalCheckBox);
+        addSpanningRow(panel, gbc, 2, warningLabel(GuiLanguage.msg("gui.config.evalWarning")));
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.dangerous"), panel);
+    }
+
+    /**
+     * Creates the GUI & Web section: gui.enabled/fontSize/language, web.bindAddress/allowConfigEdit.
+     *
+     * <p>web.allowConfigEdit gets the same treatment as dangerous.eval above, for the same
+     * reason: reference.conf itself calls out that turning it on lets anyone holding the web
+     * panel's token change config.txt, so the checkbox here says so too rather than reading
+     * like any other flag.
+     */
+    private Component createGuiWebSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addSpanningRow(panel, gbc, 0, guiEnabledCheckBox);
+        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.guiFontSize"), guiFontSizeSpinner);
+        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.guiLanguage"), guiLanguageComboBox);
+        addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.webBindAddress"), webBindAddressField);
+        addSpanningRow(panel, gbc, 4, webAllowConfigEditCheckBox);
+        addSpanningRow(panel, gbc, 5, warningLabel(GuiLanguage.msg("gui.config.webAllowConfigEditWarning")));
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.guiWeb"), panel);
+    }
+
+    /**
+     * Creates the Performance section: performance.nasBufferMs, performance.frameBufferMs.
+     */
+    private Component createPerformanceSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.nasBufferMs"), nasBufferMsSpinner);
+        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.frameBufferMs"), frameBufferMsSpinner);
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.performance"), panel);
+    }
+
+    /**
+     * Creates the read-only "Advanced (config.txt only)" section.
+     *
+     * <p>commands.aliases and playback.transforms are nested structures — serialising either of
+     * them out of a single text field is exactly what {@code WebWrites.validate} refuses
+     * STRING_LIST/CONFIG options for ("must be edited in config.txt directly"), because
+     * guessing at how to flatten one back into HOCON is how a config file gets corrupted. Shown
+     * here read-only, rendered as HOCON, rather than an editor that could silently mangle
+     * either one.
+     */
+    private Component createAdvancedReadOnlySection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addSpanningRow(panel, gbc, 0, noteLabel(GuiLanguage.msg("gui.config.aliasesReadOnlyNote")));
+        addSpanningRow(panel, gbc, 1, new JScrollPane(aliasesTextArea));
+        addSpanningRow(panel, gbc, 2, noteLabel(GuiLanguage.msg("gui.config.transformsReadOnlyNote")));
+        addSpanningRow(panel, gbc, 3, new JScrollPane(transformsTextArea));
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.advancedReadOnly"), panel);
+    }
+
+    /** A short callout in the danger color, for a control whose plain label understates the risk. */
+    private JLabel warningLabel(String text) {
+        JLabel label = new JLabel("<html><body style='width: 340px'>" + escapeHtml(text) + "</body></html>");
+        label.setFont(Tokens.fontSmall());
+        label.setForeground(Tokens.danger());
+        return label;
+    }
+
+    /** A short, muted explanatory line — for context that isn't a warning. */
+    private JLabel noteLabel(String text) {
+        JLabel label = new JLabel("<html><body style='width: 420px'>" + escapeHtml(text) + "</body></html>");
+        label.setFont(Tokens.fontSmall());
+        label.setForeground(Tokens.textMuted());
+        return label;
+    }
+
+    private static String escapeHtml(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    /**
      * Creates the bottom panel with save/reset buttons and warning.
      */
     private Component buildBottomPanel() {
@@ -381,6 +862,9 @@ public class ConfigPanel extends JPanel {
         buttonPanel.add(resetButton);
 
         card.add(buttonPanel, BorderLayout.NORTH);
+        // Fixed to the bottom of the whole panel rather than inside the scrollable content, so
+        // it stays visible regardless of which section — old or newly added — is scrolled into
+        // view; every option on this panel needs a restart, not just the original ones.
         card.add(Widgets.muted(GuiLanguage.msg("gui.config.restartRequired")), BorderLayout.SOUTH);
 
         return card;
@@ -436,6 +920,77 @@ public class ConfigPanel extends JPanel {
         proxyLavaplayerCheckBox.setSelected(config.proxyLavaplayer());
         proxyJdaCheckBox.setSelected(config.proxyJda());
         proxyGithubCheckBox.setSelected(config.proxyGithub());
+
+        // Discord — same rule as the proxy password above: setText only, never logged.
+        discordTokenField.setText(config.getToken());
+        discordOwnerSpinner.setValue(config.getOwnerId());
+
+        // Localization
+        botLanguageComboBox.setSelectedItem(config.getDefaultLanguage().name());
+
+        // Now Playing
+        npMinimalMessageCheckBox.setSelected(config.useMinimalNowPlayingMessage());
+        npShowButtonsCheckBox.setSelected(config.showNowPlayingButtons());
+        npShowProgressBarCheckBox.setSelected(config.showNpProgressBar());
+
+        // YouTube Advanced
+        youtubePoTokenField.setText(config.getYoutubePoToken());
+        youtubeVisitorDataField.setText(config.getYoutubeVisitorData());
+        youtubeClientsModel.clear();
+        List<String> clients = config.getYoutubeClients();
+        if (clients != null) {
+            for (String client : clients) {
+                youtubeClientsModel.addElement(client);
+            }
+        }
+
+        // Playback Advanced
+        maxHistorySizeSpinner.setValue(config.getMaxHistorySize());
+        for (Map.Entry<AudioSource, JCheckBox> entry : audioSourceCheckBoxes.entrySet()) {
+            entry.getValue().setSelected(config.isAudioSourceEnabled(entry.getKey()));
+        }
+        transformsTextArea.setText(renderConfig(config.getTransforms()));
+
+        // Commands Advanced
+        clearChannelDeleteLimitSpinner.setValue(config.getClearChannelDeleteLimit());
+        clearChannelAgeDaysSpinner.setValue((int) config.getClearChannelAgeDays());
+        aliasesTextArea.setText(renderConfig(config.getAliasesConfig()));
+
+        // Updates
+        updateRepositoryField.setText(config.getUpdateRepository());
+        updateAutoUpdateCheckBox.setSelected(config.isAutoUpdate());
+        updateCheckIntervalSpinner.setValue(config.getUpdateIntervalHours());
+        // setText, not a log line — same rule as every other secret field on this panel.
+        updateGithubTokenField.setText(config.getUpdateGithubToken());
+
+        // Dangerous
+        evalEngineField.setText(config.getEvalEngine());
+        evalCheckBox.setSelected(config.useEval());
+
+        // GUI & Web
+        guiEnabledCheckBox.setSelected(config.getGuiEnabled());
+        guiFontSizeSpinner.setValue(config.getGuiFontSize());
+        // The raw value, not getGuiLanguage(): that getter resolves a blank config value against
+        // ui.language, which would make "left blank" and "pinned to whatever ui.language
+        // currently is" indistinguishable here — and silently pin it the next time this saves.
+        guiLanguageComboBox.setSelectedItem(config.getGuiLanguageRaw());
+        webBindAddressField.setText(config.getWebBindAddress());
+        webAllowConfigEditCheckBox.setSelected(config.isWebConfigEditAllowed());
+
+        // Performance
+        nasBufferMsSpinner.setValue(config.getNasBufferMs());
+        frameBufferMsSpinner.setValue(config.getFrameBufferMs());
+    }
+
+    /** Renders a nested config value as HOCON text, for the read-only advanced section. */
+    private String renderConfig(Config value) {
+        if (value == null) {
+            return "";
+        }
+        return value.root().render(ConfigRenderOptions.defaults()
+                .setOriginComments(false)
+                .setComments(false)
+                .setJson(false));
     }
 
     /**
@@ -524,24 +1079,106 @@ public class ConfigPanel extends JPanel {
         updates.put("proxy.host", quoteString(proxyHostField.getText()));
         updates.put("proxy.port", String.valueOf(proxyPortSpinner.getValue()));
         updates.put("proxy.username", quoteString(proxyUsernameField.getText()));
-        updates.put("proxy.password", quoteString(readAndClearPassword()));
+        updates.put("proxy.password", quoteString(readAndClearPassword(proxyPasswordField)));
         updates.put("proxy.lavaplayer", String.valueOf(proxyLavaplayerCheckBox.isSelected()));
         updates.put("proxy.jda", String.valueOf(proxyJdaCheckBox.isSelected()));
         updates.put("proxy.github", String.valueOf(proxyGithubCheckBox.isSelected()));
 
+        // Discord
+        updates.put("discord.token", quoteString(readAndClearPassword(discordTokenField)));
+        updates.put("discord.owner", String.valueOf(discordOwnerSpinner.getValue()));
+
+        // Localization
+        updates.put("ui.language", quoteString((String) botLanguageComboBox.getSelectedItem()));
+
+        // Now Playing
+        updates.put("nowPlaying.minimalMessage", String.valueOf(npMinimalMessageCheckBox.isSelected()));
+        updates.put("nowPlaying.showButtons", String.valueOf(npShowButtonsCheckBox.isSelected()));
+        updates.put("nowPlaying.showProgressBar", String.valueOf(npShowProgressBarCheckBox.isSelected()));
+
+        // YouTube Advanced
+        updates.put("playback.youtube.poToken", quoteString(readAndClearPassword(youtubePoTokenField)));
+        updates.put("playback.youtube.visitorData", quoteString(readAndClearPassword(youtubeVisitorDataField)));
+        updates.put("playback.youtube.clients", formatStringList(currentYoutubeClients()));
+
+        // Playback Advanced
+        updates.put("playback.maxHistorySize", String.valueOf(maxHistorySizeSpinner.getValue()));
+        for (Map.Entry<AudioSource, JCheckBox> entry : audioSourceCheckBoxes.entrySet()) {
+            updates.put("playback.audioSources." + entry.getKey().getConfigName(),
+                    String.valueOf(entry.getValue().isSelected()));
+        }
+        // playback.transforms is shown read-only above; there is deliberately no entry for it
+        // here — see createAdvancedReadOnlySection for why.
+
+        // Commands Advanced
+        updates.put("commands.clearChannel.deleteLimit", String.valueOf(clearChannelDeleteLimitSpinner.getValue()));
+        updates.put("commands.clearChannel.ageDays", String.valueOf(clearChannelAgeDaysSpinner.getValue()));
+        // commands.aliases is shown read-only above; there is deliberately no entry for it
+        // here — see createAdvancedReadOnlySection for why.
+
+        // Updates
+        updates.put("updates.repository", quoteString(updateRepositoryField.getText()));
+        updates.put("updates.autoUpdate", String.valueOf(updateAutoUpdateCheckBox.isSelected()));
+        updates.put("updates.checkIntervalHours", String.valueOf(updateCheckIntervalSpinner.getValue()));
+        updates.put("updates.githubToken", quoteString(readAndClearPassword(updateGithubTokenField)));
+
+        // Dangerous
+        updates.put("dangerous.evalEngine", quoteString(evalEngineField.getText()));
+        updates.put("dangerous.eval", String.valueOf(evalCheckBox.isSelected()));
+
+        // GUI & Web
+        updates.put("gui.enabled", String.valueOf(guiEnabledCheckBox.isSelected()));
+        updates.put("gui.fontSize", String.valueOf(guiFontSizeSpinner.getValue()));
+        updates.put("gui.language", quoteString((String) guiLanguageComboBox.getSelectedItem()));
+        updates.put("web.bindAddress", quoteString(webBindAddressField.getText()));
+        updates.put("web.allowConfigEdit", String.valueOf(webAllowConfigEditCheckBox.isSelected()));
+
+        // Performance
+        updates.put("performance.nasBufferMs", String.valueOf(nasBufferMsSpinner.getValue()));
+        updates.put("performance.frameBufferMs", String.valueOf(frameBufferMsSpinner.getValue()));
+
         return updates;
     }
 
+    /** The clients list currently shown in the editor, in display (= save) order. */
+    private List<String> currentYoutubeClients() {
+        List<String> clients = new ArrayList<>();
+        for (int i = 0; i < youtubeClientsModel.size(); i++) {
+            clients.add(youtubeClientsModel.get(i));
+        }
+        return clients;
+    }
+
     /**
-     * Reads the proxy password and wipes the char array Swing handed back.
+     * Renders a list of strings as a HOCON array of quoted strings.
+     *
+     * <p>The only STRING_LIST field this panel writes: playback.youtube.clients is built from
+     * the ordered editor above, out of a known and bounded set of names, rather than parsed out
+     * of free text — which is what makes writing it back out safe.
+     */
+    private String formatStringList(List<String> values) {
+        StringBuilder sb = new StringBuilder("[ ");
+        for (int i = 0; i < values.size(); i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(quoteString(values.get(i)));
+        }
+        sb.append(" ]");
+        return sb.toString();
+    }
+
+    /**
+     * Reads a password field and wipes the char array Swing handed back.
      *
      * <p>The resulting String still ends up in the updates map and, briefly, in the rewritten
      * config.txt content — Java offers no way around that once a String exists at all — but
      * the mutable buffer this came from does not have to sit in memory a moment longer than
-     * it takes to copy it out.
+     * it takes to copy it out. Shared by every secret field on this panel: the Discord token,
+     * the update GitHub token, the YouTube poToken pair, and the proxy password.
      */
-    private String readAndClearPassword() {
-        char[] password = proxyPasswordField.getPassword();
+    private String readAndClearPassword(JPasswordField field) {
+        char[] password = field.getPassword();
         try {
             return new String(password);
         } finally {

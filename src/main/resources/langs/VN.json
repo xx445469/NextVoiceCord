@@ -1070,100 +1070,132 @@
   },
   "commands": {
     "help": {
-      "description": "hiển thị danh sách lệnh tương tác"
+      "description": "hiển thị danh sách lệnh tương tác",
+      "name": "trợ-giúp"
     },
     "nowplaying": {
-      "description": "hiển thị bài hát đang phát"
+      "description": "hiển thị bài hát đang phát",
+      "name": "đang-phát"
     },
     "np": {
-      "description": "hiển thị bài hát đang phát"
+      "description": "hiển thị bài hát đang phát",
+      "name": "np"
     },
     "play": {
-      "description": "phát bài hát đã cung cấp"
+      "description": "phát bài hát đã cung cấp",
+      "name": "phát"
     },
     "playlists": {
-      "description": "hiển thị các danh sách phát khả dụng"
+      "description": "hiển thị các danh sách phát khả dụng",
+      "name": "danh-sách"
     },
     "queue": {
-      "description": "hiển thị hàng đợi hiện tại"
+      "description": "hiển thị hàng đợi hiện tại",
+      "name": "hàng-đợi"
     },
     "history": {
-      "description": "hiển thị các bài hát phát gần đây (hàng đợi lịch sử)"
+      "description": "hiển thị các bài hát phát gần đây (hàng đợi lịch sử)",
+      "name": "lịch-sử"
     },
     "remove": {
-      "description": "xóa một bài hát khỏi hàng đợi"
+      "description": "xóa một bài hát khỏi hàng đợi",
+      "name": "xóa"
     },
     "search": {
-      "description": "tìm kiếm trên YouTube theo từ khóa đã cung cấp"
+      "description": "tìm kiếm trên YouTube theo từ khóa đã cung cấp",
+      "name": "tìm-kiếm"
     },
     "seek": {
-      "description": "tua bài hát hiện tại"
+      "description": "tua bài hát hiện tại",
+      "name": "tua"
     },
     "shuffle": {
-      "description": "xáo trộn các bài hát bạn đã thêm"
+      "description": "xáo trộn các bài hát bạn đã thêm",
+      "name": "xáo-trộn"
     },
     "skip": {
-      "description": "bỏ phiếu để bỏ qua bài hát hiện tại"
+      "description": "bỏ phiếu để bỏ qua bài hát hiện tại",
+      "name": "bỏ-qua"
     },
     "forceremove": {
-      "description": "xóa tất cả bài hát của một người dùng khỏi hàng đợi"
+      "description": "xóa tất cả bài hát của một người dùng khỏi hàng đợi",
+      "name": "buộc-xóa"
     },
     "forceskip": {
-      "description": "bỏ qua bài hát hiện tại"
+      "description": "bỏ qua bài hát hiện tại",
+      "name": "buộc-bỏ-qua"
     },
     "movetrack": {
-      "description": "di chuyển một bài hát trong hàng đợi đến vị trí khác"
+      "description": "di chuyển một bài hát trong hàng đợi đến vị trí khác",
+      "name": "di-chuyển-bài"
     },
     "pause": {
-      "description": "tạm dừng bài hát hiện tại"
+      "description": "tạm dừng bài hát hiện tại",
+      "name": "tạm-dừng"
     },
     "playnext": {
-      "description": "phát một bài hát ngay sau bài hiện tại"
+      "description": "phát một bài hát ngay sau bài hiện tại",
+      "name": "phát-tiếp-theo"
     },
     "repeat": {
-      "description": "thêm lại nhạc vào hàng đợi khi phát xong"
+      "description": "thêm lại nhạc vào hàng đợi khi phát xong",
+      "name": "lặp-lại"
     },
     "skipto": {
-      "description": "nhảy đến bài hát đã chỉ định"
+      "description": "nhảy đến bài hát đã chỉ định",
+      "name": "chuyển-đến"
     },
     "stop": {
-      "description": "dừng bài hát hiện tại và xóa hàng đợi"
+      "description": "dừng bài hát hiện tại và xóa hàng đợi",
+      "name": "dừng"
     },
     "volume": {
-      "description": "đặt hoặc hiển thị âm lượng trình phát"
+      "description": "đặt hoặc hiển thị âm lượng trình phát",
+      "name": "âm-lượng"
     },
     "prefix": {
-      "description": "đặt tiền tố riêng cho máy chủ"
+      "description": "đặt tiền tố riêng cho máy chủ",
+      "name": "tiền-tố"
     },
     "controller": {
-      "description": "tùy chỉnh bảng điều khiển đang phát cho máy chủ này"
+      "description": "tùy chỉnh bảng điều khiển đang phát cho máy chủ này",
+      "name": "bảng-điều-khiển"
     },
     "queuetype": {
-      "description": "thay đổi loại hàng đợi"
+      "description": "thay đổi loại hàng đợi",
+      "name": "loại-hàng-đợi"
     },
     "nplayout": {
-      "description": "đặt chế độ bố cục đang phát cho máy chủ này"
+      "description": "đặt chế độ bố cục đang phát cho máy chủ này",
+      "name": "giao-diện-np"
     },
     "npbuttons": {
-      "description": "đặt xem tin nhắn đang phát có nút tương tác cho máy chủ này không"
+      "description": "đặt xem tin nhắn đang phát có nút tương tác cho máy chủ này không",
+      "name": "nút-np"
     },
     "setdj": {
-      "description": "đặt vai trò DJ cho một số lệnh nhạc nhất định"
+      "description": "đặt vai trò DJ cho một số lệnh nhạc nhất định",
+      "name": "setdj"
     },
     "settc": {
-      "description": "đặt kênh văn bản cho các lệnh nhạc"
+      "description": "đặt kênh văn bản cho các lệnh nhạc",
+      "name": "settc"
     },
     "setvc": {
-      "description": "đặt kênh thoại để phát nhạc"
+      "description": "đặt kênh thoại để phát nhạc",
+      "name": "setvc"
     },
     "setskip": {
-      "description": "đặt tỷ lệ bỏ qua riêng cho máy chủ"
+      "description": "đặt tỷ lệ bỏ qua riêng cho máy chủ",
+      "name": "setskip"
     },
     "settings": {
-      "description": "mở bảng cài đặt"
+      "description": "mở bảng cài đặt",
+      "name": "cài-đặt"
     },
     "clearchannel": {
-      "description": "xóa tất cả tin nhắn trong kênh lệnh đã đặt bằng /settc (chỉ chủ sở hữu)"
+      "description": "xóa tất cả tin nhắn trong kênh lệnh đã đặt bằng /settc (chỉ chủ sở hữu)",
+      "name": "dọn-kênh"
     }
   }
 }

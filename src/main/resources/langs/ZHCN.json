@@ -1070,100 +1070,132 @@
   },
   "commands": {
     "help": {
-      "description": "显示可交互的指令列表"
+      "description": "显示可交互的指令列表",
+      "name": "帮助"
     },
     "nowplaying": {
-      "description": "显示当前播放的歌曲"
+      "description": "显示当前播放的歌曲",
+      "name": "播放中"
     },
     "np": {
-      "description": "显示当前播放的歌曲"
+      "description": "显示当前播放的歌曲",
+      "name": "np"
     },
     "play": {
-      "description": "播放指定的歌曲"
+      "description": "播放指定的歌曲",
+      "name": "播放"
     },
     "playlists": {
-      "description": "显示可用的播放列表"
+      "description": "显示可用的播放列表",
+      "name": "播放列表"
     },
     "queue": {
-      "description": "显示当前队列"
+      "description": "显示当前队列",
+      "name": "队列"
     },
     "history": {
-      "description": "显示最近播放的曲目（历史队列）"
+      "description": "显示最近播放的曲目（历史队列）",
+      "name": "历史"
     },
     "remove": {
-      "description": "从队列中移除一首歌"
+      "description": "从队列中移除一首歌",
+      "name": "移除"
     },
     "search": {
-      "description": "在 YouTube 中搜索指定内容"
+      "description": "在 YouTube 中搜索指定内容",
+      "name": "搜索"
     },
     "seek": {
-      "description": "跳转当前歌曲的播放位置"
+      "description": "跳转当前歌曲的播放位置",
+      "name": "跳转"
     },
     "shuffle": {
-      "description": "随机排序你添加的歌曲"
+      "description": "随机排序你添加的歌曲",
+      "name": "随机"
     },
     "skip": {
-      "description": "投票跳过当前歌曲"
+      "description": "投票跳过当前歌曲",
+      "name": "跳过"
     },
     "forceremove": {
-      "description": "从队列中移除某用户的所有项目"
+      "description": "从队列中移除某用户的所有项目",
+      "name": "强制移除"
     },
     "forceskip": {
-      "description": "跳过当前歌曲"
+      "description": "跳过当前歌曲",
+      "name": "强制跳过"
     },
     "movetrack": {
-      "description": "将队列中的曲目移动到其他位置"
+      "description": "将队列中的曲目移动到其他位置",
+      "name": "移动歌曲"
     },
     "pause": {
-      "description": "暂停当前歌曲"
+      "description": "暂停当前歌曲",
+      "name": "暂停"
     },
     "playnext": {
-      "description": "将单首歌曲设为下一首播放"
+      "description": "将单首歌曲设为下一首播放",
+      "name": "插播"
     },
     "repeat": {
-      "description": "播放完毕后将音乐重新加入队列"
+      "description": "播放完毕后将音乐重新加入队列",
+      "name": "循环"
     },
     "skipto": {
-      "description": "跳到指定的歌曲"
+      "description": "跳到指定的歌曲",
+      "name": "跳至"
     },
     "stop": {
-      "description": "停止当前歌曲并清空队列"
+      "description": "停止当前歌曲并清空队列",
+      "name": "停止"
     },
     "volume": {
-      "description": "设置或显示播放器音量"
+      "description": "设置或显示播放器音量",
+      "name": "音量"
     },
     "prefix": {
-      "description": "设置服务器专属前缀"
+      "description": "设置服务器专属前缀",
+      "name": "前缀"
     },
     "controller": {
-      "description": "自定义此服务器的播放中控制面板"
+      "description": "自定义此服务器的播放中控制面板",
+      "name": "控制器"
     },
     "queuetype": {
-      "description": "更改队列类型"
+      "description": "更改队列类型",
+      "name": "队列类型"
     },
     "nplayout": {
-      "description": "设置此服务器的播放中布局模式"
+      "description": "设置此服务器的播放中布局模式",
+      "name": "播放布局"
     },
     "npbuttons": {
-      "description": "设置此服务器的播放中消息是否包含交互按钮"
+      "description": "设置此服务器的播放中消息是否包含交互按钮",
+      "name": "播放按钮"
     },
     "setdj": {
-      "description": "为特定音乐指令设置 DJ 身份组"
+      "description": "为特定音乐指令设置 DJ 身份组",
+      "name": "设置dj"
     },
     "settc": {
-      "description": "设置音乐指令使用的文字频道"
+      "description": "设置音乐指令使用的文字频道",
+      "name": "设置文字频道"
     },
     "setvc": {
-      "description": "设置播放音乐使用的语音频道"
+      "description": "设置播放音乐使用的语音频道",
+      "name": "设置语音频道"
     },
     "setskip": {
-      "description": "设置服务器专属的跳过百分比"
+      "description": "设置服务器专属的跳过百分比",
+      "name": "设置跳过"
     },
     "settings": {
-      "description": "打开设置面板"
+      "description": "打开设置面板",
+      "name": "设置"
     },
     "clearchannel": {
-      "description": "清除以 /settc 设置的指令频道中所有消息（仅限所有者）"
+      "description": "清除以 /settc 设置的指令频道中所有消息（仅限所有者）",
+      "name": "清除频道"
     }
   }
 }

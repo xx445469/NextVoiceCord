@@ -1070,100 +1070,132 @@
   },
   "commands": {
     "help": {
-      "description": "対話形式のコマンド一覧を表示"
+      "description": "対話形式のコマンド一覧を表示",
+      "name": "ヘルプ"
     },
     "nowplaying": {
-      "description": "現在再生中の曲を表示"
+      "description": "現在再生中の曲を表示",
+      "name": "再生中"
     },
     "np": {
-      "description": "現在再生中の曲を表示"
+      "description": "現在再生中の曲を表示",
+      "name": "np"
     },
     "play": {
-      "description": "指定した曲を再生"
+      "description": "指定した曲を再生",
+      "name": "再生"
     },
     "playlists": {
-      "description": "利用可能なプレイリストを表示"
+      "description": "利用可能なプレイリストを表示",
+      "name": "プレイリスト"
     },
     "queue": {
-      "description": "現在のキューを表示"
+      "description": "現在のキューを表示",
+      "name": "キュー"
     },
     "history": {
-      "description": "最近再生した曲を表示（履歴キュー）"
+      "description": "最近再生した曲を表示（履歴キュー）",
+      "name": "履歴"
     },
     "remove": {
-      "description": "キューから曲を削除"
+      "description": "キューから曲を削除",
+      "name": "削除"
     },
     "search": {
-      "description": "指定したキーワードでYouTubeを検索"
+      "description": "指定したキーワードでYouTubeを検索",
+      "name": "検索"
     },
     "seek": {
-      "description": "現在の曲をシーク"
+      "description": "現在の曲をシーク",
+      "name": "シーク"
     },
     "shuffle": {
-      "description": "自分が追加した曲をシャッフル"
+      "description": "自分が追加した曲をシャッフル",
+      "name": "シャッフル"
     },
     "skip": {
-      "description": "現在の曲のスキップに投票"
+      "description": "現在の曲のスキップに投票",
+      "name": "スキップ"
     },
     "forceremove": {
-      "description": "指定ユーザーの項目をすべてキューから削除"
+      "description": "指定ユーザーの項目をすべてキューから削除",
+      "name": "強制削除"
     },
     "forceskip": {
-      "description": "現在の曲をスキップ"
+      "description": "現在の曲をスキップ",
+      "name": "強制スキップ"
     },
     "movetrack": {
-      "description": "キュー内の曲を別の位置に移動"
+      "description": "キュー内の曲を別の位置に移動",
+      "name": "トラック移動"
     },
     "pause": {
-      "description": "現在の曲を一時停止"
+      "description": "現在の曲を一時停止",
+      "name": "一時停止"
     },
     "playnext": {
-      "description": "1曲を次に再生するよう設定"
+      "description": "1曲を次に再生するよう設定",
+      "name": "次に再生"
     },
     "repeat": {
-      "description": "終了後に曲をキューへ再追加"
+      "description": "終了後に曲をキューへ再追加",
+      "name": "リピート"
     },
     "skipto": {
-      "description": "指定した曲までスキップ"
+      "description": "指定した曲までスキップ",
+      "name": "スキップ先"
     },
     "stop": {
-      "description": "現在の曲を停止しキューをクリア"
+      "description": "現在の曲を停止しキューをクリア",
+      "name": "停止"
     },
     "volume": {
-      "description": "プレイヤーの音量を設定・表示"
+      "description": "プレイヤーの音量を設定・表示",
+      "name": "音量"
     },
     "prefix": {
-      "description": "サーバー専用のプレフィックスを設定"
+      "description": "サーバー専用のプレフィックスを設定",
+      "name": "プレフィックス"
     },
     "controller": {
-      "description": "このサーバーの再生中コントロールパネルをカスタマイズ"
+      "description": "このサーバーの再生中コントロールパネルをカスタマイズ",
+      "name": "コントローラー"
     },
     "queuetype": {
-      "description": "キュータイプを変更"
+      "description": "キュータイプを変更",
+      "name": "キュータイプ"
     },
     "nplayout": {
-      "description": "このサーバーの再生中レイアウトモードを設定"
+      "description": "このサーバーの再生中レイアウトモードを設定",
+      "name": "再生表示"
     },
     "npbuttons": {
-      "description": "このサーバーの再生中メッセージに操作ボタンを含めるか設定"
+      "description": "このサーバーの再生中メッセージに操作ボタンを含めるか設定",
+      "name": "再生ボタン"
     },
     "setdj": {
-      "description": "特定の音楽コマンドに使うDJロールを設定"
+      "description": "特定の音楽コマンドに使うDJロールを設定",
+      "name": "dj設定"
     },
     "settc": {
-      "description": "音楽コマンド用のテキストチャンネルを設定"
+      "description": "音楽コマンド用のテキストチャンネルを設定",
+      "name": "テキストチャンネル設定"
     },
     "setvc": {
-      "description": "音楽再生用のボイスチャンネルを設定"
+      "description": "音楽再生用のボイスチャンネルを設定",
+      "name": "ボイスチャンネル設定"
     },
     "setskip": {
-      "description": "サーバー専用のスキップ割合を設定"
+      "description": "サーバー専用のスキップ割合を設定",
+      "name": "スキップ設定"
     },
     "settings": {
-      "description": "設定パネルを開く"
+      "description": "設定パネルを開く",
+      "name": "設定"
     },
     "clearchannel": {
-      "description": "/settcで設定したコマンドチャンネルのメッセージを全削除（オーナー専用）"
+      "description": "/settcで設定したコマンドチャンネルのメッセージを全削除（オーナー専用）",
+      "name": "チャンネル削除"
     }
   }
 }

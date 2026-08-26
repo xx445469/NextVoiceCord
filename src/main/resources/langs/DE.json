@@ -1070,100 +1070,132 @@
   },
   "commands": {
     "help": {
-      "description": "zeigt eine interaktive Liste der Befehle"
+      "description": "zeigt eine interaktive Liste der Befehle",
+      "name": "hilfe"
     },
     "nowplaying": {
-      "description": "zeigt den aktuell gespielten Song"
+      "description": "zeigt den aktuell gespielten Song",
+      "name": "nowplaying"
     },
     "np": {
-      "description": "zeigt den aktuell gespielten Song"
+      "description": "zeigt den aktuell gespielten Song",
+      "name": "np"
     },
     "play": {
-      "description": "spielt den angegebenen Song"
+      "description": "spielt den angegebenen Song",
+      "name": "abspielen"
     },
     "playlists": {
-      "description": "zeigt die verfügbaren Playlists"
+      "description": "zeigt die verfügbaren Playlists",
+      "name": "playlists"
     },
     "queue": {
-      "description": "zeigt die aktuelle Warteschlange"
+      "description": "zeigt die aktuelle Warteschlange",
+      "name": "warteschlange"
     },
     "history": {
-      "description": "zeigt zuletzt gespielte Titel (Verlauf)"
+      "description": "zeigt zuletzt gespielte Titel (Verlauf)",
+      "name": "verlauf"
     },
     "remove": {
-      "description": "entfernt einen Song aus der Warteschlange"
+      "description": "entfernt einen Song aus der Warteschlange",
+      "name": "entfernen"
     },
     "search": {
-      "description": "durchsucht YouTube nach einer angegebenen Suche"
+      "description": "durchsucht YouTube nach einer angegebenen Suche",
+      "name": "suche"
     },
     "seek": {
-      "description": "spult im aktuellen Song"
+      "description": "spult im aktuellen Song",
+      "name": "spulen"
     },
     "shuffle": {
-      "description": "mischt die von dir hinzugefügten Songs"
+      "description": "mischt die von dir hinzugefügten Songs",
+      "name": "shuffle"
     },
     "skip": {
-      "description": "stimmt dafür, den aktuellen Song zu überspringen"
+      "description": "stimmt dafür, den aktuellen Song zu überspringen",
+      "name": "skip"
     },
     "forceremove": {
-      "description": "entfernt alle Einträge eines Nutzers aus der Warteschlange"
+      "description": "entfernt alle Einträge eines Nutzers aus der Warteschlange",
+      "name": "forceentfernen"
     },
     "forceskip": {
-      "description": "überspringt den aktuellen Song"
+      "description": "überspringt den aktuellen Song",
+      "name": "forceskip"
     },
     "movetrack": {
-      "description": "verschiebt einen Titel der Warteschlange an eine andere Position"
+      "description": "verschiebt einen Titel der Warteschlange an eine andere Position",
+      "name": "trackverschieben"
     },
     "pause": {
-      "description": "pausiert den aktuellen Song"
+      "description": "pausiert den aktuellen Song",
+      "name": "pause"
     },
     "playnext": {
-      "description": "spielt einen Song als Nächstes"
+      "description": "spielt einen Song als Nächstes",
+      "name": "alsnächstes"
     },
     "repeat": {
-      "description": "fügt Musik nach dem Ende wieder der Warteschlange hinzu"
+      "description": "fügt Musik nach dem Ende wieder der Warteschlange hinzu",
+      "name": "wiederholen"
     },
     "skipto": {
-      "description": "springt zum angegebenen Song"
+      "description": "springt zum angegebenen Song",
+      "name": "zuspringen"
     },
     "stop": {
-      "description": "stoppt den aktuellen Song und leert die Warteschlange"
+      "description": "stoppt den aktuellen Song und leert die Warteschlange",
+      "name": "stop"
     },
     "volume": {
-      "description": "setzt oder zeigt die Player-Lautstärke"
+      "description": "setzt oder zeigt die Player-Lautstärke",
+      "name": "lautstärke"
     },
     "prefix": {
-      "description": "legt ein serverspezifisches Präfix fest"
+      "description": "legt ein serverspezifisches Präfix fest",
+      "name": "prefix"
     },
     "controller": {
-      "description": "passt das Wird-gespielt-Bedienfeld für diesen Server an"
+      "description": "passt das Wird-gespielt-Bedienfeld für diesen Server an",
+      "name": "controller"
     },
     "queuetype": {
-      "description": "ändert den Warteschlangentyp"
+      "description": "ändert den Warteschlangentyp",
+      "name": "warteschlangentyp"
     },
     "nplayout": {
-      "description": "legt den Wird-gespielt-Layoutmodus für diesen Server fest"
+      "description": "legt den Wird-gespielt-Layoutmodus für diesen Server fest",
+      "name": "npanzeige"
     },
     "npbuttons": {
-      "description": "legt fest, ob Wird-gespielt-Nachrichten für diesen Server Buttons enthalten"
+      "description": "legt fest, ob Wird-gespielt-Nachrichten für diesen Server Buttons enthalten",
+      "name": "npbuttons"
     },
     "setdj": {
-      "description": "legt die DJ-Rolle für bestimmte Musikbefehle fest"
+      "description": "legt die DJ-Rolle für bestimmte Musikbefehle fest",
+      "name": "setdj"
     },
     "settc": {
-      "description": "legt den Textkanal für Musikbefehle fest"
+      "description": "legt den Textkanal für Musikbefehle fest",
+      "name": "settc"
     },
     "setvc": {
-      "description": "legt den Sprachkanal für die Musikwiedergabe fest"
+      "description": "legt den Sprachkanal für die Musikwiedergabe fest",
+      "name": "setvc"
     },
     "setskip": {
-      "description": "legt einen serverspezifischen Skip-Prozentsatz fest"
+      "description": "legt einen serverspezifischen Skip-Prozentsatz fest",
+      "name": "setskip"
     },
     "settings": {
-      "description": "öffnet das Einstellungsfenster"
+      "description": "öffnet das Einstellungsfenster",
+      "name": "einstellungen"
     },
     "clearchannel": {
-      "description": "löscht alle Nachrichten im mit /settc festgelegten Befehlskanal (nur Owner)"
+      "description": "löscht alle Nachrichten im mit /settc festgelegten Befehlskanal (nur Owner)",
+      "name": "kanalleeren"
     }
   }
 }

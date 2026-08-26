@@ -1070,100 +1070,132 @@
   },
   "commands": {
     "help": {
-      "description": "pokazuje interaktywną listę komend"
+      "description": "pokazuje interaktywną listę komend",
+      "name": "pomoc"
     },
     "nowplaying": {
-      "description": "pokazuje utwór odtwarzany obecnie"
+      "description": "pokazuje utwór odtwarzany obecnie",
+      "name": "teraz-gra"
     },
     "np": {
-      "description": "pokazuje utwór odtwarzany obecnie"
+      "description": "pokazuje utwór odtwarzany obecnie",
+      "name": "np"
     },
     "play": {
-      "description": "odtwarza podany utwór"
+      "description": "odtwarza podany utwór",
+      "name": "graj"
     },
     "playlists": {
-      "description": "pokazuje dostępne playlisty"
+      "description": "pokazuje dostępne playlisty",
+      "name": "playlisty"
     },
     "queue": {
-      "description": "pokazuje aktualną kolejkę"
+      "description": "pokazuje aktualną kolejkę",
+      "name": "kolejka"
     },
     "history": {
-      "description": "pokazuje ostatnio odtwarzane utwory (historia)"
+      "description": "pokazuje ostatnio odtwarzane utwory (historia)",
+      "name": "historia"
     },
     "remove": {
-      "description": "usuwa utwór z kolejki"
+      "description": "usuwa utwór z kolejki",
+      "name": "usuń"
     },
     "search": {
-      "description": "wyszukuje podane zapytanie w YouTube"
+      "description": "wyszukuje podane zapytanie w YouTube",
+      "name": "szukaj"
     },
     "seek": {
-      "description": "przewija obecny utwór"
+      "description": "przewija obecny utwór",
+      "name": "przewiń"
     },
     "shuffle": {
-      "description": "tasuje dodane przez ciebie utwory"
+      "description": "tasuje dodane przez ciebie utwory",
+      "name": "losowo"
     },
     "skip": {
-      "description": "głosuje za pominięciem obecnego utworu"
+      "description": "głosuje za pominięciem obecnego utworu",
+      "name": "pomiń"
     },
     "forceremove": {
-      "description": "usuwa z kolejki wszystkie wpisy danego użytkownika"
+      "description": "usuwa z kolejki wszystkie wpisy danego użytkownika",
+      "name": "wymuś-usuń"
     },
     "forceskip": {
-      "description": "pomija obecny utwór"
+      "description": "pomija obecny utwór",
+      "name": "wymuś-pomiń"
     },
     "movetrack": {
-      "description": "przenosi utwór w kolejce na inną pozycję"
+      "description": "przenosi utwór w kolejce na inną pozycję",
+      "name": "przenieś-utwór"
     },
     "pause": {
-      "description": "wstrzymuje obecny utwór"
+      "description": "wstrzymuje obecny utwór",
+      "name": "pauza"
     },
     "playnext": {
-      "description": "ustawia utwór do odtworzenia jako następny"
+      "description": "ustawia utwór do odtworzenia jako następny",
+      "name": "graj-następny"
     },
     "repeat": {
-      "description": "dodaje muzykę z powrotem do kolejki po zakończeniu"
+      "description": "dodaje muzykę z powrotem do kolejki po zakończeniu",
+      "name": "powtarzaj"
     },
     "skipto": {
-      "description": "przeskakuje do wskazanego utworu"
+      "description": "przeskakuje do wskazanego utworu",
+      "name": "przejdź-do"
     },
     "stop": {
-      "description": "zatrzymuje obecny utwór i czyści kolejkę"
+      "description": "zatrzymuje obecny utwór i czyści kolejkę",
+      "name": "stop"
     },
     "volume": {
-      "description": "ustawia lub pokazuje głośność odtwarzacza"
+      "description": "ustawia lub pokazuje głośność odtwarzacza",
+      "name": "głośność"
     },
     "prefix": {
-      "description": "ustawia prefiks właściwy dla serwera"
+      "description": "ustawia prefiks właściwy dla serwera",
+      "name": "prefiks"
     },
     "controller": {
-      "description": "dostosowuje panel sterowania odtwarzaniem dla tego serwera"
+      "description": "dostosowuje panel sterowania odtwarzaniem dla tego serwera",
+      "name": "kontroler"
     },
     "queuetype": {
-      "description": "zmienia typ kolejki"
+      "description": "zmienia typ kolejki",
+      "name": "typ-kolejki"
     },
     "nplayout": {
-      "description": "ustawia tryb układu panelu odtwarzania dla tego serwera"
+      "description": "ustawia tryb układu panelu odtwarzania dla tego serwera",
+      "name": "układ-np"
     },
     "npbuttons": {
-      "description": "ustawia, czy wiadomości o odtwarzaniu mają przyciski na tym serwerze"
+      "description": "ustawia, czy wiadomości o odtwarzaniu mają przyciski na tym serwerze",
+      "name": "przyciski-np"
     },
     "setdj": {
-      "description": "ustawia rolę DJ dla wybranych komend muzycznych"
+      "description": "ustawia rolę DJ dla wybranych komend muzycznych",
+      "name": "setdj"
     },
     "settc": {
-      "description": "ustawia kanał tekstowy dla komend muzycznych"
+      "description": "ustawia kanał tekstowy dla komend muzycznych",
+      "name": "settc"
     },
     "setvc": {
-      "description": "ustawia kanał głosowy do odtwarzania muzyki"
+      "description": "ustawia kanał głosowy do odtwarzania muzyki",
+      "name": "setvc"
     },
     "setskip": {
-      "description": "ustawia próg pomijania właściwy dla serwera"
+      "description": "ustawia próg pomijania właściwy dla serwera",
+      "name": "setskip"
     },
     "settings": {
-      "description": "otwiera panel ustawień"
+      "description": "otwiera panel ustawień",
+      "name": "ustawienia"
     },
     "clearchannel": {
-      "description": "czyści wiadomości w kanale komend ustawionym przez /settc (tylko właściciel)"
+      "description": "czyści wiadomości w kanale komend ustawionym przez /settc (tylko właściciel)",
+      "name": "wyczyść-kanał"
     }
   }
 }

@@ -77,6 +77,7 @@ public class BotConfig {
     private double skipratio;
     private Language defaultLanguage;
     private Language guiLanguage;
+    private String guiLanguageRaw;
     private String webBindAddress;
     private boolean webAllowConfigEdit;
     private String updateRepository, updateGithubToken;
@@ -328,6 +329,12 @@ public class BotConfig {
         guiLanguage = GUI_LANGUAGE.hasValue(config)
                 ? Language.fromCode(GUI_LANGUAGE.getString(config)).orElse(defaultLanguage)
                 : defaultLanguage;
+        // Kept alongside the resolved guiLanguage above rather than instead of it: a blank
+        // gui.language means "follow ui.language" and resolving it eagerly (as guiLanguage
+        // does, for every other reader) would make an editor showing only the resolved value
+        // unable to tell "explicitly pinned to English" from "left blank, currently English
+        // because that's what ui.language happens to be" — and silently pin it on next save.
+        guiLanguageRaw = GUI_LANGUAGE.hasValue(config) ? GUI_LANGUAGE.getString(config) : "";
         
         // Performance options
         nasBufferMs = NAS_BUFFER_MS.getInt(config);
@@ -644,6 +651,18 @@ public class BotConfig {
         return transforms;
     }
 
+    /**
+     * The raw commands.aliases config, for read-only display.
+     *
+     * <p>Per-command lookups should use {@link #getAliases(String)} instead — this exists for
+     * a config editor that needs to show the whole nested structure at once rather than one
+     * command's list at a time.
+     */
+    public Config getAliasesConfig() {
+        return aliases;
+    }
+
+
     public Set<AudioSource> getEnabledAudioSources() {
         return enabledAudioSources;
     }
@@ -681,7 +700,18 @@ public class BotConfig {
     public Language getGuiLanguage() {
         return guiLanguage;
     }
-    
+
+    /**
+     * The raw gui.language value: blank when unset, a language code when pinned.
+     *
+     * <p>Unlike {@link #getGuiLanguage()}, this is not resolved against ui.language, so a
+     * config editor can round-trip "left blank" without turning it into "pinned to whatever
+     * ui.language currently is" the next time it saves.
+     */
+    public String getGuiLanguageRaw() {
+        return guiLanguageRaw == null ? "" : guiLanguageRaw;
+    }
+
     public int getNasBufferMs() {
         return nasBufferMs;
     }
