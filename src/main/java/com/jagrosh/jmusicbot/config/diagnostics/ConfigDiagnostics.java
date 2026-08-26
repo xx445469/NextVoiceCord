@@ -30,7 +30,16 @@ import com.typesafe.config.ConfigValue;
 public class ConfigDiagnostics {
     private static final String META_CONFIG_VERSION_KEY = "meta.configVersion";
     private static final String LYRICS_PREFIX = "lyrics.";
-    
+
+    /**
+     * A per-window GUI preference that older builds wrote into config.txt by mistake (see
+     * {@code com.jagrosh.jmusicbot.gui.GuiWindowState}). It is never a bot setting and is no
+     * longer written here at all, but a file saved by an older build may still carry it —
+     * recognising it keeps that leftover from being endlessly re-flagged as an unknown key and
+     * triggering a fresh repair (and {@code config.txt.bakN} backup) on every single restart.
+     */
+    private static final String LEGACY_GUI_ADVANCED_SECTIONS_KEY = "gui.configPanelAdvancedSections";
+
     /**
      * Paths whose nested keys are user-defined and should not be flagged as deprecated.
      * For example, playback.transforms allows arbitrary transform names (spotify, youtube, etc.)
@@ -228,7 +237,8 @@ public class ConfigDiagnostics {
      * Determines if a config path should be skipped during traversal.
      */
     private static boolean shouldSkipPath(String fullPath) {
-        return META_CONFIG_VERSION_KEY.equals(fullPath) || fullPath.startsWith(LYRICS_PREFIX);
+        return META_CONFIG_VERSION_KEY.equals(fullPath) || fullPath.startsWith(LYRICS_PREFIX)
+                || LEGACY_GUI_ADVANCED_SECTIONS_KEY.equals(fullPath);
     }
     
     /**

@@ -332,6 +332,36 @@ class ConfigDiagnosticsTest {
             assertTrue(report.getDeprecated().contains("playback.unknownSection"),
                     "Unknown key under playback should be flagged as deprecated");
         }
+
+        @Test
+        @DisplayName("ignores gui.configPanelAdvancedSections (a per-window GUI preference, not a bot setting)")
+        void testDetectDeprecatedKeys_ignoresLegacyGuiAdvancedSections() {
+            Map<String, Object> userMap = new HashMap<>();
+            Map<String, Object> gui = new HashMap<>();
+            gui.put("theme", "dark");
+            gui.put("configPanelAdvancedSections", java.util.List.of("proxy", "dangerous"));
+            userMap.put("gui", gui);
+            userMap.put("discord", Map.of("token", "test_token", "owner", 123456789L));
+            Config migratedUserConfig = ConfigFactory.parseMap(userMap);
+
+            Map<String, Object> defaultMap = new HashMap<>();
+            Map<String, Object> discord = new HashMap<>();
+            discord.put("token", "");
+            discord.put("owner", 0L);
+            defaultMap.put("discord", discord);
+            // "gui" exists in defaults (theme/fontSize/language do), the same as
+            // reference.conf, but configPanelAdvancedSections specifically is not one of its
+            // keys — it was never registered as a real option.
+            defaultMap.put("gui", Map.of("theme", "dark"));
+            Config defaults = ConfigFactory.parseMap(defaultMap);
+
+            Config merged = migratedUserConfig.withFallback(defaults).resolve();
+            ConfigDiagnostics.Report report = ConfigDiagnostics.analyze(migratedUserConfig, merged, defaults);
+
+            // Not flagged as deprecated/unknown, so a config carrying this leftover key does
+            // not trigger a repair (and another config.txt.bakN) on every restart.
+            assertFalse(report.getDeprecated().contains("gui.configPanelAdvancedSections"));
+        }
     }
     
     @Nested

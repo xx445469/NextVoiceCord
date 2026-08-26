@@ -23,6 +23,7 @@ import com.jagrosh.jmusicbot.config.io.ConfigIO;
 import com.jagrosh.jmusicbot.config.update.ConfigUpdater;
 import com.jagrosh.jmusicbot.gui.GuiLanguage;
 import com.jagrosh.jmusicbot.gui.GuiPreferences;
+import com.jagrosh.jmusicbot.gui.GuiWindowState;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
@@ -30,7 +31,6 @@ import com.jagrosh.jmusicbot.i18n.Language;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,9 +95,6 @@ public class ConfigPanel extends JPanel {
             "MUSIC", "WEB", "WEBEMBEDDED", "ANDROID", "ANDROIDVR", "ANDROIDMUSIC",
             "IOS", "MWEB", "TV", "TVHTML5SIMPLY"
     };
-
-    /** The key {@link #loadExpandedAdvancedSections()} / {@link GuiPreferences} persist under. */
-    private static final String EXPANDED_SECTIONS_KEY = "configPanelAdvancedSections";
 
     private final BotConfig config;
 
@@ -534,7 +531,10 @@ public class ConfigPanel extends JPanel {
 
     private GridBagConstraints rowConstraints() {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(Tokens.SPACE_XS, 0, Tokens.SPACE_XS, Tokens.SPACE_MD);
+        // SPACE_SM rather than SPACE_XS: rows this close together read as one dense block
+        // rather than a list of separate settings — the same reason every card already keeps
+        // SPACE_MD from its neighbour (see addSection).
+        gbc.insets = new Insets(Tokens.SPACE_SM, 0, Tokens.SPACE_SM, Tokens.SPACE_MD);
         gbc.anchor = GridBagConstraints.WEST;
         return gbc;
     }
@@ -699,23 +699,29 @@ public class ConfigPanel extends JPanel {
      * <p>The Test Connection button (see {@link #testLavalinkConnection}) is the fastest way to
      * find out whether a node is actually reachable, rather than restarting the bot and reading
      * a stack trace: it hits the node's own {@code GET /v4/info} off the Swing event thread.
+     *
+     * <p>Leads with an intro line stating plainly that a Lavalink node is a separate audio
+     * server, not an HTTP/SOCKS proxy — see {@link #createProxySection()}'s javadoc for the
+     * incident (an owner's Lavalink node pasted into the proxy fields) this exists to prevent.
      */
     private Component createLavalinkSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
         List<FilterRow> rows = new ArrayList<>();
 
-        FilterRow engineRow = addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.lavalinkEngine"),
+        rows.add(addSpanningRow(panel, gbc, 0, noteLabel(GuiLanguage.msg("gui.config.lavalinkIntro")), null));
+
+        FilterRow engineRow = addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.lavalinkEngine"),
                 lavalinkEngineComboBox, "playback.engine");
-        engineRow.merge(addSpanningRow(panel, gbc, 1,
+        engineRow.merge(addSpanningRow(panel, gbc, 2,
                 noteLabel(GuiLanguage.msg("gui.config.lavalinkEngineFallbackNote")), null));
         rows.add(engineRow);
 
-        FilterRow nodesRow = addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.lavalinkNodes"),
+        FilterRow nodesRow = addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.lavalinkNodes"),
                 buildLavalinkNodesEditor(), "lavalink.nodes");
-        nodesRow.merge(addSpanningRow(panel, gbc, 3,
+        nodesRow.merge(addSpanningRow(panel, gbc, 4,
                 noteLabel(GuiLanguage.msg("gui.config.lavalinkNodesNote")), null));
-        nodesRow.merge(addSpanningRow(panel, gbc, 4, lavalinkTestConnectionStatusLabel, null));
+        nodesRow.merge(addSpanningRow(panel, gbc, 5, lavalinkTestConnectionStatusLabel, null));
         rows.add(nodesRow);
 
         Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.lavalink"), panel);
@@ -1029,7 +1035,19 @@ public class ConfigPanel extends JPanel {
     }
 
     /**
-     * Creates the Proxy configuration section (advanced).
+     * Creates the Proxy configuration section (advanced): an HTTP/SOCKS proxy for the bot's
+     * own outbound network requests.
+     *
+     * <p>This is not where a Lavalink node goes. An owner's log once showed exactly that
+     * mistake: a Lavalink node's host/port/password pasted into these fields, silently routing
+     * YouTube traffic through it as though it were an HTTP proxy — because the two sections
+     * used to look identical (host/port/username/password cards) and the only cue telling them
+     * apart was a checkbox reading "...through proxy (Lavaplayer)", three letters away from
+     * "Lavalink". The intro line below says so explicitly; the checkbox no longer names the
+     * engine at all (see EN.json's {@code gui.config.proxyLavaplayer}); and
+     * {@link #createLavalinkSection()} — common tier, laid out as an engine selector and a node
+     * list rather than a fourth host/port card — is what a Lavalink node's address actually
+     * belongs in.
      *
      * <p>The three checkboxes are labelled by what they route rather than by their raw config
      * keys — "lavaplayer", "jda" and "github" mean nothing to someone who has not read the
@@ -1044,13 +1062,15 @@ public class ConfigPanel extends JPanel {
         GridBagConstraints gbc = rowConstraints();
         List<FilterRow> rows = new ArrayList<>();
 
-        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.proxyHost"), proxyHostField, "proxy.host"));
-        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.proxyPort"), proxyPortSpinner, "proxy.port"));
-        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.proxyUsername"), proxyUsernameField, "proxy.username"));
-        rows.add(addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.proxyPassword"), proxyPasswordField, "proxy.password"));
-        rows.add(addSpanningRow(panel, gbc, 4, proxyLavaplayerCheckBox, "proxy.lavaplayer"));
-        rows.add(addSpanningRow(panel, gbc, 5, proxyJdaCheckBox, "proxy.jda"));
-        rows.add(addSpanningRow(panel, gbc, 6, proxyGithubCheckBox, "proxy.github"));
+        rows.add(addSpanningRow(panel, gbc, 0, noteLabel(GuiLanguage.msg("gui.config.proxyIntro")), null));
+
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.proxyHost"), proxyHostField, "proxy.host"));
+        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.proxyPort"), proxyPortSpinner, "proxy.port"));
+        rows.add(addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.proxyUsername"), proxyUsernameField, "proxy.username"));
+        rows.add(addRow(panel, gbc, 4, GuiLanguage.msg("gui.config.proxyPassword"), proxyPasswordField, "proxy.password"));
+        rows.add(addSpanningRow(panel, gbc, 5, proxyLavaplayerCheckBox, "proxy.lavaplayer"));
+        rows.add(addSpanningRow(panel, gbc, 6, proxyJdaCheckBox, "proxy.jda"));
+        rows.add(addSpanningRow(panel, gbc, 7, proxyGithubCheckBox, "proxy.github"));
 
         Widgets.CollapsibleCard card = advancedCard("proxy", GuiLanguage.msg("gui.config.proxy"), panel);
         registerSection(card, card, rows);
@@ -1381,15 +1401,23 @@ public class ConfigPanel extends JPanel {
 
     /**
      * Creates the Performance section (advanced): performance.nasBufferMs, performance.frameBufferMs.
+     *
+     * <p>Both buffers exist to smooth out the bot's own audio pipeline (see reference.conf),
+     * which only runs at all when {@code playback.engine} is {@code lavaplayer} — a Lavalink
+     * node does its own buffering on its side of the connection. The note below says so, per
+     * the same "don't leave a setting silently inert" reasoning as
+     * {@link #createLavalinkSection()}'s node-list note.
      */
     private Component createPerformanceSection() {
         JPanel panel = formPanel();
         GridBagConstraints gbc = rowConstraints();
         List<FilterRow> rows = new ArrayList<>();
 
-        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.nasBufferMs"), nasBufferMsSpinner,
+        rows.add(addSpanningRow(panel, gbc, 0,
+                noteLabel(GuiLanguage.msg("gui.config.performanceLavaplayerOnlyNote")), null));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.nasBufferMs"), nasBufferMsSpinner,
                 "performance.nasBufferMs"));
-        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.frameBufferMs"), frameBufferMsSpinner,
+        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.frameBufferMs"), frameBufferMsSpinner,
                 "performance.frameBufferMs"));
 
         Widgets.CollapsibleCard card = advancedCard("performance", GuiLanguage.msg("gui.config.performance"), panel);
@@ -2043,40 +2071,29 @@ public class ConfigPanel extends JPanel {
     }
 
     /**
-     * Reads which advanced sections were left open last session, straight out of config.txt.
+     * Reads which advanced sections were left open last session.
      *
-     * <p>Independent of {@link BotConfig}, which merges the user's file against
-     * {@code reference.conf} defaults and has no getter for a key that is not a real
-     * {@link com.jagrosh.jmusicbot.config.model.ConfigOption} — this is a UI preference, the
-     * same kind {@link GuiPreferences} already persists for theme/font/language, not a setting
-     * that affects the bot itself. Missing key, missing file, or a file that fails to parse all
-     * come back as "nothing was open," which is also this panel's default.
+     * <p>Backed by {@link GuiWindowState}, not {@link BotConfig} or {@link GuiPreferences}:
+     * this is a per-window Swing preference, not a bot setting, and never was one. An earlier
+     * version wrote it into config.txt as {@code gui.configPanelAdvancedSections}, which is not
+     * a real {@link com.jagrosh.jmusicbot.config.model.ConfigOption} — so
+     * {@link com.jagrosh.jmusicbot.config.diagnostics.ConfigDiagnostics} correctly flagged it as
+     * an unknown key on every subsequent load, which triggered a config repair (and another
+     * {@code config.txt.bakN} backup) on every restart, since the panel rewrote the key right
+     * back on the very next toggle. {@link GuiWindowState}'s javadoc has the full account.
+     * Never throws; a read that fails comes back as "nothing was open," which is also this
+     * panel's default.
      */
     private Set<String> loadExpandedAdvancedSections() {
-        try {
-            Path path = ConfigIO.getConfigPath();
-            if (path == null || !Files.exists(path)) {
-                return new LinkedHashSet<>();
-            }
-            Config raw = ConfigFactory.parseFile(path.toFile());
-            String fullKey = "gui." + EXPANDED_SECTIONS_KEY;
-            if (!raw.hasPath(fullKey)) {
-                return new LinkedHashSet<>();
-            }
-            return new LinkedHashSet<>(raw.getStringList(fullKey));
-        } catch (RuntimeException ex) {
-            LOG.warn("Could not read saved advanced-section expand state: {}", ex.toString());
-            return new LinkedHashSet<>();
-        }
+        return GuiWindowState.loadExpandedAdvancedSections();
     }
 
     /**
-     * Persists which advanced sections are open, through {@link GuiPreferences} — the same
-     * write-immediately mechanism the Preferences page already uses for theme/font/language,
-     * rather than a new storage path of its own. Runs on every toggle rather than waiting for
-     * Save: opening a section is not something someone thinks of as "a config edit" they need
-     * to remember to save, the same reasoning {@link GuiPreferences} documents for its own
-     * fields.
+     * Persists which advanced sections are open, through {@link GuiWindowState}. Runs on every
+     * toggle rather than waiting for Save: opening a section is not something someone thinks of
+     * as "a config edit" they need to remember to save, the same reasoning {@link GuiPreferences}
+     * documents for its own, unrelated fields (theme/font/language, which — unlike this — really
+     * are bot settings with defaults in reference.conf, and so belong in config.txt).
      */
     private void onAdvancedSectionToggled(String key, boolean expanded) {
         if (expanded) {
@@ -2084,7 +2101,7 @@ public class ConfigPanel extends JPanel {
         } else {
             expandedAdvancedSections.remove(key);
         }
-        GuiPreferences.write("gui", EXPANDED_SECTIONS_KEY, formatStringList(new ArrayList<>(expandedAdvancedSections)));
+        GuiWindowState.saveExpandedAdvancedSections(expandedAdvancedSections);
     }
 
     /**
