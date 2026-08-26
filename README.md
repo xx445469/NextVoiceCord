@@ -1,5 +1,7 @@
 # NextVoiceCord
 
+**English** | [繁體中文](README.zh-TW.md)
+
 [![Build](https://github.com/xx445469/NextVoiceCord/actions/workflows/build-and-test.yml/badge.svg?branch=main)](https://github.com/xx445469/NextVoiceCord/actions/workflows/build-and-test.yml)
 [![Release](https://img.shields.io/github/v/release/xx445469/NextVoiceCord?include_prereleases&sort=semver&label=release)](https://github.com/xx445469/NextVoiceCord/releases)
 [![Downloads](https://img.shields.io/github/downloads/xx445469/NextVoiceCord/total?label=downloads)](https://github.com/xx445469/NextVoiceCord/releases)
