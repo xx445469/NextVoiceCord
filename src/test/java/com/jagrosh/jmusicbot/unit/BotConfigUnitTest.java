@@ -864,6 +864,55 @@ class BotConfigUnitTest extends BaseConfigTest {
             assertFalse(config.proxyJda());
             assertFalse(config.proxyGithub());
         }
+
+        @Test
+        @DisplayName("Proxy username and password round-trip through config.txt")
+        void proxyCredentialsRoundTrip() throws IOException {
+            // The config panel writes a JPasswordField's contents straight to this key, so a
+            // password that survives the trip unmangled — punctuation and all — is what stands
+            // between "the proxy works" and a silently wrong credential nobody can see to debug.
+            String configContent = """
+                meta {
+                  configVersion = 1
+                }
+                discord.token = test_token
+                discord.owner = 123456789
+                proxy {
+                  host = "proxy.example.com"
+                  port = 8080
+                  username = "proxy_user"
+                  password = "correct horse battery staple!"
+                }
+                """;
+            Path configFile = createTempConfigFile(configContent);
+            setConfigFileProperty(configFile);
+
+            BotConfig config = new BotConfig(mockUserInteraction);
+            config.load();
+
+            assertEquals("proxy_user", config.getProxyUsername());
+            assertEquals("correct horse battery staple!", config.getProxyPassword());
+        }
+
+        @Test
+        @DisplayName("Proxy username and password default to empty, not null")
+        void proxyCredentialsDefaultToEmpty() throws IOException {
+            String configContent = """
+                meta {
+                  configVersion = 1
+                }
+                discord.token = test_token
+                discord.owner = 123456789
+                """;
+            Path configFile = createTempConfigFile(configContent);
+            setConfigFileProperty(configFile);
+
+            BotConfig config = new BotConfig(mockUserInteraction);
+            config.load();
+
+            assertEquals("", config.getProxyUsername());
+            assertEquals("", config.getProxyPassword());
+        }
     }
     
     @Nested

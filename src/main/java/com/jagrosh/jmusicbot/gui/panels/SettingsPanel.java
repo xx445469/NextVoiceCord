@@ -15,17 +15,21 @@
  */
 package com.jagrosh.jmusicbot.gui.panels;
 
+import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.gui.GuiLanguage;
 import com.jagrosh.jmusicbot.gui.GuiPreferences;
 import com.jagrosh.jmusicbot.i18n.Language;
 import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
+import com.jagrosh.jmusicbot.update.UpdateChecker;
+import com.jagrosh.jmusicbot.utils.OtherUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * Settings panel for configuring GUI appearance and viewing configuration.
@@ -34,7 +38,11 @@ import java.io.IOException;
  */
 public class SettingsPanel extends JPanel {
 
-    public SettingsPanel() {
+    private final Bot bot;
+
+    public SettingsPanel(Bot bot) {
+        this.bot = bot;
+
         setLayout(new BorderLayout(0, Tokens.SPACE_MD));
         setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder(
@@ -58,6 +66,8 @@ public class SettingsPanel extends JPanel {
         content.add(createAppearanceSection());
         content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
         content.add(createConfigSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createUpdatesSection());
         content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
         content.add(createInfoSection());
 
@@ -210,6 +220,144 @@ public class SettingsPanel extends JPanel {
         body.add(pathLabel);
 
         return Widgets.titledCard(GuiLanguage.msg("gui.preferences.configuration"), body);
+    }
+
+    /**
+     * Creates the on-demand update-check section.
+     *
+     * <p>{@code updates.autoUpdate} governs the timer in {@link com.jagrosh.jmusicbot.update.SelfUpdater};
+     * this button is deliberately separate from it and never downloads or installs anything —
+     * it only asks GitHub what the latest release is and says what it found. Someone with
+     * auto-update off still has a way to look right now, without that button quietly turning
+     * auto-update on for one run.
+     */
+    private JPanel createUpdatesSection() {
+        JPanel body = Widgets.transparent(null);
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+
+        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.currentVersion"),
+                mutedValue(OtherUtil.getCurrentVersion())));
+        body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
+
+        JButton checkButton = new JButton(GuiLanguage.msg("gui.preferences.checkForUpdates"));
+        checkButton.setFont(Tokens.fontBody());
+
+        // Hidden until there is somewhere for it to go, rather than disabled, so its
+        // appearance itself signals "an update was found" without needing to read the label.
+        JButton releasesButton = new JButton(GuiLanguage.msg("gui.action.openInBrowser"));
+        releasesButton.setFont(Tokens.fontBody());
+        releasesButton.setVisible(false);
+
+        JLabel statusLabel = new JLabel(" ");
+        statusLabel.setFont(Tokens.fontBody());
+        statusLabel.setAlignmentX(LEFT_ALIGNMENT);
+
+        checkButton.addActionListener(e -> checkForUpdates(checkButton, releasesButton, statusLabel));
+
+        JPanel buttonPanel = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
+        buttonPanel.setAlignmentX(LEFT_ALIGNMENT);
+        buttonPanel.add(checkButton);
+        buttonPanel.add(releasesButton);
+        body.add(buttonPanel);
+        body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
+        body.add(statusLabel);
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.preferences.updates"), body);
+    }
+
+    /**
+     * Runs the check off the event thread.
+     *
+     * <p>{@link UpdateChecker#checkForUpdate} makes an HTTP call to the GitHub API; doing that
+     * on the EDT would freeze the whole window for however long the request takes to answer —
+     * or to time out, on a bad connection.
+     */
+    private void checkForUpdates(JButton checkButton, JButton releasesButton, JLabel statusLabel) {
+        checkButton.setEnabled(false);
+        releasesButton.setVisible(false);
+        statusLabel.setForeground(Tokens.textMuted());
+        statusLabel.setText(GuiLanguage.msg("gui.preferences.checkingForUpdates"));
+
+        String repository = bot.getConfig().getUpdateRepository();
+        String token = bot.getConfig().getUpdateGithubToken();
+        String current = OtherUtil.getCurrentVersion();
+
+        new SwingWorker<UpdateChecker.CheckOutcome, Void>() {
+            @Override
+            protected UpdateChecker.CheckOutcome doInBackground() {
+                return new UpdateChecker(repository, token).checkForUpdate(current);
+            }
+
+            @Override
+            protected void done() {
+                // Re-enabled unconditionally: a check that is queued up twice is exactly what
+                // this guards against, and that has to hold whichever outcome came back.
+                checkButton.setEnabled(true);
+                try {
+                    presentOutcome(get(), releasesButton, statusLabel);
+                } catch (Exception ex) {
+                    // doInBackground() cannot throw — checkForUpdate() catches everything — so
+                    // this only fires if that ever changes, and it must still say something
+                    // rather than leave the button looking like it did nothing.
+                    statusLabel.setForeground(Tokens.danger());
+                    statusLabel.setText(GuiLanguage.msg("gui.preferences.updateCheckFailed", ex.getMessage()));
+                }
+            }
+        }.execute();
+    }
+
+    /** Renders whichever of the three outcomes the check produced. */
+    private void presentOutcome(UpdateChecker.CheckOutcome outcome, JButton releasesButton, JLabel statusLabel) {
+        switch (outcome) {
+            case UpdateChecker.CheckOutcome.UpToDate upToDate -> {
+                statusLabel.setForeground(Tokens.success());
+                statusLabel.setText(GuiLanguage.msg("gui.preferences.updateUpToDate", upToDate.currentVersion()));
+            }
+            case UpdateChecker.CheckOutcome.UpdateAvailable available -> {
+                statusLabel.setForeground(Tokens.accent());
+                statusLabel.setText(GuiLanguage.msg("gui.preferences.updateAvailable", available.latestVersion()));
+
+                // A fresh listener each time: an operator can click "check" repeatedly, and a
+                // stale listener from an earlier check would open last time's URL instead of
+                // this one's — or, worse, both, once for every check that ever found an update.
+                for (var listener : releasesButton.getActionListeners()) {
+                    releasesButton.removeActionListener(listener);
+                }
+                releasesButton.addActionListener(e -> openReleasesPage(available.releasesUrl()));
+                releasesButton.setVisible(true);
+            }
+            case UpdateChecker.CheckOutcome.Failed failed -> {
+                statusLabel.setForeground(Tokens.danger());
+                statusLabel.setText(GuiLanguage.msg("gui.preferences.updateCheckFailed", failed.detail()));
+            }
+        }
+    }
+
+    /**
+     * Opens the release in the system browser, falling back to the clipboard.
+     *
+     * <p>Mirrors {@code MainFrame.openWebPanel}: some headless-capable desktops and Linux
+     * setups have no BROWSE action at all, and a URL on the clipboard is still strictly more
+     * useful than a dead button.
+     */
+    private void openReleasesPage(String url) {
+        try {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(URI.create(url));
+                return;
+            }
+            copyToClipboard(url);
+            JOptionPane.showMessageDialog(this,
+                    GuiLanguage.msg("gui.preferences.cannotOpenBrowser"),
+                    GuiLanguage.msg("gui.preferences.updates"), JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            copyToClipboard(url);
+        }
+    }
+
+    private void copyToClipboard(String text) {
+        Toolkit.getDefaultToolkit().getSystemClipboard()
+                .setContents(new java.awt.datatransfer.StringSelection(text), null);
     }
 
     /**

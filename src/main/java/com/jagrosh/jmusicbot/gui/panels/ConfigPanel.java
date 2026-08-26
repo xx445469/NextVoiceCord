@@ -80,6 +80,17 @@ public class ConfigPanel extends JPanel {
     private final JComboBox<String> logLevelComboBox;
     private final JTextField playlistsFolderField;
 
+    // Proxy section
+    private final JTextField proxyHostField;
+    private final JSpinner proxyPortSpinner;
+    private final JTextField proxyUsernameField;
+    // A password, not a JTextField: see WebSecrets.isSecret, which the web panel applies to
+    // this same value. Rendering it in plain text here would make the mask over there theatre.
+    private final JPasswordField proxyPasswordField;
+    private final JCheckBox proxyLavaplayerCheckBox;
+    private final JCheckBox proxyJdaCheckBox;
+    private final JCheckBox proxyGithubCheckBox;
+
     /**
      * Creates the configuration panel.
      *
@@ -127,13 +138,25 @@ public class ConfigPanel extends JPanel {
         logLevelComboBox = new JComboBox<>(new String[]{"off", "error", "warn", "info", "debug", "trace", "all"});
         playlistsFolderField = new JTextField(20);
 
+        // Proxy
+        proxyHostField = new JTextField(20);
+        proxyPortSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 65535, 1));
+        proxyUsernameField = new JTextField(15);
+        proxyPasswordField = new JPasswordField(15);
+        proxyLavaplayerCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.proxyLavaplayer"));
+        proxyJdaCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.proxyJda"));
+        proxyGithubCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.proxyGithub"));
+
         applyFieldStyle(prefixField, altPrefixField, helpWordField, gameField,
                 successEmojiField, warningEmojiField, errorEmojiField, loadingEmojiField,
-                searchingEmojiField, playlistsFolderField);
+                searchingEmojiField, playlistsFolderField, proxyHostField, proxyUsernameField,
+                proxyPasswordField);
         applyFieldStyle(statusComboBox, logLevelComboBox);
         applyFieldStyle(songInStatusCheckBox, stayInChannelCheckBox, useYouTubeOAuthCheckBox,
-                npImagesCheckBox, updateAlertsCheckBox);
-        applyFieldStyle(aloneTimeSpinner, maxSecondsSpinner, maxYTPlaylistPagesSpinner, skipRatioSpinner);
+                npImagesCheckBox, updateAlertsCheckBox, proxyLavaplayerCheckBox, proxyJdaCheckBox,
+                proxyGithubCheckBox);
+        applyFieldStyle(aloneTimeSpinner, maxSecondsSpinner, maxYTPlaylistPagesSpinner, skipRatioSpinner,
+                proxyPortSpinner);
 
         add(buildHeader(), BorderLayout.NORTH);
         add(buildScrollArea(), BorderLayout.CENTER);
@@ -172,6 +195,8 @@ public class ConfigPanel extends JPanel {
         content.add(createEmojisSection());
         content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
         content.add(createOtherSection());
+        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(createProxySection());
 
         JScrollPane scrollPane = new JScrollPane(content);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -313,6 +338,29 @@ public class ConfigPanel extends JPanel {
     }
 
     /**
+     * Creates the Proxy configuration section.
+     *
+     * <p>The three checkboxes are labelled by what they route rather than by their raw config
+     * keys — "lavaplayer", "jda" and "github" mean nothing to someone who has not read the
+     * source, but "audio playback", "Discord connection" and "update checks" are the things
+     * they actually chose to proxy or not.
+     */
+    private Component createProxySection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+
+        addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.proxyHost"), proxyHostField);
+        addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.proxyPort"), proxyPortSpinner);
+        addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.proxyUsername"), proxyUsernameField);
+        addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.proxyPassword"), proxyPasswordField);
+        addSpanningRow(panel, gbc, 4, proxyLavaplayerCheckBox);
+        addSpanningRow(panel, gbc, 5, proxyJdaCheckBox);
+        addSpanningRow(panel, gbc, 6, proxyGithubCheckBox);
+
+        return Widgets.titledCard(GuiLanguage.msg("gui.config.proxy"), panel);
+    }
+
+    /**
      * Creates the bottom panel with save/reset buttons and warning.
      */
     private Component buildBottomPanel() {
@@ -377,6 +425,17 @@ public class ConfigPanel extends JPanel {
         updateAlertsCheckBox.setSelected(config.useUpdateAlerts());
         logLevelComboBox.setSelectedItem(config.getLogLevel());
         playlistsFolderField.setText(config.getPlaylistsFolder());
+
+        // Proxy
+        proxyHostField.setText(config.getProxyHost());
+        proxyPortSpinner.setValue(config.getProxyPort());
+        proxyUsernameField.setText(config.getProxyUsername());
+        // setText, not a log line: this is the one field on the panel that must never be
+        // written anywhere it could be read back other than by typing it into this box.
+        proxyPasswordField.setText(config.getProxyPassword());
+        proxyLavaplayerCheckBox.setSelected(config.proxyLavaplayer());
+        proxyJdaCheckBox.setSelected(config.proxyJda());
+        proxyGithubCheckBox.setSelected(config.proxyGithub());
     }
 
     /**
@@ -461,7 +520,33 @@ public class ConfigPanel extends JPanel {
         updates.put("logging.level", quoteString((String) logLevelComboBox.getSelectedItem()));
         updates.put("paths.playlistsFolder", quoteString(playlistsFolderField.getText()));
 
+        // Proxy
+        updates.put("proxy.host", quoteString(proxyHostField.getText()));
+        updates.put("proxy.port", String.valueOf(proxyPortSpinner.getValue()));
+        updates.put("proxy.username", quoteString(proxyUsernameField.getText()));
+        updates.put("proxy.password", quoteString(readAndClearPassword()));
+        updates.put("proxy.lavaplayer", String.valueOf(proxyLavaplayerCheckBox.isSelected()));
+        updates.put("proxy.jda", String.valueOf(proxyJdaCheckBox.isSelected()));
+        updates.put("proxy.github", String.valueOf(proxyGithubCheckBox.isSelected()));
+
         return updates;
+    }
+
+    /**
+     * Reads the proxy password and wipes the char array Swing handed back.
+     *
+     * <p>The resulting String still ends up in the updates map and, briefly, in the rewritten
+     * config.txt content — Java offers no way around that once a String exists at all — but
+     * the mutable buffer this came from does not have to sit in memory a moment longer than
+     * it takes to copy it out.
+     */
+    private String readAndClearPassword() {
+        char[] password = proxyPasswordField.getPassword();
+        try {
+            return new String(password);
+        } finally {
+            java.util.Arrays.fill(password, '\0');
+        }
     }
 
     /**

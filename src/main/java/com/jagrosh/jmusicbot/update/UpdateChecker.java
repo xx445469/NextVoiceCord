@@ -57,6 +57,7 @@ public final class UpdateChecker
 
     private final String repository;
     private final String token;
+    private final String apiRoot;
     private final HttpClient http;
 
     /**
@@ -65,8 +66,18 @@ public final class UpdateChecker
      */
     public UpdateChecker(String repository, String token)
     {
+        this(repository, token, API_ROOT);
+    }
+
+    /**
+     * @param apiRoot GitHub's API root by default; overridable so tests can point this at a
+     *                local mock server instead of the real network
+     */
+    public UpdateChecker(String repository, String token, String apiRoot)
+    {
         this.repository = repository;
         this.token = token == null || token.isBlank() ? null : token;
+        this.apiRoot = apiRoot;
         this.http = HttpClient.newBuilder()
                               .connectTimeout(TIMEOUT)
                               .followRedirects(HttpClient.Redirect.NORMAL)
@@ -77,6 +88,30 @@ public final class UpdateChecker
     public record Release(String version, String assetName, String downloadUrl, long sizeBytes) { }
 
     /**
+     * Outcome of an on-demand check, distinguishing "nothing newer" from "the check itself
+     * failed". {@link #fetchLatest} collapses both into an empty {@code Optional} — fine for
+     * a background timer that just tries again later — but a button someone just pressed has
+     * to say which one happened, or pressing it was indistinguishable from doing nothing.
+     */
+    public sealed interface CheckOutcome
+    {
+        /** No release newer than {@code currentVersion} was found. */
+        record UpToDate(String currentVersion) implements CheckOutcome { }
+
+        /** A newer release exists, with a page a human can open to read about it. */
+        record UpdateAvailable(String currentVersion, String latestVersion, String releasesUrl)
+                implements CheckOutcome { }
+
+        /**
+         * The check could not be completed. {@code detail} is a technical, English string
+         * for a log or a "why" line — never a message shown as the whole story, since none of
+         * "no network", "rate limited" and "private repo, no token" look alike to the person
+         * who pressed the button.
+         */
+        record Failed(String detail) implements CheckOutcome { }
+    }
+
+    /**
      * Fetches the latest non-prerelease.
      *
      * @return the release, or empty if there is none or the lookup failed
@@ -85,19 +120,7 @@ public final class UpdateChecker
     {
         try
         {
-            HttpRequest.Builder request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_ROOT + repository + "/releases/latest"))
-                    .header("Accept", "application/vnd.github+json")
-                    .header("X-GitHub-Api-Version", "2022-11-28")
-                    .timeout(TIMEOUT)
-                    .GET();
-
-            if (token != null)
-            {
-                request.header("Authorization", "Bearer " + token);
-            }
-
-            HttpResponse<String> response = http.send(request.build(), HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = requestLatestRelease();
 
             if (response.statusCode() == 404)
             {
@@ -131,6 +154,94 @@ public final class UpdateChecker
             Thread.currentThread().interrupt();
             return Optional.empty();
         }
+    }
+
+    /**
+     * Checks now, for a caller that needs to tell "up to date" apart from "the check failed"
+     * rather than silently trying again later.
+     *
+     * <p>Only reports an update when the release also carries a {@code .jar} asset, matching
+     * {@link #fetchLatest}: a tag with nothing attached is not one this checker could ever
+     * install, so calling it "available" here would promise a self-update that cannot happen.
+     *
+     * <p>Never downloads or installs anything — that stays behind {@code updates.autoUpdate},
+     * decided elsewhere.
+     *
+     * @param currentVersion the running version, as from {@code OtherUtil.getCurrentVersion()}
+     */
+    public CheckOutcome checkForUpdate(String currentVersion)
+    {
+        try
+        {
+            HttpResponse<String> response = requestLatestRelease();
+
+            if (response.statusCode() == 404)
+            {
+                return new CheckOutcome.Failed("HTTP 404 from GitHub — the repository has never "
+                        + "published a release, or it is private and updates.githubToken is not set.");
+            }
+            if (response.statusCode() == 401 || response.statusCode() == 403)
+            {
+                return new CheckOutcome.Failed("GitHub rejected the request (HTTP " + response.statusCode()
+                        + "). The token may be missing or expired, or the request was rate-limited.");
+            }
+            if (response.statusCode() != 200)
+            {
+                return new CheckOutcome.Failed("GitHub returned HTTP " + response.statusCode());
+            }
+
+            JsonNode node = MAPPER.readTree(response.body());
+            Optional<Release> release = parseRelease(node);
+            if (release.isEmpty())
+            {
+                return new CheckOutcome.Failed(
+                        "The latest release of " + repository + " has no downloadable build attached.");
+            }
+
+            String latest = release.get().version();
+            if (!isNewer(currentVersion, latest))
+            {
+                return new CheckOutcome.UpToDate(currentVersion);
+            }
+
+            // html_url is the page a person can read; the asset's own "url" is the API
+            // endpoint fetchLatest() downloads from, which is not something to open in a
+            // browser — for a private repository it demands the same bearer token this
+            // process carries, one a browser tab has no way to send.
+            String releasesUrl = node.path("html_url").asText(releasesPageUrl());
+            return new CheckOutcome.UpdateAvailable(currentVersion, latest, releasesUrl);
+        }
+        catch (IOException | RuntimeException ex)
+        {
+            return new CheckOutcome.Failed(ex.toString());
+        }
+        catch (InterruptedException ex)
+        {
+            Thread.currentThread().interrupt();
+            return new CheckOutcome.Failed("Interrupted");
+        }
+    }
+
+    private HttpResponse<String> requestLatestRelease() throws IOException, InterruptedException
+    {
+        HttpRequest.Builder request = HttpRequest.newBuilder()
+                .uri(URI.create(apiRoot + repository + "/releases/latest"))
+                .header("Accept", "application/vnd.github+json")
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .timeout(TIMEOUT)
+                .GET();
+
+        if (token != null)
+        {
+            request.header("Authorization", "Bearer " + token);
+        }
+
+        return http.send(request.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
+    private String releasesPageUrl()
+    {
+        return "https://github.com/" + repository + "/releases/latest";
     }
 
     private Optional<Release> parseRelease(JsonNode node)
