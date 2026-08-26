@@ -12,7 +12,7 @@ All responses are `application/json; charset=utf-8`.
 {
   "labels": { "playingNow": "playing now", "...": "..." },
   "language": "ZHTW",
-  "version": "0.8.1-beta.1",
+  "version": "0.9.0-beta.1",
   "connected": true,
   "guilds": [
     { "name": "…", "id": "123", "playing": true, "members": 42,

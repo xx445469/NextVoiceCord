@@ -7,6 +7,46 @@ follow [semantic versioning](https://semver.org/spec/v2.0.0.html). Dates are ISO
 
 ## [Unreleased]
 
+## [0.9.0-beta.1] — 2026-08-27
+
+### Added
+
+- **Optional Lavalink playback engine.** `playback.engine` selects `lavaplayer` or `lavalink`.
+  `lavaplayer` remains the default and is unchanged.
+
+  The two are not one path with a switch: with Lavaplayer the bot holds the Discord voice
+  connection and pushes Opus frames itself, while with Lavalink the node joins the voice gateway
+  and the bot sends none. The boundary sits at the voice connection and at a per-command flag, so
+  a command not yet ported says so rather than reading empty state and showing wrong numbers.
+
+  `fallback` is accepted, logged as unimplemented, and resolves to `lavaplayer`.
+
+  No new dependency: the node's v4 REST and WebSocket API is spoken directly with OkHttp and
+  Jackson, both already present.
+
+  The config editor gains an engine selector, a node list editor, and a test-connection button —
+  one `GET /v4/info` confirms host, port, TLS and password, where before it meant restarting and
+  reading a stack trace.
+
+### Fixed
+
+- **An untranslated string fell back to the configured default language rather than to English.**
+  Setting `ui.language` to anything but English meant a missing key fell back to that same
+  language, found nothing, and rendered the raw key on screen. The per-key fallback this project
+  promises worked only for people who had left the default on English.
+
+- **The proxy and Lavalink sections could be mistaken for each other**, and were — a Lavalink node
+  entered as a proxy routed YouTube traffic through it. Each section now says what it is for and
+  names the other. Two settings that are silently inert under Lavalink now say so.
+
+- **`ConfigRenderer` dropped the braces around `CONFIG_LIST` entries**, producing HOCON that fails
+  to reparse; the exception was swallowed and the default silently replaced the operator's list.
+
+- **The collapsed-section preference moved out of `config.txt`** into a sidecar file. It is a
+  window preference, and living in the config meant the repair pass flagged it as unknown on every
+  start and wrote another backup each time.
+
+
 ## [0.8.1-beta.1] — 2026-08-26
 
 ### Added
@@ -102,6 +142,7 @@ published releases cannot play a large share of videos.
 - The web panel accepts a query-string token for reads but requires an `Authorization` header
   for anything that changes state, so a link cannot rewrite someone's configuration.
 
-[Unreleased]: https://github.com/xx445469/NextVoiceCord/compare/v0.8.1-beta.1...HEAD
+[Unreleased]: https://github.com/xx445469/NextVoiceCord/compare/v0.9.0-beta.1...HEAD
+[0.9.0-beta.1]: https://github.com/xx445469/NextVoiceCord/releases/tag/v0.9.0-beta.1
 [0.8.1-beta.1]: https://github.com/xx445469/NextVoiceCord/releases/tag/v0.8.1-beta.1
 [0.8.0-beta.1]: https://github.com/xx445469/NextVoiceCord/releases/tag/v0.8.0-beta.1
