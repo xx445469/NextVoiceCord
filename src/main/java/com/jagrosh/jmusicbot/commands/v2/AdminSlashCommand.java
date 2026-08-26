@@ -15,7 +15,6 @@
  */
 package com.jagrosh.jmusicbot.commands.v2;
 
-import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import net.dv8tion.jda.api.Permission;
@@ -24,13 +23,11 @@ import net.dv8tion.jda.api.Permission;
  * Base class for Admin-level slash commands.
  * Requires MANAGE_SERVER permission or being the bot owner.
  */
-public abstract class AdminSlashCommand extends SlashCommand
+public abstract class AdminSlashCommand extends LocalizedSlashCommand
 {
-    protected final Bot bot;
-
     public AdminSlashCommand(Bot bot)
     {
-        this.bot = bot;
+        super(bot);
         this.guildOnly = true;
         this.category = new Category("Admin");
     }

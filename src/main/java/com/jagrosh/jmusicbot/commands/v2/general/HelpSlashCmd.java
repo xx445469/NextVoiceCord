@@ -11,6 +11,7 @@ import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.help.HelpCategory;
 import com.jagrosh.jmusicbot.commands.help.HelpMenuController;
 import com.jagrosh.jmusicbot.commands.help.HelpPanelRenderer;
+import com.jagrosh.jmusicbot.commands.v2.LocalizedSlashCommand;
 
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.entities.Guild;
@@ -28,13 +29,11 @@ import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
  * <p>Someone who only knows slash commands had no way to reach help before this existed — the
  * built-in help consumer only answered to the text prefix.
  */
-public class HelpSlashCmd extends SlashCommand
+public class HelpSlashCmd extends LocalizedSlashCommand
 {
-    private final Bot bot;
-
     public HelpSlashCmd(Bot bot)
     {
-        this.bot = bot;
+        super(bot);
         // guildOnly deliberately left unset — unlike settings or playback, nothing about help
         // needs a guild, so someone who DMs the bot can still reach it.
         this.name = "help";

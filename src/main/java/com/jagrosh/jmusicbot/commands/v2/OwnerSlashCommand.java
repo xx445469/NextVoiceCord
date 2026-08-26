@@ -15,7 +15,6 @@
  */
 package com.jagrosh.jmusicbot.commands.v2;
 
-import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 
@@ -23,13 +22,11 @@ import com.jagrosh.jmusicbot.Bot;
  * Base class for owner-only slash commands.
  * Only the bot owner can use these commands (no MANAGE_SERVER fallback).
  */
-public abstract class OwnerSlashCommand extends SlashCommand
+public abstract class OwnerSlashCommand extends LocalizedSlashCommand
 {
-    protected final Bot bot;
-
     public OwnerSlashCommand(Bot bot)
     {
-        this.bot = bot;
+        super(bot);
         this.guildOnly = true;
         this.category = new Category("Owner");
     }

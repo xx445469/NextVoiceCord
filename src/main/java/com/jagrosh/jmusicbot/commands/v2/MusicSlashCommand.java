@@ -1,6 +1,5 @@
 package com.jagrosh.jmusicbot.commands.v2;
 
-import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.commands.MusicCommandValidator;
@@ -8,15 +7,14 @@ import com.jagrosh.jmusicbot.settings.Settings;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 
-public abstract class MusicSlashCommand extends SlashCommand
+public abstract class MusicSlashCommand extends LocalizedSlashCommand
 {
-    protected final Bot bot;
     protected boolean bePlaying;
     protected boolean beListening;
 
     public MusicSlashCommand(Bot bot)
     {
-        this.bot = bot;
+        super(bot);
         this.guildOnly = true;
         this.category = new Category("Music");
     }

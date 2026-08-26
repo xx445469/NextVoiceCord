@@ -1,8 +1,8 @@
 package com.jagrosh.jmusicbot.commands.v2.admin;
 
-import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.commands.v2.LocalizedSlashCommand;
 import com.jagrosh.jmusicbot.settings.Settings;
 
 import net.dv8tion.jda.api.Permission;
@@ -20,13 +20,11 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
  * the server, their own settings for everyone else. Opening the server view for a member who
  * cannot use any of it would be a page of controls that all refuse them.
  */
-public class SettingsSlashCmd extends SlashCommand
+public class SettingsSlashCmd extends LocalizedSlashCommand
 {
-    private final Bot bot;
-
     public SettingsSlashCmd(Bot bot)
     {
-        this.bot = bot;
+        super(bot);
         this.name = "settings";
         this.help = "opens the settings panel";
         this.guildOnly = true;

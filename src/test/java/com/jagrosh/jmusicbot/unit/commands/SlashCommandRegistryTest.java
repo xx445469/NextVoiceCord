@@ -5,8 +5,10 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jmusicbot.commands.SlashCommandRegistry;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.interactions.DiscordLocale;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.commands.localization.LocalizationMap;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -322,5 +325,56 @@ public class SlashCommandRegistryTest {
 
         // Hashes should be different because description changed
         assertNotEquals(hash1, hash2, "Hash should change when command description changes");
+    }
+
+    @Test
+    void testHashCalculation_ChangesWhenDescriptionLocalizationsChange() throws IOException {
+        // Given: a command whose name/description/options never change, only its localisations.
+        // If the hash only looked at getName()/getDescription(), as it did before slash-command
+        // localisation was added, this would be indistinguishable from "nothing changed" and a
+        // translation edit would never reach Discord.
+        when(commandClient.getSlashCommands()).thenReturn(List.of(slashCommand));
+        when(slashCommandData.getNameLocalizations()).thenReturn(emptyLocalizations());
+        when(slashCommandData.getDescriptionLocalizations())
+                .thenReturn(localizationsOf(DiscordLocale.JAPANESE, "曲を再生します"));
+
+        ArgumentCaptor<Consumer<List<Command>>> successCaptor = ArgumentCaptor.forClass(Consumer.class);
+        doNothing().when(commandListUpdateAction).queue(successCaptor.capture(), any());
+
+        SlashCommandRegistry.registerIfChanged(jda, commandClient);
+        successCaptor.getValue().accept(Collections.emptyList());
+
+        Path hashFile = tempDir.resolve(HASH_FILE_NAME);
+        String hash1 = Files.readString(hashFile, StandardCharsets.UTF_8).trim();
+
+        // Same name, same base description, same options — only the Japanese localisation text
+        // changes, as a translation-file edit would produce.
+        reset(jda, commandListUpdateAction);
+        when(jda.updateCommands()).thenReturn(commandListUpdateAction);
+        when(commandListUpdateAction.addCommands(anyCollection())).thenReturn(commandListUpdateAction);
+        when(slashCommandData.getDescriptionLocalizations())
+                .thenReturn(localizationsOf(DiscordLocale.JAPANESE, "新しい曲を再生します"));
+
+        ArgumentCaptor<Consumer<List<Command>>> successCaptor2 = ArgumentCaptor.forClass(Consumer.class);
+        doNothing().when(commandListUpdateAction).queue(successCaptor2.capture(), any());
+
+        SlashCommandRegistry.registerIfChanged(jda, commandClient);
+
+        // Then: registration must run again — a translation change is a real change.
+        verify(jda).updateCommands();
+        successCaptor2.getValue().accept(Collections.emptyList());
+
+        String hash2 = Files.readString(hashFile, StandardCharsets.UTF_8).trim();
+        assertNotEquals(hash1, hash2, "Hash should change when a description localisation changes");
+    }
+
+    private static LocalizationMap emptyLocalizations() {
+        return new LocalizationMap(text -> { });
+    }
+
+    private static LocalizationMap localizationsOf(DiscordLocale locale, String text) {
+        LocalizationMap map = new LocalizationMap(t -> { });
+        map.setTranslations(Map.of(locale, text));
+        return map;
     }
 }

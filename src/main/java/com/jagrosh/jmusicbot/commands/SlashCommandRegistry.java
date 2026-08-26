@@ -19,8 +19,10 @@ import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.interactions.DiscordLocale;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.commands.localization.LocalizationMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,8 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -121,7 +125,12 @@ public class SlashCommandRegistry
 
     /**
      * Calculates a hash of all slash command definitions.
-     * The hash is based on command name, description, and options.
+     * The hash is based on command name, description, options, and per-locale localisations.
+     *
+     * <p>Localisations must be part of this hash, not just name/description/options: a
+     * translation file edit changes nothing that {@link SlashCommandData#getName()} or
+     * {@link SlashCommandData#getDescription()} reports, so without this the registry would
+     * decide nothing changed and never push the new wording to Discord.
      */
     private static String calculateHash(List<SlashCommand> commands)
     {
@@ -131,18 +140,26 @@ public class SlashCommandRegistry
             SlashCommandData data = (SlashCommandData) cmd.buildCommandData();
             sb.append(data.getName()).append(":");
             sb.append(data.getDescription()).append(":");
+            appendLocalizations(sb, data.getNameLocalizations());
+            appendLocalizations(sb, data.getDescriptionLocalizations());
             // Include options in hash
             data.getOptions().forEach(option -> {
                 sb.append(option.getName()).append(",");
                 sb.append(option.getDescription()).append(",");
                 sb.append(option.getType().name()).append(",");
                 sb.append(option.isRequired()).append(",");
-                sb.append(option.isAutoComplete()).append(";");
+                sb.append(option.isAutoComplete()).append(",");
+                appendLocalizations(sb, option.getNameLocalizations());
+                appendLocalizations(sb, option.getDescriptionLocalizations());
+                sb.append(";");
             });
             // Include subcommands if any
             data.getSubcommands().forEach(sub -> {
                 sb.append("sub:").append(sub.getName()).append(",");
-                sb.append(sub.getDescription()).append(";");
+                sb.append(sub.getDescription()).append(",");
+                appendLocalizations(sb, sub.getNameLocalizations());
+                appendLocalizations(sb, sub.getDescriptionLocalizations());
+                sb.append(";");
             });
             sb.append("|");
         }
@@ -165,6 +182,26 @@ public class SlashCommandRegistry
             LOG.warn("SHA-256 not available, using simple hash");
             return String.valueOf(sb.toString().hashCode());
         }
+    }
+
+    /**
+     * Appends a locale-to-text map to the hash input in a stable order.
+     *
+     * <p>{@link LocalizationMap} is backed by a regular {@link Map}, whose iteration order is
+     * not guaranteed; sorting by {@link DiscordLocale} first keeps the hash reproducible between
+     * runs so an unrelated iteration-order change never looks like a command change.
+     */
+    private static void appendLocalizations(StringBuilder sb, LocalizationMap localizations)
+    {
+        // Real SlashCommandData never returns null here (the field starts as an empty map),
+        // but test doubles that only stub the methods they care about will — tolerate that
+        // rather than making every such mock stub localisations just to avoid an NPE.
+        if (localizations != null)
+        {
+            Map<DiscordLocale, String> sorted = new TreeMap<>(localizations.toMap());
+            sorted.forEach((locale, text) -> sb.append(locale).append('=').append(text).append(','));
+        }
+        sb.append('|');
     }
 
     /**
