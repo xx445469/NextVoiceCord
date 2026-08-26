@@ -641,7 +641,15 @@
       "uiEmojis": "UI / 絵文字",
       "useYouTubeOAuth": "再生にYouTube OAuthを使用",
       "voice": "ボイス",
-      "warning": "警告"
+      "warning": "警告",
+      "proxy": "プロキシ",
+      "proxyGithub": "更新確認 (GitHub) をプロキシ経由にする",
+      "proxyHost": "ホスト",
+      "proxyJda": "Discord接続 (JDA) をプロキシ経由にする",
+      "proxyLavaplayer": "音声再生 (Lavaplayer) をプロキシ経由にする",
+      "proxyPassword": "パスワード",
+      "proxyPort": "ポート",
+      "proxyUsername": "ユーザー名"
     },
     "console": {
       "autoScroll": "自動スクロール",
@@ -787,7 +795,15 @@
       "openFolder": "設定フォルダを開く",
       "os": "オペレーティングシステム",
       "subtitle": "このウィンドウの見た目 — Bot自体には影響しません",
-      "systemInfo": "システム情報"
+      "systemInfo": "システム情報",
+      "cannotOpenBrowser": "このデスクトップではブラウザを自動的に開けません。\nリリースページのアドレスをクリップボードにコピーしました。",
+      "checkForUpdates": "更新を確認",
+      "checkingForUpdates": "更新を確認しています…",
+      "currentVersion": "現在のバージョン",
+      "updateAvailable": "バージョン {0} が利用可能です。",
+      "updateCheckFailed": "更新を確認できませんでした: {0}",
+      "updateUpToDate": "最新の状態です（{0}）。",
+      "updates": "更新"
     },
     "section": {
       "appearance": "外観",
@@ -1050,6 +1066,104 @@
     },
     "command": {
       "aliasesSuffix": "（エイリアス: {0}）"
+    }
+  },
+  "commands": {
+    "help": {
+      "description": "対話形式のコマンド一覧を表示"
+    },
+    "nowplaying": {
+      "description": "現在再生中の曲を表示"
+    },
+    "np": {
+      "description": "現在再生中の曲を表示"
+    },
+    "play": {
+      "description": "指定した曲を再生"
+    },
+    "playlists": {
+      "description": "利用可能なプレイリストを表示"
+    },
+    "queue": {
+      "description": "現在のキューを表示"
+    },
+    "history": {
+      "description": "最近再生した曲を表示（履歴キュー）"
+    },
+    "remove": {
+      "description": "キューから曲を削除"
+    },
+    "search": {
+      "description": "指定したキーワードでYouTubeを検索"
+    },
+    "seek": {
+      "description": "現在の曲をシーク"
+    },
+    "shuffle": {
+      "description": "自分が追加した曲をシャッフル"
+    },
+    "skip": {
+      "description": "現在の曲のスキップに投票"
+    },
+    "forceremove": {
+      "description": "指定ユーザーの項目をすべてキューから削除"
+    },
+    "forceskip": {
+      "description": "現在の曲をスキップ"
+    },
+    "movetrack": {
+      "description": "キュー内の曲を別の位置に移動"
+    },
+    "pause": {
+      "description": "現在の曲を一時停止"
+    },
+    "playnext": {
+      "description": "1曲を次に再生するよう設定"
+    },
+    "repeat": {
+      "description": "終了後に曲をキューへ再追加"
+    },
+    "skipto": {
+      "description": "指定した曲までスキップ"
+    },
+    "stop": {
+      "description": "現在の曲を停止しキューをクリア"
+    },
+    "volume": {
+      "description": "プレイヤーの音量を設定・表示"
+    },
+    "prefix": {
+      "description": "サーバー専用のプレフィックスを設定"
+    },
+    "controller": {
+      "description": "このサーバーの再生中コントロールパネルをカスタマイズ"
+    },
+    "queuetype": {
+      "description": "キュータイプを変更"
+    },
+    "nplayout": {
+      "description": "このサーバーの再生中レイアウトモードを設定"
+    },
+    "npbuttons": {
+      "description": "このサーバーの再生中メッセージに操作ボタンを含めるか設定"
+    },
+    "setdj": {
+      "description": "特定の音楽コマンドに使うDJロールを設定"
+    },
+    "settc": {
+      "description": "音楽コマンド用のテキストチャンネルを設定"
+    },
+    "setvc": {
+      "description": "音楽再生用のボイスチャンネルを設定"
+    },
+    "setskip": {
+      "description": "サーバー専用のスキップ割合を設定"
+    },
+    "settings": {
+      "description": "設定パネルを開く"
+    },
+    "clearchannel": {
+      "description": "/settcで設定したコマンドチャンネルのメッセージを全削除（オーナー専用）"
     }
   }
 }

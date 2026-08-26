@@ -641,7 +641,15 @@
       "uiEmojis": "Giao diện / Emoji",
       "useYouTubeOAuth": "Dùng YouTube OAuth để phát nhạc",
       "voice": "Thoại",
-      "warning": "Cảnh báo"
+      "warning": "Cảnh báo",
+      "proxy": "Proxy",
+      "proxyGithub": "Định tuyến kiểm tra cập nhật (GitHub) qua proxy",
+      "proxyHost": "Máy chủ",
+      "proxyJda": "Định tuyến kết nối Discord (JDA) qua proxy",
+      "proxyLavaplayer": "Định tuyến phát âm thanh (Lavaplayer) qua proxy",
+      "proxyPassword": "Mật khẩu",
+      "proxyPort": "Cổng",
+      "proxyUsername": "Tên người dùng"
     },
     "console": {
       "autoScroll": "Tự động cuộn",
@@ -787,7 +795,15 @@
       "openFolder": "Mở thư mục cấu hình",
       "os": "Hệ điều hành",
       "subtitle": "Giao diện của cửa sổ này — không ảnh hưởng đến bản thân bot",
-      "systemInfo": "Thông tin hệ thống"
+      "systemInfo": "Thông tin hệ thống",
+      "cannotOpenBrowser": "Máy tính này không thể tự động mở trình duyệt.\nĐịa chỉ trang phát hành đã được sao chép vào khay nhớ tạm.",
+      "checkForUpdates": "Kiểm tra cập nhật",
+      "checkingForUpdates": "Đang kiểm tra cập nhật…",
+      "currentVersion": "Phiên bản hiện tại",
+      "updateAvailable": "Phiên bản {0} đã có sẵn.",
+      "updateCheckFailed": "Không thể kiểm tra cập nhật: {0}",
+      "updateUpToDate": "Bạn đang dùng phiên bản mới nhất ({0}).",
+      "updates": "Cập nhật"
     },
     "section": {
       "appearance": "Giao diện",
@@ -1050,6 +1066,104 @@
     },
     "command": {
       "aliasesSuffix": " (bí danh: {0})"
+    }
+  },
+  "commands": {
+    "help": {
+      "description": "hiển thị danh sách lệnh tương tác"
+    },
+    "nowplaying": {
+      "description": "hiển thị bài hát đang phát"
+    },
+    "np": {
+      "description": "hiển thị bài hát đang phát"
+    },
+    "play": {
+      "description": "phát bài hát đã cung cấp"
+    },
+    "playlists": {
+      "description": "hiển thị các danh sách phát khả dụng"
+    },
+    "queue": {
+      "description": "hiển thị hàng đợi hiện tại"
+    },
+    "history": {
+      "description": "hiển thị các bài hát phát gần đây (hàng đợi lịch sử)"
+    },
+    "remove": {
+      "description": "xóa một bài hát khỏi hàng đợi"
+    },
+    "search": {
+      "description": "tìm kiếm trên YouTube theo từ khóa đã cung cấp"
+    },
+    "seek": {
+      "description": "tua bài hát hiện tại"
+    },
+    "shuffle": {
+      "description": "xáo trộn các bài hát bạn đã thêm"
+    },
+    "skip": {
+      "description": "bỏ phiếu để bỏ qua bài hát hiện tại"
+    },
+    "forceremove": {
+      "description": "xóa tất cả bài hát của một người dùng khỏi hàng đợi"
+    },
+    "forceskip": {
+      "description": "bỏ qua bài hát hiện tại"
+    },
+    "movetrack": {
+      "description": "di chuyển một bài hát trong hàng đợi đến vị trí khác"
+    },
+    "pause": {
+      "description": "tạm dừng bài hát hiện tại"
+    },
+    "playnext": {
+      "description": "phát một bài hát ngay sau bài hiện tại"
+    },
+    "repeat": {
+      "description": "thêm lại nhạc vào hàng đợi khi phát xong"
+    },
+    "skipto": {
+      "description": "nhảy đến bài hát đã chỉ định"
+    },
+    "stop": {
+      "description": "dừng bài hát hiện tại và xóa hàng đợi"
+    },
+    "volume": {
+      "description": "đặt hoặc hiển thị âm lượng trình phát"
+    },
+    "prefix": {
+      "description": "đặt tiền tố riêng cho máy chủ"
+    },
+    "controller": {
+      "description": "tùy chỉnh bảng điều khiển đang phát cho máy chủ này"
+    },
+    "queuetype": {
+      "description": "thay đổi loại hàng đợi"
+    },
+    "nplayout": {
+      "description": "đặt chế độ bố cục đang phát cho máy chủ này"
+    },
+    "npbuttons": {
+      "description": "đặt xem tin nhắn đang phát có nút tương tác cho máy chủ này không"
+    },
+    "setdj": {
+      "description": "đặt vai trò DJ cho một số lệnh nhạc nhất định"
+    },
+    "settc": {
+      "description": "đặt kênh văn bản cho các lệnh nhạc"
+    },
+    "setvc": {
+      "description": "đặt kênh thoại để phát nhạc"
+    },
+    "setskip": {
+      "description": "đặt tỷ lệ bỏ qua riêng cho máy chủ"
+    },
+    "settings": {
+      "description": "mở bảng cài đặt"
+    },
+    "clearchannel": {
+      "description": "xóa tất cả tin nhắn trong kênh lệnh đã đặt bằng /settc (chỉ chủ sở hữu)"
     }
   }
 }

@@ -641,7 +641,15 @@
       "uiEmojis": "Interfaz / Emojis",
       "useYouTubeOAuth": "Usar OAuth de YouTube para la reproducción",
       "voice": "Voz",
-      "warning": "Advertencia"
+      "warning": "Advertencia",
+      "proxy": "Proxy",
+      "proxyGithub": "Enrutar las comprobaciones de actualización (GitHub) por el proxy",
+      "proxyHost": "Host",
+      "proxyJda": "Enrutar la conexión de Discord (JDA) por el proxy",
+      "proxyLavaplayer": "Enrutar la reproducción de audio (Lavaplayer) por el proxy",
+      "proxyPassword": "Contraseña",
+      "proxyPort": "Puerto",
+      "proxyUsername": "Usuario"
     },
     "console": {
       "autoScroll": "Desplazamiento automático",
@@ -787,7 +795,15 @@
       "openFolder": "Abrir carpeta de configuración",
       "os": "Sistema operativo",
       "subtitle": "El aspecto de esta ventana — el bot en sí no se ve afectado",
-      "systemInfo": "Información del sistema"
+      "systemInfo": "Información del sistema",
+      "cannotOpenBrowser": "Este equipo no puede abrir un navegador automáticamente.\nLa dirección de la página de versiones se copió al portapapeles.",
+      "checkForUpdates": "Buscar actualizaciones",
+      "checkingForUpdates": "Buscando actualizaciones…",
+      "currentVersion": "Versión actual",
+      "updateAvailable": "La versión {0} está disponible.",
+      "updateCheckFailed": "No se pudieron buscar actualizaciones: {0}",
+      "updateUpToDate": "Estás al día ({0}).",
+      "updates": "Actualizaciones"
     },
     "section": {
       "appearance": "Apariencia",
@@ -1050,6 +1066,104 @@
     },
     "command": {
       "aliasesSuffix": " (alias: {0})"
+    }
+  },
+  "commands": {
+    "help": {
+      "description": "muestra una lista interactiva de comandos"
+    },
+    "nowplaying": {
+      "description": "muestra la canción que se está reproduciendo"
+    },
+    "np": {
+      "description": "muestra la canción que se está reproduciendo"
+    },
+    "play": {
+      "description": "reproduce la canción indicada"
+    },
+    "playlists": {
+      "description": "muestra las listas de reproducción disponibles"
+    },
+    "queue": {
+      "description": "muestra la cola actual"
+    },
+    "history": {
+      "description": "muestra las canciones reproducidas recientemente (historial)"
+    },
+    "remove": {
+      "description": "quita una canción de la cola"
+    },
+    "search": {
+      "description": "busca en YouTube el término indicado"
+    },
+    "seek": {
+      "description": "salta a un punto de la canción actual"
+    },
+    "shuffle": {
+      "description": "mezcla las canciones que has añadido"
+    },
+    "skip": {
+      "description": "vota para saltar la canción actual"
+    },
+    "forceremove": {
+      "description": "quita de la cola todas las entradas de un usuario"
+    },
+    "forceskip": {
+      "description": "salta la canción actual"
+    },
+    "movetrack": {
+      "description": "mueve una canción de la cola a otra posición"
+    },
+    "pause": {
+      "description": "pausa la canción actual"
+    },
+    "playnext": {
+      "description": "reproduce una canción justo después de esta"
+    },
+    "repeat": {
+      "description": "vuelve a añadir la música a la cola al terminar"
+    },
+    "skipto": {
+      "description": "salta hasta la canción indicada"
+    },
+    "stop": {
+      "description": "detiene la canción actual y vacía la cola"
+    },
+    "volume": {
+      "description": "define o muestra el volumen del reproductor"
+    },
+    "prefix": {
+      "description": "define un prefijo propio del servidor"
+    },
+    "controller": {
+      "description": "personaliza el panel de control de reproducción de este servidor"
+    },
+    "queuetype": {
+      "description": "cambia el tipo de cola"
+    },
+    "nplayout": {
+      "description": "define el modo de diseño de «reproduciendo ahora» para este servidor"
+    },
+    "npbuttons": {
+      "description": "define si los mensajes de «reproduciendo ahora» incluyen botones aquí"
+    },
+    "setdj": {
+      "description": "define el rol de DJ para ciertos comandos de música"
+    },
+    "settc": {
+      "description": "define el canal de texto para los comandos de música"
+    },
+    "setvc": {
+      "description": "define el canal de voz para reproducir música"
+    },
+    "setskip": {
+      "description": "define un porcentaje de salto propio del servidor"
+    },
+    "settings": {
+      "description": "abre el panel de ajustes"
+    },
+    "clearchannel": {
+      "description": "borra todos los mensajes del canal definido con /settc (solo el dueño)"
     }
   }
 }

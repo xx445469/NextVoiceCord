@@ -641,7 +641,15 @@
       "uiEmojis": "UI / Emojis",
       "useYouTubeOAuth": "YouTube-OAuth für die Wiedergabe verwenden",
       "voice": "Sprache",
-      "warning": "Warnung"
+      "warning": "Warnung",
+      "proxy": "Proxy",
+      "proxyGithub": "Update-Prüfungen (GitHub) über Proxy leiten",
+      "proxyHost": "Host",
+      "proxyJda": "Discord-Verbindung (JDA) über Proxy leiten",
+      "proxyLavaplayer": "Audiowiedergabe (Lavaplayer) über Proxy leiten",
+      "proxyPassword": "Passwort",
+      "proxyPort": "Port",
+      "proxyUsername": "Benutzername"
     },
     "console": {
       "autoScroll": "Automatisch scrollen",
@@ -787,7 +795,15 @@
       "openFolder": "Konfigurationsordner öffnen",
       "os": "Betriebssystem",
       "subtitle": "Wie dieses Fenster aussieht — der Bot selbst ist davon nicht betroffen",
-      "systemInfo": "Systeminformationen"
+      "systemInfo": "Systeminformationen",
+      "cannotOpenBrowser": "Dieser Desktop kann keinen Browser automatisch öffnen.\nDie Adresse der Releases-Seite wurde in die Zwischenablage kopiert.",
+      "checkForUpdates": "Nach Updates suchen",
+      "checkingForUpdates": "Suche nach Updates…",
+      "currentVersion": "Aktuelle Version",
+      "updateAvailable": "Version {0} ist verfügbar.",
+      "updateCheckFailed": "Updates konnten nicht geprüft werden: {0}",
+      "updateUpToDate": "Du bist auf dem neuesten Stand ({0}).",
+      "updates": "Updates"
     },
     "section": {
       "appearance": "Erscheinungsbild",
@@ -1050,6 +1066,104 @@
     },
     "command": {
       "aliasesSuffix": " (Aliase: {0})"
+    }
+  },
+  "commands": {
+    "help": {
+      "description": "zeigt eine interaktive Liste der Befehle"
+    },
+    "nowplaying": {
+      "description": "zeigt den aktuell gespielten Song"
+    },
+    "np": {
+      "description": "zeigt den aktuell gespielten Song"
+    },
+    "play": {
+      "description": "spielt den angegebenen Song"
+    },
+    "playlists": {
+      "description": "zeigt die verfügbaren Playlists"
+    },
+    "queue": {
+      "description": "zeigt die aktuelle Warteschlange"
+    },
+    "history": {
+      "description": "zeigt zuletzt gespielte Titel (Verlauf)"
+    },
+    "remove": {
+      "description": "entfernt einen Song aus der Warteschlange"
+    },
+    "search": {
+      "description": "durchsucht YouTube nach einer angegebenen Suche"
+    },
+    "seek": {
+      "description": "spult im aktuellen Song"
+    },
+    "shuffle": {
+      "description": "mischt die von dir hinzugefügten Songs"
+    },
+    "skip": {
+      "description": "stimmt dafür, den aktuellen Song zu überspringen"
+    },
+    "forceremove": {
+      "description": "entfernt alle Einträge eines Nutzers aus der Warteschlange"
+    },
+    "forceskip": {
+      "description": "überspringt den aktuellen Song"
+    },
+    "movetrack": {
+      "description": "verschiebt einen Titel der Warteschlange an eine andere Position"
+    },
+    "pause": {
+      "description": "pausiert den aktuellen Song"
+    },
+    "playnext": {
+      "description": "spielt einen Song als Nächstes"
+    },
+    "repeat": {
+      "description": "fügt Musik nach dem Ende wieder der Warteschlange hinzu"
+    },
+    "skipto": {
+      "description": "springt zum angegebenen Song"
+    },
+    "stop": {
+      "description": "stoppt den aktuellen Song und leert die Warteschlange"
+    },
+    "volume": {
+      "description": "setzt oder zeigt die Player-Lautstärke"
+    },
+    "prefix": {
+      "description": "legt ein serverspezifisches Präfix fest"
+    },
+    "controller": {
+      "description": "passt das Wird-gespielt-Bedienfeld für diesen Server an"
+    },
+    "queuetype": {
+      "description": "ändert den Warteschlangentyp"
+    },
+    "nplayout": {
+      "description": "legt den Wird-gespielt-Layoutmodus für diesen Server fest"
+    },
+    "npbuttons": {
+      "description": "legt fest, ob Wird-gespielt-Nachrichten für diesen Server Buttons enthalten"
+    },
+    "setdj": {
+      "description": "legt die DJ-Rolle für bestimmte Musikbefehle fest"
+    },
+    "settc": {
+      "description": "legt den Textkanal für Musikbefehle fest"
+    },
+    "setvc": {
+      "description": "legt den Sprachkanal für die Musikwiedergabe fest"
+    },
+    "setskip": {
+      "description": "legt einen serverspezifischen Skip-Prozentsatz fest"
+    },
+    "settings": {
+      "description": "öffnet das Einstellungsfenster"
+    },
+    "clearchannel": {
+      "description": "löscht alle Nachrichten im mit /settc festgelegten Befehlskanal (nur Owner)"
     }
   }
 }

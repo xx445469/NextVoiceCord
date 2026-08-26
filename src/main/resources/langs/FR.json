@@ -641,7 +641,15 @@
       "uiEmojis": "UI / Emojis",
       "useYouTubeOAuth": "Utiliser OAuth YouTube pour la lecture",
       "voice": "Voix",
-      "warning": "Avertissement"
+      "warning": "Avertissement",
+      "proxy": "Proxy",
+      "proxyGithub": "Faire passer les vérifications de mise à jour (GitHub) par le proxy",
+      "proxyHost": "Hôte",
+      "proxyJda": "Faire passer la connexion Discord (JDA) par le proxy",
+      "proxyLavaplayer": "Faire passer la lecture audio (Lavaplayer) par le proxy",
+      "proxyPassword": "Mot de passe",
+      "proxyPort": "Port",
+      "proxyUsername": "Nom d'utilisateur"
     },
     "console": {
       "autoScroll": "Défilement automatique",
@@ -787,7 +795,15 @@
       "openFolder": "Ouvrir le dossier de configuration",
       "os": "Système d'exploitation",
       "subtitle": "L'apparence de cette fenêtre — le bot lui-même n'est pas affecté",
-      "systemInfo": "Informations système"
+      "systemInfo": "Informations système",
+      "cannotOpenBrowser": "Ce bureau ne peut pas ouvrir un navigateur automatiquement.\nL'adresse de la page des versions a été copiée dans le presse-papiers.",
+      "checkForUpdates": "Vérifier les mises à jour",
+      "checkingForUpdates": "Vérification des mises à jour…",
+      "currentVersion": "Version actuelle",
+      "updateAvailable": "La version {0} est disponible.",
+      "updateCheckFailed": "Impossible de vérifier les mises à jour : {0}",
+      "updateUpToDate": "Tu es à jour ({0}).",
+      "updates": "Mises à jour"
     },
     "section": {
       "appearance": "Apparence",
@@ -1050,6 +1066,104 @@
     },
     "command": {
       "aliasesSuffix": " (alias : {0})"
+    }
+  },
+  "commands": {
+    "help": {
+      "description": "affiche une liste interactive des commandes"
+    },
+    "nowplaying": {
+      "description": "affiche la chanson en cours de lecture"
+    },
+    "np": {
+      "description": "affiche la chanson en cours de lecture"
+    },
+    "play": {
+      "description": "joue la chanson indiquée"
+    },
+    "playlists": {
+      "description": "affiche les playlists disponibles"
+    },
+    "queue": {
+      "description": "affiche la file d'attente actuelle"
+    },
+    "history": {
+      "description": "affiche les titres récemment joués (historique)"
+    },
+    "remove": {
+      "description": "retire une chanson de la file d'attente"
+    },
+    "search": {
+      "description": "recherche une requête sur YouTube"
+    },
+    "seek": {
+      "description": "avance ou recule dans la chanson en cours"
+    },
+    "shuffle": {
+      "description": "mélange les chansons que tu as ajoutées"
+    },
+    "skip": {
+      "description": "vote pour passer la chanson en cours"
+    },
+    "forceremove": {
+      "description": "retire toutes les entrées d'un utilisateur de la file d'attente"
+    },
+    "forceskip": {
+      "description": "passe la chanson en cours"
+    },
+    "movetrack": {
+      "description": "déplace un titre de la file d'attente à une autre position"
+    },
+    "pause": {
+      "description": "met en pause la chanson en cours"
+    },
+    "playnext": {
+      "description": "joue une chanson juste après celle-ci"
+    },
+    "repeat": {
+      "description": "rajoute la musique à la file une fois terminée"
+    },
+    "skipto": {
+      "description": "saute jusqu'à la chanson indiquée"
+    },
+    "stop": {
+      "description": "arrête la chanson en cours et vide la file d'attente"
+    },
+    "volume": {
+      "description": "définit ou affiche le volume du lecteur"
+    },
+    "prefix": {
+      "description": "définit un préfixe propre au serveur"
+    },
+    "controller": {
+      "description": "personnalise le panneau de contrôle de lecture pour ce serveur"
+    },
+    "queuetype": {
+      "description": "change le type de file d'attente"
+    },
+    "nplayout": {
+      "description": "définit le mode de mise en page « lecture en cours » pour ce serveur"
+    },
+    "npbuttons": {
+      "description": "définit si les messages « lecture en cours » incluent des boutons ici"
+    },
+    "setdj": {
+      "description": "définit le rôle DJ pour certaines commandes musicales"
+    },
+    "settc": {
+      "description": "définit le salon textuel pour les commandes musicales"
+    },
+    "setvc": {
+      "description": "définit le salon vocal pour la lecture de musique"
+    },
+    "setskip": {
+      "description": "définit un pourcentage de vote propre au serveur"
+    },
+    "settings": {
+      "description": "ouvre le panneau de paramètres"
+    },
+    "clearchannel": {
+      "description": "efface tous les messages du salon défini avec /settc (propriétaire uniquement)"
     }
   }
 }

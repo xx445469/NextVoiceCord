@@ -641,7 +641,15 @@
       "uiEmojis": "Interfejs / Emoji",
       "useYouTubeOAuth": "Użyj OAuth YouTube do odtwarzania",
       "voice": "Głos",
-      "warning": "Ostrzeżenie"
+      "warning": "Ostrzeżenie",
+      "proxy": "Proxy",
+      "proxyGithub": "Kieruj sprawdzanie aktualizacji (GitHub) przez proxy",
+      "proxyHost": "Host",
+      "proxyJda": "Kieruj połączenie z Discordem (JDA) przez proxy",
+      "proxyLavaplayer": "Kieruj odtwarzanie dźwięku (Lavaplayer) przez proxy",
+      "proxyPassword": "Hasło",
+      "proxyPort": "Port",
+      "proxyUsername": "Nazwa użytkownika"
     },
     "console": {
       "autoScroll": "Autoprzewijanie",
@@ -787,7 +795,15 @@
       "openFolder": "Otwórz folder konfiguracyjny",
       "os": "System operacyjny",
       "subtitle": "Jak wygląda to okno — sam bot pozostaje bez zmian",
-      "systemInfo": "Informacje o systemie"
+      "systemInfo": "Informacje o systemie",
+      "cannotOpenBrowser": "Ten komputer nie może automatycznie otworzyć przeglądarki.\nAdres strony z wydaniami skopiowano do schowka.",
+      "checkForUpdates": "Sprawdź aktualizacje",
+      "checkingForUpdates": "Sprawdzanie aktualizacji…",
+      "currentVersion": "Obecna wersja",
+      "updateAvailable": "Dostępna jest wersja {0}.",
+      "updateCheckFailed": "Nie udało się sprawdzić aktualizacji: {0}",
+      "updateUpToDate": "Masz najnowszą wersję ({0}).",
+      "updates": "Aktualizacje"
     },
     "section": {
       "appearance": "Wygląd",
@@ -1050,6 +1066,104 @@
     },
     "command": {
       "aliasesSuffix": " (aliasy: {0})"
+    }
+  },
+  "commands": {
+    "help": {
+      "description": "pokazuje interaktywną listę komend"
+    },
+    "nowplaying": {
+      "description": "pokazuje utwór odtwarzany obecnie"
+    },
+    "np": {
+      "description": "pokazuje utwór odtwarzany obecnie"
+    },
+    "play": {
+      "description": "odtwarza podany utwór"
+    },
+    "playlists": {
+      "description": "pokazuje dostępne playlisty"
+    },
+    "queue": {
+      "description": "pokazuje aktualną kolejkę"
+    },
+    "history": {
+      "description": "pokazuje ostatnio odtwarzane utwory (historia)"
+    },
+    "remove": {
+      "description": "usuwa utwór z kolejki"
+    },
+    "search": {
+      "description": "wyszukuje podane zapytanie w YouTube"
+    },
+    "seek": {
+      "description": "przewija obecny utwór"
+    },
+    "shuffle": {
+      "description": "tasuje dodane przez ciebie utwory"
+    },
+    "skip": {
+      "description": "głosuje za pominięciem obecnego utworu"
+    },
+    "forceremove": {
+      "description": "usuwa z kolejki wszystkie wpisy danego użytkownika"
+    },
+    "forceskip": {
+      "description": "pomija obecny utwór"
+    },
+    "movetrack": {
+      "description": "przenosi utwór w kolejce na inną pozycję"
+    },
+    "pause": {
+      "description": "wstrzymuje obecny utwór"
+    },
+    "playnext": {
+      "description": "ustawia utwór do odtworzenia jako następny"
+    },
+    "repeat": {
+      "description": "dodaje muzykę z powrotem do kolejki po zakończeniu"
+    },
+    "skipto": {
+      "description": "przeskakuje do wskazanego utworu"
+    },
+    "stop": {
+      "description": "zatrzymuje obecny utwór i czyści kolejkę"
+    },
+    "volume": {
+      "description": "ustawia lub pokazuje głośność odtwarzacza"
+    },
+    "prefix": {
+      "description": "ustawia prefiks właściwy dla serwera"
+    },
+    "controller": {
+      "description": "dostosowuje panel sterowania odtwarzaniem dla tego serwera"
+    },
+    "queuetype": {
+      "description": "zmienia typ kolejki"
+    },
+    "nplayout": {
+      "description": "ustawia tryb układu panelu odtwarzania dla tego serwera"
+    },
+    "npbuttons": {
+      "description": "ustawia, czy wiadomości o odtwarzaniu mają przyciski na tym serwerze"
+    },
+    "setdj": {
+      "description": "ustawia rolę DJ dla wybranych komend muzycznych"
+    },
+    "settc": {
+      "description": "ustawia kanał tekstowy dla komend muzycznych"
+    },
+    "setvc": {
+      "description": "ustawia kanał głosowy do odtwarzania muzyki"
+    },
+    "setskip": {
+      "description": "ustawia próg pomijania właściwy dla serwera"
+    },
+    "settings": {
+      "description": "otwiera panel ustawień"
+    },
+    "clearchannel": {
+      "description": "czyści wiadomości w kanale komend ustawionym przez /settc (tylko właściciel)"
     }
   }
 }

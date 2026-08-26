@@ -682,7 +682,15 @@
       "uiEmojis": "介面／表情符號",
       "useYouTubeOAuth": "使用 YouTube OAuth 播放",
       "voice": "語音",
-      "warning": "警告"
+      "warning": "警告",
+      "proxy": "代理伺服器",
+      "proxyGithub": "透過代理伺服器發送更新檢查 (GitHub)",
+      "proxyHost": "主機",
+      "proxyJda": "透過代理伺服器連線 Discord (JDA)",
+      "proxyLavaplayer": "透過代理伺服器播放音訊 (Lavaplayer)",
+      "proxyPassword": "密碼",
+      "proxyPort": "連接埠",
+      "proxyUsername": "使用者名稱"
     },
     "console": {
       "autoScroll": "自動捲動",
@@ -798,7 +806,15 @@
       "openFolder": "開啟設定資料夾",
       "os": "作業系統",
       "subtitle": "這個視窗的外觀——不影響機器人本身",
-      "systemInfo": "系統資訊"
+      "systemInfo": "系統資訊",
+      "cannotOpenBrowser": "這個桌面環境無法自動開啟瀏覽器。\n發行頁面網址已複製到剪貼簿。",
+      "checkForUpdates": "檢查更新",
+      "checkingForUpdates": "正在檢查更新⋯",
+      "currentVersion": "目前版本",
+      "updateAvailable": "有新版本 {0} 可用。",
+      "updateCheckFailed": "無法檢查更新：{0}",
+      "updateUpToDate": "已是最新版本（{0}）。",
+      "updates": "更新"
     },
     "sources": {
       "avgLoadTime": "平均載入時間",
@@ -1050,6 +1066,104 @@
     },
     "command": {
       "aliasesSuffix": "（別名：{0}）"
+    }
+  },
+  "commands": {
+    "help": {
+      "description": "顯示互動式指令清單"
+    },
+    "nowplaying": {
+      "description": "顯示目前播放的歌曲"
+    },
+    "np": {
+      "description": "顯示目前播放的歌曲"
+    },
+    "play": {
+      "description": "播放指定的歌曲"
+    },
+    "playlists": {
+      "description": "顯示可用的播放清單"
+    },
+    "queue": {
+      "description": "顯示目前的佇列"
+    },
+    "history": {
+      "description": "顯示最近播放的曲目（歷史佇列）"
+    },
+    "remove": {
+      "description": "從佇列中移除一首歌"
+    },
+    "search": {
+      "description": "在 YouTube 搜尋指定的關鍵字"
+    },
+    "seek": {
+      "description": "跳轉目前歌曲的播放位置"
+    },
+    "shuffle": {
+      "description": "隨機排序你加入的歌曲"
+    },
+    "skip": {
+      "description": "投票跳過目前歌曲"
+    },
+    "forceremove": {
+      "description": "從佇列中移除某使用者的所有項目"
+    },
+    "forceskip": {
+      "description": "跳過目前歌曲"
+    },
+    "movetrack": {
+      "description": "將佇列中的曲目移動到其他位置"
+    },
+    "pause": {
+      "description": "暫停目前歌曲"
+    },
+    "playnext": {
+      "description": "將單首歌曲設為下一首播放"
+    },
+    "repeat": {
+      "description": "播完後將音樂重新加入佇列"
+    },
+    "skipto": {
+      "description": "跳到指定的歌曲"
+    },
+    "stop": {
+      "description": "停止目前歌曲並清空佇列"
+    },
+    "volume": {
+      "description": "設定或顯示播放器音量"
+    },
+    "prefix": {
+      "description": "設定伺服器專屬前綴"
+    },
+    "controller": {
+      "description": "自訂此伺服器的播放中控制面板"
+    },
+    "queuetype": {
+      "description": "變更佇列類型"
+    },
+    "nplayout": {
+      "description": "設定此伺服器的播放中版面模式"
+    },
+    "npbuttons": {
+      "description": "設定此伺服器的播放中訊息是否包含互動按鈕"
+    },
+    "setdj": {
+      "description": "為特定音樂指令設定 DJ 身分組"
+    },
+    "settc": {
+      "description": "設定音樂指令使用的文字頻道"
+    },
+    "setvc": {
+      "description": "設定播放音樂使用的語音頻道"
+    },
+    "setskip": {
+      "description": "設定伺服器專屬的跳過百分比"
+    },
+    "settings": {
+      "description": "開啟設定面板"
+    },
+    "clearchannel": {
+      "description": "清除以 /settc 設定的指令頻道中所有訊息（僅限擁有者）"
     }
   }
 }

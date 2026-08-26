@@ -641,7 +641,15 @@
       "uiEmojis": "界面 / 表情符号",
       "useYouTubeOAuth": "使用 YouTube OAuth 播放",
       "voice": "语音",
-      "warning": "警告"
+      "warning": "警告",
+      "proxy": "代理",
+      "proxyGithub": "通过代理发送更新检查 (GitHub)",
+      "proxyHost": "主机",
+      "proxyJda": "通过代理连接 Discord (JDA)",
+      "proxyLavaplayer": "通过代理播放音频 (Lavaplayer)",
+      "proxyPassword": "密码",
+      "proxyPort": "端口",
+      "proxyUsername": "用户名"
     },
     "console": {
       "autoScroll": "自动滚动",
@@ -787,7 +795,15 @@
       "openFolder": "打开配置文件夹",
       "os": "操作系统",
       "subtitle": "此窗口的外观——不影响机器人本身",
-      "systemInfo": "系统信息"
+      "systemInfo": "系统信息",
+      "cannotOpenBrowser": "这个桌面环境无法自动打开浏览器。\n发布页面地址已复制到剪贴板。",
+      "checkForUpdates": "检查更新",
+      "checkingForUpdates": "正在检查更新……",
+      "currentVersion": "当前版本",
+      "updateAvailable": "有新版本 {0} 可用。",
+      "updateCheckFailed": "无法检查更新：{0}",
+      "updateUpToDate": "已是最新版本（{0}）。",
+      "updates": "更新"
     },
     "section": {
       "appearance": "外观",
@@ -1050,6 +1066,104 @@
     },
     "command": {
       "aliasesSuffix": "（别名：{0}）"
+    }
+  },
+  "commands": {
+    "help": {
+      "description": "显示可交互的指令列表"
+    },
+    "nowplaying": {
+      "description": "显示当前播放的歌曲"
+    },
+    "np": {
+      "description": "显示当前播放的歌曲"
+    },
+    "play": {
+      "description": "播放指定的歌曲"
+    },
+    "playlists": {
+      "description": "显示可用的播放列表"
+    },
+    "queue": {
+      "description": "显示当前队列"
+    },
+    "history": {
+      "description": "显示最近播放的曲目（历史队列）"
+    },
+    "remove": {
+      "description": "从队列中移除一首歌"
+    },
+    "search": {
+      "description": "在 YouTube 中搜索指定内容"
+    },
+    "seek": {
+      "description": "跳转当前歌曲的播放位置"
+    },
+    "shuffle": {
+      "description": "随机排序你添加的歌曲"
+    },
+    "skip": {
+      "description": "投票跳过当前歌曲"
+    },
+    "forceremove": {
+      "description": "从队列中移除某用户的所有项目"
+    },
+    "forceskip": {
+      "description": "跳过当前歌曲"
+    },
+    "movetrack": {
+      "description": "将队列中的曲目移动到其他位置"
+    },
+    "pause": {
+      "description": "暂停当前歌曲"
+    },
+    "playnext": {
+      "description": "将单首歌曲设为下一首播放"
+    },
+    "repeat": {
+      "description": "播放完毕后将音乐重新加入队列"
+    },
+    "skipto": {
+      "description": "跳到指定的歌曲"
+    },
+    "stop": {
+      "description": "停止当前歌曲并清空队列"
+    },
+    "volume": {
+      "description": "设置或显示播放器音量"
+    },
+    "prefix": {
+      "description": "设置服务器专属前缀"
+    },
+    "controller": {
+      "description": "自定义此服务器的播放中控制面板"
+    },
+    "queuetype": {
+      "description": "更改队列类型"
+    },
+    "nplayout": {
+      "description": "设置此服务器的播放中布局模式"
+    },
+    "npbuttons": {
+      "description": "设置此服务器的播放中消息是否包含交互按钮"
+    },
+    "setdj": {
+      "description": "为特定音乐指令设置 DJ 身份组"
+    },
+    "settc": {
+      "description": "设置音乐指令使用的文字频道"
+    },
+    "setvc": {
+      "description": "设置播放音乐使用的语音频道"
+    },
+    "setskip": {
+      "description": "设置服务器专属的跳过百分比"
+    },
+    "settings": {
+      "description": "打开设置面板"
+    },
+    "clearchannel": {
+      "description": "清除以 /settc 设置的指令频道中所有消息（仅限所有者）"
     }
   }
 }
