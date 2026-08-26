@@ -1,10 +1,8 @@
-# Discussions are not enabled on this repository, so these point at Issues rather than
-# at a Discussions tab that would 404. Swap the URLs if Discussions is turned on later.
 blank_issues_enabled: false
 contact_links:
-  - name: Question
-    url: https://github.com/xx445469/NextVoiceCord/issues
-    about: For general questions, open an issue and label it "question"
+  - name: Question or general discussion
+    url: https://github.com/xx445469/NextVoiceCord/discussions
+    about: For anything that is not a bug report or a specific request
   - name: Upstream projects
     url: https://github.com/jagrosh/MusicBot/discussions
     about: For questions about JMusicBot itself, which this project builds on

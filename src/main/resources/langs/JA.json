@@ -649,7 +649,54 @@
       "proxyLavaplayer": "音声再生 (Lavaplayer) をプロキシ経由にする",
       "proxyPassword": "パスワード",
       "proxyPort": "ポート",
-      "proxyUsername": "ユーザー名"
+      "proxyUsername": "ユーザー名",
+      "advancedReadOnly": "詳細設定（config.txt のみ）",
+      "aliasesReadOnlyNote": "コマンドエイリアスはネスト構造のため、単一のフィールドから安全に編集することはできません。config.txt 内の commands.aliases を直接編集してから、再起動してください。",
+      "audioSources": "有効な音声ソース",
+      "botLanguage": "Botの言語（Discord）",
+      "clearChannelAgeDays": "チャンネルクリアの最大経過日数（0 = 無制限）",
+      "clearChannelDeleteLimit": "チャンネルクリアの削除件数上限（0 = 無制限）",
+      "commandsAdvanced": "コマンド（詳細設定）",
+      "dangerous": "危険",
+      "discord": "Discord",
+      "discordOwner": "オーナーのユーザーID",
+      "discordToken": "Botトークン",
+      "discordTokenWarning": "誤って編集すると、Botが起動しなくなります。Discord Developer Portalから直接コピーしたトークンのみを貼り付けてください。",
+      "evalEngine": "Evalエンジン",
+      "evalWarning": "危険：Botのオーナーが、Bot自身のプロセス内で任意のコードを実行できるようになります。オーナー権限を持つ人物は、Botが動作しているマシンでできることを何でも行えてしまいます。このリスクを十分に理解し、受け入れられる場合にのみ有効にしてください。",
+      "frameBufferMs": "フレームバッファ（ms）",
+      "guiEnabled": "デスクトップウィンドウを有効にする",
+      "guiFontSize": "フォントサイズ",
+      "guiLanguage": "デスクトップウィンドウの言語",
+      "guiLanguageFollowLabel": "（Botの言語に従う）",
+      "guiWeb": "GUI＆Webパネル",
+      "localization": "言語",
+      "maxHistorySize": "履歴の最大件数（0 = 無効）",
+      "nasBufferMs": "NASバッファ（ms）",
+      "nowPlaying": "再生中",
+      "npMinimalMessage": "再生中メッセージをコンパクト表示",
+      "npShowButtons": "再生中に再生操作ボタンを表示",
+      "npShowProgressBar": "再生中に進捗バーを表示",
+      "performance": "パフォーマンス",
+      "playbackAdvanced": "再生（詳細設定）",
+      "transformsReadOnlyNote": "再生トランスフォームは高度なネスト構造のため、単一のフィールドから安全に編集することはできません。config.txt 内の playback.transforms を直接編集してから、再起動してください。",
+      "updateAutoUpdate": "更新を自動的にダウンロードしてインストールする",
+      "updateCheckIntervalHours": "更新確認の間隔（時間）",
+      "updateGithubToken": "GitHubトークン（プライベートリポジトリのみ）",
+      "updateRepository": "GitHubリポジトリ（owner/name）",
+      "updates": "更新",
+      "useEval": "evalコマンドを有効にする",
+      "webAllowConfigEdit": "Webパネルからconfig.txtの編集を許可する",
+      "webAllowConfigEditWarning": "Webパネルのトークンを持つ人は誰でもconfig.txtを変更できるようになります。バインドアドレスが外部からの接続を許可している場合、ネットワーク上の他のデバイスからも変更可能です。デフォルトでは無効です。",
+      "webBindAddress": "Webパネルのバインドアドレス",
+      "youtubeAdvanced": "YouTube（詳細設定）",
+      "youtubeClients": "InnerTubeクライアント（順序どおり）",
+      "youtubeClientsAdd": "追加",
+      "youtubeClientsDown": "下へ移動",
+      "youtubeClientsRemove": "削除",
+      "youtubeClientsUp": "上へ移動",
+      "youtubePoToken": "生成元証明トークン",
+      "youtubeVisitorData": "訪問者データ"
     },
     "console": {
       "autoScroll": "自動スクロール",
@@ -1070,100 +1117,132 @@
   },
   "commands": {
     "help": {
-      "description": "対話形式のコマンド一覧を表示"
+      "description": "対話形式のコマンド一覧を表示",
+      "name": "ヘルプ"
     },
     "nowplaying": {
-      "description": "現在再生中の曲を表示"
+      "description": "現在再生中の曲を表示",
+      "name": "再生中"
     },
     "np": {
-      "description": "現在再生中の曲を表示"
+      "description": "現在再生中の曲を表示",
+      "name": "np"
     },
     "play": {
-      "description": "指定した曲を再生"
+      "description": "指定した曲を再生",
+      "name": "再生"
     },
     "playlists": {
-      "description": "利用可能なプレイリストを表示"
+      "description": "利用可能なプレイリストを表示",
+      "name": "プレイリスト"
     },
     "queue": {
-      "description": "現在のキューを表示"
+      "description": "現在のキューを表示",
+      "name": "キュー"
     },
     "history": {
-      "description": "最近再生した曲を表示（履歴キュー）"
+      "description": "最近再生した曲を表示（履歴キュー）",
+      "name": "履歴"
     },
     "remove": {
-      "description": "キューから曲を削除"
+      "description": "キューから曲を削除",
+      "name": "削除"
     },
     "search": {
-      "description": "指定したキーワードでYouTubeを検索"
+      "description": "指定したキーワードでYouTubeを検索",
+      "name": "検索"
     },
     "seek": {
-      "description": "現在の曲をシーク"
+      "description": "現在の曲をシーク",
+      "name": "シーク"
     },
     "shuffle": {
-      "description": "自分が追加した曲をシャッフル"
+      "description": "自分が追加した曲をシャッフル",
+      "name": "シャッフル"
     },
     "skip": {
-      "description": "現在の曲のスキップに投票"
+      "description": "現在の曲のスキップに投票",
+      "name": "スキップ"
     },
     "forceremove": {
-      "description": "指定ユーザーの項目をすべてキューから削除"
+      "description": "指定ユーザーの項目をすべてキューから削除",
+      "name": "強制削除"
     },
     "forceskip": {
-      "description": "現在の曲をスキップ"
+      "description": "現在の曲をスキップ",
+      "name": "強制スキップ"
     },
     "movetrack": {
-      "description": "キュー内の曲を別の位置に移動"
+      "description": "キュー内の曲を別の位置に移動",
+      "name": "トラック移動"
     },
     "pause": {
-      "description": "現在の曲を一時停止"
+      "description": "現在の曲を一時停止",
+      "name": "一時停止"
     },
     "playnext": {
-      "description": "1曲を次に再生するよう設定"
+      "description": "1曲を次に再生するよう設定",
+      "name": "次に再生"
     },
     "repeat": {
-      "description": "終了後に曲をキューへ再追加"
+      "description": "終了後に曲をキューへ再追加",
+      "name": "リピート"
     },
     "skipto": {
-      "description": "指定した曲までスキップ"
+      "description": "指定した曲までスキップ",
+      "name": "スキップ先"
     },
     "stop": {
-      "description": "現在の曲を停止しキューをクリア"
+      "description": "現在の曲を停止しキューをクリア",
+      "name": "停止"
     },
     "volume": {
-      "description": "プレイヤーの音量を設定・表示"
+      "description": "プレイヤーの音量を設定・表示",
+      "name": "音量"
     },
     "prefix": {
-      "description": "サーバー専用のプレフィックスを設定"
+      "description": "サーバー専用のプレフィックスを設定",
+      "name": "プレフィックス"
     },
     "controller": {
-      "description": "このサーバーの再生中コントロールパネルをカスタマイズ"
+      "description": "このサーバーの再生中コントロールパネルをカスタマイズ",
+      "name": "コントローラー"
     },
     "queuetype": {
-      "description": "キュータイプを変更"
+      "description": "キュータイプを変更",
+      "name": "キュータイプ"
     },
     "nplayout": {
-      "description": "このサーバーの再生中レイアウトモードを設定"
+      "description": "このサーバーの再生中レイアウトモードを設定",
+      "name": "再生表示"
     },
     "npbuttons": {
-      "description": "このサーバーの再生中メッセージに操作ボタンを含めるか設定"
+      "description": "このサーバーの再生中メッセージに操作ボタンを含めるか設定",
+      "name": "再生ボタン"
     },
     "setdj": {
-      "description": "特定の音楽コマンドに使うDJロールを設定"
+      "description": "特定の音楽コマンドに使うDJロールを設定",
+      "name": "dj設定"
     },
     "settc": {
-      "description": "音楽コマンド用のテキストチャンネルを設定"
+      "description": "音楽コマンド用のテキストチャンネルを設定",
+      "name": "テキストチャンネル設定"
     },
     "setvc": {
-      "description": "音楽再生用のボイスチャンネルを設定"
+      "description": "音楽再生用のボイスチャンネルを設定",
+      "name": "ボイスチャンネル設定"
     },
     "setskip": {
-      "description": "サーバー専用のスキップ割合を設定"
+      "description": "サーバー専用のスキップ割合を設定",
+      "name": "スキップ設定"
     },
     "settings": {
-      "description": "設定パネルを開く"
+      "description": "設定パネルを開く",
+      "name": "設定"
     },
     "clearchannel": {
-      "description": "/settcで設定したコマンドチャンネルのメッセージを全削除（オーナー専用）"
+      "description": "/settcで設定したコマンドチャンネルのメッセージを全削除（オーナー専用）",
+      "name": "チャンネル削除"
     }
   }
 }

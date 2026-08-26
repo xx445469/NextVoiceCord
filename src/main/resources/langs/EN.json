@@ -695,20 +695,51 @@
       "theme": "Theme"
     },
     "config": {
+      "advancedReadOnly": "Advanced (config.txt only)",
       "alertOwnerAboutUpdates": "Alert owner about updates",
+      "aliasesReadOnlyNote": "Command aliases are a nested structure and cannot be safely edited from a single field. Edit commands.aliases in config.txt directly, then restart.",
       "aloneTimeUntilStop": "Alone time until stop (seconds)",
       "altPrefix": "Alt prefix",
+      "appearance": "Appearance & Language",
+      "audioSources": "Enabled audio sources",
+      "botLanguage": "Bot language (Discord)",
+      "clearChannelAgeDays": "Clear channel max age in days (0 = unlimited)",
+      "clearChannelDeleteLimit": "Clear channel delete limit (0 = unlimited)",
       "commands": "Commands",
+      "commandsAdvanced": "Commands (Advanced)",
+      "dangerous": "Dangerous",
+      "discord": "Discord",
+      "discordOwner": "Owner user ID",
+      "discordToken": "Bot token",
+      "discordTokenWarning": "Editing this incorrectly will stop the bot from starting. Only paste a token copied directly from the Discord Developer Portal.",
       "error": "Error",
+      "evalEngine": "Eval engine",
+      "evalWarning": "DANGEROUS: lets the bot owner run arbitrary code in the bot's own process. Anyone with owner access could then do anything the machine running the bot can do. Only enable this if you fully understand and accept that risk.",
+      "frameBufferMs": "Frame buffer (ms)",
       "gameStatus": "Game status",
+      "guiEnabled": "Enable the desktop window",
+      "guiFontSize": "Font size",
+      "guiLanguage": "Desktop window language",
+      "guiLanguageFollowLabel": "(follow bot language)",
+      "guiTheme": "Theme",
+      "guiWeb": "GUI & Web Panel",
       "helpWord": "Help word",
       "loading": "Loading",
+      "localization": "Language",
       "logLevel": "Log level",
+      "maxHistorySize": "Max history size (0 = disabled)",
       "maxTrackSeconds": "Max track seconds (0 = unlimited)",
       "maxYouTubePlaylistPages": "Max YouTube playlist pages",
+      "nasBufferMs": "NAS buffer (ms)",
+      "nowPlaying": "Now Playing",
+      "npMinimalMessage": "Compact now-playing messages",
+      "npShowButtons": "Show playback buttons in now-playing",
+      "npShowProgressBar": "Show now-playing progress bar",
       "onlineStatus": "Online status",
       "other": "Other",
+      "performance": "Performance",
       "playback": "Playback",
+      "playbackAdvanced": "Playback (Advanced)",
       "playlistsFolder": "Playlists folder",
       "prefix": "Prefix",
       "presence": "Presence",
@@ -727,6 +758,7 @@
       "saveErrorTitle": "Save Error",
       "savedDialogMessage": "Configuration saved successfully!\n\nPlease restart the bot for changes to take effect.\n\nBackup created: {0}",
       "savedDialogTitle": "Configuration Saved",
+      "searchLabel": "Filter settings",
       "searching": "Searching",
       "showCurrentSongInStatus": "Show current song in status",
       "showYouTubeThumbnails": "Show YouTube thumbnails in now playing",
@@ -735,10 +767,30 @@
       "subtitle": "Edit config.txt and save — the bot must restart to apply changes",
       "success": "Success",
       "title": "Bot config",
+      "transformsReadOnlyNote": "Playback transforms are an advanced nested structure and cannot be safely edited from a single field. Edit playback.transforms in config.txt directly, then restart.",
       "uiEmojis": "UI / Emojis",
+      "updateAutoUpdate": "Automatically download and install updates",
+      "updateCheckIntervalHours": "Hours between update checks",
+      "updateGithubToken": "GitHub token (private repositories only)",
+      "updateRepository": "GitHub repository (owner/name)",
+      "updates": "Updates",
+      "updatesAdvanced": "Updates (Advanced)",
+      "useEval": "Enable eval command",
       "useYouTubeOAuth": "Use YouTube OAuth for playback",
       "voice": "Voice",
-      "warning": "Warning"
+      "warning": "Warning",
+      "webAllowConfigEdit": "Allow the web panel to edit config.txt",
+      "webAllowConfigEditWarning": "Lets anyone holding the web panel's token change config.txt, including from other devices on the network if the bind address allows outside connections. Off by default.",
+      "webBindAddress": "Web panel bind address",
+      "youtube": "YouTube",
+      "youtubeAdvanced": "YouTube (Advanced)",
+      "youtubeClients": "InnerTube clients (in order)",
+      "youtubeClientsAdd": "Add",
+      "youtubeClientsDown": "Move down",
+      "youtubeClientsRemove": "Remove",
+      "youtubeClientsUp": "Move up",
+      "youtubePoToken": "Proof-of-origin token",
+      "youtubeVisitorData": "Visitor data"
     },
     "console": {
       "autoScroll": "Auto-scroll",
@@ -1080,37 +1132,133 @@
     "footer": "Playback controls act immediately on the live bot. Everything else here is read-only unless you press Save."
   },
   "commands": {
-    "help": { "description": "shows an interactive list of commands" },
-    "nowplaying": { "description": "shows the song that is currently playing" },
-    "np": { "description": "shows the song that is currently playing" },
-    "play": { "description": "plays the provided song" },
-    "playlists": { "description": "shows the available playlists" },
-    "queue": { "description": "shows the current queue" },
-    "history": { "description": "shows recently played tracks (history queue)" },
-    "remove": { "description": "removes a song from the queue" },
-    "search": { "description": "searches YouTube for a provided query" },
-    "seek": { "description": "seeks the current song" },
-    "shuffle": { "description": "shuffles songs you have added" },
-    "skip": { "description": "votes to skip the current song" },
-    "forceremove": { "description": "removes all entries by a user from the queue" },
-    "forceskip": { "description": "skips the current song" },
-    "movetrack": { "description": "move a track in the current queue to a different position" },
-    "pause": { "description": "pauses the current song" },
-    "playnext": { "description": "plays a single song next" },
-    "repeat": { "description": "re-adds music to the queue when finished" },
-    "skipto": { "description": "skips to the specified song" },
-    "stop": { "description": "stops the current song and clears the queue" },
-    "volume": { "description": "sets or shows the player volume" },
-    "prefix": { "description": "sets a server-specific prefix" },
-    "controller": { "description": "customises the now-playing control panel for this server" },
-    "queuetype": { "description": "changes the queue type" },
-    "nplayout": { "description": "sets the now-playing layout mode for this server" },
-    "npbuttons": { "description": "sets whether now-playing messages include interactive buttons for this server" },
-    "setdj": { "description": "sets the DJ role for certain music commands" },
-    "settc": { "description": "sets the text channel for music commands" },
-    "setvc": { "description": "sets the voice channel for playing music" },
-    "setskip": { "description": "sets a server-specific skip percentage" },
-    "settings": { "description": "opens the settings panel" },
-    "clearchannel": { "description": "clears all messages in the command channel set with /settc (owner only)" }
+    "help": {
+      "name": "help",
+      "description": "shows an interactive list of commands"
+    },
+    "nowplaying": {
+      "name": "nowplaying",
+      "description": "shows the song that is currently playing"
+    },
+    "np": {
+      "name": "np",
+      "description": "shows the song that is currently playing"
+    },
+    "play": {
+      "name": "play",
+      "description": "plays the provided song"
+    },
+    "playlists": {
+      "name": "playlists",
+      "description": "shows the available playlists"
+    },
+    "queue": {
+      "name": "queue",
+      "description": "shows the current queue"
+    },
+    "history": {
+      "name": "history",
+      "description": "shows recently played tracks (history queue)"
+    },
+    "remove": {
+      "name": "remove",
+      "description": "removes a song from the queue"
+    },
+    "search": {
+      "name": "search",
+      "description": "searches YouTube for a provided query"
+    },
+    "seek": {
+      "name": "seek",
+      "description": "seeks the current song"
+    },
+    "shuffle": {
+      "name": "shuffle",
+      "description": "shuffles songs you have added"
+    },
+    "skip": {
+      "name": "skip",
+      "description": "votes to skip the current song"
+    },
+    "forceremove": {
+      "name": "forceremove",
+      "description": "removes all entries by a user from the queue"
+    },
+    "forceskip": {
+      "name": "forceskip",
+      "description": "skips the current song"
+    },
+    "movetrack": {
+      "name": "movetrack",
+      "description": "move a track in the current queue to a different position"
+    },
+    "pause": {
+      "name": "pause",
+      "description": "pauses the current song"
+    },
+    "playnext": {
+      "name": "playnext",
+      "description": "plays a single song next"
+    },
+    "repeat": {
+      "name": "repeat",
+      "description": "re-adds music to the queue when finished"
+    },
+    "skipto": {
+      "name": "skipto",
+      "description": "skips to the specified song"
+    },
+    "stop": {
+      "name": "stop",
+      "description": "stops the current song and clears the queue"
+    },
+    "volume": {
+      "name": "volume",
+      "description": "sets or shows the player volume"
+    },
+    "prefix": {
+      "name": "prefix",
+      "description": "sets a server-specific prefix"
+    },
+    "controller": {
+      "name": "controller",
+      "description": "customises the now-playing control panel for this server"
+    },
+    "queuetype": {
+      "name": "queuetype",
+      "description": "changes the queue type"
+    },
+    "nplayout": {
+      "name": "nplayout",
+      "description": "sets the now-playing layout mode for this server"
+    },
+    "npbuttons": {
+      "name": "npbuttons",
+      "description": "sets whether now-playing messages include interactive buttons for this server"
+    },
+    "setdj": {
+      "name": "setdj",
+      "description": "sets the DJ role for certain music commands"
+    },
+    "settc": {
+      "name": "settc",
+      "description": "sets the text channel for music commands"
+    },
+    "setvc": {
+      "name": "setvc",
+      "description": "sets the voice channel for playing music"
+    },
+    "setskip": {
+      "name": "setskip",
+      "description": "sets a server-specific skip percentage"
+    },
+    "settings": {
+      "name": "settings",
+      "description": "opens the settings panel"
+    },
+    "clearchannel": {
+      "name": "clearchannel",
+      "description": "clears all messages in the command channel set with /settc (owner only)"
+    }
   }
 }

@@ -18,14 +18,18 @@ package com.jagrosh.jmusicbot.gui.components;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -99,6 +103,105 @@ public final class Widgets
         card.add(heading, BorderLayout.NORTH);
         card.add(body, BorderLayout.CENTER);
         return card;
+    }
+
+    /**
+     * A titled card whose body can be tucked away behind its own heading.
+     *
+     * <p>For settings a first-time reader does not need to see. The heading — a chevron plus
+     * the title, rendered as one clickable button rather than a separate icon and a separate
+     * label — stays visible either way; only the body beneath it collapses. Anything placed in
+     * that body, warning included, is hidden or shown as a unit: opening the section always
+     * shows the whole of it, never a part with the warning left out.
+     */
+    public static class CollapsibleCard extends Card
+    {
+        private final JButton header;
+        private final JPanel bodyWrapper;
+        private final String title;
+        private boolean userExpanded;
+        private boolean filterActive;
+        private boolean filterExpanded;
+        private Consumer<Boolean> onToggle;
+
+        public CollapsibleCard(String title, Component body, boolean initiallyExpanded)
+        {
+            this.title = title;
+            this.userExpanded = initiallyExpanded;
+
+            setLayout(new BorderLayout(0, Tokens.SPACE_SM));
+
+            header = new JButton();
+            header.setFont(Tokens.fontHeading());
+            header.setForeground(Tokens.text());
+            header.setHorizontalAlignment(SwingConstants.LEFT);
+            header.setBorderPainted(false);
+            header.setContentAreaFilled(false);
+            header.setFocusPainted(false);
+            header.setOpaque(false);
+            header.setMargin(new Insets(0, 0, 0, 0));
+            header.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            header.addActionListener(e ->
+            {
+                userExpanded = !userExpanded;
+                // A click is the user overriding whatever the search filter was showing —
+                // their choice should stick, not be clobbered the next time applyVisibility runs.
+                filterActive = false;
+                applyVisibility();
+                if (onToggle != null)
+                {
+                    onToggle.accept(userExpanded);
+                }
+            });
+
+            bodyWrapper = new JPanel(new BorderLayout());
+            bodyWrapper.setOpaque(false);
+            bodyWrapper.add(body, BorderLayout.CENTER);
+
+            add(header, BorderLayout.NORTH);
+            add(bodyWrapper, BorderLayout.CENTER);
+
+            applyVisibility();
+        }
+
+        /**
+         * Shows or hides the body regardless of the stored preference, without changing it —
+         * for the search filter to call while a query is active.
+         */
+        public void setFilterExpanded(boolean expanded)
+        {
+            filterActive = true;
+            filterExpanded = expanded;
+            applyVisibility();
+        }
+
+        /** Goes back to whatever the user (or the persisted preference) had this set to. */
+        public void clearFilterOverride()
+        {
+            filterActive = false;
+            applyVisibility();
+        }
+
+        /** Whether the body is currently shown — for tests, and for the filter's own bookkeeping. */
+        public boolean isBodyVisible()
+        {
+            return bodyWrapper.isVisible();
+        }
+
+        /** Notified with the new user-chosen state whenever the heading is clicked. */
+        public void onToggle(Consumer<Boolean> listener)
+        {
+            this.onToggle = listener;
+        }
+
+        private void applyVisibility()
+        {
+            boolean expanded = filterActive ? filterExpanded : userExpanded;
+            bodyWrapper.setVisible(expanded);
+            header.setText((expanded ? "▾  " : "▸  ") + title);
+            revalidate();
+            repaint();
+        }
     }
 
     /**

@@ -649,7 +649,54 @@
       "proxyLavaplayer": "Audiowiedergabe (Lavaplayer) über Proxy leiten",
       "proxyPassword": "Passwort",
       "proxyPort": "Port",
-      "proxyUsername": "Benutzername"
+      "proxyUsername": "Benutzername",
+      "advancedReadOnly": "Erweitert (nur config.txt)",
+      "aliasesReadOnlyNote": "Befehlsaliase sind eine verschachtelte Struktur und können nicht sicher über ein einzelnes Feld bearbeitet werden. Bearbeite commands.aliases direkt in config.txt und starte danach neu.",
+      "audioSources": "Aktivierte Audioquellen",
+      "botLanguage": "Bot-Sprache (Discord)",
+      "clearChannelAgeDays": "Max. Alter für „Kanal leeren“ in Tagen (0 = unbegrenzt)",
+      "clearChannelDeleteLimit": "Löschlimit für „Kanal leeren“ (0 = unbegrenzt)",
+      "commandsAdvanced": "Befehle (Erweitert)",
+      "dangerous": "Gefährlich",
+      "discord": "Discord",
+      "discordOwner": "Besitzer-Benutzer-ID",
+      "discordToken": "Bot-Token",
+      "discordTokenWarning": "Wird dies falsch bearbeitet, startet der Bot nicht mehr. Füge nur einen Token ein, der direkt aus dem Discord Developer Portal kopiert wurde.",
+      "evalEngine": "Eval-Engine",
+      "evalWarning": "GEFÄHRLICH: Erlaubt dem Bot-Besitzer, beliebigen Code im eigenen Prozess des Bots auszuführen. Jeder mit Besitzerzugriff könnte damit alles tun, wozu die Maschine, auf der der Bot läuft, fähig ist. Aktiviere dies nur, wenn du dieses Risiko vollständig verstehst und akzeptierst.",
+      "frameBufferMs": "Frame-Puffer (ms)",
+      "guiEnabled": "Desktopfenster aktivieren",
+      "guiFontSize": "Schriftgröße",
+      "guiLanguage": "Sprache des Desktopfensters",
+      "guiLanguageFollowLabel": "(folgt der Bot-Sprache)",
+      "guiWeb": "GUI & Web-Panel",
+      "localization": "Sprache",
+      "maxHistorySize": "Max. Verlaufsgröße (0 = deaktiviert)",
+      "nasBufferMs": "NAS-Puffer (ms)",
+      "nowPlaying": "Wird gespielt",
+      "npMinimalMessage": "Kompakte „Wird gespielt“-Nachrichten",
+      "npShowButtons": "Wiedergabe-Buttons bei „Wird gespielt“ anzeigen",
+      "npShowProgressBar": "Fortschrittsbalken bei „Wird gespielt“ anzeigen",
+      "performance": "Leistung",
+      "playbackAdvanced": "Wiedergabe (Erweitert)",
+      "transformsReadOnlyNote": "Wiedergabe-Transforms sind eine erweiterte, verschachtelte Struktur und können nicht sicher über ein einzelnes Feld bearbeitet werden. Bearbeite playback.transforms direkt in config.txt und starte danach neu.",
+      "updateAutoUpdate": "Updates automatisch herunterladen und installieren",
+      "updateCheckIntervalHours": "Stunden zwischen Update-Prüfungen",
+      "updateGithubToken": "GitHub-Token (nur für private Repositories)",
+      "updateRepository": "GitHub-Repository (owner/name)",
+      "updates": "Updates",
+      "useEval": "Eval-Befehl aktivieren",
+      "webAllowConfigEdit": "Dem Web-Panel erlauben, config.txt zu bearbeiten",
+      "webAllowConfigEditWarning": "Erlaubt jedem, der den Token des Web-Panels besitzt, config.txt zu ändern – auch von anderen Geräten im Netzwerk, falls die Bind-Adresse externe Verbindungen zulässt. Standardmäßig deaktiviert.",
+      "webBindAddress": "Bind-Adresse des Web-Panels",
+      "youtubeAdvanced": "YouTube (Erweitert)",
+      "youtubeClients": "InnerTube-Clients (in Reihenfolge)",
+      "youtubeClientsAdd": "Hinzufügen",
+      "youtubeClientsDown": "Nach unten",
+      "youtubeClientsRemove": "Entfernen",
+      "youtubeClientsUp": "Nach oben",
+      "youtubePoToken": "Herkunftsnachweis-Token",
+      "youtubeVisitorData": "Besucherdaten"
     },
     "console": {
       "autoScroll": "Automatisch scrollen",
@@ -1070,100 +1117,132 @@
   },
   "commands": {
     "help": {
-      "description": "zeigt eine interaktive Liste der Befehle"
+      "description": "zeigt eine interaktive Liste der Befehle",
+      "name": "hilfe"
     },
     "nowplaying": {
-      "description": "zeigt den aktuell gespielten Song"
+      "description": "zeigt den aktuell gespielten Song",
+      "name": "nowplaying"
     },
     "np": {
-      "description": "zeigt den aktuell gespielten Song"
+      "description": "zeigt den aktuell gespielten Song",
+      "name": "np"
     },
     "play": {
-      "description": "spielt den angegebenen Song"
+      "description": "spielt den angegebenen Song",
+      "name": "abspielen"
     },
     "playlists": {
-      "description": "zeigt die verfügbaren Playlists"
+      "description": "zeigt die verfügbaren Playlists",
+      "name": "playlists"
     },
     "queue": {
-      "description": "zeigt die aktuelle Warteschlange"
+      "description": "zeigt die aktuelle Warteschlange",
+      "name": "warteschlange"
     },
     "history": {
-      "description": "zeigt zuletzt gespielte Titel (Verlauf)"
+      "description": "zeigt zuletzt gespielte Titel (Verlauf)",
+      "name": "verlauf"
     },
     "remove": {
-      "description": "entfernt einen Song aus der Warteschlange"
+      "description": "entfernt einen Song aus der Warteschlange",
+      "name": "entfernen"
     },
     "search": {
-      "description": "durchsucht YouTube nach einer angegebenen Suche"
+      "description": "durchsucht YouTube nach einer angegebenen Suche",
+      "name": "suche"
     },
     "seek": {
-      "description": "spult im aktuellen Song"
+      "description": "spult im aktuellen Song",
+      "name": "spulen"
     },
     "shuffle": {
-      "description": "mischt die von dir hinzugefügten Songs"
+      "description": "mischt die von dir hinzugefügten Songs",
+      "name": "shuffle"
     },
     "skip": {
-      "description": "stimmt dafür, den aktuellen Song zu überspringen"
+      "description": "stimmt dafür, den aktuellen Song zu überspringen",
+      "name": "skip"
     },
     "forceremove": {
-      "description": "entfernt alle Einträge eines Nutzers aus der Warteschlange"
+      "description": "entfernt alle Einträge eines Nutzers aus der Warteschlange",
+      "name": "forceentfernen"
     },
     "forceskip": {
-      "description": "überspringt den aktuellen Song"
+      "description": "überspringt den aktuellen Song",
+      "name": "forceskip"
     },
     "movetrack": {
-      "description": "verschiebt einen Titel der Warteschlange an eine andere Position"
+      "description": "verschiebt einen Titel der Warteschlange an eine andere Position",
+      "name": "trackverschieben"
     },
     "pause": {
-      "description": "pausiert den aktuellen Song"
+      "description": "pausiert den aktuellen Song",
+      "name": "pause"
     },
     "playnext": {
-      "description": "spielt einen Song als Nächstes"
+      "description": "spielt einen Song als Nächstes",
+      "name": "alsnächstes"
     },
     "repeat": {
-      "description": "fügt Musik nach dem Ende wieder der Warteschlange hinzu"
+      "description": "fügt Musik nach dem Ende wieder der Warteschlange hinzu",
+      "name": "wiederholen"
     },
     "skipto": {
-      "description": "springt zum angegebenen Song"
+      "description": "springt zum angegebenen Song",
+      "name": "zuspringen"
     },
     "stop": {
-      "description": "stoppt den aktuellen Song und leert die Warteschlange"
+      "description": "stoppt den aktuellen Song und leert die Warteschlange",
+      "name": "stop"
     },
     "volume": {
-      "description": "setzt oder zeigt die Player-Lautstärke"
+      "description": "setzt oder zeigt die Player-Lautstärke",
+      "name": "lautstärke"
     },
     "prefix": {
-      "description": "legt ein serverspezifisches Präfix fest"
+      "description": "legt ein serverspezifisches Präfix fest",
+      "name": "prefix"
     },
     "controller": {
-      "description": "passt das Wird-gespielt-Bedienfeld für diesen Server an"
+      "description": "passt das Wird-gespielt-Bedienfeld für diesen Server an",
+      "name": "controller"
     },
     "queuetype": {
-      "description": "ändert den Warteschlangentyp"
+      "description": "ändert den Warteschlangentyp",
+      "name": "warteschlangentyp"
     },
     "nplayout": {
-      "description": "legt den Wird-gespielt-Layoutmodus für diesen Server fest"
+      "description": "legt den Wird-gespielt-Layoutmodus für diesen Server fest",
+      "name": "npanzeige"
     },
     "npbuttons": {
-      "description": "legt fest, ob Wird-gespielt-Nachrichten für diesen Server Buttons enthalten"
+      "description": "legt fest, ob Wird-gespielt-Nachrichten für diesen Server Buttons enthalten",
+      "name": "npbuttons"
     },
     "setdj": {
-      "description": "legt die DJ-Rolle für bestimmte Musikbefehle fest"
+      "description": "legt die DJ-Rolle für bestimmte Musikbefehle fest",
+      "name": "setdj"
     },
     "settc": {
-      "description": "legt den Textkanal für Musikbefehle fest"
+      "description": "legt den Textkanal für Musikbefehle fest",
+      "name": "settc"
     },
     "setvc": {
-      "description": "legt den Sprachkanal für die Musikwiedergabe fest"
+      "description": "legt den Sprachkanal für die Musikwiedergabe fest",
+      "name": "setvc"
     },
     "setskip": {
-      "description": "legt einen serverspezifischen Skip-Prozentsatz fest"
+      "description": "legt einen serverspezifischen Skip-Prozentsatz fest",
+      "name": "setskip"
     },
     "settings": {
-      "description": "öffnet das Einstellungsfenster"
+      "description": "öffnet das Einstellungsfenster",
+      "name": "einstellungen"
     },
     "clearchannel": {
-      "description": "löscht alle Nachrichten im mit /settc festgelegten Befehlskanal (nur Owner)"
+      "description": "löscht alle Nachrichten im mit /settc festgelegten Befehlskanal (nur Owner)",
+      "name": "kanalleeren"
     }
   }
 }

@@ -649,7 +649,54 @@
       "proxyLavaplayer": "Enrutar la reproducción de audio (Lavaplayer) por el proxy",
       "proxyPassword": "Contraseña",
       "proxyPort": "Puerto",
-      "proxyUsername": "Usuario"
+      "proxyUsername": "Usuario",
+      "advancedReadOnly": "Avanzado (solo config.txt)",
+      "aliasesReadOnlyNote": "Los alias de comandos son una estructura anidada y no se pueden editar de forma segura desde un solo campo. Edita commands.aliases directamente en config.txt y luego reinicia.",
+      "audioSources": "Fuentes de audio habilitadas",
+      "botLanguage": "Idioma del bot (Discord)",
+      "clearChannelAgeDays": "Antigüedad máx. para limpiar el canal, en días (0 = sin límite)",
+      "clearChannelDeleteLimit": "Límite de borrado al limpiar el canal (0 = sin límite)",
+      "commandsAdvanced": "Comandos (Avanzado)",
+      "dangerous": "Peligroso",
+      "discord": "Discord",
+      "discordOwner": "ID de usuario del propietario",
+      "discordToken": "Token del bot",
+      "discordTokenWarning": "Editar esto incorrectamente hará que el bot no pueda iniciarse. Pega solo un token copiado directamente desde el Discord Developer Portal.",
+      "evalEngine": "Motor de eval",
+      "evalWarning": "PELIGROSO: permite que el propietario del bot ejecute código arbitrario en el propio proceso del bot. Cualquiera con acceso de propietario podría entonces hacer lo que sea capaz de hacer la máquina que ejecuta el bot. Actívalo solo si comprendes y aceptas totalmente ese riesgo.",
+      "frameBufferMs": "Búfer de frames (ms)",
+      "guiEnabled": "Habilitar la ventana de escritorio",
+      "guiFontSize": "Tamaño de fuente",
+      "guiLanguage": "Idioma de la ventana de escritorio",
+      "guiLanguageFollowLabel": "(seguir el idioma del bot)",
+      "guiWeb": "Interfaz y panel web",
+      "localization": "Idioma",
+      "maxHistorySize": "Tamaño máx. del historial (0 = desactivado)",
+      "nasBufferMs": "Búfer NAS (ms)",
+      "nowPlaying": "Reproduciendo ahora",
+      "npMinimalMessage": "Mensajes compactos de «Reproduciendo ahora»",
+      "npShowButtons": "Mostrar botones de reproducción en «Reproduciendo ahora»",
+      "npShowProgressBar": "Mostrar barra de progreso en «Reproduciendo ahora»",
+      "performance": "Rendimiento",
+      "playbackAdvanced": "Reproducción (Avanzado)",
+      "transformsReadOnlyNote": "Los transforms de reproducción son una estructura anidada avanzada y no se pueden editar de forma segura desde un solo campo. Edita playback.transforms directamente en config.txt y luego reinicia.",
+      "updateAutoUpdate": "Descargar e instalar actualizaciones automáticamente",
+      "updateCheckIntervalHours": "Horas entre comprobaciones de actualización",
+      "updateGithubToken": "Token de GitHub (solo repositorios privados)",
+      "updateRepository": "Repositorio de GitHub (owner/name)",
+      "updates": "Actualizaciones",
+      "useEval": "Habilitar el comando eval",
+      "webAllowConfigEdit": "Permitir que el panel web edite config.txt",
+      "webAllowConfigEditWarning": "Permite que cualquiera que tenga el token del panel web cambie config.txt, incluso desde otros dispositivos de la red si la dirección de enlace admite conexiones externas. Desactivado por defecto.",
+      "webBindAddress": "Dirección de enlace del panel web",
+      "youtubeAdvanced": "YouTube (Avanzado)",
+      "youtubeClients": "Clientes InnerTube (en orden)",
+      "youtubeClientsAdd": "Añadir",
+      "youtubeClientsDown": "Bajar",
+      "youtubeClientsRemove": "Eliminar",
+      "youtubeClientsUp": "Subir",
+      "youtubePoToken": "Token de prueba de origen",
+      "youtubeVisitorData": "Datos del visitante"
     },
     "console": {
       "autoScroll": "Desplazamiento automático",
@@ -1070,100 +1117,132 @@
   },
   "commands": {
     "help": {
-      "description": "muestra una lista interactiva de comandos"
+      "description": "muestra una lista interactiva de comandos",
+      "name": "ayuda"
     },
     "nowplaying": {
-      "description": "muestra la canción que se está reproduciendo"
+      "description": "muestra la canción que se está reproduciendo",
+      "name": "reproduciendo"
     },
     "np": {
-      "description": "muestra la canción que se está reproduciendo"
+      "description": "muestra la canción que se está reproduciendo",
+      "name": "np"
     },
     "play": {
-      "description": "reproduce la canción indicada"
+      "description": "reproduce la canción indicada",
+      "name": "reproducir"
     },
     "playlists": {
-      "description": "muestra las listas de reproducción disponibles"
+      "description": "muestra las listas de reproducción disponibles",
+      "name": "listas"
     },
     "queue": {
-      "description": "muestra la cola actual"
+      "description": "muestra la cola actual",
+      "name": "cola"
     },
     "history": {
-      "description": "muestra las canciones reproducidas recientemente (historial)"
+      "description": "muestra las canciones reproducidas recientemente (historial)",
+      "name": "historial"
     },
     "remove": {
-      "description": "quita una canción de la cola"
+      "description": "quita una canción de la cola",
+      "name": "quitar"
     },
     "search": {
-      "description": "busca en YouTube el término indicado"
+      "description": "busca en YouTube el término indicado",
+      "name": "buscar"
     },
     "seek": {
-      "description": "salta a un punto de la canción actual"
+      "description": "salta a un punto de la canción actual",
+      "name": "posición"
     },
     "shuffle": {
-      "description": "mezcla las canciones que has añadido"
+      "description": "mezcla las canciones que has añadido",
+      "name": "aleatorio"
     },
     "skip": {
-      "description": "vota para saltar la canción actual"
+      "description": "vota para saltar la canción actual",
+      "name": "saltar"
     },
     "forceremove": {
-      "description": "quita de la cola todas las entradas de un usuario"
+      "description": "quita de la cola todas las entradas de un usuario",
+      "name": "forzar-quitar"
     },
     "forceskip": {
-      "description": "salta la canción actual"
+      "description": "salta la canción actual",
+      "name": "forzar-saltar"
     },
     "movetrack": {
-      "description": "mueve una canción de la cola a otra posición"
+      "description": "mueve una canción de la cola a otra posición",
+      "name": "mover-pista"
     },
     "pause": {
-      "description": "pausa la canción actual"
+      "description": "pausa la canción actual",
+      "name": "pausa"
     },
     "playnext": {
-      "description": "reproduce una canción justo después de esta"
+      "description": "reproduce una canción justo después de esta",
+      "name": "reproducir-siguiente"
     },
     "repeat": {
-      "description": "vuelve a añadir la música a la cola al terminar"
+      "description": "vuelve a añadir la música a la cola al terminar",
+      "name": "repetir"
     },
     "skipto": {
-      "description": "salta hasta la canción indicada"
+      "description": "salta hasta la canción indicada",
+      "name": "ir-a"
     },
     "stop": {
-      "description": "detiene la canción actual y vacía la cola"
+      "description": "detiene la canción actual y vacía la cola",
+      "name": "detener"
     },
     "volume": {
-      "description": "define o muestra el volumen del reproductor"
+      "description": "define o muestra el volumen del reproductor",
+      "name": "volumen"
     },
     "prefix": {
-      "description": "define un prefijo propio del servidor"
+      "description": "define un prefijo propio del servidor",
+      "name": "prefijo"
     },
     "controller": {
-      "description": "personaliza el panel de control de reproducción de este servidor"
+      "description": "personaliza el panel de control de reproducción de este servidor",
+      "name": "controlador"
     },
     "queuetype": {
-      "description": "cambia el tipo de cola"
+      "description": "cambia el tipo de cola",
+      "name": "tipo-cola"
     },
     "nplayout": {
-      "description": "define el modo de diseño de «reproduciendo ahora» para este servidor"
+      "description": "define el modo de diseño de «reproduciendo ahora» para este servidor",
+      "name": "diseño-np"
     },
     "npbuttons": {
-      "description": "define si los mensajes de «reproduciendo ahora» incluyen botones aquí"
+      "description": "define si los mensajes de «reproduciendo ahora» incluyen botones aquí",
+      "name": "botones-np"
     },
     "setdj": {
-      "description": "define el rol de DJ para ciertos comandos de música"
+      "description": "define el rol de DJ para ciertos comandos de música",
+      "name": "setdj"
     },
     "settc": {
-      "description": "define el canal de texto para los comandos de música"
+      "description": "define el canal de texto para los comandos de música",
+      "name": "settc"
     },
     "setvc": {
-      "description": "define el canal de voz para reproducir música"
+      "description": "define el canal de voz para reproducir música",
+      "name": "setvc"
     },
     "setskip": {
-      "description": "define un porcentaje de salto propio del servidor"
+      "description": "define un porcentaje de salto propio del servidor",
+      "name": "setskip"
     },
     "settings": {
-      "description": "abre el panel de ajustes"
+      "description": "abre el panel de ajustes",
+      "name": "ajustes"
     },
     "clearchannel": {
-      "description": "borra todos los mensajes del canal definido con /settc (solo el dueño)"
+      "description": "borra todos los mensajes del canal definido con /settc (solo el dueño)",
+      "name": "limpiar-canal"
     }
   }
 }

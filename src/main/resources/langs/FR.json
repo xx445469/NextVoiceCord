@@ -649,7 +649,54 @@
       "proxyLavaplayer": "Faire passer la lecture audio (Lavaplayer) par le proxy",
       "proxyPassword": "Mot de passe",
       "proxyPort": "Port",
-      "proxyUsername": "Nom d'utilisateur"
+      "proxyUsername": "Nom d'utilisateur",
+      "advancedReadOnly": "Avancé (config.txt uniquement)",
+      "aliasesReadOnlyNote": "Les alias de commandes forment une structure imbriquée et ne peuvent pas être modifiés en toute sécurité depuis un seul champ. Modifie commands.aliases directement dans config.txt, puis redémarre.",
+      "audioSources": "Sources audio activées",
+      "botLanguage": "Langue du bot (Discord)",
+      "clearChannelAgeDays": "Âge max. avant nettoyage du salon, en jours (0 = illimité)",
+      "clearChannelDeleteLimit": "Limite de suppression pour le nettoyage du salon (0 = illimitée)",
+      "commandsAdvanced": "Commandes (Avancé)",
+      "dangerous": "Dangereux",
+      "discord": "Discord",
+      "discordOwner": "ID utilisateur du propriétaire",
+      "discordToken": "Token du bot",
+      "discordTokenWarning": "Une modification incorrecte empêchera le bot de démarrer. Colle uniquement un token copié directement depuis le Discord Developer Portal.",
+      "evalEngine": "Moteur d'eval",
+      "evalWarning": "DANGEREUX : permet au propriétaire du bot d'exécuter du code arbitraire dans le propre processus du bot. Toute personne ayant un accès propriétaire pourrait alors faire tout ce que la machine exécutant le bot est capable de faire. N'active ceci que si tu comprends et acceptes pleinement ce risque.",
+      "frameBufferMs": "Tampon de frames (ms)",
+      "guiEnabled": "Activer la fenêtre de bureau",
+      "guiFontSize": "Taille de police",
+      "guiLanguage": "Langue de la fenêtre de bureau",
+      "guiLanguageFollowLabel": "(suit la langue du bot)",
+      "guiWeb": "Interface & panneau web",
+      "localization": "Langue",
+      "maxHistorySize": "Taille max. de l'historique (0 = désactivé)",
+      "nasBufferMs": "Tampon NAS (ms)",
+      "nowPlaying": "Lecture en cours",
+      "npMinimalMessage": "Messages de lecture en cours compacts",
+      "npShowButtons": "Afficher les boutons de lecture dans « Lecture en cours »",
+      "npShowProgressBar": "Afficher la barre de progression dans « Lecture en cours »",
+      "performance": "Performance",
+      "playbackAdvanced": "Lecture (Avancé)",
+      "transformsReadOnlyNote": "Les transforms de lecture forment une structure imbriquée avancée et ne peuvent pas être modifiés en toute sécurité depuis un seul champ. Modifie playback.transforms directement dans config.txt, puis redémarre.",
+      "updateAutoUpdate": "Télécharger et installer les mises à jour automatiquement",
+      "updateCheckIntervalHours": "Heures entre les vérifications de mise à jour",
+      "updateGithubToken": "Token GitHub (dépôts privés uniquement)",
+      "updateRepository": "Dépôt GitHub (owner/name)",
+      "updates": "Mises à jour",
+      "useEval": "Activer la commande eval",
+      "webAllowConfigEdit": "Autoriser le panneau web à modifier config.txt",
+      "webAllowConfigEditWarning": "Permet à quiconque possède le token du panneau web de modifier config.txt, y compris depuis d'autres appareils du réseau si l'adresse d'écoute autorise les connexions externes. Désactivé par défaut.",
+      "webBindAddress": "Adresse d'écoute du panneau web",
+      "youtubeAdvanced": "YouTube (Avancé)",
+      "youtubeClients": "Clients InnerTube (dans l'ordre)",
+      "youtubeClientsAdd": "Ajouter",
+      "youtubeClientsDown": "Descendre",
+      "youtubeClientsRemove": "Supprimer",
+      "youtubeClientsUp": "Monter",
+      "youtubePoToken": "Token de preuve d'origine",
+      "youtubeVisitorData": "Données visiteur"
     },
     "console": {
       "autoScroll": "Défilement automatique",
@@ -1070,100 +1117,132 @@
   },
   "commands": {
     "help": {
-      "description": "affiche une liste interactive des commandes"
+      "description": "affiche une liste interactive des commandes",
+      "name": "aide"
     },
     "nowplaying": {
-      "description": "affiche la chanson en cours de lecture"
+      "description": "affiche la chanson en cours de lecture",
+      "name": "en-cours"
     },
     "np": {
-      "description": "affiche la chanson en cours de lecture"
+      "description": "affiche la chanson en cours de lecture",
+      "name": "np"
     },
     "play": {
-      "description": "joue la chanson indiquée"
+      "description": "joue la chanson indiquée",
+      "name": "jouer"
     },
     "playlists": {
-      "description": "affiche les playlists disponibles"
+      "description": "affiche les playlists disponibles",
+      "name": "playlists"
     },
     "queue": {
-      "description": "affiche la file d'attente actuelle"
+      "description": "affiche la file d'attente actuelle",
+      "name": "file"
     },
     "history": {
-      "description": "affiche les titres récemment joués (historique)"
+      "description": "affiche les titres récemment joués (historique)",
+      "name": "historique"
     },
     "remove": {
-      "description": "retire une chanson de la file d'attente"
+      "description": "retire une chanson de la file d'attente",
+      "name": "retirer"
     },
     "search": {
-      "description": "recherche une requête sur YouTube"
+      "description": "recherche une requête sur YouTube",
+      "name": "recherche"
     },
     "seek": {
-      "description": "avance ou recule dans la chanson en cours"
+      "description": "avance ou recule dans la chanson en cours",
+      "name": "positionner"
     },
     "shuffle": {
-      "description": "mélange les chansons que tu as ajoutées"
+      "description": "mélange les chansons que tu as ajoutées",
+      "name": "aléatoire"
     },
     "skip": {
-      "description": "vote pour passer la chanson en cours"
+      "description": "vote pour passer la chanson en cours",
+      "name": "passer"
     },
     "forceremove": {
-      "description": "retire toutes les entrées d'un utilisateur de la file d'attente"
+      "description": "retire toutes les entrées d'un utilisateur de la file d'attente",
+      "name": "forceretirer"
     },
     "forceskip": {
-      "description": "passe la chanson en cours"
+      "description": "passe la chanson en cours",
+      "name": "forcepasser"
     },
     "movetrack": {
-      "description": "déplace un titre de la file d'attente à une autre position"
+      "description": "déplace un titre de la file d'attente à une autre position",
+      "name": "déplacer-piste"
     },
     "pause": {
-      "description": "met en pause la chanson en cours"
+      "description": "met en pause la chanson en cours",
+      "name": "pause"
     },
     "playnext": {
-      "description": "joue une chanson juste après celle-ci"
+      "description": "joue une chanson juste après celle-ci",
+      "name": "jouer-ensuite"
     },
     "repeat": {
-      "description": "rajoute la musique à la file une fois terminée"
+      "description": "rajoute la musique à la file une fois terminée",
+      "name": "répéter"
     },
     "skipto": {
-      "description": "saute jusqu'à la chanson indiquée"
+      "description": "saute jusqu'à la chanson indiquée",
+      "name": "aller-à"
     },
     "stop": {
-      "description": "arrête la chanson en cours et vide la file d'attente"
+      "description": "arrête la chanson en cours et vide la file d'attente",
+      "name": "stop"
     },
     "volume": {
-      "description": "définit ou affiche le volume du lecteur"
+      "description": "définit ou affiche le volume du lecteur",
+      "name": "volume"
     },
     "prefix": {
-      "description": "définit un préfixe propre au serveur"
+      "description": "définit un préfixe propre au serveur",
+      "name": "préfixe"
     },
     "controller": {
-      "description": "personnalise le panneau de contrôle de lecture pour ce serveur"
+      "description": "personnalise le panneau de contrôle de lecture pour ce serveur",
+      "name": "contrôleur"
     },
     "queuetype": {
-      "description": "change le type de file d'attente"
+      "description": "change le type de file d'attente",
+      "name": "type-file"
     },
     "nplayout": {
-      "description": "définit le mode de mise en page « lecture en cours » pour ce serveur"
+      "description": "définit le mode de mise en page « lecture en cours » pour ce serveur",
+      "name": "np-affichage"
     },
     "npbuttons": {
-      "description": "définit si les messages « lecture en cours » incluent des boutons ici"
+      "description": "définit si les messages « lecture en cours » incluent des boutons ici",
+      "name": "np-boutons"
     },
     "setdj": {
-      "description": "définit le rôle DJ pour certaines commandes musicales"
+      "description": "définit le rôle DJ pour certaines commandes musicales",
+      "name": "setdj"
     },
     "settc": {
-      "description": "définit le salon textuel pour les commandes musicales"
+      "description": "définit le salon textuel pour les commandes musicales",
+      "name": "settc"
     },
     "setvc": {
-      "description": "définit le salon vocal pour la lecture de musique"
+      "description": "définit le salon vocal pour la lecture de musique",
+      "name": "setvc"
     },
     "setskip": {
-      "description": "définit un pourcentage de vote propre au serveur"
+      "description": "définit un pourcentage de vote propre au serveur",
+      "name": "setskip"
     },
     "settings": {
-      "description": "ouvre le panneau de paramètres"
+      "description": "ouvre le panneau de paramètres",
+      "name": "paramètres"
     },
     "clearchannel": {
-      "description": "efface tous les messages du salon défini avec /settc (propriétaire uniquement)"
+      "description": "efface tous les messages du salon défini avec /settc (propriétaire uniquement)",
+      "name": "vider-salon"
     }
   }
 }

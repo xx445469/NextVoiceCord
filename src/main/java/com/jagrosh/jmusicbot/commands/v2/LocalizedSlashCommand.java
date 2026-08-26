@@ -24,14 +24,16 @@ import com.jagrosh.jmusicbot.i18n.CommandLocalizations;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
 
 /**
- * Base for every v2 slash command, wiring the per-locale description Discord shows in a user's
- * own client into {@link SlashCommand#getDescriptionLocalization()}.
+ * Base for every v2 slash command, wiring the per-locale name and description Discord shows in
+ * a user's own client into {@link SlashCommand#getNameLocalization()} and
+ * {@link SlashCommand#getDescriptionLocalization()}.
  *
- * <p>{@code SlashCommand.buildCommandData()} already calls
- * {@link #getDescriptionLocalization()} and, if it returns anything, attaches it via
- * {@code SlashCommandData.setDescriptionLocalizations}; overriding it here is the only wiring
- * every command needs. {@link #getNameLocalization()} is deliberately left at its library
- * default (empty) — see {@link CommandLocalizations} for why command names are not localised.
+ * <p>{@code SlashCommand.buildCommandData()} already calls both of those and, for whichever
+ * returns anything, attaches it via {@code SlashCommandData.setNameLocalizations} /
+ * {@code setDescriptionLocalizations}; overriding them here is the only wiring every command
+ * needs. Every translated name is validated before it can reach that point — see
+ * {@link CommandLocalizations#isValidName} — so an over-eager or malformed translation degrades
+ * to the English name instead of failing the whole command registration.
  *
  * <p>Every direct extender of the library's {@code SlashCommand} in this project
  * ({@code MusicSlashCommand}, {@code AdminSlashCommand}, {@code OwnerSlashCommand}, and the two
@@ -47,6 +49,12 @@ public abstract class LocalizedSlashCommand extends SlashCommand
     protected LocalizedSlashCommand(Bot bot)
     {
         this.bot = bot;
+    }
+
+    @Override
+    public Map<DiscordLocale, String> getNameLocalization()
+    {
+        return CommandLocalizations.nameLocalizations(bot.getLanguages(), this.name, this.name);
     }
 
     @Override

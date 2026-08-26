@@ -347,6 +347,20 @@ public enum AudioSource
             clients.add(client);
         }
 
+        // ANDROID cannot load a playlist and upstream logs "broken with no known fix" on
+        // startup, so a list built around it fails in a way whose cause is nowhere near the
+        // error. Said here, next to the setting that caused it, rather than left for someone
+        // to correlate two unrelated log lines twenty seconds apart.
+        boolean canLoadPlaylists = names.stream()
+                .map(n -> n.trim().toUpperCase(Locale.ROOT).replace("_", ""))
+                .anyMatch(n -> n.equals("ANDROIDVR"));
+        if (!clients.isEmpty() && !canLoadPlaylists)
+        {
+            logger.warn("playback.youtube.clients has no ANDROIDVR: playlist links will fail to load.");
+            logger.warn("  YouTube changed its playlist response and ANDROIDVR is currently the only");
+            logger.warn("  client that still reads it. Suggested: clients = [ANDROIDVR, IOS, MUSIC, WEB, TV]");
+        }
+
         if (clients.isEmpty())
         {
             // Falling back rather than starting with no clients: an empty list would make
