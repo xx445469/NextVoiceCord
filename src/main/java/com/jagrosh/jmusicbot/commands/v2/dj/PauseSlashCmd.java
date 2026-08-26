@@ -17,38 +17,41 @@ package com.jagrosh.jmusicbot.commands.v2.dj;
 
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
-import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.v2.DJSlashCommand;
-import com.jagrosh.jmusicbot.utils.FormatUtil;
+import com.jagrosh.jmusicbot.service.MusicService;
 
 /**
  * Slash command to pause the current song.
  */
 public class PauseSlashCmd extends DJSlashCommand
 {
+    private final MusicService musicService;
+
     public PauseSlashCmd(Bot bot)
     {
         super(bot);
+        this.musicService = bot.getMusicService();
         this.name = "pause";
         this.help = "pauses the current song";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
+        this.lavalinkStageOneSupported = true;
     }
 
     @Override
     public void doDJCommand(SlashCommandEvent event)
     {
-        AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
-
-        if (handler.getPlayer().isPaused())
+        // Routed through MusicService (rather than reading AudioHandler directly, as this used
+        // to) so the lavalink-mode branch inside MusicService.isPaused/setPaused applies here too
+        // - see the "Lavalink boundary" comment in MusicService.pause/setPaused.
+        if (musicService.isPaused(event.getGuild()))
         {
             event.reply(event.getClient().getWarning() + " " + bot.msg(event.getGuild(), "player.pauseAlready", "/play"))
                     .setEphemeral(true).queue();
             return;
         }
 
-        handler.getPlayer().setPaused(true);
-        String trackTitle = FormatUtil.getTrackTitle(handler.getPlayer().getPlayingTrack());
+        String trackTitle = musicService.setPaused(event.getGuild(), true);
         event.reply(event.getClient().getSuccess() + " " + bot.msg(event.getGuild(), "player.paused", trackTitle, "/play")).queue();
     }
 }

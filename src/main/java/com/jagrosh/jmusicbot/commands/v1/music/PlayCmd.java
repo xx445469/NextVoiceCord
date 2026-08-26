@@ -48,6 +48,7 @@ public class PlayCmd extends MusicCommand
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = false;
+        this.lavalinkStageOneSupported = true; // play-from-URL/search and resume (empty args)
         this.children = new Command[]{new PlaylistCmd(bot)};
     }
 

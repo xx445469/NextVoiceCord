@@ -51,7 +51,9 @@ public enum ConfigOption {
     LOG_LEVEL("logging.level", ConfigType.STRING, false, "Logging verbosity (off, error, warn, info, debug, trace, all)"),
     EVAL_ENGINE("dangerous.evalEngine", ConfigType.STRING, false, "Eval engine name"),
     PLAYLISTS_FOLDER("paths.playlistsFolder", ConfigType.STRING, false, "Alternative folder for playlists"),
-    
+    PLAYBACK_ENGINE("playback.engine", ConfigType.STRING, false,
+            "Playback backend: lavaplayer, lavalink, or fallback (not yet implemented)"),
+
     // Boolean options
     STAY_IN_CHANNEL("voice.stayInChannel", ConfigType.BOOLEAN, false, "Whether to stay in voice channel after queue ends"),
     SONG_IN_GAME("presence.songInStatus", ConfigType.BOOLEAN, false, "Whether to show current song in bot status"),
@@ -67,7 +69,7 @@ public enum ConfigOption {
     YOUTUBE_CLIENTS("playback.youtube.clients", ConfigType.STRING_LIST, false, "InnerTube clients to try, in order"),
     SPOTIFY_CLIENT_ID("spotify.clientId", ConfigType.STRING, false, "Spotify Web API client ID; blank disables Spotify link support"),
     SPOTIFY_CLIENT_SECRET("spotify.clientSecret", ConfigType.STRING, false, "Spotify Web API client secret; blank disables Spotify link support"),
-
+    
     // Numeric options
     MAX_SECONDS("playback.maxTrackSeconds", ConfigType.LONG, false, "Maximum track length in seconds (0 = no limit)"),
     MAX_YT_PLAYLIST_PAGES("playback.maxYouTubePlaylistPages", ConfigType.INT, false, "Maximum YouTube playlist pages to load"),
@@ -81,7 +83,18 @@ public enum ConfigOption {
     ALIASES("commands.aliases", ConfigType.CONFIG, false, "Command aliases configuration"),
     TRANSFORMS("playback.transforms", ConfigType.CONFIG, false, "Audio source transforms configuration"),
     AUDIO_SOURCES("playback.audioSources", ConfigType.CONFIG, false, "Audio sources configuration (nested booleans)"),
-    
+    // Registered so config regeneration (ConfigRenderer/ConfigUpdater) preserves a user's node
+    // list correctly, the same as every other option — but deliberately kept out of the web
+    // panel's /api/config listing (see WebData.HIDDEN_KEYS) because it carries a credential
+    // (nodes[].password) that the web panel has no per-node redaction UI for. The desktop
+    // window's ConfigPanel does have a structured editor for this (see
+    // ConfigPanel.createLavalinkSection) — the two panels are not held to the same bar here:
+    // the desktop editor runs locally and never sends a node's password anywhere, where the web
+    // panel would have to serialise it into an HTTP response first.
+    LAVALINK_NODES("lavalink.nodes", ConfigType.CONFIG_LIST, false,
+            "Lavalink node connection list (name, host, port, password, secure); desktop window only, "
+                    + "not the web panel"),
+
     // GUI options
     GUI_ENABLED("gui.enabled", ConfigType.BOOLEAN, false, "Enable or disable the GUI (default true)"),
     GUI_THEME("gui.theme", ConfigType.STRING, false, "GUI theme: light, dark, darcula, intellij"),
@@ -153,6 +166,7 @@ public enum ConfigOption {
                 case BOOLEAN -> config.getBoolean(key);
                 case CONFIG -> config.getConfig(key);
                 case STRING_LIST -> config.getStringList(key);
+                case CONFIG_LIST -> config.getConfigList(key);
             };
         } catch (Exception e) {
             return null;
@@ -214,7 +228,15 @@ public enum ConfigOption {
     public List<String> getStringList(Config config) {
         return config.getStringList(key);
     }
-    
+
+    /**
+     * Type-safe getter for a list of nested Config objects (e.g. lavalink.nodes).
+     * @throws ConfigException.Missing if the path doesn't exist
+     */
+    public List<? extends Config> getConfigList(Config config) {
+        return config.getConfigList(key);
+    }
+
     /**
      * Checks if the config has a value for this option.
      */
@@ -268,6 +290,7 @@ public enum ConfigOption {
         DOUBLE,
         BOOLEAN,
         CONFIG,
-        STRING_LIST
+        STRING_LIST,
+        CONFIG_LIST
     }
 }

@@ -28,19 +28,32 @@ import net.dv8tion.jda.api.exceptions.PermissionException;
  *
  * @author John Grosh <john.a.grosh@gmail.com>
  */
-public abstract class MusicCommand extends Command 
+public abstract class MusicCommand extends Command
 {
     protected final Bot bot;
     protected boolean bePlaying;
     protected boolean beListening;
-    
+
+    /**
+     * Whether this command works with {@code playback.engine = lavalink}.
+     *
+     * <p>Defaults to {@code false} deliberately: stage 1 is a narrow, explicit set of verbs
+     * (play, pause/resume, stop, skip, volume), and everything else (queue reordering, seek,
+     * favorites, playlists, history, shuffle, repeat mode...) still reads Lavaplayer's
+     * {@code AudioHandler}, which is never populated in Lavalink mode. Refusing by default means
+     * a command added later without setting this flag fails safe - a clear "not implemented yet"
+     * reply - rather than silently reading empty/wrong state. Stage 2 flips more of these to
+     * {@code true} as each command's Lavalink path is actually built, not before.
+     */
+    protected boolean lavalinkStageOneSupported = false;
+
     public MusicCommand(Bot bot)
     {
         this.bot = bot;
         this.guildOnly = true;
         this.category = new Category("Music");
     }
-    
+
     @Override
     protected void execute(CommandEvent event)
     {
@@ -99,9 +112,15 @@ public abstract class MusicCommand extends Command
 
         if (valid)
         {
+            // Lavalink boundary: see the lavalinkStageOneSupported javadoc above.
+            if (bot.getConfig().isLavalinkMode() && !lavalinkStageOneSupported)
+            {
+                event.replyWarning(bot.msg(event.getGuild(), "lavalink.notYetSupported"));
+                return;
+            }
             doCommand(event);
         }
     }
-    
+
     public abstract void doCommand(CommandEvent event);
 }

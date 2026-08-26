@@ -18,6 +18,7 @@ package com.jagrosh.jmusicbot.service;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.audio.PlaybackReason;
+import com.jagrosh.jmusicbot.audio.lavalink.LavalinkPlaybackEngine;
 import com.jagrosh.jmusicbot.audio.QueuedTrack;
 import com.jagrosh.jmusicbot.audio.RequestMetadata;
 import com.jagrosh.jmusicbot.commands.v1.DJCommand;
@@ -283,6 +284,16 @@ public class MusicService
         if (args != null && args.startsWith("\"") && args.endsWith("\""))
             args = args.substring(1, args.length() - 1);
 
+        // Lavalink boundary: separate end-to-end path (join already happened in
+        // MusicCommandValidator; this loads/queues/resumes via the node instead of Lavaplayer).
+        // See LavalinkPlaybackEngine's class doc for why this is a parallel path rather than a
+        // rewrite of the Lavaplayer flow below.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            playLavalink(guild, member, args, output);
+            return;
+        }
+
         if (args == null || args.isEmpty())
         {
             AudioHandler handler = getHandler(guild);
@@ -312,6 +323,73 @@ public class MusicService
 
         bot.getPlayerManager().loadItemOrdered(guild, args,
                 bot.getAudioLoadWrapper().wrap(args, new AudioLoadResultHandlers.PlayResultHandler(this, bot, output, guild, member, args, false, channel)));
+    }
+
+    // ========== Lavalink stage 1: play/resume ==========
+    //
+    // This and the other lavalink*/handleLavalink* helpers below are the only place
+    // MusicService touches LavalinkPlaybackEngine. They intentionally do not reuse
+    // addTrackInternal/TrackAddResult/AudioLoadResultHandlers - those are built around
+    // com.sedmelluq...AudioTrack, which a Lavalink node never hands the bot. See
+    // LavalinkPlaybackEngine's class doc for the full reasoning.
+
+    private void playLavalink(Guild guild, Member member, String args, OutputAdapter output)
+    {
+        LavalinkPlaybackEngine engine = bot.getLavalinkEngine();
+        if (engine == null)
+        {
+            output.replyError(bot.msg(guild, "lavalink.nodeUnavailable"));
+            return;
+        }
+
+        if (args == null || args.isEmpty())
+        {
+            if (engine.isPlaying(guild) && engine.isPaused(guild))
+            {
+                if (DJCommand.checkDJPermission(bot, guild, member))
+                {
+                    String resumedTitle = engine.setPaused(guild, false);
+                    LOG.info("Playback resumed (lavalink): guild={}, user={}, track=\"{}\"",
+                            guild.getId(), member.getUser().getName(), resumedTitle);
+                    output.replySuccess(bot.msg(guild, "player.resumed", FormatUtil.filter(resumedTitle)));
+                }
+                else
+                {
+                    output.replyError(bot.msg(guild, "permissions.errors.needDjUnpause"));
+                }
+                return;
+            }
+            output.onShowHelp();
+            return;
+        }
+
+        LOG.info("Loading track (lavalink): guild={}, user={}, query=\"{}\"",
+                guild.getId(), member.getUser().getName(), args);
+        engine.play(guild, member.getIdLong(), args)
+              .thenAccept(result -> handleLavalinkPlayResult(guild, result, output))
+              .exceptionally(ex ->
+              {
+                  LOG.warn("Lavalink play() failed: guild={}, query=\"{}\": {}", guild.getId(), args, ex.toString());
+                  output.replyError(bot.msg(guild, "lavalink.loadFailed", String.valueOf(ex.getMessage())));
+                  return null;
+              });
+    }
+
+    private void handleLavalinkPlayResult(Guild guild, LavalinkPlaybackEngine.PlayResult result, OutputAdapter output)
+    {
+        switch (result.kind())
+        {
+            case PLAYING_NOW -> output.replySuccess(
+                    bot.msg(guild, "lavalink.nowPlaying", FormatUtil.filter(result.title())));
+            case QUEUED -> output.replySuccess(
+                    bot.msg(guild, "lavalink.queued", FormatUtil.filter(result.title()), result.queuePosition()));
+            case NO_MATCHES -> output.replyWarning(bot.msg(guild, "lavalink.noMatches"));
+            case TOO_LONG -> output.replyWarning(
+                    bot.msg(guild, "lavalink.trackTooLong", FormatUtil.filter(result.title()), bot.getConfig().getMaxTime()));
+            case LOAD_FAILED -> output.replyError(
+                    bot.msg(guild, "lavalink.loadFailed", String.valueOf(result.errorDetail())));
+            case NODE_NOT_READY -> output.replyError(bot.msg(guild, "lavalink.nodeUnavailable"));
+        }
     }
 
     public void previous(Guild guild, Member member, OutputAdapter output)
@@ -458,6 +536,24 @@ public class MusicService
         if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToUseButton"))
             return;
 
+        // Lavalink boundary: see LavalinkPlaybackEngine's class doc.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            LavalinkPlaybackEngine engine = bot.getLavalinkEngine();
+            if (engine == null)
+            {
+                output.replyError(bot.msg(guild, "lavalink.nodeUnavailable"));
+                return;
+            }
+            int newVol = Math.max(0, Math.min(150, engine.getVolume(guild) + change));
+            int[] changed = engine.setVolume(guild, newVol);
+            if (changed != null)
+            {
+                output.replySuccess(bot.msg(guild, "player.volumeChanged", changed[0], changed[1]));
+            }
+            return;
+        }
+
         AudioHandler handler = getHandler(guild);
         int newVol = handler.getPlayer().getVolume() + change;
         newVol = Math.max(0, Math.min(150, newVol));
@@ -474,6 +570,11 @@ public class MusicService
      */
     public int getVolume(Guild guild)
     {
+        // Lavalink boundary: see LavalinkPlaybackEngine's class doc.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            return bot.getLavalinkEngine() == null ? 100 : bot.getLavalinkEngine().getVolume(guild);
+        }
         AudioHandler handler = getHandler(guild);
         return handler.getPlayer().getVolume();
     }
@@ -493,6 +594,18 @@ public class MusicService
         {
             LOG.warn("Volume change rejected: invalid value {} (must be 0-150)", volume);
             return null;
+        }
+
+        // Lavalink boundary: see LavalinkPlaybackEngine's class doc.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            LavalinkPlaybackEngine engine = bot.getLavalinkEngine();
+            if (engine == null)
+            {
+                return null;
+            }
+            int[] changed = engine.setVolume(guild, volume);
+            return changed == null ? null : new VolumeResult(changed[0], changed[1]);
         }
 
         AudioHandler handler = getHandler(guild);
@@ -525,6 +638,14 @@ public class MusicService
         if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToUseButton"))
             return;
 
+        // Lavalink boundary: see LavalinkPlaybackEngine's class doc.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            stopLavalink(guild);
+            output.replySuccess(bot.msg(guild, "lavalink.stopped"));
+            return;
+        }
+
         AudioHandler handler = getHandler(guild);
         handler.stopAndClearQueuePreserveHistory();
         guild.getAudioManager().closeAudioConnection();
@@ -541,6 +662,13 @@ public class MusicService
     {
         LOG.info("Stopping playback and clearing queue: guild={}", guild.getId());
 
+        // Lavalink boundary: see LavalinkPlaybackEngine's class doc.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            stopLavalink(guild);
+            return;
+        }
+
         AudioHandler handler = getHandler(guild);
         handler.stopAndClearQueuePreserveHistory();
         guild.getAudioManager().closeAudioConnection();
@@ -548,10 +676,36 @@ public class MusicService
         LOG.debug("Audio connection closed: guild={}", guild.getId());
     }
 
+    private void stopLavalink(Guild guild)
+    {
+        LavalinkPlaybackEngine engine = bot.getLavalinkEngine();
+        if (engine == null)
+        {
+            return;
+        }
+        engine.stop(guild);
+        engine.leave(guild);
+    }
+
     public void pause(Guild guild, Member member, OutputAdapter output)
     {
         if (!requireDJPermission(guild, member, output, "permissions.errors.needDjToUseButton"))
             return;
+
+        // Lavalink boundary: see LavalinkPlaybackEngine's class doc.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            LavalinkPlaybackEngine engine = bot.getLavalinkEngine();
+            if (engine == null)
+            {
+                output.replyError(bot.msg(guild, "lavalink.nodeUnavailable"));
+                return;
+            }
+            boolean nowPaused = !engine.isPaused(guild);
+            String title = engine.setPaused(guild, nowPaused);
+            output.replySuccess(bot.msg(guild, nowPaused ? "lavalink.paused" : "player.resumed", FormatUtil.filter(String.valueOf(title))));
+            return;
+        }
 
         AudioHandler handler = getHandler(guild);
         handler.getPlayer().setPaused(!handler.getPlayer().isPaused());
@@ -566,6 +720,11 @@ public class MusicService
      */
     public boolean isPaused(Guild guild)
     {
+        // Lavalink boundary: see LavalinkPlaybackEngine's class doc.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            return bot.getLavalinkEngine() != null && bot.getLavalinkEngine().isPaused(guild);
+        }
         AudioHandler handler = getHandler(guild);
         return handler.getPlayer().isPaused();
     }
@@ -579,6 +738,16 @@ public class MusicService
      */
     public String setPaused(Guild guild, boolean paused)
     {
+        // Lavalink boundary: see LavalinkPlaybackEngine's class doc.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            LavalinkPlaybackEngine engine = bot.getLavalinkEngine();
+            String trackTitle = engine == null ? null : engine.setPaused(guild, paused);
+            LOG.info("Player {} (lavalink): guild={}, track=\"{}\"",
+                    paused ? "paused" : "resumed", guild.getId(), trackTitle);
+            return trackTitle;
+        }
+
         AudioHandler handler = getHandler(guild);
         handler.getPlayer().setPaused(paused);
         AudioTrack track = handler.getPlayer().getPlayingTrack();
@@ -592,6 +761,26 @@ public class MusicService
 
     public void skip(Guild guild, Member member, OutputAdapter output)
     {
+        // Lavalink boundary: see LavalinkPlaybackEngine's class doc.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            LavalinkPlaybackEngine engine = bot.getLavalinkEngine();
+            if (engine == null)
+            {
+                output.replyError(bot.msg(guild, "lavalink.nodeUnavailable"));
+                return;
+            }
+            boolean isDJ = DJCommand.checkDJPermission(bot, guild, member);
+            if (!isDJ && engine.getCurrentRequesterId(guild) != member.getIdLong())
+            {
+                output.replyError(bot.msg(guild, "permissions.errors.needDjOrRequesterSkip"));
+                return;
+            }
+            engine.skip(guild);
+            output.replySuccess(bot.msg(guild, "player.skipped"));
+            return;
+        }
+
         AudioHandler handler = getHandler(guild);
         boolean isDJ = DJCommand.checkDJPermission(bot, guild, member);
 
@@ -664,6 +853,15 @@ public class MusicService
         LOG.debug("Skip vote requested: guild={}, user={}, listeners={}",
                 guild.getId(), member.getUser().getName(), listeners);
 
+        // Lavalink boundary: same vote-counting logic as below, ported onto
+        // LavalinkPlaybackEngine's much smaller per-guild state (current track + requester id +
+        // a vote set) instead of AudioHandler. See LavalinkPlaybackEngine's class doc.
+        if (bot.getConfig().isLavalinkMode())
+        {
+            skipWithVoteLavalink(guild, member, listeners, output);
+            return;
+        }
+
         AudioHandler handler = getHandler(guild);
         RequestMetadata rm = handler.getRequestMetadata();
 
@@ -723,6 +921,69 @@ public class MusicService
             output.replySuccess(bot.msg(guild, "voting.voteRegistered", voteStatus));
         }
     }
+
+    private void skipWithVoteLavalink(Guild guild, Member member, int listeners, OutputAdapter output)
+    {
+        LavalinkPlaybackEngine engine = bot.getLavalinkEngine();
+        if (engine == null)
+        {
+            output.replyError(bot.msg(guild, "lavalink.nodeUnavailable"));
+            return;
+        }
+
+        long requesterId = engine.getCurrentRequesterId(guild);
+
+        double skipRatio = getSettings(guild).getSkipRatio();
+        if (skipRatio == -1)
+        {
+            skipRatio = bot.getConfig().getSkipRatio();
+        }
+
+        if (member.getIdLong() == requesterId || skipRatio == 0)
+        {
+            String trackTitle = engine.skip(guild);
+            LOG.info("Track skipped by owner/instant skip (lavalink): guild={}, user={}, track=\"{}\"",
+                    guild.getId(), member.getUser().getName(), trackTitle);
+            output.replySuccess(bot.msg(guild, "player.skippedTrack", FormatUtil.filter(String.valueOf(trackTitle))));
+            return;
+        }
+
+        String voterId = member.getId();
+        java.util.Set<String> votes = engine.getVotes(guild);
+        boolean alreadyVoted = votes.contains(voterId);
+        if (!alreadyVoted)
+        {
+            votes.add(voterId);
+        }
+
+        int skippers = (int) votes.stream()
+                .filter(id -> guild.getMemberById(id) != null &&
+                        guild.getMemberById(id).getVoiceState() != null &&
+                        guild.getMemberById(id).getVoiceState().getChannel() != null)
+                .count();
+        int required = (int) Math.ceil(listeners * skipRatio);
+        String voteStatus = bot.msg(guild, "voting.status", skippers, required, listeners);
+
+        if (alreadyVoted)
+        {
+            output.replyWarning(bot.msg(guild, "voting.alreadyVoted", voteStatus));
+        }
+        else if (skippers >= required)
+        {
+            String trackTitle = engine.skip(guild);
+            String requester = requesterId == 0L
+                    ? bot.msg(guild, "player.requesterAutoplay")
+                    : bot.msg(guild, "player.requesterUser", "<@" + requesterId + ">");
+            LOG.info("Track skipped by vote (lavalink): guild={}, track=\"{}\", votes={}/{}",
+                    guild.getId(), trackTitle, skippers, required);
+            output.replySuccess(bot.msg(guild, "voting.voteSkipSuccess", voteStatus, FormatUtil.filter(String.valueOf(trackTitle)), requester));
+        }
+        else
+        {
+            output.replySuccess(bot.msg(guild, "voting.voteRegistered", voteStatus));
+        }
+    }
+
 
     public void addCurrentTrackToFavorites(Guild guild, Member member, OutputAdapter output)
     {

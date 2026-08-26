@@ -23,6 +23,8 @@ import com.jagrosh.jmusicbot.audio.AudioLoadWrapper;
 import com.jagrosh.jmusicbot.audio.NowPlayingHandler;
 import com.jagrosh.jmusicbot.audio.PlayerManager;
 import com.jagrosh.jmusicbot.audio.TrackLoadingMonitor;
+import com.jagrosh.jmusicbot.audio.lavalink.LavalinkPlaybackEngine;
+import com.jagrosh.jmusicbot.config.model.PlaybackEngine;
 import com.jagrosh.jmusicbot.entities.UserInteraction;
 import javax.swing.JFrame;
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader;
@@ -67,6 +69,12 @@ public class Bot
     private final AudioLoadWrapper audioLoadWrapper;
     private final LanguageManager languages;
     private final UserLanguageStore userLanguages;
+    /**
+     * Non-null only when {@code playback.engine = lavalink}. See {@link LavalinkPlaybackEngine}
+     * for why this lives beside {@link #players} rather than replacing it — the two engines are
+     * separate paths, not two implementations of one interface.
+     */
+    private final LavalinkPlaybackEngine lavalinkEngine;
     private SelfUpdater updater;
     /** Set when --web is used, so the window can offer a link to it. */
     private com.jagrosh.jmusicbot.web.WebPanel webPanel;
@@ -101,7 +109,14 @@ public class Bot
         this.aloneInVoiceHandler.init();
         this.musicService = new MusicService(this);
         this.searchService = new SearchService(this);
-        
+        // Config load already normalizes an empty node list back to "lavaplayer" (BotConfig),
+        // but this stays defensive rather than trusting that invariant blindly - a unit test
+        // that hands Bot a hand-built/mocked BotConfig is not guaranteed to go through load().
+        this.lavalinkEngine = config.getPlaybackEngine() == PlaybackEngine.LAVALINK
+                && !config.getLavalinkNodes().isEmpty()
+                ? new LavalinkPlaybackEngine(this, config.getLavalinkNodes())
+                : null;
+
         // Initialize audio load wrapper - use NO_OP when GUI is disabled to avoid monitoring overhead
         this.audioLoadWrapper = isNoGUI() 
             ? AudioLoadWrapper.NO_OP 
@@ -256,6 +271,19 @@ public class Bot
         return musicService;
     }
 
+    /**
+     * The Lavalink engine, or {@code null} when {@code playback.engine != lavalink}.
+     *
+     * <p>Callers that only run in Lavalink mode (the {@code lavalinkStageOneSupported} branch
+     * of {@code MusicService}'s play/pause/stop/skip/volume methods, and
+     * {@code MusicCommandValidator}) are only reached when this is non-null - see
+     * {@link #getConfig()}{@code .isLavalinkMode()}.
+     */
+    public LavalinkPlaybackEngine getLavalinkEngine()
+    {
+        return lavalinkEngine;
+    }
+
     public SearchService getSearchService()
     {
         return searchService;
@@ -331,6 +359,9 @@ public class Bot
         if (shuttingDown)
             return;
         shuttingDown = true;
+
+        if (lavalinkEngine != null)
+            lavalinkEngine.shutdown();
 
         // Clean up audio connections first (before shutting down thread pool, as these may trigger events that use it)
         if (jda != null && jda.getStatus() != JDA.Status.SHUTTING_DOWN)

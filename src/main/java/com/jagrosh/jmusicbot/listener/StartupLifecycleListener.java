@@ -51,6 +51,13 @@ public class StartupLifecycleListener extends ListenerAdapter {
 
     @Override
     public void onReady(ReadyEvent event) {
+        // Needs the self user id for the node's Client-Name/User-Id headers, which is only
+        // reliably available once the gateway session is fully up - hence here, not in
+        // DiscordService right after JDABuilder.build().
+        if (bot.getLavalinkEngine() != null) {
+            bot.getLavalinkEngine().start();
+        }
+
         if (event.getJDA().getGuildCache().isEmpty()) {
             Logger log = LoggerFactory.getLogger("MusicBot");
             String inviteUrl = event.getJDA().getInviteUrl(JMusicBot.RECOMMENDED_PERMS);

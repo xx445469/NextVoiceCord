@@ -17,9 +17,8 @@ package com.jagrosh.jmusicbot.commands.v2.dj;
 
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jmusicbot.Bot;
-import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.commands.v2.DJSlashCommand;
-import com.jagrosh.jmusicbot.settings.Settings;
+import com.jagrosh.jmusicbot.service.MusicService;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -31,9 +30,12 @@ import java.util.Collections;
  */
 public class VolumeSlashCmd extends DJSlashCommand
 {
+    private final MusicService musicService;
+
     public VolumeSlashCmd(Bot bot)
     {
         super(bot);
+        this.musicService = bot.getMusicService();
         this.name = "volume";
         this.help = "sets or shows the player volume";
         this.aliases = bot.getConfig().getAliases(this.name);
@@ -42,14 +44,16 @@ public class VolumeSlashCmd extends DJSlashCommand
                         .setMinValue(0)
                         .setMaxValue(150)
         );
+        this.lavalinkStageOneSupported = true;
     }
 
     @Override
     public void doDJCommand(SlashCommandEvent event)
     {
-        AudioHandler handler = (AudioHandler) event.getGuild().getAudioManager().getSendingHandler();
-        Settings settings = event.getClient().getSettingsFor(event.getGuild());
-        int currentVolume = handler.getPlayer().getVolume();
+        // Routed through MusicService (rather than reading AudioHandler directly, as this used
+        // to) so the lavalink-mode branch inside MusicService.getVolume/setVolume applies here
+        // too - see the "Lavalink boundary" comment there.
+        int currentVolume = musicService.getVolume(event.getGuild());
 
         if (event.getOption("level") == null)
         {
@@ -59,9 +63,14 @@ public class VolumeSlashCmd extends DJSlashCommand
         else
         {
             int newVolume = (int) event.getOption("level").getAsLong();
-            handler.getPlayer().setVolume(newVolume);
-            settings.setVolume(newVolume);
-            event.reply(FormatUtil.volumeIcon(newVolume) + " " + bot.msg(event.getGuild(), "player.volumeChanged", currentVolume, newVolume)).queue();
+            MusicService.VolumeResult result = musicService.setVolume(event.getGuild(), newVolume);
+            if (result == null)
+            {
+                event.reply(event.getClient().getError() + " " + bot.msg(event.getGuild(), "player.errors.volumeInvalid"))
+                        .setEphemeral(true).queue();
+                return;
+            }
+            event.reply(FormatUtil.volumeIcon(result.newVolume) + " " + bot.msg(event.getGuild(), "player.volumeChanged", result.oldVolume, result.newVolume)).queue();
         }
     }
 }

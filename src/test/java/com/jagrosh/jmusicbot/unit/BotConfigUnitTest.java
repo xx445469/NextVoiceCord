@@ -431,15 +431,15 @@ class BotConfigUnitTest extends BaseConfigTest {
                 """;
             Path configFile = createTempConfigFile(configContent);
             setConfigFileProperty(configFile);
-
+            
             BotConfig config = new BotConfig(mockUserInteraction);
             config.load();
-
+            
             Set<AudioSource> sources = config.getEnabledAudioSources();
-
+            
             // Should have 8 sources enabled (11 total - 3 disabled: bandcamp, beam, spotify)
             assertEquals(8, sources.size(), "Should have 8 sources enabled");
-
+            
             // Enabled sources
             assertTrue(config.isAudioSourceEnabled(AudioSource.YOUTUBE));
             assertTrue(config.isAudioSourceEnabled(AudioSource.SOUNDCLOUD));
@@ -449,7 +449,7 @@ class BotConfigUnitTest extends BaseConfigTest {
             assertTrue(config.isAudioSourceEnabled(AudioSource.NICO));
             assertTrue(config.isAudioSourceEnabled(AudioSource.HTTP));
             assertTrue(config.isAudioSourceEnabled(AudioSource.LOCAL));
-
+            
             // Disabled sources
             assertFalse(config.isAudioSourceEnabled(AudioSource.BANDCAMP),
                 "Bandcamp should be disabled when set to false");
@@ -458,7 +458,7 @@ class BotConfigUnitTest extends BaseConfigTest {
             assertFalse(config.isAudioSourceEnabled(AudioSource.SPOTIFY),
                 "Spotify should be disabled when set to false");
         }
-
+        
         @Test
         @DisplayName("All sources enabled when all set to false (fallback behavior)")
         void allSourcesEnabledWhenAllSetToFalse() throws IOException {

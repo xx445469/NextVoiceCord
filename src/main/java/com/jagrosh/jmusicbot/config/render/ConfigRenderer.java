@@ -146,6 +146,42 @@ public class ConfigRenderer {
                                 }
                             }
                         }
+                    } else if (option.getType() == ConfigOption.ConfigType.CONFIG_LIST) {
+                        // A list of objects (currently only lavalink.nodes) needs the same manual
+                        // brace-by-brace rendering as the CONFIG branch above, and for the same
+                        // underlying reason: ConfigValue.render(INLINE_VALUE_OPTIONS) — formatted
+                        // HOCON turned off — drops the "{ }" around each object in a list rather
+                        // than just omitting quotes, producing text like
+                        // "[host=a,name=x,host=b,name=y]" that reparses as one flattened object
+                        // rather than two, so ConfigDocument.withValueText throws a parse
+                        // exception, which the catch below then silently swallows — leaving
+                        // whatever the template shipped (reference.conf's demo node) in place
+                        // instead of the user's actual list. Building the text by hand, with
+                        // explicit braces per element, is what the CONFIG branch already does for
+                        // exactly this reason.
+                        java.util.List<? extends Config> items = option.getConfigList(migratedUserConfig);
+                        StringBuilder sb = new StringBuilder("[ ");
+                        boolean firstItem = true;
+                        for (Config item : items) {
+                            if (!firstItem) {
+                                sb.append(", ");
+                            }
+                            firstItem = false;
+                            sb.append("{ ");
+                            boolean firstField = true;
+                            for (String nestedKey : item.root().keySet()) {
+                                if (!firstField) {
+                                    sb.append(", ");
+                                }
+                                firstField = false;
+                                ConfigValue nestedValue = item.getValue(nestedKey);
+                                sb.append(nestedKey).append(" = ").append(renderValue(nestedValue));
+                            }
+                            sb.append(" }");
+                        }
+                        sb.append(" ]");
+                        LOGGER.debug("Replacing config list '{}' with: {}", key, sb.toString());
+                        outputDoc = outputDoc.withValueText(key, sb.toString());
                     } else {
                         // For simple values, get the ConfigValue and render it
                         ConfigValue value = migratedUserConfig.getValue(key);

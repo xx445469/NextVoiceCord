@@ -38,6 +38,7 @@ public class SkipCmd extends MusicCommand
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = true;
+        this.lavalinkStageOneSupported = true;
     }
 
     @Override
