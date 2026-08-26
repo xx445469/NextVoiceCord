@@ -64,3 +64,7 @@ config.txt.bak*
 *.bak
 *.bak[0-9]*
 /userlanguages.json
+
+# Scratch worktrees created for isolated agent runs. They are full checkouts of this
+# same repository, so committing one nests a copy of the repo inside itself.
+.claude/worktrees/

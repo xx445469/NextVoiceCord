@@ -9,6 +9,18 @@ follow [semantic versioning](https://semver.org/spec/v2.0.0.html). Dates are ISO
 
 ### Fixed
 
+- **No playlist could be loaded from YouTube.** Reported as a YouTube Music problem; it was
+  neither specific to YouTube Music nor to the playlist in question. Measured directly: a
+  known-good public playlist failed identically, on `music.youtube.com` and `www.youtube.com`
+  alike, on the pinned snapshot *and* on the released 1.18.2 — so YouTube changed the playlist
+  response and `youtube-source` has not caught up on any version. Testing each client
+  individually found exactly one that still works, `ANDROIDVR`, and it produces real audio
+  frames rather than only loading metadata. It now leads the default client list. `ANDROID` is
+  dropped: upstream logs "ANDROID is broken with no known fix" at startup.
+
+  A note in `reference.conf` claiming `ANDROID_VR` played nothing has been corrected — that
+  measurement only ever covered single videos.
+
 - **The desktop window rendered Chinese, Japanese and Korean as empty boxes on Linux.** The
   interface font was chosen from a list of platform families — Inter, Ubuntu, Cantarell, Noto
   Sans — none of which contain CJK glyphs, and nothing checked whether the chosen font could
