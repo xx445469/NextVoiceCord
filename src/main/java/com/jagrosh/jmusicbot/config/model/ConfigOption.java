@@ -84,10 +84,14 @@ public enum ConfigOption {
     // Registered so config regeneration (ConfigRenderer/ConfigUpdater) preserves a user's node
     // list correctly, the same as every other option — but deliberately kept out of the web
     // panel's /api/config listing (see WebData.HIDDEN_KEYS) because it carries a credential
-    // (nodes[].password) that the panel has no per-node redaction UI for yet. That UI is stage 2;
-    // until then this is config.txt-only, matching how WebWrites already refuses STRING_LIST/CONFIG.
+    // (nodes[].password) that the web panel has no per-node redaction UI for. The desktop
+    // window's ConfigPanel does have a structured editor for this (see
+    // ConfigPanel.createLavalinkSection) — the two panels are not held to the same bar here:
+    // the desktop editor runs locally and never sends a node's password anywhere, where the web
+    // panel would have to serialise it into an HTTP response first.
     LAVALINK_NODES("lavalink.nodes", ConfigType.CONFIG_LIST, false,
-            "Lavalink node connection list (name, host, port, password, secure); config.txt only"),
+            "Lavalink node connection list (name, host, port, password, secure); desktop window only, "
+                    + "not the web panel"),
 
     // GUI options
     GUI_ENABLED("gui.enabled", ConfigType.BOOLEAN, false, "Enable or disable the GUI (default true)"),

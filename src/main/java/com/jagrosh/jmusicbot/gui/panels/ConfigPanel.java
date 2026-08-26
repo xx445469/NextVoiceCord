@@ -18,6 +18,7 @@ package com.jagrosh.jmusicbot.gui.panels;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.audio.AudioSource;
+import com.jagrosh.jmusicbot.audio.lavalink.LavalinkNodeConfig;
 import com.jagrosh.jmusicbot.config.io.ConfigIO;
 import com.jagrosh.jmusicbot.config.update.ConfigUpdater;
 import com.jagrosh.jmusicbot.gui.GuiLanguage;
@@ -26,6 +27,8 @@ import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
 import com.jagrosh.jmusicbot.i18n.Language;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
@@ -77,6 +80,9 @@ public class ConfigPanel extends JPanel {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigPanel.class);
 
+    /** Reused across test-connection presses; a Jackson mapper is safe to share and reuse. */
+    private static final ObjectMapper LAVALINK_TEST_MAPPER = new ObjectMapper();
+
     /**
      * Known InnerTube client names, in the canonical (underscore-free) form
      * {@code AudioSource.clientByName} matches against. Offered as suggestions in the "add" box
@@ -114,6 +120,13 @@ public class ConfigPanel extends JPanel {
     private final JSpinner maxYTPlaylistPagesSpinner;
     private final JSpinner skipRatioSpinner;
     private final JCheckBox useYouTubeOAuthCheckBox;
+
+    // Lavalink section (common) — playback.engine, lavalink.nodes. See createLavalinkSection
+    // for why this is common rather than tucked behind an advanced card.
+    private final JComboBox<String> lavalinkEngineComboBox;
+    private final DefaultListModel<LavalinkNodeConfig> lavalinkNodesModel;
+    private final JList<LavalinkNodeConfig> lavalinkNodesJList;
+    private final JLabel lavalinkTestConnectionStatusLabel;
 
     // UI/Emojis section
     private final JTextField successEmojiField;
@@ -237,6 +250,27 @@ public class ConfigPanel extends JPanel {
         skipRatioSpinner = new JSpinner(new SpinnerNumberModel(0.55, 0.0, 1.0, 0.05));
         useYouTubeOAuthCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.useYouTubeOAuth"));
 
+        // Lavalink — "fallback" is offered because config.txt accepts it, not because it works;
+        // see createLavalinkSection for the note shown beside it.
+        lavalinkEngineComboBox = new JComboBox<>(new String[]{"lavaplayer", "lavalink", "fallback"});
+        lavalinkNodesModel = new DefaultListModel<>();
+        lavalinkNodesJList = new JList<>(lavalinkNodesModel);
+        lavalinkNodesJList.setVisibleRowCount(4);
+        lavalinkNodesJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        lavalinkNodesJList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                            boolean isSelected, boolean cellHasFocus) {
+                // describe(), never the record itself: it never includes the password (see
+                // LavalinkNodeConfig), which is exactly what a list rendered in this window
+                // must never show.
+                String text = value instanceof LavalinkNodeConfig node ? node.describe() : String.valueOf(value);
+                return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
+            }
+        });
+        lavalinkTestConnectionStatusLabel = new JLabel(" ");
+        lavalinkTestConnectionStatusLabel.setFont(Tokens.fontSmall());
+
         // UI/Emojis
         successEmojiField = new JTextField(5);
         warningEmojiField = new JTextField(5);
@@ -336,7 +370,7 @@ public class ConfigPanel extends JPanel {
                 proxyPasswordField, discordTokenField, youtubePoTokenField, youtubeVisitorDataField,
                 updateRepositoryField, updateGithubTokenField, evalEngineField, webBindAddressField);
         applyFieldStyle(statusComboBox, logLevelComboBox, botLanguageComboBox, guiLanguageComboBox,
-                guiThemeComboBox, youtubeClientsAddComboBox);
+                guiThemeComboBox, youtubeClientsAddComboBox, lavalinkEngineComboBox);
         applyFieldStyle(songInStatusCheckBox, stayInChannelCheckBox, useYouTubeOAuthCheckBox,
                 npImagesCheckBox, updateAlertsCheckBox, proxyLavaplayerCheckBox, proxyJdaCheckBox,
                 proxyGithubCheckBox, npMinimalMessageCheckBox, npShowButtonsCheckBox,
@@ -346,7 +380,8 @@ public class ConfigPanel extends JPanel {
                 proxyPortSpinner, discordOwnerSpinner, maxHistorySizeSpinner, clearChannelDeleteLimitSpinner,
                 clearChannelAgeDaysSpinner, updateCheckIntervalSpinner, guiFontSizeSpinner,
                 nasBufferMsSpinner, frameBufferMsSpinner);
-        applyFieldStyle(youtubeClientsJList, aliasesTextArea, transformsTextArea);
+        applyFieldStyle(youtubeClientsJList, aliasesTextArea, transformsTextArea, lavalinkNodesJList,
+                lavalinkTestConnectionStatusLabel);
         for (JCheckBox checkBox : audioSourceCheckBoxes.values()) {
             applyFieldStyle(checkBox);
         }
@@ -455,6 +490,7 @@ public class ConfigPanel extends JPanel {
         addSection(content, createPresenceSection());
         addSection(content, createVoiceSection());
         addSection(content, createPlaybackSection());
+        addSection(content, createLavalinkSection());
         addSection(content, createEmojisSection());
         addSection(content, createOtherSection());
         addSection(content, createProxySection());
@@ -637,6 +673,321 @@ public class ConfigPanel extends JPanel {
         Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.playback"), panel);
         registerSection(card, null, rows);
         return card;
+    }
+
+    /**
+     * Creates the common Lavalink section: playback.engine and lavalink.nodes.
+     *
+     * <p>{@code playback.engine} is the switch that decides which playback path the whole bot
+     * uses, so — unlike the Proxy section below, which someone already knows they need before
+     * going looking for it — this stays common, never collapsed: someone who installed this
+     * build to use Lavalink should not have to go hunting through advanced cards to find it.
+     * {@code fallback} is offered as a real choice, because config.txt accepts it, but the note
+     * merged into this row says plainly that it is not implemented yet (stage 3 — both engines
+     * live, with a handover on node failure) and resolves to {@code lavaplayer} with a logged
+     * warning. The window is not allowed to offer it as though it worked when the startup log
+     * already says otherwise.
+     *
+     * <p>{@code lavalink.nodes} gets a real list editor, built the same way as the
+     * {@code playback.youtube.clients} editor above — an ordered list plus add/remove/reorder
+     * controls — except each entry here is a small object (name/host/port/password/secure)
+     * rather than a single string, so add and edit open a small dialog instead of picking from a
+     * combo box (see {@link #showLavalinkNodeDialog}). Stage 1 only ever reads the first entry —
+     * the note merged into this row says so — so the editor lets someone build a longer list
+     * without it silently going unused.
+     *
+     * <p>The Test Connection button (see {@link #testLavalinkConnection}) is the fastest way to
+     * find out whether a node is actually reachable, rather than restarting the bot and reading
+     * a stack trace: it hits the node's own {@code GET /v4/info} off the Swing event thread.
+     */
+    private Component createLavalinkSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
+
+        FilterRow engineRow = addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.lavalinkEngine"),
+                lavalinkEngineComboBox, "playback.engine");
+        engineRow.merge(addSpanningRow(panel, gbc, 1,
+                noteLabel(GuiLanguage.msg("gui.config.lavalinkEngineFallbackNote")), null));
+        rows.add(engineRow);
+
+        FilterRow nodesRow = addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.lavalinkNodes"),
+                buildLavalinkNodesEditor(), "lavalink.nodes");
+        nodesRow.merge(addSpanningRow(panel, gbc, 3,
+                noteLabel(GuiLanguage.msg("gui.config.lavalinkNodesNote")), null));
+        nodesRow.merge(addSpanningRow(panel, gbc, 4, lavalinkTestConnectionStatusLabel, null));
+        rows.add(nodesRow);
+
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.lavalink"), panel);
+        registerSection(card, null, rows);
+        return card;
+    }
+
+    /** The ordered list, add/edit/remove/reorder controls and test-connection button for lavalink.nodes. */
+    private JPanel buildLavalinkNodesEditor() {
+        JPanel wrapper = Widgets.transparent(new BorderLayout(Tokens.SPACE_SM, 0));
+
+        JScrollPane listScroll = new JScrollPane(lavalinkNodesJList);
+        listScroll.setPreferredSize(new Dimension(240, 90));
+        wrapper.add(listScroll, BorderLayout.CENTER);
+
+        JPanel controls = Widgets.transparent(new GridLayout(0, 1, 0, Tokens.SPACE_XS));
+
+        JButton addButton = new JButton(GuiLanguage.msg("gui.config.lavalinkNodeAdd"));
+        addButton.setFont(Tokens.fontSmall());
+        addButton.addActionListener(e -> {
+            LavalinkNodeConfig created = showLavalinkNodeDialog(null);
+            if (created != null) {
+                lavalinkNodesModel.addElement(withDefaultedName(created, lavalinkNodesModel.size()));
+            }
+        });
+
+        JButton editButton = new JButton(GuiLanguage.msg("gui.config.lavalinkNodeEdit"));
+        editButton.setFont(Tokens.fontSmall());
+        editButton.addActionListener(e -> {
+            int index = lavalinkNodesJList.getSelectedIndex();
+            if (index < 0) {
+                return;
+            }
+            LavalinkNodeConfig updated = showLavalinkNodeDialog(lavalinkNodesModel.get(index));
+            if (updated != null) {
+                lavalinkNodesModel.set(index, withDefaultedName(updated, index));
+            }
+        });
+
+        JButton removeButton = new JButton(GuiLanguage.msg("gui.config.lavalinkNodeRemove"));
+        removeButton.setFont(Tokens.fontSmall());
+        removeButton.addActionListener(e -> {
+            int index = lavalinkNodesJList.getSelectedIndex();
+            if (index >= 0) {
+                lavalinkNodesModel.remove(index);
+            }
+        });
+
+        JButton upButton = new JButton(GuiLanguage.msg("gui.config.lavalinkNodeUp"));
+        upButton.setFont(Tokens.fontSmall());
+        upButton.addActionListener(e -> moveSelectedLavalinkNode(-1));
+
+        JButton downButton = new JButton(GuiLanguage.msg("gui.config.lavalinkNodeDown"));
+        downButton.setFont(Tokens.fontSmall());
+        downButton.addActionListener(e -> moveSelectedLavalinkNode(1));
+
+        JButton testButton = new JButton(GuiLanguage.msg("gui.config.lavalinkTestConnection"));
+        testButton.setFont(Tokens.fontSmall());
+        testButton.addActionListener(e -> testLavalinkConnection(testButton));
+
+        controls.add(addButton);
+        controls.add(editButton);
+        controls.add(removeButton);
+        controls.add(upButton);
+        controls.add(downButton);
+        controls.add(testButton);
+
+        wrapper.add(controls, BorderLayout.EAST);
+        return wrapper;
+    }
+
+    /** Moves the selected node up (-1) or down (+1) in the ordered list, if it can move. */
+    private void moveSelectedLavalinkNode(int direction) {
+        int index = lavalinkNodesJList.getSelectedIndex();
+        int target = index + direction;
+        if (index < 0 || target < 0 || target >= lavalinkNodesModel.size()) {
+            return;
+        }
+        LavalinkNodeConfig value = lavalinkNodesModel.remove(index);
+        lavalinkNodesModel.add(target, value);
+        lavalinkNodesJList.setSelectedIndex(target);
+    }
+
+    /**
+     * Defaults a blank name to {@code node-<index>}, the same fallback
+     * {@link LavalinkNodeConfig#parseList} uses when config.txt is edited by hand without one.
+     */
+    private LavalinkNodeConfig withDefaultedName(LavalinkNodeConfig node, int index) {
+        if (node.name() != null && !node.name().isBlank()) {
+            return node;
+        }
+        return new LavalinkNodeConfig("node-" + index, node.host(), node.port(), node.password(), node.secure());
+    }
+
+    /**
+     * Shows the add/edit dialog for one {@code lavalink.nodes} entry. Re-prompts rather than
+     * accepting a blank host, since {@link LavalinkNodeConfig#parseList} would otherwise silently
+     * skip whatever gets saved here. Returns {@code null} if the dialog is cancelled.
+     */
+    private LavalinkNodeConfig showLavalinkNodeDialog(LavalinkNodeConfig existing) {
+        JTextField nameField = new JTextField(existing == null ? "" : existing.name(), 15);
+        JTextField hostField = new JTextField(existing == null ? "" : existing.host(), 15);
+        JSpinner portSpinner = new JSpinner(
+                new SpinnerNumberModel(existing == null ? 2333 : existing.port(), 1, 65535, 1));
+        // A password, not a JTextField: same reasoning as every other credential field on this
+        // panel (see the class javadoc) — never shown or logged in plain text.
+        JPasswordField passwordField = new JPasswordField(existing == null ? "" : existing.password(), 15);
+        JCheckBox secureCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.lavalinkNodeSecure"),
+                existing != null && existing.secure());
+        applyFieldStyle(nameField, hostField, portSpinner, passwordField, secureCheckBox);
+
+        JPanel form = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+        addRow(form, gbc, 0, GuiLanguage.msg("gui.config.lavalinkNodeName"), nameField, null);
+        addRow(form, gbc, 1, GuiLanguage.msg("gui.config.lavalinkNodeHost"), hostField, null);
+        addRow(form, gbc, 2, GuiLanguage.msg("gui.config.lavalinkNodePort"), portSpinner, null);
+        addRow(form, gbc, 3, GuiLanguage.msg("gui.config.lavalinkNodePassword"), passwordField, null);
+        addSpanningRow(form, gbc, 4, secureCheckBox, null);
+
+        String title = existing == null
+                ? GuiLanguage.msg("gui.config.lavalinkNodeDialogTitleAdd")
+                : GuiLanguage.msg("gui.config.lavalinkNodeDialogTitleEdit");
+
+        while (true) {
+            int result = JOptionPane.showConfirmDialog(this, form, title,
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (result != JOptionPane.OK_OPTION) {
+                return null;
+            }
+            String host = hostField.getText().trim();
+            if (host.isEmpty()) {
+                JOptionPane.showMessageDialog(this, GuiLanguage.msg("gui.config.lavalinkNodeDialogHostRequired"),
+                        title, JOptionPane.ERROR_MESSAGE);
+                continue;
+            }
+            return new LavalinkNodeConfig(nameField.getText().trim(), host, (Integer) portSpinner.getValue(),
+                    readAndClearPassword(passwordField), secureCheckBox.isSelected());
+        }
+    }
+
+    /** The node currently selected in the list, or the first one if nothing is selected. */
+    private LavalinkNodeConfig selectedOrFirstLavalinkNode() {
+        int index = lavalinkNodesJList.getSelectedIndex();
+        if (index >= 0) {
+            return lavalinkNodesModel.get(index);
+        }
+        return lavalinkNodesModel.isEmpty() ? null : lavalinkNodesModel.get(0);
+    }
+
+    /**
+     * Probes a Lavalink node's {@code GET /v4/info} off the Swing event thread and reports one
+     * of three distinct outcomes: reachable and authenticated, reachable but the password was
+     * rejected, or unreachable — restarting the bot and reading a stack trace is not how anyone
+     * should have to find out which of those applies. The button stays disabled for the duration
+     * of the request, via {@link SwingWorker}, which runs {@code doInBackground} off the EDT and
+     * hands the result back to {@code done} on it.
+     */
+    private void testLavalinkConnection(JButton button) {
+        LavalinkNodeConfig node = selectedOrFirstLavalinkNode();
+        if (node == null) {
+            lavalinkTestConnectionStatusLabel.setForeground(Tokens.textMuted());
+            lavalinkTestConnectionStatusLabel.setText(GuiLanguage.msg("gui.config.lavalinkTestConnectionNoNode"));
+            return;
+        }
+
+        button.setEnabled(false);
+        lavalinkTestConnectionStatusLabel.setForeground(Tokens.textMuted());
+        lavalinkTestConnectionStatusLabel.setText(
+                GuiLanguage.msg("gui.config.lavalinkTestConnectionRunning", node.describe()));
+
+        SwingWorker<LavalinkProbeResult, Void> worker = new SwingWorker<>() {
+            @Override
+            protected LavalinkProbeResult doInBackground() {
+                return probeLavalinkNode(node);
+            }
+
+            @Override
+            protected void done() {
+                button.setEnabled(true);
+                LavalinkProbeResult result;
+                try {
+                    result = get();
+                } catch (Exception ex) {
+                    result = LavalinkProbeResult.unreachable(GuiLanguage.msg(
+                            "gui.config.lavalinkTestConnectionUnreachable", node.describe(), ex.getMessage()));
+                }
+                lavalinkTestConnectionStatusLabel.setForeground(switch (result.outcome()) {
+                    case AUTHENTICATED -> Tokens.success();
+                    case PASSWORD_REJECTED -> Tokens.warning();
+                    case UNREACHABLE -> Tokens.danger();
+                });
+                lavalinkTestConnectionStatusLabel.setText(result.message());
+            }
+        };
+        worker.execute();
+    }
+
+    /**
+     * Hits {@code GET /v4/info} with the node's password in the {@code Authorization} header —
+     * exactly the request documented and verified against a real node — and turns the response
+     * into one of {@link LavalinkProbeResult}'s three outcomes. Runs entirely on the calling
+     * thread; the caller ({@link #testLavalinkConnection}) is what keeps this off the EDT.
+     */
+    private LavalinkProbeResult probeLavalinkNode(LavalinkNodeConfig node) {
+        java.net.http.HttpRequest request;
+        try {
+            request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create(node.httpBaseUrl() + "/v4/info"))
+                    .timeout(java.time.Duration.ofSeconds(8))
+                    .header("Authorization", node.password())
+                    .GET()
+                    .build();
+        } catch (RuntimeException ex) {
+            return LavalinkProbeResult.unreachable(GuiLanguage.msg(
+                    "gui.config.lavalinkTestConnectionUnreachable", node.describe(), ex.getMessage()));
+        }
+
+        java.net.http.HttpClient client = java.net.http.HttpClient.newBuilder()
+                .connectTimeout(java.time.Duration.ofSeconds(5))
+                .build();
+        try {
+            java.net.http.HttpResponse<String> response =
+                    client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+            int status = response.statusCode();
+            if (status == 200) {
+                return LavalinkProbeResult.authenticated(describeLavalinkInfo(response.body()));
+            }
+            if (status == 401 || status == 403) {
+                return LavalinkProbeResult.passwordRejected(GuiLanguage.msg(
+                        "gui.config.lavalinkTestConnectionAuthFailed", node.describe(), status));
+            }
+            return LavalinkProbeResult.unreachable(GuiLanguage.msg(
+                    "gui.config.lavalinkTestConnectionUnreachable", node.describe(), "HTTP " + status));
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            return LavalinkProbeResult.unreachable(GuiLanguage.msg(
+                    "gui.config.lavalinkTestConnectionUnreachable", node.describe(), ex.getMessage()));
+        } catch (Exception ex) {
+            String message = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+            return LavalinkProbeResult.unreachable(GuiLanguage.msg(
+                    "gui.config.lavalinkTestConnectionUnreachable", node.describe(), message));
+        }
+    }
+
+    /** Pulls version/sourceManagers/plugins out of a successful /v4/info body for the status line. */
+    private String describeLavalinkInfo(String body) {
+        try {
+            JsonNode root = LAVALINK_TEST_MAPPER.readTree(body);
+            String version = root.path("version").path("semver").asText("?");
+            int sourceManagers = root.path("sourceManagers").size();
+            int plugins = root.path("plugins").size();
+            return GuiLanguage.msg("gui.config.lavalinkTestConnectionOk", version, sourceManagers, plugins);
+        } catch (java.io.IOException | RuntimeException ex) {
+            return GuiLanguage.msg("gui.config.lavalinkTestConnectionOk", "?", 0, 0);
+        }
+    }
+
+    /** One of the three outcomes {@link #testLavalinkConnection} must report distinctly. */
+    private record LavalinkProbeResult(Outcome outcome, String message) {
+        private enum Outcome { AUTHENTICATED, PASSWORD_REJECTED, UNREACHABLE }
+
+        static LavalinkProbeResult authenticated(String message) {
+            return new LavalinkProbeResult(Outcome.AUTHENTICATED, message);
+        }
+
+        static LavalinkProbeResult passwordRejected(String message) {
+            return new LavalinkProbeResult(Outcome.PASSWORD_REJECTED, message);
+        }
+
+        static LavalinkProbeResult unreachable(String message) {
+            return new LavalinkProbeResult(Outcome.UNREACHABLE, message);
+        }
     }
 
     /**
@@ -1152,6 +1503,16 @@ public class ConfigPanel extends JPanel {
         skipRatioSpinner.setValue(config.getSkipRatio());
         useYouTubeOAuthCheckBox.setSelected(config.useYouTubeOauth());
 
+        // Lavalink — the raw engine value (see BotConfig.getPlaybackEngineRaw), not the resolved
+        // one, so a config.txt with engine = "fallback" shows "fallback" here instead of quietly
+        // reverting the displayed choice to lavaplayer.
+        lavalinkEngineComboBox.setSelectedItem(config.getPlaybackEngineRaw());
+        lavalinkNodesModel.clear();
+        for (LavalinkNodeConfig node : config.getLavalinkNodes()) {
+            lavalinkNodesModel.addElement(node);
+        }
+        lavalinkTestConnectionStatusLabel.setText(" ");
+
         // UI/Emojis
         successEmojiField.setText(config.getSuccess());
         warningEmojiField.setText(config.getWarning());
@@ -1318,6 +1679,10 @@ public class ConfigPanel extends JPanel {
         updates.put("playback.skipRatio", String.valueOf(skipRatioSpinner.getValue()));
         updates.put("playback.youtube.useOAuth", String.valueOf(useYouTubeOAuthCheckBox.isSelected()));
 
+        // Lavalink
+        updates.put("playback.engine", quoteString((String) lavalinkEngineComboBox.getSelectedItem()));
+        updates.put("lavalink.nodes", formatLavalinkNodesList(currentLavalinkNodes()));
+
         // UI/Emojis
         updates.put("ui.emojis.success", quoteString(successEmojiField.getText()));
         updates.put("ui.emojis.warning", quoteString(warningEmojiField.getText()));
@@ -1406,6 +1771,41 @@ public class ConfigPanel extends JPanel {
         return clients;
     }
 
+    /** The nodes currently shown in the editor, in display (= save) order. */
+    private List<LavalinkNodeConfig> currentLavalinkNodes() {
+        List<LavalinkNodeConfig> nodes = new ArrayList<>();
+        for (int i = 0; i < lavalinkNodesModel.size(); i++) {
+            nodes.add(lavalinkNodesModel.get(i));
+        }
+        return nodes;
+    }
+
+    /**
+     * Renders lavalink.nodes as a single-line HOCON array of node objects — the same "single
+     * line" choice {@link #formatStringList} makes for playback.youtube.clients, and for the
+     * same reason: {@link #replaceLavalinkNodesValue} below replaces exactly the span between
+     * the array's own brackets in the existing file, however many lines that span happens to be,
+     * so the *replacement* does not need to match the original formatting — only stay valid
+     * HOCON, which a single line trivially is.
+     */
+    private String formatLavalinkNodesList(List<LavalinkNodeConfig> nodes) {
+        StringBuilder sb = new StringBuilder("[ ");
+        for (int i = 0; i < nodes.size(); i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            LavalinkNodeConfig node = nodes.get(i);
+            sb.append("{ name = ").append(quoteString(node.name()))
+              .append(", host = ").append(quoteString(node.host()))
+              .append(", port = ").append(node.port())
+              .append(", password = ").append(quoteString(node.password()))
+              .append(", secure = ").append(node.secure())
+              .append(" }");
+        }
+        sb.append(" ]");
+        return sb.toString();
+    }
+
     /**
      * Renders a list of strings as a HOCON array of quoted strings.
      *
@@ -1434,7 +1834,8 @@ public class ConfigPanel extends JPanel {
      * config.txt content — Java offers no way around that once a String exists at all — but
      * the mutable buffer this came from does not have to sit in memory a moment longer than
      * it takes to copy it out. Shared by every secret field on this panel: the Discord token,
-     * the update GitHub token, the YouTube poToken pair, and the proxy password.
+     * the update GitHub token, the YouTube poToken pair, the proxy password, and a Lavalink
+     * node's password in the add/edit dialog.
      */
     private String readAndClearPassword(JPasswordField field) {
         char[] password = field.getPassword();
@@ -1468,6 +1869,17 @@ public class ConfigPanel extends JPanel {
             String key = entry.getKey();
             String value = entry.getValue();
 
+            // lavalink.nodes is a HOCON array that can legitimately span many lines in
+            // config.txt (see reference.conf, where it does). The single-line regex replace
+            // every other key on this panel uses below would only touch the array's opening
+            // "[" and leave the rest of the old array sitting there as orphaned, unparseable
+            // text — exactly the kind of corruption a structured editor is supposed to avoid.
+            // This walks the actual bracket structure instead of guessing at a line pattern.
+            if ("lavalink.nodes".equals(key)) {
+                result = replaceLavalinkNodesValue(result, value);
+                continue;
+            }
+
             // Extract the leaf key (e.g., "status" from "presence.status")
             String leafKey = key.contains(".") ? key.substring(key.lastIndexOf('.') + 1) : key;
 
@@ -1490,6 +1902,115 @@ public class ConfigPanel extends JPanel {
         }
 
         return result;
+    }
+
+    /**
+     * Replaces {@code lavalink.nodes}'s value in {@code content} with {@code newValue}, without
+     * assuming the existing value fits on one line.
+     *
+     * <p>This is the part of the whole feature most able to corrupt a config file: every other
+     * value on this panel is a scalar the existing single-line regex can safely replace, but the
+     * node list is a HOCON array that reference.conf ships spread across many lines, with a node
+     * object nested inside it. Blindly regexing "the rest of this line" would leave everything
+     * after the first line — the rest of the old array — behind as orphaned text. This instead
+     * locates the array's own opening {@code [} and its matching {@code ]} (see
+     * {@link #findMatchingBracket}) and replaces exactly that span, so the result is always
+     * either "the old array, gone entirely" or nothing changed at all — never a corrupted mix
+     * of both.
+     *
+     * <p>If no {@code lavalink.nodes} key can be found at all (config.txt predates this feature
+     * and has not yet been regenerated against reference.conf), a new {@code lavalink} block is
+     * appended rather than the edit being silently dropped.
+     */
+    private String replaceLavalinkNodesValue(String content, String newValue) {
+        int[] range = findLavalinkNodesValueRange(content);
+        if (range == null) {
+            LOG.warn("Could not find lavalink.nodes in config.txt; appending a new lavalink section "
+                    + "instead of guessing at a location that might corrupt the file.");
+            String separator = content.endsWith("\n") ? "\n" : "\n\n";
+            return content + separator + "lavalink {\n  nodes = " + newValue + "\n}\n";
+        }
+        return content.substring(0, range[0]) + newValue + content.substring(range[1] + 1);
+    }
+
+    /**
+     * Finds the {@code [...]} span of {@code lavalink.nodes}'s current value, trying the nested
+     * block form ({@code lavalink { nodes = [...] }}, what reference.conf ships) first and the
+     * dotted top-level form ({@code lavalink.nodes = [...]}) second. Returns {@code null} if
+     * neither is found.
+     *
+     * @return {@code {indexOf('['), indexOf(matching ']')}}, or {@code null}
+     */
+    private int[] findLavalinkNodesValueRange(String content) {
+        java.util.regex.Matcher sectionMatcher =
+                java.util.regex.Pattern.compile("(?m)^\\s*lavalink\\s*\\{").matcher(content);
+        if (sectionMatcher.find()) {
+            int openBraceIndex = content.indexOf('{', sectionMatcher.start());
+            int closeBraceIndex = findMatchingBracket(content, openBraceIndex);
+            if (closeBraceIndex > openBraceIndex) {
+                int[] range = findBracketedValueRange(content, openBraceIndex + 1, closeBraceIndex, "nodes");
+                if (range != null) {
+                    return range;
+                }
+            }
+        }
+        return findBracketedValueRange(content, 0, content.length(), "lavalink.nodes");
+    }
+
+    /** Finds {@code keyName = [...]} inside {@code content[regionStart, regionEnd)}, if present. */
+    private int[] findBracketedValueRange(String content, int regionStart, int regionEnd, String keyName) {
+        java.util.regex.Matcher keyMatcher = java.util.regex.Pattern
+                .compile("(?m)^\\s*" + java.util.regex.Pattern.quote(keyName) + "\\s*=\\s*")
+                .matcher(content);
+        keyMatcher.region(regionStart, regionEnd);
+        if (!keyMatcher.find()) {
+            return null;
+        }
+        int bracketIndex = keyMatcher.end();
+        while (bracketIndex < regionEnd && Character.isWhitespace(content.charAt(bracketIndex))) {
+            bracketIndex++;
+        }
+        if (bracketIndex >= regionEnd || content.charAt(bracketIndex) != '[') {
+            return null;
+        }
+        int valueEnd = findMatchingBracket(content, bracketIndex);
+        if (valueEnd < 0 || valueEnd > regionEnd) {
+            return null;
+        }
+        return new int[]{bracketIndex, valueEnd};
+    }
+
+    /**
+     * Finds the index of the character matching the bracket at {@code openIndex} (a {@code [} or
+     * {@code {}), skipping over the contents of double-quoted strings — escaped quotes included —
+     * so a bracket character inside a quoted value (a password containing {@code [}, say) is
+     * never mistaken for structure. Returns -1 if no matching close bracket is found.
+     */
+    private static int findMatchingBracket(String content, int openIndex) {
+        int depth = 0;
+        boolean inString = false;
+        for (int i = openIndex; i < content.length(); i++) {
+            char c = content.charAt(i);
+            if (inString) {
+                if (c == '\\') {
+                    i++;
+                } else if (c == '"') {
+                    inString = false;
+                }
+                continue;
+            }
+            if (c == '"') {
+                inString = true;
+            } else if (c == '[' || c == '{') {
+                depth++;
+            } else if (c == ']' || c == '}') {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 
     /**
