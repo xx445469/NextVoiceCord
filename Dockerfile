@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.12
 
-# Multi-stage build for JMusicBot
+# Multi-stage build for NextVoiceCord
 # Stage 1: Build the application
 FROM maven:3.9.12-eclipse-temurin-25-alpine AS builder
 
@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=/root/.m2/repository \
 # Using noble (Ubuntu 24.04) for glibc 2.39 compatibility with native libraries
 FROM eclipse-temurin:25-jdk-noble AS jre-builder
 
-# Create a minimal JRE with only the modules JMusicBot needs
+# Create a minimal JRE with only the modules NextVoiceCord needs
 # Modules determined by: jdeps --print-module-deps --ignore-missing-deps <jar>
 # Plus runtime-loaded modules that jdeps can't detect:
 #   java.base         - Core Java classes
@@ -63,11 +63,11 @@ RUN $JAVA_HOME/bin/jlink \
 FROM bitnami/minideb:trixie
 
 # OCI image labels for better traceability and management
-LABEL org.opencontainers.image.title="JMusicBot" \
+LABEL org.opencontainers.image.title="NextVoiceCord" \
       org.opencontainers.image.description="A cross-platform Discord music bot with a clean interface" \
       org.opencontainers.image.url="https://jmusicbot.com" \
       org.opencontainers.image.source="https://github.com/xx445469/NextVoiceCord" \
-      org.opencontainers.image.vendor="JMusicBot" \
+      org.opencontainers.image.vendor="xx445469" \
       org.opencontainers.image.licenses="Apache-2.0"
 
 # Copy custom JRE from jre-builder stage
@@ -82,7 +82,7 @@ RUN groupadd --gid 10001 jmusicbot && \
     chown -R jmusicbot:jmusicbot /app /musicbot
 
 # Copy the built JAR from builder stage
-COPY --from=builder --chown=jmusicbot:jmusicbot /build/target/JMusicBot-*-All.jar /app/app.jar
+COPY --from=builder --chown=jmusicbot:jmusicbot /build/target/NextVoiceCord-*-All.jar /app/app.jar
 
 # Copy and set permissions for entrypoint script
 COPY --chown=jmusicbot:jmusicbot --chmod=755 docker/entrypoint.sh /app/entrypoint.sh
