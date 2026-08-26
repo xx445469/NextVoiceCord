@@ -128,6 +128,10 @@ jobs:
           prerelease: ${{ steps.version.outputs.is_prerelease }}
           generateReleaseNotes: true
           allowUpdates: true
+          # Without this, re-running a release adds a second jar alongside the first rather
+          # than replacing it — so a fixed build would sit next to the broken one it fixes,
+          # with nothing on the page saying which is which.
+          removeArtifacts: true
           artifacts: "NextVoiceCord-${{ steps.version.outputs.version }}.jar"
           body: |
             **[Download NextVoiceCord-${{ steps.version.outputs.version }}.jar](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/NextVoiceCord-${{ steps.version.outputs.version }}.jar)**
