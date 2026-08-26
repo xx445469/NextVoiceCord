@@ -1,0 +1,84 @@
+name: Translation correction
+description: Something the bot says is wrong, unnatural, or untranslated in your language
+title: "[i18n] "
+labels: ["translation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Eleven of the twelve languages are machine-generated and have never been read by
+        someone who speaks them. They are complete and they read fluently, which is exactly
+        the problem — that is indistinguishable from being correct.
+
+        You do not need to fix a whole file. One wrong word is worth reporting. If you would
+        rather send a pull request, the files are plain JSON under
+        `src/main/resources/langs/` and the README explains the three rules CI enforces.
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Which language?
+      options:
+        - DE — Deutsch
+        - ES — Español
+        - FR — Français
+        - JA — 日本語
+        - KO — 한국어
+        - PL — Polski
+        - RU — Русский
+        - UA — Українська
+        - VN — Tiếng Việt
+        - ZHCN — 简体中文
+        - ZHTW — 繁體中文
+        - EN — English
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of problem?
+      options:
+        - Wrong or misleading translation
+        - Unnatural phrasing — correct but nobody would say it
+        - Wrong terminology for this region
+        - Still in English when it should not be
+        - Text is cut off or overflows
+        - A literal "{0}" or "{1}" appears in the message
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: What the bot says now
+      description: Paste it exactly, or attach a screenshot.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested
+    attributes:
+      label: What it should say
+      description: |
+        If a value gets substituted into the message, keep the `{0}` `{1}` markers. You can
+        move them to suit the grammar, but every one of them has to survive or the message
+        renders a literal `{1}` to everyone.
+    validations:
+      required: true
+
+  - type: input
+    id: key
+    attributes:
+      label: Translation key
+      description: |
+        Optional, and helpful if you can find it. The key is the dotted path in the JSON file,
+        for example `player.skipped`. Searching the English text in
+        `src/main/resources/langs/EN.json` will find it.
+      placeholder: player.volumeChanged
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Where it appears
+      description: The command that produced it, or which part of the interface.

@@ -1,64 +1,112 @@
-name: Bug Report
-description: Report a bug or unexpected behavior
-title: "[Bug Report] Title Here "
-labels: []
-assignees: []
+name: Bug report
+description: Something does not work the way it should
+title: "[Bug] "
+labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: if audio will not play at all, check
+        [Troubleshooting](https://github.com/xx445469/NextVoiceCord/wiki/Troubleshooting)
+        first. This is a beta pinned to an unreleased `youtube-source` build, and playback
+        failures are the one thing most likely to already be known.
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where does it happen?
+      description: Three separate interfaces share one codebase, and a bug in one usually is not in the others.
+      options:
+        - Discord (commands, the now-playing panel)
+        - The desktop window
+        - The web panel
+        - Starting the bot at all
+        - Somewhere else / not sure
+    validations:
+      required: true
+
   - type: textarea
     id: description
     attributes:
-      label: Bug Description
-      description: Please provide a clear and concise description of what the bug is.
-      placeholder: The bug is...
+      label: What happened?
+      placeholder: Describe what you saw, not what you think caused it.
     validations:
       required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect instead?
+    validations:
+      required: true
+
   - type: textarea
     id: reproduce
     attributes:
-      label: Steps to Reproduce
-      description: Provide steps you can take to reliably reproduce this bug
+      label: How can it be reproduced?
+      description: A bug that can be reproduced gets fixed. One that cannot usually does not.
       placeholder: |
         1.
         2.
         3.
     validations:
       required: true
-  - type: textarea
-    id: expected
-    attributes:
-      label: Expected Result
-      description: What did you expect to happen when this bug occurred?
-      placeholder: I expected...
-    validations:
-      required: true
-  - type: textarea
-    id: debug
-    attributes:
-      label: Debug Output
-      description: Please run the `debug` command and paste it here or upload it as an attachment. If you cannot run the command, please provide information about your system such as operating system version, JMusicBot version, etc.
-    validations:
-      required: true
-  - type: textarea
-    id: additional-info
-    attributes:
-      label: Additional Info
-      description: Any additional info that you think might be useful or relevant to this bug
-  - type: checkboxes
-    id: checks
-    attributes:
-      label: Checklist
-      description: Before submitting your issue, please affirm the following
-      options:
-        - label: I have looked for information about this [within the documentation](https://jmusicbot.com/)
-          required: true
-        - label: I have searched for similar issues [on the issues page](https://github.com/xx445469/NextVoiceCord/issues?q=is%3Aissue)
-          required: true
-        - label: I am using an official release from [the releases page](https://github.com/xx445469/NextVoiceCord/releases)
-          required: true
+
   - type: input
     id: version
     attributes:
-      label: JMusicBot Version
-      description: Which version of JMusicBot are you running?
+      label: NextVoiceCord version
+      description: Shown by the `about` command, and in the desktop window under Help → About.
+      placeholder: 0.8.0-beta.1
     validations:
       required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How are you running it?
+      options:
+        - java -jar
+        - Docker
+        - Built from source
+    validations:
+      required: true
+
+  - type: textarea
+    id: debug
+    attributes:
+      label: Debug output
+      description: |
+        Run the `debug` command and paste the result. If the bot will not start, paste the
+        console output instead, along with your OS and `java -version`.
+      render: text
+    validations:
+      required: true
+
+  - type: input
+    id: language
+    attributes:
+      label: Language in use
+      description: |
+        Only needed if the bug involves wording, missing text, or a message showing a literal
+        `{0}`. Eleven of the twelve languages are machine-translated and unreviewed.
+      placeholder: ZHTW
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Anything from the console around the time it happened. Redact your bot token.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked the [wiki](https://github.com/xx445469/NextVoiceCord/wiki)
+          required: true
+        - label: I searched [existing issues](https://github.com/xx445469/NextVoiceCord/issues?q=is%3Aissue)
+          required: true
+        - label: I removed my bot token from anything I pasted above
+          required: true

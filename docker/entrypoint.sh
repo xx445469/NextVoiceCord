@@ -9,7 +9,7 @@ if [ ! -f "$JAR" ]; then
 fi
 
 echo "[INFO] ========================================"
-echo "[INFO] JMusicBot Containerized"
+echo "[INFO] NextVoiceCord Containerized"
 echo "[INFO] ========================================"
 echo "[INFO] Selected jar: $JAR"
 echo "[INFO] Working directory: $(pwd)"

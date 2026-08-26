@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This will have this script check for a new version of JMusicBot every
+# This will have this script check for a new version of NextVoiceCord every
 # startup (and download it if the latest version isn't currently downloaded)
 DOWNLOAD=true
 
@@ -8,7 +8,7 @@ DOWNLOAD=true
 # when you use the shutdown command
 LOOP=true
 
-# JVM options for running JMusicBot
+# JVM options for running NextVoiceCord
 # --enable-native-access=ALL-UNNAMED: Required for Java 22+ to load native libraries (jdave, udpqueue)
 JAVA_OPTS="${JAVA_OPTS:---enable-native-access=ALL-UNNAMED}"
 
@@ -59,7 +59,7 @@ run() {
          -XX:+AlwaysPreTouch \
          -Dnogui=true \
          $JAVA_OPTS \
-         -jar $(ls -t JMusicBot* | head -1)
+         -jar $(ls -t NextVoiceCord* | head -1)
 }
 
 while

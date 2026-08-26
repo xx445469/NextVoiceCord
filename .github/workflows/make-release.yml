@@ -112,7 +112,10 @@ jobs:
           mvn --batch-mode verify -Pcoverage -Dproject.build.outputTimestamp=$COMMIT_TIME
 
       - name: Rename JAR
-        run: mv target/*-All.jar JMusicBot-${{ steps.version.outputs.version }}.jar
+        # NextVoiceCord, not JMusicBot. The project carries a distinct name precisely because
+        # Apache 2.0 §6 grants no trademark rights, and shipping the artefact under the
+        # upstream's name would undo that.
+        run: mv target/*-All.jar NextVoiceCord-${{ steps.version.outputs.version }}.jar
 
       - name: Create Release
         uses: ncipollo/release-action@v1
@@ -125,12 +128,17 @@ jobs:
           prerelease: ${{ steps.version.outputs.is_prerelease }}
           generateReleaseNotes: true
           allowUpdates: true
-          artifacts: "JMusicBot-${{ steps.version.outputs.version }}.jar"
+          artifacts: "NextVoiceCord-${{ steps.version.outputs.version }}.jar"
           body: |
-            ### Setup
-            https://jmusicbot.com/setup
-            https://jmusicbot.com/config
+            **[Download NextVoiceCord-${{ steps.version.outputs.version }}.jar](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/NextVoiceCord-${{ steps.version.outputs.version }}.jar)**
 
-            # Download: [JMusicBot-${{ steps.version.outputs.version }}.jar](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/JMusicBot-${{ steps.version.outputs.version }}.jar)
+            Java 25 or newer. `java -jar NextVoiceCord.jar generate-config` writes a config
+            to fill in, then `java -jar NextVoiceCord.jar` starts it.
+
+            - [Getting started](https://github.com/${{ github.repository }}/wiki/Getting-Started)
+            - [Commands](https://github.com/${{ github.repository }}/wiki/Commands)
+            - [Troubleshooting](https://github.com/${{ github.repository }}/wiki/Troubleshooting)
+
+            Docker: `ghcr.io/xx445469/nextvoicecord:${{ steps.version.outputs.version }}`
 
             ---
