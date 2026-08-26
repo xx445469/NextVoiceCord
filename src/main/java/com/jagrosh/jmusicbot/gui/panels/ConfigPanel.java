@@ -180,12 +180,11 @@ public class ConfigPanel extends JPanel {
     private final JSpinner clearChannelAgeDaysSpinner;
     private final JTextArea aliasesTextArea;
 
-    // Updates section — updates.autoUpdate is common; repository/checkIntervalHours/githubToken
-    // are advanced (see createUpdatesAdvancedSection).
-    private final JTextField updateRepositoryField;
+    // Updates section — all common now. The repository is a hard-coded constant (see
+    // UpdateChecker) and the GitHub token was removed once the repository stopped being
+    // private, so all that is left to configure is whether and how often to check.
     private final JCheckBox updateAutoUpdateCheckBox;
     private final JSpinner updateCheckIntervalSpinner;
-    private final JPasswordField updateGithubTokenField;
 
     // Dangerous section (advanced) — dangerous.evalEngine, dangerous.eval
     private final JTextField evalEngineField;
@@ -196,7 +195,7 @@ public class ConfigPanel extends JPanel {
     private final JCheckBox guiEnabledCheckBox;
     private final JSpinner guiFontSizeSpinner;
     private final JComboBox<String> guiLanguageComboBox;
-    private final JComboBox<ThemeManager.Theme> guiThemeComboBox;
+    private final Widgets.Segmented guiThemeSegmented;
     private final JTextField webBindAddressField;
     private final JCheckBox webAllowConfigEditCheckBox;
 
@@ -235,17 +234,17 @@ public class ConfigPanel extends JPanel {
         // Presence
         gameField = new JTextField(20);
         statusComboBox = new JComboBox<>(new String[]{"ONLINE", "IDLE", "DND", "INVISIBLE"});
-        songInStatusCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.showCurrentSongInStatus"));
+        songInStatusCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.showCurrentSongInStatus"));
 
         // Voice
-        stayInChannelCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.stayInChannel"));
+        stayInChannelCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.stayInChannel"));
         aloneTimeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 3600, 1));
 
         // Playback
         maxSecondsSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 86400, 60));
         maxYTPlaylistPagesSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
         skipRatioSpinner = new JSpinner(new SpinnerNumberModel(0.55, 0.0, 1.0, 0.05));
-        useYouTubeOAuthCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.useYouTubeOAuth"));
+        useYouTubeOAuthCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.useYouTubeOAuth"));
 
         // Lavalink — "fallback" is offered because config.txt accepts it, not because it works;
         // see createLavalinkSection for the note shown beside it.
@@ -276,8 +275,8 @@ public class ConfigPanel extends JPanel {
         searchingEmojiField = new JTextField(5);
 
         // Other
-        npImagesCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.showYouTubeThumbnails"));
-        updateAlertsCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.alertOwnerAboutUpdates"));
+        npImagesCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.showYouTubeThumbnails"));
+        updateAlertsCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.alertOwnerAboutUpdates"));
         logLevelComboBox = new JComboBox<>(new String[]{"off", "error", "warn", "info", "debug", "trace", "all"});
         playlistsFolderField = new JTextField(20);
 
@@ -286,9 +285,9 @@ public class ConfigPanel extends JPanel {
         proxyPortSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 65535, 1));
         proxyUsernameField = new JTextField(15);
         proxyPasswordField = new JPasswordField(15);
-        proxyLavaplayerCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.proxyLavaplayer"));
-        proxyJdaCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.proxyJda"));
-        proxyGithubCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.proxyGithub"));
+        proxyLavaplayerCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.proxyLavaplayer"));
+        proxyJdaCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.proxyJda"));
+        proxyGithubCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.proxyGithub"));
 
         // Discord — a spinner rather than a text field for the owner id: a Discord snowflake
         // is unquoted in HOCON, so a spinner backed by a Long model is what keeps a stray
@@ -300,9 +299,9 @@ public class ConfigPanel extends JPanel {
         botLanguageComboBox = new JComboBox<>(languageCodes());
 
         // Now Playing
-        npMinimalMessageCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.npMinimalMessage"));
-        npShowButtonsCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.npShowButtons"));
-        npShowProgressBarCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.npShowProgressBar"));
+        npMinimalMessageCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.npMinimalMessage"));
+        npShowButtonsCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.npShowButtons"));
+        npShowProgressBarCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.npShowProgressBar"));
 
         // YouTube Advanced
         youtubePoTokenField = new JPasswordField(20);
@@ -320,7 +319,7 @@ public class ConfigPanel extends JPanel {
         maxHistorySizeSpinner = new JSpinner(new SpinnerNumberModel(40, 0, 100000, 10));
         audioSourceCheckBoxes = new LinkedHashMap<>();
         for (AudioSource source : AudioSource.valuesSortedByPriority()) {
-            audioSourceCheckBoxes.put(source, new JCheckBox(source.getDescription()));
+            audioSourceCheckBoxes.put(source, Widgets.toggleSwitch(source.getDescription()));
         }
         transformsTextArea = readOnlyConfigArea();
 
@@ -330,19 +329,18 @@ public class ConfigPanel extends JPanel {
         aliasesTextArea = readOnlyConfigArea();
 
         // Updates
-        updateRepositoryField = new JTextField(20);
-        updateAutoUpdateCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.updateAutoUpdate"));
+        updateAutoUpdateCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.updateAutoUpdate"));
         updateCheckIntervalSpinner = new JSpinner(new SpinnerNumberModel(6, 1, 8760, 1));
-        updateGithubTokenField = new JPasswordField(20);
 
         // Dangerous
         evalEngineField = new JTextField(15);
-        evalCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.useEval"));
+        evalCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.useEval"));
 
         // Appearance / GUI & Web
-        guiEnabledCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.guiEnabled"));
+        guiEnabledCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.guiEnabled"));
         guiFontSizeSpinner = new JSpinner(new SpinnerNumberModel(12, 8, 24, 1));
-        guiThemeComboBox = new JComboBox<>(ThemeManager.Theme.values());
+        guiThemeSegmented = new Widgets.Segmented(
+                Arrays.stream(ThemeManager.Theme.values()).map(ThemeManager.Theme::getDisplayName).toList(), 0);
         guiLanguageComboBox = new JComboBox<>(guiLanguageChoices());
         guiLanguageComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -355,7 +353,7 @@ public class ConfigPanel extends JPanel {
             }
         });
         webBindAddressField = new JTextField(20);
-        webAllowConfigEditCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.webAllowConfigEdit"));
+        webAllowConfigEditCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.webAllowConfigEdit"));
 
         // Performance
         nasBufferMsSpinner = new JSpinner(new SpinnerNumberModel(800, 0, 60000, 100));
@@ -365,9 +363,9 @@ public class ConfigPanel extends JPanel {
                 successEmojiField, warningEmojiField, errorEmojiField, loadingEmojiField,
                 searchingEmojiField, playlistsFolderField, proxyHostField, proxyUsernameField,
                 proxyPasswordField, discordTokenField, youtubePoTokenField, youtubeVisitorDataField,
-                updateRepositoryField, updateGithubTokenField, evalEngineField, webBindAddressField);
+                evalEngineField, webBindAddressField);
         applyFieldStyle(statusComboBox, logLevelComboBox, botLanguageComboBox, guiLanguageComboBox,
-                guiThemeComboBox, youtubeClientsAddComboBox, lavalinkEngineComboBox);
+                youtubeClientsAddComboBox, lavalinkEngineComboBox);
         applyFieldStyle(songInStatusCheckBox, stayInChannelCheckBox, useYouTubeOAuthCheckBox,
                 npImagesCheckBox, updateAlertsCheckBox, proxyLavaplayerCheckBox, proxyJdaCheckBox,
                 proxyGithubCheckBox, npMinimalMessageCheckBox, npShowButtonsCheckBox,
@@ -395,6 +393,17 @@ public class ConfigPanel extends JPanel {
         for (JComponent c : components) {
             c.setFont(Tokens.fontBody());
         }
+    }
+
+    /** Index of {@code theme} within {@code ThemeManager.Theme.values()}, for the segmented control. */
+    private static int themeIndex(ThemeManager.Theme theme) {
+        ThemeManager.Theme[] values = ThemeManager.Theme.values();
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == theme) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     /** Every language code this build ships translations for, in declaration order. */
@@ -499,20 +508,13 @@ public class ConfigPanel extends JPanel {
         addSection(content, createPlaybackAdvancedSection());
         addSection(content, createCommandsAdvancedSection());
         addSection(content, createUpdatesSection());
-        addSection(content, createUpdatesAdvancedSection());
         addSection(content, createDangerousSection());
         addSection(content, createAppearanceSection());
         addSection(content, createGuiWebAdvancedSection());
         addSection(content, createPerformanceSection());
         addSection(content, createAdvancedReadOnlySection());
 
-        JScrollPane scrollPane = new JScrollPane(content);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setOpaque(false);
-        scrollPane.getViewport().setOpaque(false);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        return scrollPane;
+        return Widgets.scrollable(content);
     }
 
     private void addSection(JPanel content, Component section) {
@@ -551,7 +553,7 @@ public class ConfigPanel extends JPanel {
         gbc.weightx = 0;
         gbc.fill = GridBagConstraints.NONE;
         JLabel l = new JLabel(label);
-        l.setFont(Tokens.fontBody());
+        l.setFont(Tokens.fontLabel());
         l.setForeground(Tokens.textMuted());
         panel.add(l, gbc);
 
@@ -829,7 +831,7 @@ public class ConfigPanel extends JPanel {
         // A password, not a JTextField: same reasoning as every other credential field on this
         // panel (see the class javadoc) — never shown or logged in plain text.
         JPasswordField passwordField = new JPasswordField(existing == null ? "" : existing.password(), 15);
-        JCheckBox secureCheckBox = new JCheckBox(GuiLanguage.msg("gui.config.lavalinkNodeSecure"),
+        JCheckBox secureCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.lavalinkNodeSecure"),
                 existing != null && existing.secure());
         applyFieldStyle(nameField, hostField, portSpinner, passwordField, secureCheckBox);
 
@@ -1288,8 +1290,13 @@ public class ConfigPanel extends JPanel {
     }
 
     /**
-     * Creates the common Updates section: updates.autoUpdate only. The repository, check
-     * interval and GitHub token live in {@link #createUpdatesAdvancedSection()} instead.
+     * Creates the common Updates section: updates.autoUpdate, updates.checkIntervalHours.
+     *
+     * <p>{@code updates.alerts} lives in {@link #createOtherSection()} instead, matching where
+     * it already was before this section existed. There is no repository or token field here —
+     * see {@link com.jagrosh.jmusicbot.update.UpdateChecker}'s class javadoc: the repository is
+     * a hard-coded constant, never a setting, and the token was removed once the repository
+     * stopped being private. That leaves nothing here worth tucking behind an advanced card.
      */
     private Component createUpdatesSection() {
         JPanel panel = formPanel();
@@ -1297,29 +1304,11 @@ public class ConfigPanel extends JPanel {
         List<FilterRow> rows = new ArrayList<>();
 
         rows.add(addSpanningRow(panel, gbc, 0, updateAutoUpdateCheckBox, "updates.autoUpdate"));
+        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.updateCheckIntervalHours"), updateCheckIntervalSpinner,
+                "updates.checkIntervalHours"));
 
         Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.updates"), panel);
         registerSection(card, null, rows);
-        return card;
-    }
-
-    /**
-     * Creates the Updates Advanced section (advanced): repository, check interval, GitHub token.
-     */
-    private Component createUpdatesAdvancedSection() {
-        JPanel panel = formPanel();
-        GridBagConstraints gbc = rowConstraints();
-        List<FilterRow> rows = new ArrayList<>();
-
-        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.updateRepository"), updateRepositoryField,
-                "updates.repository"));
-        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.updateCheckIntervalHours"), updateCheckIntervalSpinner,
-                "updates.checkIntervalHours"));
-        rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.updateGithubToken"), updateGithubTokenField,
-                "updates.githubToken"));
-
-        Widgets.CollapsibleCard card = advancedCard("updatesAdvanced", GuiLanguage.msg("gui.config.updatesAdvanced"), panel);
-        registerSection(card, card, rows);
         return card;
     }
 
@@ -1363,7 +1352,7 @@ public class ConfigPanel extends JPanel {
         GridBagConstraints gbc = rowConstraints();
         List<FilterRow> rows = new ArrayList<>();
 
-        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.guiTheme"), guiThemeComboBox, "gui.theme"));
+        rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.guiTheme"), guiThemeSegmented, "gui.theme"));
         rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.guiLanguage"), guiLanguageComboBox, "gui.language"));
         rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.guiFontSize"), guiFontSizeSpinner, "gui.fontSize"));
 
@@ -1484,14 +1473,11 @@ public class ConfigPanel extends JPanel {
 
         JPanel buttonPanel = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
 
-        JButton saveButton = new JButton(GuiLanguage.msg("gui.config.saveChanges"));
-        saveButton.setFont(Tokens.fontBody());
-        saveButton.putClientProperty("JButton.buttonType", "default");
+        JButton saveButton = Widgets.primaryButton(GuiLanguage.msg("gui.config.saveChanges"));
         saveButton.addActionListener(e -> saveConfiguration());
         buttonPanel.add(saveButton);
 
-        JButton resetButton = new JButton(GuiLanguage.msg("gui.config.resetToCurrent"));
-        resetButton.setFont(Tokens.fontBody());
+        JButton resetButton = Widgets.secondaryButton(GuiLanguage.msg("gui.config.resetToCurrent"));
         resetButton.addActionListener(e -> loadCurrentValues());
         buttonPanel.add(resetButton);
 
@@ -1499,7 +1485,7 @@ public class ConfigPanel extends JPanel {
         // Fixed to the bottom of the whole panel rather than inside the scrollable content, so
         // it stays visible regardless of which section — old or newly added — is scrolled into
         // view; every option on this panel needs a restart, not just the original ones.
-        card.add(Widgets.muted(GuiLanguage.msg("gui.config.restartRequired")), BorderLayout.SOUTH);
+        card.add(Widgets.hint(GuiLanguage.msg("gui.config.restartRequired")), BorderLayout.SOUTH);
 
         return card;
     }
@@ -1601,11 +1587,8 @@ public class ConfigPanel extends JPanel {
         aliasesTextArea.setText(renderConfig(config.getAliasesConfig()));
 
         // Updates
-        updateRepositoryField.setText(config.getUpdateRepository());
         updateAutoUpdateCheckBox.setSelected(config.isAutoUpdate());
         updateCheckIntervalSpinner.setValue(config.getUpdateIntervalHours());
-        // setText, not a log line — same rule as every other secret field on this panel.
-        updateGithubTokenField.setText(config.getUpdateGithubToken());
 
         // Dangerous
         evalEngineField.setText(config.getEvalEngine());
@@ -1613,7 +1596,7 @@ public class ConfigPanel extends JPanel {
 
         // Appearance / GUI & Web
         guiEnabledCheckBox.setSelected(config.getGuiEnabled());
-        guiThemeComboBox.setSelectedItem(ThemeManager.Theme.fromConfigKey(config.getGuiTheme()));
+        guiThemeSegmented.setSelectedIndex(themeIndex(ThemeManager.Theme.fromConfigKey(config.getGuiTheme())));
         guiFontSizeSpinner.setValue(config.getGuiFontSize());
         // The raw value, not getGuiLanguage(): that getter resolves a blank config value against
         // ui.language, which would make "left blank" and "pinned to whatever ui.language
@@ -1766,10 +1749,8 @@ public class ConfigPanel extends JPanel {
         // here — see createAdvancedReadOnlySection for why.
 
         // Updates
-        updates.put("updates.repository", quoteString(updateRepositoryField.getText()));
         updates.put("updates.autoUpdate", String.valueOf(updateAutoUpdateCheckBox.isSelected()));
         updates.put("updates.checkIntervalHours", String.valueOf(updateCheckIntervalSpinner.getValue()));
-        updates.put("updates.githubToken", quoteString(readAndClearPassword(updateGithubTokenField)));
 
         // Dangerous
         updates.put("dangerous.evalEngine", quoteString(evalEngineField.getText()));
@@ -1777,7 +1758,7 @@ public class ConfigPanel extends JPanel {
 
         // Appearance / GUI & Web
         updates.put("gui.enabled", String.valueOf(guiEnabledCheckBox.isSelected()));
-        updates.put("gui.theme", quoteString(((ThemeManager.Theme) guiThemeComboBox.getSelectedItem()).getConfigKey()));
+        updates.put("gui.theme", quoteString(ThemeManager.Theme.values()[guiThemeSegmented.getSelectedIndex()].getConfigKey()));
         updates.put("gui.fontSize", String.valueOf(guiFontSizeSpinner.getValue()));
         updates.put("gui.language", quoteString((String) guiLanguageComboBox.getSelectedItem()));
         updates.put("web.bindAddress", quoteString(webBindAddressField.getText()));

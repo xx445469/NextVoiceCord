@@ -27,8 +27,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -106,16 +104,7 @@ public class DashboardPanel extends JPanel
 
         nowPlayingList.setLayout(new BoxLayout(nowPlayingList, BoxLayout.Y_AXIS));
 
-        JScrollPane scroll = new JScrollPane(nowPlayingList);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        // Without this the list scrolls a few pixels per notch, because the default unit is
-        // derived from a component that is not there.
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-
-        body.add(scroll, BorderLayout.CENTER);
+        body.add(Widgets.scrollable(nowPlayingList), BorderLayout.CENTER);
         return body;
     }
 

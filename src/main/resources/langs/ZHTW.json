@@ -723,8 +723,6 @@
       "transformsReadOnlyNote": "播放轉換是進階的巢狀結構，無法透過單一欄位安全編輯。請直接在 config.txt 中編輯 playback.transforms，然後重新啟動。",
       "updateAutoUpdate": "自動下載並安裝更新",
       "updateCheckIntervalHours": "更新檢查間隔（小時）",
-      "updateGithubToken": "GitHub 權杖（僅限私有儲存庫）",
-      "updateRepository": "GitHub 儲存庫（owner/name）",
       "updates": "更新",
       "useEval": "啟用 eval 指令",
       "webAllowConfigEdit": "允許網頁面板編輯 config.txt",
@@ -741,7 +739,6 @@
       "appearance": "外觀與語言",
       "guiTheme": "主題",
       "searchLabel": "篩選設定",
-      "updatesAdvanced": "更新（進階）",
       "youtube": "YouTube"
     },
     "console": {

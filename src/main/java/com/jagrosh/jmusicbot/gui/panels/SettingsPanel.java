@@ -30,6 +30,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 /**
  * Settings panel for configuring GUI appearance and viewing configuration.
@@ -71,13 +72,7 @@ public class SettingsPanel extends JPanel {
         content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
         content.add(createInfoSection());
 
-        JScrollPane scrollPane = new JScrollPane(content);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setOpaque(false);
-        scrollPane.getViewport().setOpaque(false);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        return scrollPane;
+        return Widgets.scrollable(content);
     }
 
     /** One preference: a label on the left, its control on the right. */
@@ -87,7 +82,7 @@ public class SettingsPanel extends JPanel {
         row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
 
         JLabel l = new JLabel(label);
-        l.setFont(Tokens.fontBody());
+        l.setFont(Tokens.fontLabel());
         l.setForeground(Tokens.text());
         row.add(l, BorderLayout.WEST);
 
@@ -145,15 +140,16 @@ public class SettingsPanel extends JPanel {
         JPanel body = Widgets.transparent(null);
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
 
-        JComboBox<ThemeManager.Theme> themeBox = new JComboBox<>(ThemeManager.Theme.values());
-        themeBox.setFont(Tokens.fontBody());
-        themeBox.setSelectedItem(ThemeManager.getCurrentTheme());
-        themeBox.addActionListener(e -> {
-            ThemeManager.Theme selected = (ThemeManager.Theme) themeBox.getSelectedItem();
-            if (selected != null) {
-                ThemeManager.setTheme(selected);
-                GuiPreferences.saveTheme(selected.getConfigKey());
-            }
+        // A segmented control rather than a combo box: four themes are few enough that every
+        // choice can stay on screen at once, so comparing them does not require opening a menu.
+        List<ThemeManager.Theme> themes = List.of(ThemeManager.Theme.values());
+        List<String> themeLabels = themes.stream().map(ThemeManager.Theme::getDisplayName).toList();
+        int initialTheme = Math.max(0, themes.indexOf(ThemeManager.getCurrentTheme()));
+        Widgets.Segmented themeControl = new Widgets.Segmented(themeLabels, initialTheme);
+        themeControl.onChange(index -> {
+            ThemeManager.Theme selected = themes.get(index);
+            ThemeManager.setTheme(selected);
+            GuiPreferences.saveTheme(selected.getConfigKey());
         });
 
         SpinnerNumberModel fontModel = new SpinnerNumberModel(
@@ -175,19 +171,14 @@ public class SettingsPanel extends JPanel {
         });
 
         body.add(preferenceRow(GuiLanguage.msg("gui.language.label"), buildLanguageBox()));
-        body.add(javax.swing.Box.createVerticalStrut(Tokens.SPACE_XS));
         // The distinction is worth stating outright: someone changing this expects it to
         // affect what the bot says in Discord, and it does not.
-        body.add(Widgets.muted(GuiLanguage.msg("gui.language.hint")));
-        body.add(javax.swing.Box.createVerticalStrut(Tokens.SPACE_MD));
-        body.add(preferenceRow(GuiLanguage.msg("gui.appearance.theme"), themeBox));
+        body.add(Widgets.hint(GuiLanguage.msg("gui.language.hint")));
+        body.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        body.add(preferenceRow(GuiLanguage.msg("gui.appearance.theme"), themeControl));
         body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
         body.add(preferenceRow(GuiLanguage.msg("gui.appearance.fontSize"), fontSpinner));
-        body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
-
-        JLabel note = Widgets.muted(GuiLanguage.msg("gui.appearance.savedNote"));
-        note.setAlignmentX(LEFT_ALIGNMENT);
-        body.add(note);
+        body.add(Widgets.hint(GuiLanguage.msg("gui.appearance.savedNote")));
 
         return Widgets.titledCard(GuiLanguage.msg("gui.section.appearance"), body);
     }
@@ -202,22 +193,16 @@ public class SettingsPanel extends JPanel {
         JPanel buttonPanel = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
         buttonPanel.setAlignmentX(LEFT_ALIGNMENT);
 
-        JButton openFolderButton = new JButton(GuiLanguage.msg("gui.preferences.openFolder"));
-        openFolderButton.setFont(Tokens.fontBody());
+        JButton openFolderButton = Widgets.secondaryButton(GuiLanguage.msg("gui.preferences.openFolder"));
         openFolderButton.addActionListener(e -> openConfigFolder());
         buttonPanel.add(openFolderButton);
 
-        JButton openFileButton = new JButton(GuiLanguage.msg("gui.preferences.openFile"));
-        openFileButton.setFont(Tokens.fontBody());
+        JButton openFileButton = Widgets.secondaryButton(GuiLanguage.msg("gui.preferences.openFile"));
         openFileButton.addActionListener(e -> openConfigFile());
         buttonPanel.add(openFileButton);
 
         body.add(buttonPanel);
-        body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
-
-        JLabel pathLabel = Widgets.muted(GuiLanguage.msg("gui.preferences.location", getConfigPath()));
-        pathLabel.setAlignmentX(LEFT_ALIGNMENT);
-        body.add(pathLabel);
+        body.add(Widgets.hint(GuiLanguage.msg("gui.preferences.location", getConfigPath())));
 
         return Widgets.titledCard(GuiLanguage.msg("gui.preferences.configuration"), body);
     }
@@ -239,13 +224,13 @@ public class SettingsPanel extends JPanel {
                 mutedValue(OtherUtil.getCurrentVersion())));
         body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
 
-        JButton checkButton = new JButton(GuiLanguage.msg("gui.preferences.checkForUpdates"));
-        checkButton.setFont(Tokens.fontBody());
+        // Primary: this is the action the card exists for, unlike the two open-a-file-manager
+        // buttons in the Configuration card above.
+        JButton checkButton = Widgets.primaryButton(GuiLanguage.msg("gui.preferences.checkForUpdates"));
 
         // Hidden until there is somewhere for it to go, rather than disabled, so its
         // appearance itself signals "an update was found" without needing to read the label.
-        JButton releasesButton = new JButton(GuiLanguage.msg("gui.action.openInBrowser"));
-        releasesButton.setFont(Tokens.fontBody());
+        JButton releasesButton = Widgets.secondaryButton(GuiLanguage.msg("gui.action.openInBrowser"));
         releasesButton.setVisible(false);
 
         JLabel statusLabel = new JLabel(" ");
@@ -278,14 +263,12 @@ public class SettingsPanel extends JPanel {
         statusLabel.setForeground(Tokens.textMuted());
         statusLabel.setText(GuiLanguage.msg("gui.preferences.checkingForUpdates"));
 
-        String repository = bot.getConfig().getUpdateRepository();
-        String token = bot.getConfig().getUpdateGithubToken();
         String current = OtherUtil.getCurrentVersion();
 
         new SwingWorker<UpdateChecker.CheckOutcome, Void>() {
             @Override
             protected UpdateChecker.CheckOutcome doInBackground() {
-                return new UpdateChecker(repository, token).checkForUpdate(current);
+                return new UpdateChecker().checkForUpdate(current);
             }
 
             @Override

@@ -84,7 +84,6 @@ public class BotConfig {
     private String guiLanguageRaw;
     private String webBindAddress;
     private boolean webAllowConfigEdit;
-    private String updateRepository, updateGithubToken;
     private boolean autoUpdate;
     private int updateIntervalHours;
     private OnlineStatus status;
@@ -273,8 +272,6 @@ public class BotConfig {
         spotifyClientSecret = SPOTIFY_CLIENT_SECRET.getString(config);
         proxyUsername = PROXY_USERNAME.getString(config);
         proxyPassword = PROXY_PASSWORD.getString(config);
-        updateRepository = UPDATE_REPOSITORY.getString(config);
-        updateGithubToken = UPDATE_GITHUB_TOKEN.getString(config);
         autoUpdate = UPDATE_AUTO.getBoolean(config);
         updateIntervalHours = UPDATE_INTERVAL_HOURS.getInt(config);
         // An unrecognised code falls back to English with a warning rather than aborting
@@ -480,16 +477,6 @@ public class BotConfig {
     /** Default language for servers that have not chosen one. */
     public Language getDefaultLanguage() {
         return defaultLanguage;
-    }
-
-    /** Repository checked for new releases, as owner/name. */
-    public String getUpdateRepository() {
-        return updateRepository;
-    }
-
-    /** GitHub token for release lookups; empty for a public repository. */
-    public String getUpdateGithubToken() {
-        return updateGithubToken;
     }
 
     /** Whether the bot installs new releases and restarts into them by itself. */

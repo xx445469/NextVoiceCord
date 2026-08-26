@@ -362,8 +362,41 @@ class ConfigDiagnosticsTest {
             // not trigger a repair (and another config.txt.bakN) on every restart.
             assertFalse(report.getDeprecated().contains("gui.configPanelAdvancedSections"));
         }
+
+        @Test
+        @DisplayName("ignores updates.repository and updates.githubToken (removed once the repository "
+                + "stopped being a setting)")
+        void testDetectDeprecatedKeys_ignoresLegacyUpdateKeys() {
+            Map<String, Object> userMap = new HashMap<>();
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("alerts", true);
+            updates.put("repository", "someone/somewhere");
+            updates.put("githubToken", "ghp_stale");
+            userMap.put("updates", updates);
+            userMap.put("discord", Map.of("token", "test_token", "owner", 123456789L));
+            Config migratedUserConfig = ConfigFactory.parseMap(userMap);
+
+            Map<String, Object> defaultMap = new HashMap<>();
+            Map<String, Object> discord = new HashMap<>();
+            discord.put("token", "");
+            discord.put("owner", 0L);
+            defaultMap.put("discord", discord);
+            // "updates" exists in defaults (alerts/autoUpdate/checkIntervalHours do, the same
+            // as reference.conf), but repository and githubToken specifically are not among
+            // its keys any more — they were removed as ConfigOption entries entirely.
+            defaultMap.put("updates", Map.of("alerts", true));
+            Config defaults = ConfigFactory.parseMap(defaultMap);
+
+            Config merged = migratedUserConfig.withFallback(defaults).resolve();
+            ConfigDiagnostics.Report report = ConfigDiagnostics.analyze(migratedUserConfig, merged, defaults);
+
+            // A config.txt written by an older build still carries these two keys; reading it
+            // must not flag them as deprecated/unknown, or every restart repairs the file anew.
+            assertFalse(report.getDeprecated().contains("updates.repository"));
+            assertFalse(report.getDeprecated().contains("updates.githubToken"));
+        }
     }
-    
+
     @Nested
     @DisplayName("Report Methods")
     class ReportMethodsTests {

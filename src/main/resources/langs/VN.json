@@ -682,8 +682,6 @@
       "transformsReadOnlyNote": "Biến đổi phát nhạc là một cấu trúc lồng nhau nâng cao và không thể chỉnh sửa an toàn từ một trường duy nhất. Hãy chỉnh sửa playback.transforms trực tiếp trong config.txt, sau đó khởi động lại.",
       "updateAutoUpdate": "Tự động tải xuống và cài đặt bản cập nhật",
       "updateCheckIntervalHours": "Số giờ giữa các lần kiểm tra cập nhật",
-      "updateGithubToken": "Token GitHub (chỉ dành cho kho lưu trữ riêng tư)",
-      "updateRepository": "Kho lưu trữ GitHub (owner/name)",
       "updates": "Cập nhật",
       "useEval": "Bật lệnh eval",
       "webAllowConfigEdit": "Cho phép bảng điều khiển web chỉnh sửa config.txt",
@@ -700,7 +698,6 @@
       "appearance": "Diện mạo & Ngôn ngữ",
       "guiTheme": "Giao diện",
       "searchLabel": "Lọc cài đặt",
-      "updatesAdvanced": "Cập nhật (Nâng cao)",
       "youtube": "YouTube"
     },
     "console": {

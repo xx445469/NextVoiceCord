@@ -119,7 +119,7 @@ public final class SelfUpdater
         try
         {
             String current = OtherUtil.getCurrentVersion();
-            Optional<UpdateChecker.Release> latest = checker.fetchLatest();
+            Optional<UpdateChecker.Release> latest = checker.fetchLatest(current);
 
             if (latest.isEmpty() || !UpdateChecker.isNewer(current, latest.get().version()))
             {

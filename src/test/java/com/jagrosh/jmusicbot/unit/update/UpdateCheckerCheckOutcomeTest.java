@@ -59,10 +59,10 @@ class UpdateCheckerCheckOutcomeTest
         server.shutdown();
     }
 
-    private UpdateChecker checkerFor(String token)
+    private UpdateChecker checker()
     {
         String apiRoot = "http://localhost:" + server.getPort() + "/repos/";
-        return new UpdateChecker("owner/repo", token, apiRoot);
+        return new UpdateChecker(apiRoot);
     }
 
     private static String releaseJson(String tag, boolean withJarAsset)
@@ -97,7 +97,7 @@ class UpdateCheckerCheckOutcomeTest
                     .setBody(releaseJson("v1.0.0", true))
                     .setHeader("Content-Type", "application/json"));
 
-            UpdateChecker.CheckOutcome outcome = checkerFor(null).checkForUpdate("1.0.0");
+            UpdateChecker.CheckOutcome outcome = checker().checkForUpdate("1.0.0");
 
             var upToDate = assertInstanceOf(UpdateChecker.CheckOutcome.UpToDate.class, outcome);
             assertEquals("1.0.0", upToDate.currentVersion());
@@ -112,7 +112,7 @@ class UpdateCheckerCheckOutcomeTest
                     .setBody(releaseJson("v2.0.0", true))
                     .setHeader("Content-Type", "application/json"));
 
-            UpdateChecker.CheckOutcome outcome = checkerFor(null).checkForUpdate("1.0.0");
+            UpdateChecker.CheckOutcome outcome = checker().checkForUpdate("1.0.0");
 
             var available = assertInstanceOf(UpdateChecker.CheckOutcome.UpdateAvailable.class, outcome);
             assertEquals("1.0.0", available.currentVersion());
@@ -131,7 +131,7 @@ class UpdateCheckerCheckOutcomeTest
                     .setBody(releaseJson("v2.0.0", false))
                     .setHeader("Content-Type", "application/json"));
 
-            UpdateChecker.CheckOutcome outcome = checkerFor(null).checkForUpdate("1.0.0");
+            UpdateChecker.CheckOutcome outcome = checker().checkForUpdate("1.0.0");
 
             assertInstanceOf(UpdateChecker.CheckOutcome.Failed.class, outcome);
         }
@@ -142,23 +142,23 @@ class UpdateCheckerCheckOutcomeTest
     class Failure
     {
         @Test
-        @DisplayName("404 (no release, or private without a token) is reported as Failed")
+        @DisplayName("404 (no matching release published) is reported as Failed")
         void notFound()
         {
             server.enqueue(new MockResponse().setResponseCode(404));
 
-            UpdateChecker.CheckOutcome outcome = checkerFor(null).checkForUpdate("1.0.0");
+            UpdateChecker.CheckOutcome outcome = checker().checkForUpdate("1.0.0");
 
             assertInstanceOf(UpdateChecker.CheckOutcome.Failed.class, outcome);
         }
 
         @Test
-        @DisplayName("401/403 (bad token, or rate limited) is reported as Failed")
+        @DisplayName("401/403 (rate limited) is reported as Failed")
         void unauthorizedOrRateLimited()
         {
             server.enqueue(new MockResponse().setResponseCode(403));
 
-            UpdateChecker.CheckOutcome outcome = checkerFor("stale-token").checkForUpdate("1.0.0");
+            UpdateChecker.CheckOutcome outcome = checker().checkForUpdate("1.0.0");
 
             assertInstanceOf(UpdateChecker.CheckOutcome.Failed.class, outcome);
         }
@@ -169,7 +169,7 @@ class UpdateCheckerCheckOutcomeTest
         {
             server.enqueue(new MockResponse().setResponseCode(500));
 
-            UpdateChecker.CheckOutcome outcome = checkerFor(null).checkForUpdate("1.0.0");
+            UpdateChecker.CheckOutcome outcome = checker().checkForUpdate("1.0.0");
 
             assertInstanceOf(UpdateChecker.CheckOutcome.Failed.class, outcome);
         }
@@ -182,7 +182,7 @@ class UpdateCheckerCheckOutcomeTest
             // as close as a unit test gets to "the network is unreachable".
             server.shutdown();
 
-            UpdateChecker.CheckOutcome outcome = checkerFor(null).checkForUpdate("1.0.0");
+            UpdateChecker.CheckOutcome outcome = checker().checkForUpdate("1.0.0");
 
             assertInstanceOf(UpdateChecker.CheckOutcome.Failed.class, outcome);
         }
@@ -193,10 +193,79 @@ class UpdateCheckerCheckOutcomeTest
         {
             server.enqueue(new MockResponse().setResponseCode(404));
 
-            UpdateChecker.CheckOutcome outcome = checkerFor(null).checkForUpdate("1.0.0");
+            UpdateChecker.CheckOutcome outcome = checker().checkForUpdate("1.0.0");
 
             var failed = assertInstanceOf(UpdateChecker.CheckOutcome.Failed.class, outcome);
             assertTrue(failed.detail() != null && !failed.detail().isBlank());
+        }
+    }
+
+    /**
+     * Which GitHub endpoint gets asked depends on whether the running version is itself a
+     * pre-release — see the class javadoc on {@link UpdateChecker}. {@code /releases/latest}
+     * never returns a pre-release (GitHub 404s), which is exactly why every check from this
+     * project's own pre-release builds used to find nothing.
+     */
+    @Nested
+    @DisplayName("endpoint selection")
+    class EndpointSelection
+    {
+        @Test
+        @DisplayName("a stable running version asks /releases/latest")
+        void stableVersionAsksForLatest() throws InterruptedException
+        {
+            server.enqueue(new MockResponse()
+                    .setResponseCode(200)
+                    .setBody(releaseJson("v1.0.0", true))
+                    .setHeader("Content-Type", "application/json"));
+
+            checker().checkForUpdate("1.0.0");
+
+            assertTrue(server.takeRequest().getPath().endsWith("/releases/latest"));
+        }
+
+        @Test
+        @DisplayName("a pre-release running version asks /releases instead, so it can see pre-releases too")
+        void preReleaseVersionAsksForReleasesList() throws InterruptedException
+        {
+            server.enqueue(new MockResponse()
+                    .setResponseCode(200)
+                    .setBody("[" + releaseJson("v1.0.0-beta.2", true) + "]")
+                    .setHeader("Content-Type", "application/json"));
+
+            checker().checkForUpdate("1.0.0-beta.1");
+
+            String path = server.takeRequest().getPath();
+            assertTrue(path != null && path.contains("/releases") && !path.contains("/releases/latest"));
+        }
+
+        @Test
+        @DisplayName("the newest entry of a /releases array is used when the running version is a pre-release")
+        void picksFirstEntryOfReleasesArray()
+        {
+            server.enqueue(new MockResponse()
+                    .setResponseCode(200)
+                    .setBody("[" + releaseJson("v2.0.0-beta.1", true) + "]")
+                    .setHeader("Content-Type", "application/json"));
+
+            UpdateChecker.CheckOutcome outcome = checker().checkForUpdate("1.0.0-beta.1");
+
+            var available = assertInstanceOf(UpdateChecker.CheckOutcome.UpdateAvailable.class, outcome);
+            assertEquals("2.0.0-beta.1", available.latestVersion());
+        }
+
+        @Test
+        @DisplayName("an empty /releases array (nothing published yet) is Failed, not a crash")
+        void emptyReleasesArrayIsFailed()
+        {
+            server.enqueue(new MockResponse()
+                    .setResponseCode(200)
+                    .setBody("[]")
+                    .setHeader("Content-Type", "application/json"));
+
+            UpdateChecker.CheckOutcome outcome = checker().checkForUpdate("1.0.0-beta.1");
+
+            assertInstanceOf(UpdateChecker.CheckOutcome.Failed.class, outcome);
         }
     }
 }

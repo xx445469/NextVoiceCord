@@ -137,13 +137,7 @@ public class SystemHealthPanel extends JPanel {
         gcCard.setPreferredSize(new Dimension(600, 220));
         content.add(gcCard);
 
-        JScrollPane scroll = new JScrollPane(content);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        return scroll;
+        return Widgets.scrollable(content);
     }
 
     private Component buildControlsCard() {

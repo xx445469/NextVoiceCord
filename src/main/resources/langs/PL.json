@@ -682,8 +682,6 @@
       "transformsReadOnlyNote": "Transformacje odtwarzania to zaawansowana struktura zagnieżdżona i nie można ich bezpiecznie edytować z poziomu jednego pola. Edytuj playback.transforms bezpośrednio w config.txt, a następnie uruchom ponownie.",
       "updateAutoUpdate": "Automatycznie pobieraj i instaluj aktualizacje",
       "updateCheckIntervalHours": "Liczba godzin między sprawdzaniem aktualizacji",
-      "updateGithubToken": "Token GitHub (tylko prywatne repozytoria)",
-      "updateRepository": "Repozytorium GitHub (owner/name)",
       "updates": "Aktualizacje",
       "useEval": "Włącz komendę eval",
       "webAllowConfigEdit": "Zezwól panelowi WWW na edycję config.txt",
@@ -700,7 +698,6 @@
       "appearance": "Wygląd i język",
       "guiTheme": "Motyw",
       "searchLabel": "Filtruj ustawienia",
-      "updatesAdvanced": "Aktualizacje (Zaawansowane)",
       "youtube": "YouTube"
     },
     "console": {

@@ -39,11 +39,25 @@ import org.slf4j.LoggerFactory;
  * <p>Split from the code that applies an update so the two can be reasoned about separately:
  * asking GitHub what exists is safe and repeatable, replacing a running binary is neither.
  *
- * <h2>Private repositories</h2>
- * The GitHub releases API returns 404 — not 403 — for a private repository accessed without
- * credentials, which is indistinguishable from "this repository does not exist". That makes
- * the most likely misconfiguration also the most confusing one, so a 404 is reported with
- * both possibilities named rather than as a bare failure.
+ * <h2>Repository</h2>
+ * Always this project — {@link #REPOSITORY} — never a setting. A self-updater that could be
+ * pointed at an arbitrary repository is a way to get arbitrary code installed on someone's
+ * machine, so there is deliberately no config key for it any more. The repository used to be
+ * private, which is the only reason a token ever existed here; it is public now, so there is
+ * nothing left to authenticate.
+ *
+ * <h2>Pre-releases</h2>
+ * Every release this project has shipped so far is a pre-release (e.g. {@code 0.9.0-beta.1}),
+ * and GitHub's {@code /releases/latest} endpoint — by design — never returns one; it answers
+ * 404 until the first non-prerelease is published. A build that is itself a pre-release almost
+ * certainly wants to hear about newer pre-releases (that is the only kind of update a beta
+ * tester will ever see), while a build running an already-stable version most likely does not
+ * want to be offered a beta. So the endpoint is chosen from the running version: a pre-release
+ * build asks {@code /releases?per_page=1} (the single newest release of any kind, exactly what
+ * the repository's own "Releases" page shows first); a stable build asks {@code
+ * /releases/latest} (GitHub's own "latest", which by definition excludes pre-releases). Either
+ * way, {@link #isNewer} is what actually decides whether the result is worth installing — this
+ * only decides which release GitHub is asked to name.
  *
  * @author adan (xx445469)
  */
@@ -55,28 +69,27 @@ public final class UpdateChecker
     private static final Duration TIMEOUT = Duration.ofSeconds(30);
     private static final String API_ROOT = "https://api.github.com/repos/";
 
-    private final String repository;
-    private final String token;
+    /**
+     * The one repository this build ever checks. Not configurable — see the class javadoc for
+     * why letting that be a setting would be a code-execution hazard rather than a convenience.
+     */
+    public static final String REPOSITORY = "xx445469/NextVoiceCord";
+
     private final String apiRoot;
     private final HttpClient http;
 
-    /**
-     * @param repository {@code owner/name}, e.g. {@code xx445469/NextVoiceCord}
-     * @param token      GitHub token, or {@code null}; required only for private repositories
-     */
-    public UpdateChecker(String repository, String token)
+    /** Checks {@link #REPOSITORY} against the real GitHub API. */
+    public UpdateChecker()
     {
-        this(repository, token, API_ROOT);
+        this(API_ROOT);
     }
 
     /**
      * @param apiRoot GitHub's API root by default; overridable so tests can point this at a
      *                local mock server instead of the real network
      */
-    public UpdateChecker(String repository, String token, String apiRoot)
+    public UpdateChecker(String apiRoot)
     {
-        this.repository = repository;
-        this.token = token == null || token.isBlank() ? null : token;
         this.apiRoot = apiRoot;
         this.http = HttpClient.newBuilder()
                               .connectTimeout(TIMEOUT)
@@ -105,48 +118,49 @@ public final class UpdateChecker
         /**
          * The check could not be completed. {@code detail} is a technical, English string
          * for a log or a "why" line — never a message shown as the whole story, since none of
-         * "no network", "rate limited" and "private repo, no token" look alike to the person
+         * "no network", "rate limited" and "nothing published yet" look alike to the person
          * who pressed the button.
          */
         record Failed(String detail) implements CheckOutcome { }
     }
 
     /**
-     * Fetches the latest non-prerelease.
+     * Fetches the newest release {@code currentVersion} should be offered — see the class
+     * javadoc for how a pre-release running version changes which GitHub endpoint that is.
      *
+     * @param currentVersion the running version, as from {@code OtherUtil.getCurrentVersion()}
      * @return the release, or empty if there is none or the lookup failed
      */
-    public Optional<Release> fetchLatest()
+    public Optional<Release> fetchLatest(String currentVersion)
     {
         try
         {
-            HttpResponse<String> response = requestLatestRelease();
+            HttpResponse<String> response = requestReleases(currentVersion);
 
             if (response.statusCode() == 404)
             {
-                LOG.warn("No releases found for {}. Either the repository has never published a "
-                         + "release, or it is private and updates.githubToken is not set — the API "
-                         + "returns 404 for both.", repository);
+                LOG.warn("No releases found for {}. The repository has never published a release "
+                         + "matching this request.", REPOSITORY);
                 return Optional.empty();
             }
             if (response.statusCode() == 401 || response.statusCode() == 403)
             {
-                LOG.warn("GitHub rejected the update check for {} (HTTP {}). If updates.githubToken "
-                         + "is set, it may be expired or lack 'Contents: read'.",
-                         repository, response.statusCode());
+                LOG.warn("GitHub rejected the update check for {} (HTTP {}) — likely rate-limited.",
+                         REPOSITORY, response.statusCode());
                 return Optional.empty();
             }
             if (response.statusCode() != 200)
             {
-                LOG.warn("Update check for {} failed with HTTP {}", repository, response.statusCode());
+                LOG.warn("Update check for {} failed with HTTP {}", REPOSITORY, response.statusCode());
                 return Optional.empty();
             }
 
-            return parseRelease(MAPPER.readTree(response.body()));
+            Optional<JsonNode> node = newestReleaseNode(response.body());
+            return node.isEmpty() ? Optional.empty() : parseRelease(node.get());
         }
         catch (IOException | RuntimeException ex)
         {
-            LOG.warn("Update check for {} failed: {}", repository, ex.toString());
+            LOG.warn("Update check for {} failed: {}", REPOSITORY, ex.toString());
             return Optional.empty();
         }
         catch (InterruptedException ex)
@@ -173,29 +187,34 @@ public final class UpdateChecker
     {
         try
         {
-            HttpResponse<String> response = requestLatestRelease();
+            HttpResponse<String> response = requestReleases(currentVersion);
 
             if (response.statusCode() == 404)
             {
-                return new CheckOutcome.Failed("HTTP 404 from GitHub — the repository has never "
-                        + "published a release, or it is private and updates.githubToken is not set.");
+                return new CheckOutcome.Failed(
+                        "HTTP 404 from GitHub — " + REPOSITORY + " has never published a release.");
             }
             if (response.statusCode() == 401 || response.statusCode() == 403)
             {
                 return new CheckOutcome.Failed("GitHub rejected the request (HTTP " + response.statusCode()
-                        + "). The token may be missing or expired, or the request was rate-limited.");
+                        + "). The request was likely rate-limited — try again later.");
             }
             if (response.statusCode() != 200)
             {
                 return new CheckOutcome.Failed("GitHub returned HTTP " + response.statusCode());
             }
 
-            JsonNode node = MAPPER.readTree(response.body());
-            Optional<Release> release = parseRelease(node);
+            Optional<JsonNode> node = newestReleaseNode(response.body());
+            if (node.isEmpty())
+            {
+                return new CheckOutcome.Failed(REPOSITORY + " has no releases published yet.");
+            }
+
+            Optional<Release> release = parseRelease(node.get());
             if (release.isEmpty())
             {
                 return new CheckOutcome.Failed(
-                        "The latest release of " + repository + " has no downloadable build attached.");
+                        "The latest release of " + REPOSITORY + " has no downloadable build attached.");
             }
 
             String latest = release.get().version();
@@ -206,9 +225,8 @@ public final class UpdateChecker
 
             // html_url is the page a person can read; the asset's own "url" is the API
             // endpoint fetchLatest() downloads from, which is not something to open in a
-            // browser — for a private repository it demands the same bearer token this
-            // process carries, one a browser tab has no way to send.
-            String releasesUrl = node.path("html_url").asText(releasesPageUrl());
+            // browser.
+            String releasesUrl = node.get().path("html_url").asText(releasesPageUrl());
             return new CheckOutcome.UpdateAvailable(currentVersion, latest, releasesUrl);
         }
         catch (IOException | RuntimeException ex)
@@ -222,26 +240,56 @@ public final class UpdateChecker
         }
     }
 
-    private HttpResponse<String> requestLatestRelease() throws IOException, InterruptedException
+    /**
+     * Whether {@code currentVersion} is itself a pre-release (carries a {@code -suffix}, e.g.
+     * {@code 0.9.0-beta.1}) — see the class javadoc for what that changes about the request.
+     */
+    static boolean isPreReleaseVersion(String currentVersion)
     {
-        HttpRequest.Builder request = HttpRequest.newBuilder()
-                .uri(URI.create(apiRoot + repository + "/releases/latest"))
+        return currentVersion != null && !currentVersion.isBlank()
+                && splitVersion(currentVersion)[1].length() > 0;
+    }
+
+    /** The path this request asks GitHub for, given the running version. */
+    private String releasesPath(String currentVersion)
+    {
+        // A pre-release build asks for the single newest release of any kind; a stable build
+        // asks GitHub's own "latest", which excludes pre-releases by definition.
+        return isPreReleaseVersion(currentVersion) ? "releases?per_page=1" : "releases/latest";
+    }
+
+    private HttpResponse<String> requestReleases(String currentVersion) throws IOException, InterruptedException
+    {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiRoot + REPOSITORY + "/" + releasesPath(currentVersion)))
                 .header("Accept", "application/vnd.github+json")
                 .header("X-GitHub-Api-Version", "2022-11-28")
                 .timeout(TIMEOUT)
-                .GET();
+                .GET()
+                .build();
 
-        if (token != null)
-        {
-            request.header("Authorization", "Bearer " + token);
-        }
-
-        return http.send(request.build(), HttpResponse.BodyHandlers.ofString());
+        return http.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     private String releasesPageUrl()
     {
-        return "https://github.com/" + repository + "/releases/latest";
+        return "https://github.com/" + REPOSITORY + "/releases/latest";
+    }
+
+    /**
+     * {@code /releases/latest} answers with a single release object; {@code /releases} answers
+     * with an array, newest first — this normalises both into "the one release under
+     * discussion", or empty if the array came back with nothing in it (a repository with no
+     * releases at all answers {@code /releases?per_page=1} with {@code 200 []}, not a 404).
+     */
+    private Optional<JsonNode> newestReleaseNode(String body) throws IOException
+    {
+        JsonNode root = MAPPER.readTree(body);
+        if (!root.isArray())
+        {
+            return Optional.of(root);
+        }
+        return root.isEmpty() ? Optional.empty() : Optional.of(root.get(0));
     }
 
     private Optional<Release> parseRelease(JsonNode node)
@@ -258,7 +306,7 @@ public final class UpdateChecker
             if (name.endsWith(".jar"))
             {
                 // url, not browser_download_url: the API endpoint honours the Authorization
-                // header, which is what makes assets on a private repository reachable.
+                // header used by download() below, unlike the plain redirect URL.
                 return Optional.of(new Release(
                         stripLeadingV(tag),
                         name,
@@ -267,7 +315,7 @@ public final class UpdateChecker
             }
         }
 
-        LOG.warn("Release {} of {} has no .jar asset attached; nothing to download.", tag, repository);
+        LOG.warn("Release {} of {} has no .jar asset attached; nothing to download.", tag, REPOSITORY);
         return Optional.empty();
     }
 
@@ -285,22 +333,18 @@ public final class UpdateChecker
 
         try
         {
-            HttpRequest.Builder request = HttpRequest.newBuilder()
+            HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(release.downloadUrl()))
                     // Required for the API asset endpoint; without it GitHub returns JSON
                     // metadata rather than the file itself.
                     .header("Accept", "application/octet-stream")
                     .timeout(Duration.ofMinutes(10))
-                    .GET();
-
-            if (token != null)
-            {
-                request.header("Authorization", "Bearer " + token);
-            }
+                    .GET()
+                    .build();
 
             LOG.info("Downloading {} ({} bytes)...", release.assetName(), release.sizeBytes());
             HttpResponse<InputStream> response =
-                    http.send(request.build(), HttpResponse.BodyHandlers.ofInputStream());
+                    http.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
             if (response.statusCode() != 200)
             {

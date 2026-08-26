@@ -134,6 +134,27 @@ public final class Tokens
         return isDark() ? DARK_BORDER : LIGHT_BORDER;
     }
 
+    /**
+     * A stronger line for a card's own outline.
+     *
+     * <p>{@link #border()} is close enough in luminance to {@link #surfaceRaised()} that a
+     * card's edge barely reads against its own fill — the two are only a few steps apart in
+     * Discord's own hierarchy. Blended a quarter of the way toward the text colour instead, so
+     * the boundary is visible without becoming a second accent colour in the window.
+     */
+    public static Color cardBorder()
+    {
+        return mix(border(), text(), 0.28f);
+    }
+
+    private static Color mix(Color from, Color to, float amount)
+    {
+        return new Color(
+                Math.round(from.getRed() + (to.getRed() - from.getRed()) * amount),
+                Math.round(from.getGreen() + (to.getGreen() - from.getGreen()) * amount),
+                Math.round(from.getBlue() + (to.getBlue() - from.getBlue()) * amount));
+    }
+
     // ---- Text ---------------------------------------------------------------
 
     public static Color text()
@@ -205,10 +226,27 @@ public final class Tokens
         return font(7f, Font.BOLD);
     }
 
-    /** Card headings and section labels. */
+    /**
+     * Card headings and section labels.
+     *
+     * <p>Set three points above body text, not one — at a single point of difference, bold
+     * alone did not read as a heading next to a field label at the same size; it just looked
+     * like slightly heavier body text. The gap has to be wide enough that the two are
+     * unmistakably different levels at a glance, not something a reader has to compare closely.
+     */
     public static Font fontHeading()
     {
-        return font(1f, Font.BOLD);
+        return font(3f, Font.BOLD);
+    }
+
+    /**
+     * Field labels: the same size as body text, medium weight. Distinguishes "the name of a
+     * setting" from "the value of a setting" (which stays {@link #fontBody()}) without
+     * competing with {@link #fontHeading()} above it.
+     */
+    public static Font fontLabel()
+    {
+        return font(0f, Font.PLAIN);
     }
 
     /** Body text. */

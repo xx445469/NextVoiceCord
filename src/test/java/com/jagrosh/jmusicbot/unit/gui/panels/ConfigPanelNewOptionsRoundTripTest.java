@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
  * block.
  *
  * <p>Covers, deliberately, one of each kind the task called out: an int
- * (performance.nasBufferMs), a boolean (nowPlaying.showButtons), a string (updates.repository)
+ * (performance.nasBufferMs), a boolean (nowPlaying.showButtons), a string (paths.playlistsFolder)
  * and a secret (discord.token) — plus the two controls built specifically to round-trip a
  * structure rather than a scalar: the ordered playback.youtube.clients editor and the
  * playback.audioSources checkboxes.
@@ -85,10 +85,11 @@ class ConfigPanelNewOptionsRoundTripTest extends BaseConfigTest
             }
             updates {
               alerts = true
-              repository = "old/repo"
               autoUpdate = false
               checkIntervalHours = 6
-              githubToken = ""
+            }
+            paths {
+              playlistsFolder = "old/Playlists"
             }
             playback {
               youtube {
@@ -135,7 +136,7 @@ class ConfigPanelNewOptionsRoundTripTest extends BaseConfigTest
         assertEquals(123456789L, spinnerValue(panel, "discordOwnerSpinner"));
         assertEquals(800, spinnerValue(panel, "nasBufferMsSpinner"));
         assertTrue(checkBoxOf(panel, "npShowButtonsCheckBox"));
-        assertEquals("old/repo", textOf(panel, "updateRepositoryField"));
+        assertEquals("old/Playlists", textOf(panel, "playlistsFolderField"));
         assertEquals(List.of("ANDROID", "IOS"), listModelValues(panel, "youtubeClientsModel"));
         assertTrue(audioSourceSelected(panel, AudioSource.YOUTUBE));
         assertTrue(audioSourceSelected(panel, AudioSource.SOUNDCLOUD));
@@ -161,7 +162,7 @@ class ConfigPanelNewOptionsRoundTripTest extends BaseConfigTest
         setPassword(panel, "discordTokenField", newToken);
         setSpinner(panel, "nasBufferMsSpinner", 950);
         setCheckBox(panel, "npShowButtonsCheckBox", false);
-        setText(panel, "updateRepositoryField", "newowner/newrepo");
+        setText(panel, "playlistsFolderField", "NewPlaylists");
         setListModelValues(panel, "youtubeClientsModel", List.of("TV", "MUSIC"));
         setAudioSourceSelected(panel, AudioSource.YOUTUBE, false);
         setAudioSourceSelected(panel, AudioSource.BANDCAMP, true);
@@ -196,7 +197,7 @@ class ConfigPanelNewOptionsRoundTripTest extends BaseConfigTest
         assertEquals("\"" + newToken + "\"", updates.get("discord.token"));
         assertEquals("950", updates.get("performance.nasBufferMs"));
         assertEquals("false", updates.get("nowPlaying.showButtons"));
-        assertEquals("\"newowner/newrepo\"", updates.get("updates.repository"));
+        assertEquals("\"NewPlaylists\"", updates.get("paths.playlistsFolder"));
         assertEquals("[ \"TV\", \"MUSIC\" ]", updates.get("playback.youtube.clients"));
         assertEquals("false", updates.get("playback.audioSources.youtube"));
         assertEquals("true", updates.get("playback.audioSources.bandcamp"));
@@ -211,7 +212,7 @@ class ConfigPanelNewOptionsRoundTripTest extends BaseConfigTest
         assertEquals(newToken, reloaded.getToken());
         assertEquals(950, reloaded.getNasBufferMs());
         assertFalse(reloaded.showNowPlayingButtons());
-        assertEquals("newowner/newrepo", reloaded.getUpdateRepository());
+        assertEquals("NewPlaylists", reloaded.getPlaylistsFolder());
         assertEquals(List.of("TV", "MUSIC"), reloaded.getYoutubeClients());
         assertFalse(reloaded.isAudioSourceEnabled(AudioSource.YOUTUBE));
         assertTrue(reloaded.isAudioSourceEnabled(AudioSource.BANDCAMP));

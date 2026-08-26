@@ -682,8 +682,6 @@
       "transformsReadOnlyNote": "Los transforms de reproducción son una estructura anidada avanzada y no se pueden editar de forma segura desde un solo campo. Edita playback.transforms directamente en config.txt y luego reinicia.",
       "updateAutoUpdate": "Descargar e instalar actualizaciones automáticamente",
       "updateCheckIntervalHours": "Horas entre comprobaciones de actualización",
-      "updateGithubToken": "Token de GitHub (solo repositorios privados)",
-      "updateRepository": "Repositorio de GitHub (owner/name)",
       "updates": "Actualizaciones",
       "useEval": "Habilitar el comando eval",
       "webAllowConfigEdit": "Permitir que el panel web edite config.txt",
@@ -700,7 +698,6 @@
       "appearance": "Apariencia e idioma",
       "guiTheme": "Tema",
       "searchLabel": "Filtrar ajustes",
-      "updatesAdvanced": "Actualizaciones (Avanzado)",
       "youtube": "YouTube"
     },
     "console": {

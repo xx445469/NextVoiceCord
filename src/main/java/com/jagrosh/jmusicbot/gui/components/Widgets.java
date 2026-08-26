@@ -20,18 +20,28 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JToggleButton;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
@@ -55,9 +65,18 @@ public final class Widgets
      * <p>Painted rather than bordered because Swing borders are drawn inside a rectangular
      * component: a rounded border leaves the original square corners showing behind it,
      * which is visible against any background that is not the same colour.
+     *
+     * <p>Carries its own soft shadow along the bottom edge and a stronger outline than the
+     * hairline used between flat regions ({@link Tokens#cardBorder()} rather than {@link
+     * Tokens#border()}) — together what makes a group of controls read as a card rather than a
+     * faint rectangle. The shadow is drawn inside the component's own bounds, trimmed from the
+     * fill rather than added outside it, so it never depends on the container leaving spare
+     * space around the card.
      */
     public static class Card extends JPanel
     {
+        private static final int SHADOW = 3;
+
         private final int radius;
 
         public Card()
@@ -70,7 +89,7 @@ public final class Widgets
             this.radius = radius;
             setOpaque(false);
             setBorder(BorderFactory.createEmptyBorder(
-                    Tokens.SPACE_MD, Tokens.SPACE_MD, Tokens.SPACE_MD, Tokens.SPACE_MD));
+                    Tokens.SPACE_LG, Tokens.SPACE_LG, Tokens.SPACE_LG, Tokens.SPACE_LG));
         }
 
         @Override
@@ -79,11 +98,28 @@ public final class Widgets
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            g2.setColor(Tokens.surfaceRaised());
-            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+            int w = getWidth();
+            int fillHeight = getHeight() - SHADOW;
 
-            g2.setColor(Tokens.border());
-            g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, radius, radius);
+            // A soft shadow along the bottom edge, faded over a few 1px bands rather than one
+            // flat rectangle — a hard-edged shadow reads as a second border, not depth. Inset
+            // slightly from both sides so it stays under the card's own rounded corners.
+            for (int i = 0; i < SHADOW; i++)
+            {
+                int alpha = (Tokens.isDark() ? 30 : 18) - i * 8;
+                if (alpha <= 0)
+                {
+                    continue;
+                }
+                g2.setColor(new Color(0, 0, 0, alpha));
+                g2.fillRect(radius / 2, fillHeight + i, Math.max(0, w - radius), 1);
+            }
+
+            g2.setColor(Tokens.surfaceRaised());
+            g2.fillRoundRect(0, 0, w, fillHeight, radius, radius);
+
+            g2.setColor(Tokens.cardBorder());
+            g2.drawRoundRect(0, 0, w - 1, fillHeight - 1, radius, radius);
 
             g2.dispose();
             super.paintComponent(g);
@@ -94,7 +130,7 @@ public final class Widgets
     public static Card titledCard(String title, Component body)
     {
         Card card = new Card();
-        card.setLayout(new BorderLayout(0, Tokens.SPACE_SM));
+        card.setLayout(new BorderLayout(0, Tokens.SPACE_MD));
 
         JLabel heading = new JLabel(title);
         heading.setFont(Tokens.fontHeading());
@@ -104,6 +140,7 @@ public final class Widgets
         card.add(body, BorderLayout.CENTER);
         return card;
     }
+
 
     /**
      * A titled card whose body can be tucked away behind its own heading.
@@ -129,7 +166,7 @@ public final class Widgets
             this.title = title;
             this.userExpanded = initiallyExpanded;
 
-            setLayout(new BorderLayout(0, Tokens.SPACE_SM));
+            setLayout(new BorderLayout(0, Tokens.SPACE_MD));
 
             header = new JButton();
             header.setFont(Tokens.fontHeading());
@@ -359,6 +396,259 @@ public final class Widgets
         label.setFont(Tokens.fontSmall());
         label.setForeground(Tokens.textMuted());
         return label;
+    }
+
+    /**
+     * A hint beneath a control: what it does or where it is saved, in the reader's eye rather
+     * than the control's. Carries its own top margin, so a call site does not need a separate
+     * {@code Box.createVerticalStrut} between the two just to keep them from touching.
+     */
+    public static JLabel hint(String text)
+    {
+        JLabel label = muted(text);
+        label.setBorder(BorderFactory.createEmptyBorder(Tokens.SPACE_XS, 0, 0, 0));
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return label;
+    }
+
+    /**
+     * The action a panel exists for. Filled with the accent colour so it is found first, as
+     * opposed to {@link #secondaryButton(String)} for everything beside it that is not that
+     * action.
+     *
+     * <p>Coloured with an explicit background/foreground rather than FlatLaf's {@code
+     * JButton.buttonType = default} alone: that styling only takes effect for a button that is
+     * also its {@link javax.swing.JRootPane}'s registered default button (the one Enter
+     * activates), which none of these are — the window has no single "the" default action, and
+     * making one of these it would mean Enter submitting a form the reader may not have been
+     * looking at. An explicit colour reads as primary regardless.
+     */
+    public static JButton primaryButton(String text)
+    {
+        JButton button = new JButton(text);
+        button.setFont(Tokens.fontBody());
+        button.setForeground(Color.WHITE);
+        button.setBackground(Tokens.accent());
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return button;
+    }
+
+    /** An ordinary action: present, but not what the panel is for. */
+    public static JButton secondaryButton(String text)
+    {
+        JButton button = new JButton(text);
+        button.setFont(Tokens.fontBody());
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return button;
+    }
+
+    /**
+     * The outer, page-level scroll area every panel wraps its content in.
+     *
+     * <p>Leaves a gutter between the content and the scrollbar's own track, which a bare
+     * {@link JScrollPane} does not: without it, a card's right edge sits flush against the
+     * viewport edge and the scrollbar draws directly on top of it. Centralised here rather than
+     * repeated per panel so the gutter — and the rest of the scroll styling — stays one
+     * decision instead of eight slightly different copies of it.
+     */
+    public static JScrollPane scrollable(Component content)
+    {
+        JPanel gutter = transparent(new BorderLayout());
+        gutter.add(content, BorderLayout.CENTER);
+        gutter.add(Box.createHorizontalStrut(Tokens.SPACE_SM), BorderLayout.EAST);
+
+        JScrollPane scroll = new JScrollPane(gutter);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        // Without this the content scrolls a few pixels per notch, because the default unit is
+        // derived from a component that is not there.
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        return scroll;
+    }
+
+    /**
+     * A boolean control that reads as a switch rather than a box with a tick in it — the more
+     * modern convention for a setting that is simply on or off.
+     *
+     * <p>Still a {@link JCheckBox} underneath: {@code isSelected()}, {@code setSelected()},
+     * {@link JCheckBox#addActionListener} and every other {@code AbstractButton} API a caller
+     * already relies on keep working exactly as before. Only the painted icon changes, via the
+     * same "set a custom icon on the button" mechanism Swing's own look and feel uses to draw
+     * the default box — so this never needs its own {@code ButtonUI} and keeps the platform's
+     * keyboard and screen-reader behaviour for a checkbox intact.
+     */
+    public static JCheckBox toggleSwitch(String text)
+    {
+        JCheckBox box = new JCheckBox(text);
+        Icon icon = new SwitchIcon();
+        box.setIcon(icon);
+        box.setSelectedIcon(icon);
+        box.setRolloverIcon(icon);
+        box.setRolloverSelectedIcon(icon);
+        box.setDisabledIcon(icon);
+        box.setDisabledSelectedIcon(icon);
+        box.setIconTextGap(Tokens.SPACE_SM);
+        box.setOpaque(false);
+        box.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return box;
+    }
+
+    /** {@link #toggleSwitch(String)}, initially selected. */
+    public static JCheckBox toggleSwitch(String text, boolean selected)
+    {
+        JCheckBox box = toggleSwitch(text);
+        box.setSelected(selected);
+        return box;
+    }
+
+    /** The track-and-thumb icon {@link #toggleSwitch(String)} paints in place of a checkbox. */
+    private static final class SwitchIcon implements Icon
+    {
+        private static final int W = 34;
+        private static final int H = 18;
+
+        @Override
+        public int getIconWidth()
+        {
+            return W;
+        }
+
+        @Override
+        public int getIconHeight()
+        {
+            return H;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y)
+        {
+            AbstractButton button = (AbstractButton) c;
+            boolean selected = button.isSelected();
+
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            Color track = selected ? Tokens.accent() : Tokens.surfaceSunken();
+            if (!button.isEnabled())
+            {
+                track = Tokens.border();
+            }
+            g2.setColor(track);
+            g2.fillRoundRect(x, y + 1, W, H - 2, H - 2, H - 2);
+
+            if (!selected)
+            {
+                g2.setColor(Tokens.cardBorder());
+                g2.drawRoundRect(x, y + 1, W - 1, H - 3, H - 2, H - 2);
+            }
+
+            int thumbSize = H - 6;
+            int thumbX = selected ? x + W - thumbSize - 3 : x + 3;
+            g2.setColor(Color.WHITE);
+            g2.fillOval(thumbX, y + 3, thumbSize, thumbSize);
+
+            g2.dispose();
+        }
+    }
+
+    /**
+     * A row of mutually exclusive options in one pill, for a short fixed set — the theme, say.
+     * Reads faster than a combo box for two to four choices: every option is visible at once,
+     * with no menu to open before the current one can even be compared against the others.
+     */
+    public static final class Segmented extends JPanel
+    {
+        private final List<JToggleButton> buttons = new java.util.ArrayList<>();
+        private int selectedIndex;
+        private IntConsumer onChange;
+
+        public Segmented(List<String> labels, int initialIndex)
+        {
+            setOpaque(false);
+            setLayout(new GridLayout(1, labels.size(), 2, 0));
+            setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+
+            ButtonGroup group = new ButtonGroup();
+            for (int i = 0; i < labels.size(); i++)
+            {
+                int index = i;
+                JToggleButton button = new JToggleButton(labels.get(i));
+                button.setFont(Tokens.fontSmall());
+                button.setFocusPainted(false);
+                button.setContentAreaFilled(false);
+                button.setBorderPainted(false);
+                button.setOpaque(false);
+                button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                button.setSelected(index == initialIndex);
+                button.addActionListener(e ->
+                {
+                    selectedIndex = index;
+                    refreshColors();
+                    if (onChange != null)
+                    {
+                        onChange.accept(index);
+                    }
+                });
+                group.add(button);
+                buttons.add(button);
+                add(button);
+            }
+            selectedIndex = initialIndex;
+            refreshColors();
+        }
+
+        /** Notified with the newly chosen index whenever the selection changes by click. */
+        public void onChange(IntConsumer listener)
+        {
+            this.onChange = listener;
+        }
+
+        public int getSelectedIndex()
+        {
+            return selectedIndex;
+        }
+
+        public void setSelectedIndex(int index)
+        {
+            if (index < 0 || index >= buttons.size())
+            {
+                return;
+            }
+            selectedIndex = index;
+            buttons.get(index).setSelected(true);
+            refreshColors();
+        }
+
+        private void refreshColors()
+        {
+            for (int i = 0; i < buttons.size(); i++)
+            {
+                buttons.get(i).setForeground(i == selectedIndex ? Color.WHITE : Tokens.textMuted());
+            }
+        }
+
+        @Override
+        public void paint(java.awt.Graphics g)
+        {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            g2.setColor(Tokens.surfaceSunken());
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), Tokens.RADIUS_SM, Tokens.RADIUS_SM);
+
+            if (selectedIndex >= 0 && selectedIndex < buttons.size())
+            {
+                Component selected = buttons.get(selectedIndex);
+                g2.setColor(Tokens.accent());
+                g2.fillRoundRect(selected.getX(), selected.getY(),
+                        selected.getWidth(), selected.getHeight(), Tokens.RADIUS_SM, Tokens.RADIUS_SM);
+            }
+
+            g2.dispose();
+            super.paint(g);
+        }
     }
 
     /** A transparent container, so nested panels do not paint over a card's rounded corners. */

@@ -66,13 +66,7 @@ public class StatusPanel extends JPanel {
     }
 
     private Component buildScrollArea() {
-        JScrollPane scroll = new JScrollPane(serverList);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        return scroll;
+        return Widgets.scrollable(serverList);
     }
 
     /**

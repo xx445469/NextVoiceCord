@@ -41,6 +41,19 @@ public class ConfigDiagnostics {
     private static final String LEGACY_GUI_ADVANCED_SECTIONS_KEY = "gui.configPanelAdvancedSections";
 
     /**
+     * {@code updates.repository} and {@code updates.githubToken} were removed once the
+     * self-updater's repository stopped being configurable (see {@code UpdateChecker}): the
+     * repository is now a hardcoded constant — letting it be a setting was a way to point a
+     * self-updater at arbitrary code — and the token existed only while that repository was
+     * private, which it no longer is. Recognising the leftover keys here, the same way as
+     * {@link #LEGACY_GUI_ADVANCED_SECTIONS_KEY} above, keeps a {@code config.txt} written by an
+     * older build from being endlessly re-flagged as carrying an unknown key and triggering a
+     * fresh repair (and {@code config.txt.bakN} backup) on every restart.
+     */
+    private static final Set<String> LEGACY_UPDATE_KEYS = Set.of(
+            "updates.repository", "updates.githubToken");
+
+    /**
      * Paths whose nested keys are user-defined and should not be flagged as deprecated.
      * For example, playback.transforms allows arbitrary transform names (spotify, youtube, etc.)
      * defined by the user.
@@ -238,7 +251,8 @@ public class ConfigDiagnostics {
      */
     private static boolean shouldSkipPath(String fullPath) {
         return META_CONFIG_VERSION_KEY.equals(fullPath) || fullPath.startsWith(LYRICS_PREFIX)
-                || LEGACY_GUI_ADVANCED_SECTIONS_KEY.equals(fullPath);
+                || LEGACY_GUI_ADVANCED_SECTIONS_KEY.equals(fullPath)
+                || LEGACY_UPDATE_KEYS.contains(fullPath);
     }
     
     /**

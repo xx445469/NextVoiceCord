@@ -398,7 +398,7 @@ public class Bot
         {
             updater = new SelfUpdater(
                     this,
-                    new UpdateChecker(config.getUpdateRepository(), config.getUpdateGithubToken()),
+                    new UpdateChecker(),
                     config.isAutoUpdate());
             updater.start(config.getUpdateIntervalHours());
         }

@@ -233,13 +233,7 @@ public class PerformancePanel extends JPanel {
 
         content.add(buildEventsCard());
 
-        JScrollPane scroll = new JScrollPane(content);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        return scroll;
+        return Widgets.scrollable(content);
     }
 
     private Component buildControlsCard() {

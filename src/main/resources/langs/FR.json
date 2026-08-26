@@ -682,8 +682,6 @@
       "transformsReadOnlyNote": "Les transforms de lecture forment une structure imbriquée avancée et ne peuvent pas être modifiés en toute sécurité depuis un seul champ. Modifie playback.transforms directement dans config.txt, puis redémarre.",
       "updateAutoUpdate": "Télécharger et installer les mises à jour automatiquement",
       "updateCheckIntervalHours": "Heures entre les vérifications de mise à jour",
-      "updateGithubToken": "Token GitHub (dépôts privés uniquement)",
-      "updateRepository": "Dépôt GitHub (owner/name)",
       "updates": "Mises à jour",
       "useEval": "Activer la commande eval",
       "webAllowConfigEdit": "Autoriser le panneau web à modifier config.txt",
@@ -700,7 +698,6 @@
       "appearance": "Apparence & langue",
       "guiTheme": "Thème",
       "searchLabel": "Filtrer les paramètres",
-      "updatesAdvanced": "Mises à jour (Avancé)",
       "youtube": "YouTube"
     },
     "console": {

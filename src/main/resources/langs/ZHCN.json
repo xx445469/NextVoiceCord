@@ -682,8 +682,6 @@
       "transformsReadOnlyNote": "播放转换是高级嵌套结构，无法通过单个字段安全编辑。请直接在 config.txt 中编辑 playback.transforms，然后重启。",
       "updateAutoUpdate": "自动下载并安装更新",
       "updateCheckIntervalHours": "更新检查间隔（小时）",
-      "updateGithubToken": "GitHub 令牌（仅限私有仓库）",
-      "updateRepository": "GitHub 仓库（owner/name）",
       "updates": "更新",
       "useEval": "启用 eval 指令",
       "webAllowConfigEdit": "允许网页面板编辑 config.txt",
@@ -700,7 +698,6 @@
       "appearance": "外观与语言",
       "guiTheme": "主题",
       "searchLabel": "筛选设置",
-      "updatesAdvanced": "更新（高级）",
       "youtube": "YouTube"
     },
     "console": {

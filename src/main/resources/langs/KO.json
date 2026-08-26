@@ -682,8 +682,6 @@
       "transformsReadOnlyNote": "재생 트랜스폼은 고급 중첩 구조라서 필드 하나로는 안전하게 편집할 수 없어요. config.txt에서 playback.transforms를 직접 편집한 다음 재시작해 주세요.",
       "updateAutoUpdate": "업데이트를 자동으로 다운로드하고 설치",
       "updateCheckIntervalHours": "업데이트 확인 간격 (시간)",
-      "updateGithubToken": "GitHub 토큰 (비공개 저장소 전용)",
-      "updateRepository": "GitHub 저장소 (owner/name)",
       "updates": "업데이트",
       "useEval": "eval 명령어 활성화",
       "webAllowConfigEdit": "웹 패널이 config.txt를 편집하도록 허용",
@@ -700,7 +698,6 @@
       "appearance": "외관 및 언어",
       "guiTheme": "테마",
       "searchLabel": "필터 설정",
-      "updatesAdvanced": "업데이트 (고급)",
       "youtube": "YouTube"
     },
     "console": {

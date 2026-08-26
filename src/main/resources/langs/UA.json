@@ -682,8 +682,6 @@
       "transformsReadOnlyNote": "Трансформації відтворення — це просунута вкладена структура, її не можна безпечно редагувати через одне поле. Відредагуй playback.transforms безпосередньо в config.txt, а потім перезапусти бота.",
       "updateAutoUpdate": "Автоматично завантажувати й встановлювати оновлення",
       "updateCheckIntervalHours": "Годин між перевірками оновлень",
-      "updateGithubToken": "Токен GitHub (лише для приватних репозиторіїв)",
-      "updateRepository": "Репозиторій GitHub (owner/name)",
       "updates": "Оновлення",
       "useEval": "Увімкнути команду eval",
       "webAllowConfigEdit": "Дозволити веб-панелі редагувати config.txt",
@@ -700,7 +698,6 @@
       "appearance": "Зовнішній вигляд та мова",
       "guiTheme": "Тема",
       "searchLabel": "Фільтр налаштувань",
-      "updatesAdvanced": "Оновлення (Розширені)",
       "youtube": "YouTube"
     },
     "console": {

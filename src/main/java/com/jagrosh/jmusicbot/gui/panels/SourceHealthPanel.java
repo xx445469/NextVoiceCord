@@ -273,10 +273,7 @@ public class SourceHealthPanel extends JPanel {
         tables.setMaximumSize(new Dimension(Integer.MAX_VALUE, 320));
         content.add(tables);
 
-        JScrollPane outer = new JScrollPane(content);
-        styleScroll(outer);
-        outer.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        return outer;
+        return Widgets.scrollable(content);
     }
 
     private void styleScroll(JScrollPane scroll) {

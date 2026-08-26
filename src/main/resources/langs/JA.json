@@ -682,8 +682,6 @@
       "transformsReadOnlyNote": "再生トランスフォームは高度なネスト構造のため、単一のフィールドから安全に編集することはできません。config.txt 内の playback.transforms を直接編集してから、再起動してください。",
       "updateAutoUpdate": "更新を自動的にダウンロードしてインストールする",
       "updateCheckIntervalHours": "更新確認の間隔（時間）",
-      "updateGithubToken": "GitHubトークン（プライベートリポジトリのみ）",
-      "updateRepository": "GitHubリポジトリ（owner/name）",
       "updates": "更新",
       "useEval": "evalコマンドを有効にする",
       "webAllowConfigEdit": "Webパネルからconfig.txtの編集を許可する",
@@ -700,7 +698,6 @@
       "appearance": "外観＆言語",
       "guiTheme": "テーマ",
       "searchLabel": "フィルター設定",
-      "updatesAdvanced": "更新（詳細設定）",
       "youtube": "YouTube"
     },
     "console": {

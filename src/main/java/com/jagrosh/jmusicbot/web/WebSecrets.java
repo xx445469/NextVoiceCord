@@ -42,7 +42,6 @@ public final class WebSecrets
 
     private static final Set<String> SECRET_KEYS = Set.of(
             "discord.token",
-            "updates.githubToken",
             "playback.youtube.poToken",
             "playback.youtube.visitorData",
             "proxy.password",

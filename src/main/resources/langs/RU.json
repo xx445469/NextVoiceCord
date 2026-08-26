@@ -682,8 +682,6 @@
       "transformsReadOnlyNote": "Трансформации воспроизведения — это продвинутая вложенная структура, её нельзя безопасно редактировать через одно поле. Отредактируй playback.transforms прямо в config.txt, а затем перезапусти бота.",
       "updateAutoUpdate": "Автоматически скачивать и устанавливать обновления",
       "updateCheckIntervalHours": "Часы между проверками обновлений",
-      "updateGithubToken": "Токен GitHub (только для приватных репозиториев)",
-      "updateRepository": "Репозиторий GitHub (owner/name)",
       "updates": "Обновления",
       "useEval": "Включить команду eval",
       "webAllowConfigEdit": "Разрешить веб-панели редактировать config.txt",
@@ -700,7 +698,6 @@
       "appearance": "Внешний вид и язык",
       "guiTheme": "Тема",
       "searchLabel": "Фильтр настроек",
-      "updatesAdvanced": "Обновления (Дополнительно)",
       "youtube": "YouTube"
     },
     "console": {

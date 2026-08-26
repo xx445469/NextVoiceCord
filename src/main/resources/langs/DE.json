@@ -682,8 +682,6 @@
       "transformsReadOnlyNote": "Wiedergabe-Transforms sind eine erweiterte, verschachtelte Struktur und können nicht sicher über ein einzelnes Feld bearbeitet werden. Bearbeite playback.transforms direkt in config.txt und starte danach neu.",
       "updateAutoUpdate": "Updates automatisch herunterladen und installieren",
       "updateCheckIntervalHours": "Stunden zwischen Update-Prüfungen",
-      "updateGithubToken": "GitHub-Token (nur für private Repositories)",
-      "updateRepository": "GitHub-Repository (owner/name)",
       "updates": "Updates",
       "useEval": "Eval-Befehl aktivieren",
       "webAllowConfigEdit": "Dem Web-Panel erlauben, config.txt zu bearbeiten",
@@ -700,7 +698,6 @@
       "appearance": "Erscheinungsbild & Sprache",
       "guiTheme": "Design",
       "searchLabel": "Einstellungen filtern",
-      "updatesAdvanced": "Updates (Erweitert)",
       "youtube": "YouTube"
     },
     "console": {
