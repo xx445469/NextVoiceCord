@@ -15,6 +15,8 @@
  */
 package com.jagrosh.jmusicbot;
 
+import com.jagrosh.jmusicbot.audio.lavalink.LavalinkNodeConfig;
+import com.jagrosh.jmusicbot.config.model.PlaybackEngine;
 import com.jagrosh.jmusicbot.i18n.Language;
 
 import static com.jagrosh.jmusicbot.config.model.ConfigOption.*;
@@ -86,6 +88,8 @@ public class BotConfig {
     private Activity game;
     private Config aliases, transforms;
     private Set<AudioSource> enabledAudioSources;
+    private PlaybackEngine playbackEngine;
+    private java.util.List<LavalinkNodeConfig> lavalinkNodes;
 
     private boolean valid = false;
 
@@ -346,6 +350,21 @@ public class BotConfig {
                 LOGGER.info("Proxy configured: {}:{} [lavaplayer={}, jda={}, github={}]",
                         proxyHost, proxyPort, proxyLavaplayer, proxyJda, proxyGithub);
             }
+        }
+
+        // Playback engine (Lavaplayer vs. Lavalink)
+        String rawEngine = PLAYBACK_ENGINE.hasValue(config) ? PLAYBACK_ENGINE.getString(config) : "lavaplayer";
+        playbackEngine = PlaybackEngine.resolve(rawEngine, LOGGER);
+        lavalinkNodes = LavalinkNodeConfig.parseList(config, LOGGER);
+        if (playbackEngine == PlaybackEngine.LAVALINK && lavalinkNodes.isEmpty()) {
+            LOGGER.error("playback.engine = \"lavalink\" but no valid lavalink.nodes are configured "
+                    + "(or all entries failed validation - see the errors above). "
+                    + "Falling back to \"lavaplayer\" until at least one valid node is configured.");
+            playbackEngine = PlaybackEngine.LAVAPLAYER;
+        }
+        if (playbackEngine == PlaybackEngine.LAVALINK) {
+            LOGGER.info("Playback engine: lavalink, node(s): {}",
+                    lavalinkNodes.stream().map(LavalinkNodeConfig::describe).collect(Collectors.toList()));
         }
     }
     
@@ -717,5 +736,25 @@ public class BotConfig {
     
     public boolean proxyGithub() {
         return proxyGithub;
+    }
+
+    // Playback engine getters
+
+    /** Which audio backend to actually play through. Never {@code null}; never {@code FALLBACK}. */
+    public PlaybackEngine getPlaybackEngine() {
+        return playbackEngine;
+    }
+
+    /** Convenience for {@code getPlaybackEngine() == PlaybackEngine.LAVALINK}. */
+    public boolean isLavalinkMode() {
+        return playbackEngine == PlaybackEngine.LAVALINK;
+    }
+
+    /**
+     * Validated {@code lavalink.nodes}. Empty when none are configured or {@code playback.engine}
+     * is not {@code lavalink}'s point of consuming this. Never {@code null}.
+     */
+    public java.util.List<LavalinkNodeConfig> getLavalinkNodes() {
+        return lavalinkNodes;
     }
 }

@@ -96,6 +96,18 @@ final class WebData
             "web.bindAddress",
             "web.allowConfigEdit");
 
+    /**
+     * Keys left out of the listing entirely, rather than shown read-only.
+     *
+     * <p>{@code lavalink.nodes} is a list of objects, one of which ({@code password}) is a
+     * credential. The rest of this panel redacts secrets per-key via {@link WebSecrets}, which
+     * assumes one key holds one value; a list of node objects doesn't fit that shape without a
+     * per-node-aware editor, which is stage-2 work (the Lavalink web/GUI diagnostics called out
+     * as not yet built). Omitting it here is the safe default until that exists: config.txt is
+     * still the way to set it, same as it is today.
+     */
+    private static final Set<String> HIDDEN_KEYS = Set.of("lavalink.nodes");
+
     /** Keeps a long-running bot's recent-loads list from becoming an unbounded response body. */
     private static final int RECENT_LOADS_LIMIT = 50;
 
@@ -693,6 +705,10 @@ final class WebData
             for (ConfigOption option : ConfigOption.values())
             {
                 String key = option.getKey();
+                if (HIDDEN_KEYS.contains(key))
+                {
+                    continue;
+                }
                 String display = WebSecrets.forDisplay(key, readValue(option, merged));
 
                 var entry = new LinkedHashMap<String, Object>();

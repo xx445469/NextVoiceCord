@@ -51,7 +51,9 @@ public enum ConfigOption {
     LOG_LEVEL("logging.level", ConfigType.STRING, false, "Logging verbosity (off, error, warn, info, debug, trace, all)"),
     EVAL_ENGINE("dangerous.evalEngine", ConfigType.STRING, false, "Eval engine name"),
     PLAYLISTS_FOLDER("paths.playlistsFolder", ConfigType.STRING, false, "Alternative folder for playlists"),
-    
+    PLAYBACK_ENGINE("playback.engine", ConfigType.STRING, false,
+            "Playback backend: lavaplayer, lavalink, or fallback (not yet implemented)"),
+
     // Boolean options
     STAY_IN_CHANNEL("voice.stayInChannel", ConfigType.BOOLEAN, false, "Whether to stay in voice channel after queue ends"),
     SONG_IN_GAME("presence.songInStatus", ConfigType.BOOLEAN, false, "Whether to show current song in bot status"),
@@ -79,7 +81,14 @@ public enum ConfigOption {
     ALIASES("commands.aliases", ConfigType.CONFIG, false, "Command aliases configuration"),
     TRANSFORMS("playback.transforms", ConfigType.CONFIG, false, "Audio source transforms configuration"),
     AUDIO_SOURCES("playback.audioSources", ConfigType.CONFIG, false, "Audio sources configuration (nested booleans)"),
-    
+    // Registered so config regeneration (ConfigRenderer/ConfigUpdater) preserves a user's node
+    // list correctly, the same as every other option — but deliberately kept out of the web
+    // panel's /api/config listing (see WebData.HIDDEN_KEYS) because it carries a credential
+    // (nodes[].password) that the panel has no per-node redaction UI for yet. That UI is stage 2;
+    // until then this is config.txt-only, matching how WebWrites already refuses STRING_LIST/CONFIG.
+    LAVALINK_NODES("lavalink.nodes", ConfigType.CONFIG_LIST, false,
+            "Lavalink node connection list (name, host, port, password, secure); config.txt only"),
+
     // GUI options
     GUI_ENABLED("gui.enabled", ConfigType.BOOLEAN, false, "Enable or disable the GUI (default true)"),
     GUI_THEME("gui.theme", ConfigType.STRING, false, "GUI theme: light, dark, darcula, intellij"),
@@ -151,6 +160,7 @@ public enum ConfigOption {
                 case BOOLEAN -> config.getBoolean(key);
                 case CONFIG -> config.getConfig(key);
                 case STRING_LIST -> config.getStringList(key);
+                case CONFIG_LIST -> config.getConfigList(key);
             };
         } catch (Exception e) {
             return null;
@@ -212,7 +222,15 @@ public enum ConfigOption {
     public List<String> getStringList(Config config) {
         return config.getStringList(key);
     }
-    
+
+    /**
+     * Type-safe getter for a list of nested Config objects (e.g. lavalink.nodes).
+     * @throws ConfigException.Missing if the path doesn't exist
+     */
+    public List<? extends Config> getConfigList(Config config) {
+        return config.getConfigList(key);
+    }
+
     /**
      * Checks if the config has a value for this option.
      */
@@ -266,6 +284,7 @@ public enum ConfigOption {
         DOUBLE,
         BOOLEAN,
         CONFIG,
-        STRING_LIST
+        STRING_LIST,
+        CONFIG_LIST
     }
 }

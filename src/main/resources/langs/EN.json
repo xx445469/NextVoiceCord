@@ -203,6 +203,17 @@
       "twoValidIndexes": "Please include two valid indexes."
     }
   },
+  "lavalink": {
+    "notYetSupported": "This command isn't available yet with the Lavalink playback engine. Stage 1 only supports play, pause, resume, stop, skip and volume.",
+    "nodeUnavailable": "The Lavalink node isn't connected right now. Please try again in a moment.",
+    "nowPlaying": "Now playing **{0}**",
+    "queued": "Queued **{0}** at position {1}",
+    "noMatches": "No results found for that query.",
+    "trackTooLong": "This track (**{0}**) is longer than the allowed maximum: `{1}`",
+    "loadFailed": "Couldn't load that track: {0}",
+    "paused": "Paused **{0}**.",
+    "stopped": "Stopped playback and left the voice channel."
+  },
   "history": {
     "disabled": "Playback history is disabled by config (playback.maxHistorySize = 0).",
     "nowEmpty": "Playback history is now empty!",

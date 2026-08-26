@@ -319,7 +319,7 @@ final class WebWrites
                     ? "must not contain a line break" : null;
             // A list or a nested block is not one text field, and guessing at how to serialise
             // one from a string is how a config file gets corrupted.
-            case STRING_LIST, CONFIG -> "must be edited in config.txt directly";
+            case STRING_LIST, CONFIG, CONFIG_LIST -> "must be edited in config.txt directly";
         };
     }
 

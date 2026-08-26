@@ -339,6 +339,18 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <!-- Lavalink stage 1 (playback.engine = lavalink): the node's REST + WebSocket API is
+             spoken directly with OkHttp rather than pulling in a Lavalink client library, so
+             this adds ~0 bytes to the shaded jar - JDA already depends on this exact artifact
+             and version at compile scope (net.dv8tion:JDA -> com.squareup.okhttp3:okhttp-jvm),
+             so it was already present. Declared explicitly here only so it is a compile-time
+             dependency of this project rather than an unlisted transitive one. -->
+        <!-- Source: https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp-jvm -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp-jvm</artifactId>
+            <version>5.3.2</version>
+        </dependency>
 
         <!-- GUI Dependencies -->
         <!-- FlatLaf Look and Feel - Modern flat Swing L&F -->

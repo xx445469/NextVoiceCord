@@ -77,7 +77,16 @@ public class DiscordService {
                     ProxyUtil.applyOkHttpCredentials(new OkHttpClient.Builder().proxy(proxy), config));
             LOG.info("JDA configured to use proxy: {}", ProxyUtil.describe(config));
         }
-        
+
+        // Lavalink mode: the node opens the voice connection and sends the audio, not JDA.
+        // Installing this interceptor is what stops JDA from opening its own UDP audio socket -
+        // see LavalinkVoiceDispatchInterceptor for the rest of that split. Bot's own
+        // LavalinkPlaybackEngine is constructed before JDA (in the Bot constructor), specifically
+        // so it exists here to hand the interceptor off.
+        if (bot.getLavalinkEngine() != null) {
+            jdaBuilder.setVoiceDispatchInterceptor(bot.getLavalinkEngine().newVoiceDispatchInterceptor());
+        }
+
         JDA jda = jdaBuilder.build();
 
         // Perform post-startup validation

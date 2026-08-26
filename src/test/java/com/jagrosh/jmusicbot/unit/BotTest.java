@@ -20,6 +20,8 @@ import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.audio.AudioHandler;
+import com.jagrosh.jmusicbot.audio.lavalink.LavalinkNodeConfig;
+import com.jagrosh.jmusicbot.config.model.PlaybackEngine;
 import com.jagrosh.jmusicbot.entities.UserInteraction;
 import javax.swing.JFrame;
 import com.jagrosh.jmusicbot.settings.SettingsManager;
@@ -36,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.Instant;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -404,6 +407,66 @@ public class BotTest
         void getYouTubeOauth2Handler_returnsHandler()
         {
             assertNotNull(bot.getYouTubeOauth2Handler());
+        }
+    }
+
+    // ==================== Lavalink engine wiring ====================
+
+    /**
+     * "engine = lavaplayer produces exactly the same wiring as before your change" - the
+     * {@code setUp()} mock does not stub {@code getPlaybackEngine()}/{@code getLavalinkNodes()}
+     * at all, the same as every other pre-existing test in this class, and Bot's constructor
+     * must still come out exactly as it did before this feature existed: no Lavalink engine,
+     * and every other subsystem constructed exactly as {@code ConstructorTests} already checks.
+     */
+    @Nested
+    @DisplayName("Lavalink engine wiring")
+    class LavalinkEngineWiring
+    {
+        @Test
+        @DisplayName("default (unstubbed) config wires no Lavalink engine")
+        void defaultConfigWiresNoLavalinkEngine()
+        {
+            assertNull(bot.getLavalinkEngine());
+        }
+
+        @Test
+        @DisplayName("playback.engine = lavaplayer wires no Lavalink engine")
+        void lavaplayerEngineWiresNoLavalinkEngine()
+        {
+            when(config.getPlaybackEngine()).thenReturn(PlaybackEngine.LAVAPLAYER);
+
+            Bot lavaplayerBot = new Bot(waiter, config, settingsManager, userInteraction);
+
+            assertNull(lavaplayerBot.getLavalinkEngine());
+            // Everything else still exists and is unaffected by the engine getter existing at all.
+            assertNotNull(lavaplayerBot.getPlayerManager());
+            assertNotNull(lavaplayerBot.getMusicService());
+        }
+
+        @Test
+        @DisplayName("playback.engine = lavalink with a valid node wires a Lavalink engine")
+        void lavalinkEngineWiresWhenNodesPresent()
+        {
+            when(config.getPlaybackEngine()).thenReturn(PlaybackEngine.LAVALINK);
+            when(config.getLavalinkNodes()).thenReturn(
+                    List.of(new LavalinkNodeConfig("main", "localhost", 2333, "youshallnotpass", false)));
+
+            Bot lavalinkBot = new Bot(waiter, config, settingsManager, userInteraction);
+
+            assertNotNull(lavalinkBot.getLavalinkEngine());
+        }
+
+        @Test
+        @DisplayName("playback.engine = lavalink with no nodes does not wire an engine (defensive; BotConfig should already prevent this)")
+        void lavalinkEngineNotWiredWithoutNodes()
+        {
+            when(config.getPlaybackEngine()).thenReturn(PlaybackEngine.LAVALINK);
+            when(config.getLavalinkNodes()).thenReturn(List.of());
+
+            Bot lavalinkBot = new Bot(waiter, config, settingsManager, userInteraction);
+
+            assertNull(lavalinkBot.getLavalinkEngine());
         }
     }
 }

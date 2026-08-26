@@ -12,11 +12,16 @@ import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Shared validation logic for music commands (both text and slash commands).
  */
 public final class MusicCommandValidator
 {
+    private static final Logger LOG = LoggerFactory.getLogger(MusicCommandValidator.class);
+
     private MusicCommandValidator() {} // Utility class
 
     /**
@@ -59,13 +64,24 @@ public final class MusicCommandValidator
         }
 
         // Set up audio handler
-        bot.getPlayerManager().setUpHandler(guild);
+        // Lavalink boundary: in lavaplayer mode this is unchanged - it lazily creates the
+        // AudioHandler/AudioPlayer pair. In lavalink mode there is no AudioHandler at all (the
+        // node holds playback state, not the bot), so setting one up here would be pointless
+        // Lavaplayer machinery that nothing reads. See LavalinkPlaybackEngine's class doc for the
+        // full "who holds the connection" split.
+        boolean lavalinkMode = bot.getConfig().isLavalinkMode();
+        if (!lavalinkMode)
+        {
+            bot.getPlayerManager().setUpHandler(guild);
+        }
 
         // Check if music must be playing
         if (bePlaying)
         {
-            AudioHandler handler = (AudioHandler) guild.getAudioManager().getSendingHandler();
-            if (handler == null || !handler.isMusicPlaying(jda))
+            boolean playing = lavalinkMode
+                    ? bot.getLavalinkEngine() != null && bot.getLavalinkEngine().isPlaying(guild)
+                    : isLavaplayerPlaying(guild, jda);
+            if (!playing)
             {
                 errorHandler.onNotPlayingError();
                 return false;
@@ -100,7 +116,23 @@ public final class MusicCommandValidator
             {
                 try
                 {
-                    guild.getAudioManager().openAudioConnection(userState.getChannel());
+                    // Lavalink boundary: DirectAudioController rather than
+                    // AudioManager.openAudioConnection - see LavalinkPlaybackEngine.join().
+                    if (lavalinkMode)
+                    {
+                        if (bot.getLavalinkEngine() == null)
+                        {
+                            LOG.error("Lavalink mode is on but the engine failed to initialize; "
+                                    + "cannot join voice for guild {}.", guild.getId());
+                            errorHandler.onVoiceConnectError(userState.getChannel());
+                            return false;
+                        }
+                        bot.getLavalinkEngine().join(guild, userState.getChannel());
+                    }
+                    else
+                    {
+                        guild.getAudioManager().openAudioConnection(userState.getChannel());
+                    }
                 }
                 catch (PermissionException ex)
                 {
@@ -111,5 +143,11 @@ public final class MusicCommandValidator
         }
 
         return true;
+    }
+
+    private static boolean isLavaplayerPlaying(Guild guild, JDA jda)
+    {
+        AudioHandler handler = (AudioHandler) guild.getAudioManager().getSendingHandler();
+        return handler != null && handler.isMusicPlaying(jda);
     }
 }

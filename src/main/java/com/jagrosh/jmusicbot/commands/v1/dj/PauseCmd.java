@@ -36,6 +36,7 @@ public class PauseCmd extends DJCommand
         this.help = "pauses the current song";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = true;
+        this.lavalinkStageOneSupported = true;
     }
 
     @Override

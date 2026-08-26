@@ -12,6 +12,9 @@ public abstract class MusicSlashCommand extends LocalizedSlashCommand
     protected boolean bePlaying;
     protected boolean beListening;
 
+    /** See {@link com.jagrosh.jmusicbot.commands.v1.MusicCommand#lavalinkStageOneSupported}. */
+    protected boolean lavalinkStageOneSupported = false;
+
     public MusicSlashCommand(Bot bot)
     {
         super(bot);
@@ -76,6 +79,12 @@ public abstract class MusicSlashCommand extends LocalizedSlashCommand
 
         if (valid)
         {
+            if (bot.getConfig().isLavalinkMode() && !lavalinkStageOneSupported)
+            {
+                event.reply(bot.getConfig().getWarning() + " " + bot.msg(event.getGuild(), "lavalink.notYetSupported"))
+                        .setEphemeral(true).queue();
+                return;
+            }
             doCommand(event);
         }
     }

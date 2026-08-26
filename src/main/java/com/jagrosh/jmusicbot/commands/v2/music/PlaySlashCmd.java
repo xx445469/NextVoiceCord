@@ -35,6 +35,7 @@ public class PlaySlashCmd extends MusicSlashCommand
         this.aliases = bot.getConfig().getAliases(this.name);
         this.beListening = true;
         this.bePlaying = false;
+        this.lavalinkStageOneSupported = true; // play-from-URL/search and resume (no "query" option)
     }
 
     @Override

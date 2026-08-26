@@ -36,6 +36,7 @@ public class StopCmd extends DJCommand
         this.help = "stops the current song and clears the queue";
         this.aliases = bot.getConfig().getAliases(this.name);
         this.bePlaying = false;
+        this.lavalinkStageOneSupported = true;
     }
 
     @Override
