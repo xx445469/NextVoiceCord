@@ -696,7 +696,12 @@
       "youtubeClientsRemove": "削除",
       "youtubeClientsUp": "上へ移動",
       "youtubePoToken": "生成元証明トークン",
-      "youtubeVisitorData": "訪問者データ"
+      "youtubeVisitorData": "訪問者データ",
+      "appearance": "外観＆言語",
+      "guiTheme": "テーマ",
+      "searchLabel": "フィルター設定",
+      "updatesAdvanced": "更新（詳細設定）",
+      "youtube": "YouTube"
     },
     "console": {
       "autoScroll": "自動スクロール",

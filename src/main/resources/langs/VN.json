@@ -696,7 +696,12 @@
       "youtubeClientsRemove": "Xoá",
       "youtubeClientsUp": "Di chuyển lên",
       "youtubePoToken": "Token chứng minh nguồn gốc",
-      "youtubeVisitorData": "Dữ liệu khách truy cập"
+      "youtubeVisitorData": "Dữ liệu khách truy cập",
+      "appearance": "Diện mạo & Ngôn ngữ",
+      "guiTheme": "Giao diện",
+      "searchLabel": "Lọc cài đặt",
+      "updatesAdvanced": "Cập nhật (Nâng cao)",
+      "youtube": "YouTube"
     },
     "console": {
       "autoScroll": "Tự động cuộn",
