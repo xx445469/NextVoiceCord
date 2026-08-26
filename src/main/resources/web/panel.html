@@ -147,6 +147,14 @@
     background: var(--surface); color: var(--text);
   }
 
+  .authnotice {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid #e5484d; border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 18px;
+  }
+  .authnotice strong { display: block; margin-bottom: 4px; }
+  .authnotice p { margin: 0; color: var(--muted); font-size: 13.5px; }
+
   .empty { color: var(--muted); text-align: center; padding: 44px 0; }
   .empty.small { padding: 14px 0; font-size: 13px; }
   .banner {
@@ -215,6 +223,10 @@
 
   <main class="content">
     <div class="wrap">
+      <div class="authnotice" id="authnotice" hidden>
+        <strong data-i18n="web.auth.title">Not signed in</strong>
+        <p id="authnoticetext"></p>
+      </div>
       <header class="pageheader">
         <h1>NextVoiceCord</h1>
         <span class="version" id="version"></span>
@@ -370,6 +382,31 @@ function noteHttpFailure(status) {
   setLive(false, status === 401
       ? L('web.status.unauthorised', 'unauthorised')
       : fmt(L('web.status.error', 'error {0}'), status));
+
+  // Stop entirely once the token is refused. The token changes on every restart, so a tab
+  // left open across one becomes a tab polling a dead credential twice a second — which the
+  // server's own lockout then reads as someone guessing, and bans the address for it. Two
+  // features working exactly as designed, combining into "the panel locked me out".
+  if (status === 401 || status === 429) {
+    stopPolling();
+    showAuthNotice(status);
+  }
+}
+
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  authLost = true;
+}
+
+// Replaces the page rather than sitting in the corner: every view behind it is now stale,
+// and a dashboard that quietly stops updating is worse than one that says it has.
+function showAuthNotice(status) {
+  const notice = el('authnotice');
+  if (!notice) return;
+  el('authnoticetext').textContent = status === 429
+      ? L('web.auth.lockedOut', 'Too many failed attempts. Wait a few minutes, then open the panel again using the link printed in the console.')
+      : L('web.auth.tokenStale', 'This link is no longer valid. The token changes every time the bot restarts — open the panel again using the link printed in the console.');
+  notice.hidden = false;
 }
 
 function stat(value, label) {
@@ -1054,6 +1091,7 @@ document.addEventListener('click', e => {
 const REFRESH_MS = { overview: 3000, servers: 3000, console: 2000, performance: 5000, system: 5000, sources: 5000 };
 let pollTimer = null;
 let currentView = null;
+let authLost = false;
 
 // One-shot poll/render per view, with no interval attached — VIEW_START below wraps the ones
 // that repeat. Kept separate so a language change can redraw just the visible view once,
@@ -1084,6 +1122,7 @@ function refreshCurrentView() {
 
 function showView(key) {
   if (key === currentView || !VIEW_START[key]) return;
+  if (authLost) return;   // nothing behind the notice can refresh; do not start a new interval
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   currentView = key;
   document.querySelectorAll('.navitem').forEach(b => b.classList.toggle('active', b.dataset.view === key));
