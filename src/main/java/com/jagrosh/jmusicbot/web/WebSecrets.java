@@ -46,7 +46,12 @@ public final class WebSecrets
             "playback.youtube.poToken",
             "playback.youtube.visitorData",
             "proxy.password",
-            "proxy.username");
+            "proxy.username",
+            // clientSecret is also caught by the "secret" name match below; clientId is not
+            // (nothing in its name looks like a credential), so it needs to be listed
+            // explicitly. Both authenticate the bot to Spotify's catalog API.
+            "spotify.clientId",
+            "spotify.clientSecret");
 
     private WebSecrets() { }
 

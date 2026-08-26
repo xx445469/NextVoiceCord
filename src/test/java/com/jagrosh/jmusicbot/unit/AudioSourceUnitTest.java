@@ -126,6 +126,7 @@ class AudioSourceUnitTest {
         @DisplayName("fromConfigName() returns correct source for valid names")
         void fromConfigNameReturnsCorrectSource() {
             assertEquals(Optional.of(AudioSource.YOUTUBE), AudioSource.fromConfigName("youtube"));
+            assertEquals(Optional.of(AudioSource.SPOTIFY), AudioSource.fromConfigName("spotify"));
             assertEquals(Optional.of(AudioSource.SOUNDCLOUD), AudioSource.fromConfigName("soundcloud"));
             assertEquals(Optional.of(AudioSource.HTTP), AudioSource.fromConfigName("http"));
             assertEquals(Optional.of(AudioSource.LOCAL), AudioSource.fromConfigName("local"));
@@ -143,7 +144,7 @@ class AudioSourceUnitTest {
         @DisplayName("fromConfigName() returns empty for invalid names")
         void fromConfigNameReturnsEmptyForInvalidNames() {
             assertEquals(Optional.empty(), AudioSource.fromConfigName("invalid"));
-            assertEquals(Optional.empty(), AudioSource.fromConfigName("spotify"));
+            assertEquals(Optional.empty(), AudioSource.fromConfigName("applemusic"));
             assertEquals(Optional.empty(), AudioSource.fromConfigName(""));
         }
 
