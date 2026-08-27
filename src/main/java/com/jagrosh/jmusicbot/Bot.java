@@ -396,11 +396,8 @@ public class Bot
         // knowing whether anything is playing, and that needs a live JDA connection.
         if (updater == null)
         {
-            updater = new SelfUpdater(
-                    this,
-                    new UpdateChecker(),
-                    config.isAutoUpdate());
-            updater.start(config.getUpdateIntervalHours());
+            updater = new SelfUpdater(this, new UpdateChecker());
+            updater.start();
         }
     }
     

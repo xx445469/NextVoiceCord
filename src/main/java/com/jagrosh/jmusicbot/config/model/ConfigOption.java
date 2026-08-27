@@ -35,8 +35,6 @@ public enum ConfigOption {
     // String options
     PREFIX("commands.prefix", ConfigType.STRING, false, "Command prefix (use @mention for mention prefix)"),
     LANGUAGE("ui.language", ConfigType.STRING, false, "Default bot language (EN, DE, ES, FR, JA, KO, PL, RU, UA, VN, ZHCN, ZHTW)"),
-    UPDATE_AUTO("updates.autoUpdate", ConfigType.BOOLEAN, false, "Download new releases and restart into them when idle"),
-    UPDATE_INTERVAL_HOURS("updates.checkIntervalHours", ConfigType.INT, false, "Hours between update checks"),
     ALTPREFIX("commands.altPrefix", ConfigType.STRING, false, "Alternative command prefix (use NONE to disable)"),
     HELP_WORD("commands.help", ConfigType.STRING, false, "Word used to view help"),
     SUCCESS_EMOJI("ui.emojis.success", ConfigType.STRING, false, "Success emoji"),

@@ -789,7 +789,8 @@
       "status": "Status",
       "systemHealth": "Stan systemu",
       "theme": "Motyw",
-      "view": "Widok"
+      "view": "Widok",
+      "updates": "Aktualizacje"
     },
     "nav": {
       "botConfig": "Konfiguracja bota",
@@ -799,7 +800,8 @@
       "preferences": "Preferencje",
       "servers": "Serwery",
       "sources": "Źródła",
-      "system": "System"
+      "system": "System",
+      "updates": "Aktualizacje"
     },
     "overview": {
       "connecting": "Łączenie z Discordem…",
@@ -1016,6 +1018,21 @@
       "cannotOpen": "Ten komputer nie może automatycznie otworzyć przeglądarki.\nAdres panelu został skopiowany do schowka.",
       "title": "Panel WWW",
       "notReady": "Panel WWW uruchamia się, gdy bot połączy się z Discordem. Spróbuj ponownie za chwilę."
+    },
+    "updates": {
+      "confirmIdleMessage": "To zainstaluje wersję {0} i natychmiast zrestartuje bota. Kontynuować?",
+      "confirmPlayingMessage": "W {0} aktualnie gra muzyka. Instalacja teraz natychmiast rozłączy wszystkich słuchaczy tam obecnych. Kontynuować mimo to?",
+      "confirmTitle": "Zainstaluj i uruchom ponownie",
+      "downloadFailed": "Znaleziono wersję {0}, ale nie udało się jej pobrać. Szczegóły znajdziesz w logu.",
+      "downloading": "Pobieranie aktualizacji… to może chwilę potrwać.",
+      "installButton": "Zainstaluj i uruchom ponownie",
+      "installFailed": "Nie udało się zainstalować aktualizacji. Szczegóły znajdziesz w logu.",
+      "installing": "Instalowanie…",
+      "noStagedUpdate": "Nie ma jeszcze przygotowanej aktualizacji. Bot automatycznie sprawdza GitHub co godzinę.",
+      "notConnected": "Jeszcze nie połączono z Discordem. Spróbuj ponownie, gdy bot skończy uruchamianie.",
+      "notStaged": "Obecnie nie ma nic przygotowanego do zainstalowania.",
+      "stagedVersion": "Wersja {0} została pobrana i jest gotowa do instalacji.",
+      "subtitle": "Sprawdzane automatycznie co godzinę. Nic nie instaluje się, dopóki tego nie potwierdzisz."
     }
   },
   "web": {
@@ -1314,6 +1331,7 @@
     "playlistSummary": "Playlista Spotify **{0}**: dodano {1} z {2} utworów (dopasowano przez YouTube).",
     "artistSummary": "Popularne utwory artysty Spotify **{0}**: dodano {1} z {2} (dopasowano przez YouTube).",
     "summaryFailedSuffix": "\n{0} utworów nie miało dopasowania na YouTube i zostały pominięte.",
-    "summaryCappedSuffix": "\nSpotify podaje łącznie {0} utworów; sprawdzono tylko pierwsze {1}."
+    "summaryCappedSuffix": "\nSpotify podaje łącznie {0} utworów; sprawdzono tylko pierwsze {1}.",
+    "notConfigured": "To link do Spotify, ale obsługa Spotify nie jest skonfigurowana na tym bocie. Poproś właściciela, aby ustawił `spotify.clientId` i `spotify.clientSecret` w konfiguracji, aby ją włączyć."
   }
 }

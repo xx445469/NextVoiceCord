@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.i18n.Language;
-import com.jagrosh.jmusicbot.update.UpdateChecker;
-import com.jagrosh.jmusicbot.utils.OtherUtil;
+import com.jagrosh.jmusicbot.update.SelfUpdater;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -59,6 +59,10 @@ import org.slf4j.LoggerFactory;
  *       accepted for the initial page load, because that is what makes the printed link work by
  *       pasting, but never for anything that changes state — a header cannot be forged by a
  *       page on another site, and a URL can.</li>
+ *   <li>Installing a downloaded release — the one endpoint that makes the process replace its
+ *       own jar and restart — is held to a stricter bar again: refused outright unless the
+ *       panel is bound to loopback or {@code web.allowConfigEdit} is on. See {@link
+ *       #handleUpdateInstall} for the rest of what gates it.</li>
  *   <li>Secrets are never sent. Not masked in the browser; not included in the response. See
  *       {@link WebSecrets}.</li>
  * </ul>
@@ -85,54 +89,21 @@ public final class WebPanel
     private HttpServer server;
 
     /**
-     * Runs the one outbound call {@code /api/update-check} makes — see {@link
+     * Runs the outbound work {@code /api/update-check} triggers — see {@link
      * #handleUpdateCheck}. Kept apart from {@link #server}'s own executor, which is sized for
-     * answering local reads instantly, not for a thread sitting on a socket to GitHub for up to
-     * {@link UpdateChecker}'s own 30-second timeout.
+     * answering local reads instantly, not for a thread that can now sit through
+     * {@link SelfUpdater#checkAndStage()}'s full check-then-download: a GitHub round trip, then,
+     * once an update exists, a ~68 MB transfer that can run for minutes.
      */
     private final ExecutorService updateCheckExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
-    /**
-     * Overrides where {@link #handleUpdateCheck} points {@link UpdateChecker} — {@code null}
-     * means the real GitHub API. The same seam {@link UpdateChecker#UpdateChecker(String)}
-     * itself offers, threaded one layer further out so an HTTP-level test of this class can
-     * point a real request at a local server instead of the network, the same way {@link
-     * UpdateChecker}'s own tests do.
-     */
-    private final String updateCheckApiRoot;
-
-    /**
-     * Overrides {@link OtherUtil#getCurrentVersion()} for {@link #handleUpdateCheck} — {@code
-     * null} means the real running version. {@link OtherUtil#getCurrentVersion()} answers
-     * {@code "UNKNOWN"} for anything not run from the packaged jar — this project's own test
-     * suite included — and {@link UpdateChecker#isNewer} treats {@code "UNKNOWN"} as never
-     * newer than anything, by design: a build that cannot name its own version has nothing
-     * trustworthy to compare against. That is exactly right for the running bot and exactly
-     * wrong for a test that needs to reach the "update available" outcome at all, hence this.
-     */
-    private final String updateCheckCurrentVersion;
-
     public WebPanel(Bot bot, int port)
-    {
-        this(bot, port, null, null);
-    }
-
-    /** Test-only: see {@link #updateCheckApiRoot}; the running version is used as normal. */
-    WebPanel(Bot bot, int port, String updateCheckApiRoot)
-    {
-        this(bot, port, updateCheckApiRoot, null);
-    }
-
-    /** Test-only: see {@link #updateCheckApiRoot} and {@link #updateCheckCurrentVersion}. */
-    WebPanel(Bot bot, int port, String updateCheckApiRoot, String updateCheckCurrentVersion)
     {
         this.bot = bot;
         this.port = port;
         this.auth = new WebAuth();
         this.data = new WebData(bot);
         this.writes = new WebWrites(bot);
-        this.updateCheckApiRoot = updateCheckApiRoot;
-        this.updateCheckCurrentVersion = updateCheckCurrentVersion;
     }
 
     /**
@@ -161,6 +132,7 @@ public final class WebPanel
             server.createContext("/api/control", this::handleControl);
             server.createContext("/api/youtube-oauth", this::handleYoutubeOauth);
             server.createContext("/api/update-check", this::handleUpdateCheck);
+            server.createContext("/api/update-install", this::handleUpdateInstall);
 
             server.setExecutor(Executors.newFixedThreadPool(THREADS));
             server.start();
@@ -394,24 +366,32 @@ public final class WebPanel
     }
 
     /**
-     * Checks GitHub for a newer release, matching what the desktop window's own "Check for
-     * updates" button does — see {@link com.jagrosh.jmusicbot.gui.panels.SettingsPanel} and
-     * {@link UpdateChecker}. Only ever checks and reports; never downloads or installs anything,
-     * that stays {@link com.jagrosh.jmusicbot.update.SelfUpdater}'s job on its own schedule.
+     * Checks GitHub for a newer release and, if one exists, downloads it — matching what the
+     * desktop window's own "Check for updates" button does, see
+     * {@link com.jagrosh.jmusicbot.gui.panels.UpdatesPanel} and
+     * {@link SelfUpdater#checkAndStage()}. This used to only ever check: a person told "version
+     * X is available" with no way to act on that until the hourly background check happened to
+     * catch up was told about an update they could not use. Installing still happens only
+     * through {@link #handleUpdateInstall}, on request — this never does more than {@link
+     * SelfUpdater#checkAndStage()} itself ever does, which is check and download, nothing more.
      *
      * <p>GET only, authorised the same way every other read here is — a query-string token is
      * enough. That is deliberately what stops this from being usable to make the bot hammer
-     * GitHub from an unauthenticated caller: {@link #authorised} runs, and can refuse, before
-     * {@link UpdateChecker} is ever constructed, so a missing or wrong token never reaches the
-     * network.
+     * GitHub (or download unbounded releases) from an unauthenticated caller: {@link
+     * #authorised} runs, and can refuse, before {@link SelfUpdater#checkAndStage()} is ever
+     * reached, so a missing or wrong token never reaches the network.
      *
-     * <p>The outbound call itself is dispatched to {@link #updateCheckExecutor} rather than run
-     * inline. Running it on this thread — one of the four the whole server answers every request
-     * with — would let a slow or stalled connection to GitHub tie that thread up for as long as
-     * {@link UpdateChecker}'s own 30-second timeout, leaving every other open tab of the panel
-     * unable to load anything for the same stretch. Dispatching returns this thread to the pool
-     * immediately; the exchange is completed later, from the background thread, once the check
-     * finishes.
+     * <p>The work itself is dispatched to {@link #updateCheckExecutor} rather than run inline.
+     * Running it on this thread — one of the four the whole server answers every request with —
+     * would let a slow connection to GitHub, or a slow ~68 MB download once an update is found,
+     * tie that thread up for minutes, leaving every other open tab of the panel unable to load
+     * anything for the same stretch. Dispatching returns this thread to the pool immediately;
+     * the exchange is completed later, from the background thread, once the work finishes.
+     *
+     * <p>Answers 409 rather than running anything if {@link Bot#getUpdater()} is not there yet —
+     * the same "not connected to Discord" state {@link #handleUpdateInstall} already reports,
+     * since staging now lives on that same object and there is nothing to check-and-stage with
+     * before it exists.
      */
     private void handleUpdateCheck(HttpExchange exchange) throws IOException
     {
@@ -425,25 +405,139 @@ public final class WebPanel
             return;
         }
 
+        SelfUpdater updater = bot.getUpdater();
+        if (updater == null)
+        {
+            send(exchange, 409, "application/json; charset=utf-8",
+                 MAPPER.writeValueAsString(Map.of(
+                         "ok", false, "status", "notReady",
+                         "message", "Not connected to Discord yet.")));
+            return;
+        }
+
         updateCheckExecutor.execute(() -> {
-            UpdateChecker checker = updateCheckApiRoot == null
-                    ? new UpdateChecker() : new UpdateChecker(updateCheckApiRoot);
-            String currentVersion = updateCheckCurrentVersion == null
-                    ? OtherUtil.getCurrentVersion() : updateCheckCurrentVersion;
-            UpdateChecker.CheckOutcome outcome = checker.checkForUpdate(currentVersion);
+            SelfUpdater.CheckAndStageOutcome outcome = updater.checkAndStage();
             try
             {
                 send(exchange, 200, "application/json; charset=utf-8",
-                     MAPPER.writeValueAsString(WebData.updateCheckPayload(outcome)));
+                     MAPPER.writeValueAsString(WebData.checkAndStagePayload(outcome)));
             }
             catch (IOException ex)
             {
-                // Most likely the caller's tab was closed or navigated away before GitHub
-                // answered — nothing is listening for a response any more, and there is
+                // Most likely the caller's tab was closed or navigated away before this
+                // finished — nothing is listening for a response any more, and there is
                 // nothing more useful to do here than note it and move on.
                 LOG.debug("Web panel: could not deliver an update-check response: {}", ex.toString());
             }
         });
+    }
+
+    /**
+     * Installs whatever {@link SelfUpdater}'s own hourly background check has already staged,
+     * restarting the process into it — the web panel's equivalent of the desktop window's
+     * "Install and restart" button, and the riskiest single endpoint this class exposes: unlike
+     * everything else here, it makes the bot replace its own jar and restart, dropping every
+     * voice connection the instant it does. Three things gate that beyond the ordinary token
+     * check:
+     *
+     * <ul>
+     *   <li><b>POST only</b>, and only with the {@code Authorization} header — never a
+     *       query-string token — for the same CSRF reason {@link #handleConfig} requires it: a
+     *       page on another site can make a browser issue a cross-origin request carrying
+     *       whatever is in the URL, but not set a header.</li>
+     *   <li><b>Refused whenever the panel is reachable from outside this machine and {@code
+     *       web.allowConfigEdit} is off</b> — see {@link #installGateOpen()}. Restarting the
+     *       process is at least as consequential as rewriting {@code config.txt}, so it is held
+     *       to at least the bar {@link #handleConfig} already enforces for that, not a lower
+     *       one.</li>
+     *   <li><b>Never installs on this call alone.</b> Every call is a dry run — {@link
+     *       SelfUpdater#decideInstall(boolean)} runs and its answer is returned, but nothing is
+     *       scheduled — unless the request body says {@code "confirm":true}. The page always
+     *       makes an unconfirmed call first, shows what {@code decideInstall} found (idle, or
+     *       exactly who is playing), and only sends {@code confirm} — with {@code force} too, if
+     *       the first call came back {@code "blocked"} — after a person has read that and said
+     *       to continue. The same two-step confirmation the desktop window's own dialog walks
+     *       through, just spread across two requests instead of one synchronous call.</li>
+     * </ul>
+     *
+     * <p>When the decision is {@code Ready} and the call was confirmed, the response is sent
+     * first and {@link SelfUpdater#installNow()} runs a moment later from the shared thread
+     * pool — never inline on this request thread, which would have no chance to flush a
+     * response before the process it is running in exits.
+     */
+    private void handleUpdateInstall(HttpExchange exchange) throws IOException
+    {
+        if (!"POST".equals(exchange.getRequestMethod()))
+        {
+            send(exchange, 405, "text/plain; charset=utf-8", "Method not allowed.");
+            return;
+        }
+        if (!authorised(exchange, true))
+        {
+            return;
+        }
+        if (!installGateOpen())
+        {
+            send(exchange, 403, "application/json; charset=utf-8",
+                 MAPPER.writeValueAsString(Map.of(
+                         "ok", false,
+                         "status", "disabled",
+                         "message", "Installing from the web panel is off while it is reachable from "
+                                 + "outside this machine and web.allowConfigEdit is off. Set "
+                                 + "web.allowConfigEdit = true in config.txt, bind the panel to "
+                                 + "127.0.0.1, or use the desktop window instead.")));
+            return;
+        }
+
+        SelfUpdater updater = bot.getUpdater();
+        if (updater == null)
+        {
+            send(exchange, 409, "application/json; charset=utf-8",
+                 MAPPER.writeValueAsString(Map.of(
+                         "ok", false, "status", "notReady",
+                         "message", "Not connected to Discord yet.")));
+            return;
+        }
+
+        Map<String, String> body = readStringMap(exchange);
+        boolean force = body != null && "true".equalsIgnoreCase(body.get("force"));
+        boolean confirmed = body != null && "true".equalsIgnoreCase(body.get("confirm"));
+
+        SelfUpdater.InstallDecision decision = updater.decideInstall(force);
+        send(exchange, 200, "application/json; charset=utf-8",
+             MAPPER.writeValueAsString(WebData.installDecisionPayload(decision)));
+
+        if (confirmed && decision instanceof SelfUpdater.InstallDecision.Ready)
+        {
+            // Scheduled rather than run inline: the response just sent above has to actually
+            // reach the browser before this process replaces itself, which calling
+            // installNow() directly on this request thread could not guarantee.
+            bot.getThreadpool().schedule(updater::installNow, 500, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    /**
+     * Whether installing from the web panel is allowed at all right now — see {@link
+     * #handleUpdateInstall}. Mirrors the bar {@link #handleConfig} already holds writes to: a
+     * panel reachable only from this machine is trusted the way a shell on this machine already
+     * is, and one where the operator has separately opted into {@code web.allowConfigEdit} has
+     * already accepted that whoever holds the token can materially change how the bot runs.
+     * Neither holding, the safest default is to refuse.
+     */
+    private boolean installGateOpen()
+    {
+        return isLoopback(bot.getConfig().getWebBindAddress()) || bot.getConfig().isWebConfigEditAllowed();
+    }
+
+    /** Whether {@code bindAddress} only ever accepts connections from this machine. */
+    private static boolean isLoopback(String bindAddress)
+    {
+        if (bindAddress == null || bindAddress.isBlank())
+        {
+            return true;
+        }
+        String trimmed = bindAddress.trim();
+        return "127.0.0.1".equals(trimmed) || "::1".equals(trimmed) || "localhost".equals(trimmed);
     }
 
     // ==================== Request helpers ====================

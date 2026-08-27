@@ -789,7 +789,8 @@
       "status": "Status",
       "systemHealth": "Systemzustand",
       "theme": "Design",
-      "view": "Ansicht"
+      "view": "Ansicht",
+      "updates": "Updates"
     },
     "nav": {
       "botConfig": "Bot-Konfiguration",
@@ -799,7 +800,8 @@
       "preferences": "Präferenzen",
       "servers": "Server",
       "sources": "Quellen",
-      "system": "System"
+      "system": "System",
+      "updates": "Updates"
     },
     "overview": {
       "connecting": "Verbindung zu Discord wird hergestellt…",
@@ -1016,6 +1018,21 @@
       "cannotOpen": "Dieser Desktop kann keinen Browser automatisch öffnen.\nDie Panel-Adresse wurde in die Zwischenablage kopiert.",
       "title": "Web-Panel",
       "notReady": "Das Webpanel startet, sobald der Bot mit Discord verbunden ist. Versuch es gleich noch einmal."
+    },
+    "updates": {
+      "confirmIdleMessage": "Dies installiert Version {0} und startet den Bot sofort neu. Fortfahren?",
+      "confirmPlayingMessage": "In {0} läuft gerade Musik. Eine Installation trennt jetzt sofort die Verbindung aller dortigen Zuhörer. Trotzdem fortfahren?",
+      "confirmTitle": "Installieren und neu starten",
+      "downloadFailed": "Version {0} wurde gefunden, konnte aber nicht heruntergeladen werden. Details siehe Log.",
+      "downloading": "Update wird heruntergeladen… das kann einen Moment dauern.",
+      "installButton": "Installieren und neu starten",
+      "installFailed": "Das Update konnte nicht installiert werden. Details siehe Log.",
+      "installing": "Wird installiert…",
+      "noStagedUpdate": "Noch kein Update bereitgestellt. Der Bot prüft GitHub automatisch jede Stunde.",
+      "notConnected": "Noch nicht mit Discord verbunden. Versuch es erneut, sobald der Bot vollständig gestartet ist.",
+      "notStaged": "Momentan ist nichts zur Installation bereitgestellt.",
+      "stagedVersion": "Version {0} ist heruntergeladen und installationsbereit.",
+      "subtitle": "Wird automatisch stündlich geprüft. Es wird nichts installiert, ohne dass du zustimmst."
     }
   },
   "web": {
@@ -1314,6 +1331,7 @@
     "playlistSummary": "Spotify-Playlist **{0}**: {1} von {2} Titeln hinzugefügt (per YouTube-Suche gefunden).",
     "artistSummary": "Spotify-Künstler **{0}** – Top-Titel: {1} von {2} hinzugefügt (per YouTube-Suche gefunden).",
     "summaryFailedSuffix": "\n{0} Titel hatten keine Entsprechung auf YouTube und wurden übersprungen.",
-    "summaryCappedSuffix": "\nSpotify meldet insgesamt {0} Titel; es wurden nur die ersten {1} geprüft."
+    "summaryCappedSuffix": "\nSpotify meldet insgesamt {0} Titel; es wurden nur die ersten {1} geprüft.",
+    "notConfigured": "Das ist ein Spotify-Link, aber Spotify-Unterstützung ist auf diesem Bot nicht eingerichtet. Bitte den Bot-Besitzer, `spotify.clientId` und `spotify.clientSecret` in der Konfiguration zu setzen, um dies zu aktivieren."
   }
 }

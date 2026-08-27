@@ -130,3 +130,50 @@ Body accepts `language`, `theme`, `fontSize`. Same result shape.
 
 Body `{"action": "pause|resume|skip|volume", "guild": "<id>", "value": "<0-150>"}`.
 Same result shape.
+
+## GET /api/update-check
+
+Checks GitHub for a newer release and, if one exists, downloads it — the same check-then-download
+`SelfUpdater.checkAndStage()` the hourly background timer runs, triggered on request instead
+of waiting for the timer. Telling someone a newer version exists with no way to act on it until
+the hourly pass caught up was worse than not telling them at all, so a successful check here also
+leaves something for `POST /api/update-install` to install, the same as the hourly timer would.
+Never installs anything by itself.
+
+A ~68 MB transfer is not instant; this can take a while to answer when an update exists, and
+refuses (409) before doing anything if the bot has not connected to Discord yet — the same
+`notReady` state `POST /api/update-install` reports.
+
+```json
+{ "status": "upToDate", "currentVersion": "0.10.0" }
+{ "status": "staged", "version": "0.11.0", "url": "https://github.com/…/releases/tag/v0.11.0" }
+{ "status": "downloadFailed", "version": "0.11.0", "url": "https://github.com/…/releases/tag/v0.11.0" }
+{ "status": "failed", "detail": "…" }
+```
+
+`staged` means `POST /api/update-install` now has something to install. `downloadFailed` means a
+newer release was found but the transfer itself did not complete — nothing is staged. `failed`
+means the check itself could not be completed (network error, rate limit, and so on).
+
+## POST /api/update-install
+
+Installs whatever the bot's own hourly background check has already staged, restarting the
+process into it. The riskiest endpoint here: refused outright (403) unless the panel is bound to
+loopback or `web.allowConfigEdit` is on, refused (409) if the bot has not connected to Discord
+yet, and — even once past both of those — never installs from one call alone.
+
+Body `{"force": "true"|"false", "confirm": "true"|"false"}`, both optional and defaulting to
+`false`. Every call answers with what would happen; only a call with `"confirm":"true"` actually
+schedules it:
+
+```json
+{ "status": "notStaged" }
+{ "status": "blocked", "playing": ["Guild A", "Guild B"] }
+{ "status": "installing", "version": "0.10.0" }
+```
+
+`blocked` means something is playing and `force` was not set — installing now would cut it off
+without warning, so nothing happens. Sending the same request again with `"force":"true"` and
+`"confirm":"true"` installs anyway. `installing` with `"confirm":"true"` is the only case that
+actually schedules the restart; every other combination is a dry run.
+

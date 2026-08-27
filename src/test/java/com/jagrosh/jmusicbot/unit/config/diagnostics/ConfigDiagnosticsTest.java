@@ -381,9 +381,9 @@ class ConfigDiagnosticsTest {
             discord.put("token", "");
             discord.put("owner", 0L);
             defaultMap.put("discord", discord);
-            // "updates" exists in defaults (alerts/autoUpdate/checkIntervalHours do, the same
-            // as reference.conf), but repository and githubToken specifically are not among
-            // its keys any more — they were removed as ConfigOption entries entirely.
+            // "updates" exists in defaults (alerts does, the same as reference.conf), but
+            // repository and githubToken specifically are not among its keys any more — they
+            // were removed as ConfigOption entries entirely.
             defaultMap.put("updates", Map.of("alerts", true));
             Config defaults = ConfigFactory.parseMap(defaultMap);
 
@@ -394,6 +394,39 @@ class ConfigDiagnosticsTest {
             // must not flag them as deprecated/unknown, or every restart repairs the file anew.
             assertFalse(report.getDeprecated().contains("updates.repository"));
             assertFalse(report.getDeprecated().contains("updates.githubToken"));
+        }
+
+        @Test
+        @DisplayName("ignores updates.autoUpdate and updates.checkIntervalHours (removed once installing "
+                + "became always a person's own decision)")
+        void testDetectDeprecatedKeys_ignoresLegacyAutoUpdateKeys() {
+            Map<String, Object> userMap = new HashMap<>();
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("alerts", true);
+            updates.put("autoUpdate", false);
+            updates.put("checkIntervalHours", 6);
+            userMap.put("updates", updates);
+            userMap.put("discord", Map.of("token", "test_token", "owner", 123456789L));
+            Config migratedUserConfig = ConfigFactory.parseMap(userMap);
+
+            Map<String, Object> defaultMap = new HashMap<>();
+            Map<String, Object> discord = new HashMap<>();
+            discord.put("token", "");
+            discord.put("owner", 0L);
+            defaultMap.put("discord", discord);
+            // Same reasoning as the sibling test above: "updates" exists in defaults, but
+            // autoUpdate and checkIntervalHours specifically do not any more — checking is now
+            // unconditional and hourly, and installing is never automatic.
+            defaultMap.put("updates", Map.of("alerts", true));
+            Config defaults = ConfigFactory.parseMap(defaultMap);
+
+            Config merged = migratedUserConfig.withFallback(defaults).resolve();
+            ConfigDiagnostics.Report report = ConfigDiagnostics.analyze(migratedUserConfig, merged, defaults);
+
+            // A config.txt written by an older build still carries these two keys; reading it
+            // must not flag them as deprecated/unknown, or every restart repairs the file anew.
+            assertFalse(report.getDeprecated().contains("updates.autoUpdate"));
+            assertFalse(report.getDeprecated().contains("updates.checkIntervalHours"));
         }
     }
 

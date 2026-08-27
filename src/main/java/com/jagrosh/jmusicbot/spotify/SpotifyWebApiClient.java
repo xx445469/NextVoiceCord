@@ -34,12 +34,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * actually talks to Spotify; everything played afterwards comes from YouTube.
  *
  * <h2>Caps</h2>
- * The playlist-tracks and album-tracks endpoints page: playlists at up to 100 items per page,
- * albums at up to 50. Rather than walk every page of a playlist that might hold thousands of
- * tracks, this client reads exactly one page from each and reports the true total (from the
- * API's own {@code total} field) alongside how many were actually loaded, so a capped playlist
- * says so instead of silently looking like a complete one. Artist "top tracks" is not paged —
- * Spotify returns at most 10 — so there is nothing to cap there.
+ * The playlist-tracks and album-tracks endpoints page at up to 100 (playlist) and 50 (album)
+ * items per request. Walking every page of an arbitrarily large playlist would mean firing one
+ * YouTube search per track — a thousand-track playlist would be a thousand searches — so rather
+ * than page without limit, this client stops at a bound: {@value #MAX_PLAYLIST_TRACKS} tracks for
+ * a playlist, and the same bound (several pages deep) for an album, which in practice is enough to
+ * read any real album start to finish. It always reports the true total (from the API's own
+ * {@code total} field) alongside how many were actually loaded, so a capped list says so instead
+ * of silently looking complete.
+ *
+ * <p>A failure partway through paging keeps whatever pages were already fetched rather than
+ * discarding them — reported the same way a bound-hit is, as a true total with the rest capped —
+ * because by that point there is something worth salvaging. A failure on the very first page,
+ * where nothing has been fetched yet, fails the whole lookup instead, the same as any other
+ * endpoint here. Artist "top tracks" is not paged — Spotify returns at most 10 — so there is
+ * nothing to cap there.
  *
  * @author adan (xx445469)
  */
@@ -48,10 +57,22 @@ public class SpotifyWebApiClient
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String DEFAULT_API_ROOT = "https://api.spotify.com/v1";
 
-    /** Spotify's playlist-tracks endpoint pages at 100 items; this client reads one page. */
-    public static final int MAX_PLAYLIST_TRACKS = 100;
-    /** Spotify's album-tracks endpoint pages at 50 items; this client reads one page. */
-    public static final int MAX_ALBUM_TRACKS = 50;
+    /** Spotify's documented per-request page size for playlist tracks. */
+    public static final int PLAYLIST_PAGE_SIZE = 100;
+    /** Spotify's documented per-request page size for album tracks. */
+    public static final int ALBUM_PAGE_SIZE = 50;
+
+    /**
+     * How many playlist tracks this client will page through in total before stopping — not the
+     * per-request page size (see {@link #PLAYLIST_PAGE_SIZE}). Every track is a YouTube search,
+     * so this bounds the cost of one playlist link rather than following it to an unbounded size.
+     */
+    public static final int MAX_PLAYLIST_TRACKS = 500;
+    /**
+     * How many album tracks this client will page through in total before stopping (see
+     * {@link #MAX_PLAYLIST_TRACKS}). High enough that a real album is covered in full in practice.
+     */
+    public static final int MAX_ALBUM_TRACKS = 500;
 
     // Artist top-tracks requires a market; Spotify does not offer a "no market" option for it
     // with a client-credentials token. This is a simplification, not a config option: it just
@@ -107,13 +128,11 @@ public class SpotifyWebApiClient
         JsonNode album = get("/albums/" + id, null);
         String name = album.path("name").asText("Spotify album");
 
-        JsonNode page = get("/albums/" + id + "/tracks", "limit=" + MAX_ALBUM_TRACKS + "&offset=0");
-        List<String> queries = queriesFromItems(page.path("items"), false);
-        int total = page.path("total").asInt(queries.size());
-        boolean capped = total > MAX_ALBUM_TRACKS;
+        PagedTracks paged = fetchPagedTracks("/albums/" + id + "/tracks", null,
+                ALBUM_PAGE_SIZE, MAX_ALBUM_TRACKS, false);
 
-        return new SpotifyResolution(SpotifyReference.EntityType.ALBUM, name, queries, total, capped,
-                capped ? MAX_ALBUM_TRACKS : 0);
+        return new SpotifyResolution(SpotifyReference.EntityType.ALBUM, name, paged.queries, paged.total,
+                paged.capped, paged.capLimit);
     }
 
     private SpotifyResolution resolvePlaylist(String id) throws IOException, InterruptedException
@@ -121,14 +140,84 @@ public class SpotifyWebApiClient
         JsonNode playlist = get("/playlists/" + id, "fields=" + encode("name"));
         String name = playlist.path("name").asText("Spotify playlist");
 
-        JsonNode page = get("/playlists/" + id + "/tracks",
-                "limit=" + MAX_PLAYLIST_TRACKS + "&offset=0&fields=" + encode("total,items(track(name,artists(name),is_local))"));
-        List<String> queries = queriesFromItems(page.path("items"), true);
-        int total = page.path("total").asInt(queries.size());
-        boolean capped = total > MAX_PLAYLIST_TRACKS;
+        String fields = encode("total,items(track(name,artists(name),is_local))");
+        PagedTracks paged = fetchPagedTracks("/playlists/" + id + "/tracks", fields,
+                PLAYLIST_PAGE_SIZE, MAX_PLAYLIST_TRACKS, true);
 
-        return new SpotifyResolution(SpotifyReference.EntityType.PLAYLIST, name, queries, total, capped,
-                capped ? MAX_PLAYLIST_TRACKS : 0);
+        return new SpotifyResolution(SpotifyReference.EntityType.PLAYLIST, name, paged.queries, paged.total,
+                paged.capped, paged.capLimit);
+    }
+
+    /**
+     * The result of paging a tracks endpoint: the search queries actually usable (after
+     * dropping removed/local tracks — see {@link #queryFromTrackNode}), the API's own reported
+     * total, and whether some of that total was never read.
+     *
+     * <p>{@code capped}/{@code capLimit} are about items read versus {@code total}, not about
+     * {@code queries.size()} versus {@code total}: a page can legitimately contain fewer usable
+     * queries than items (a removed or local track produces no query) without that meaning
+     * anything was capped.
+     */
+    private record PagedTracks(List<String> queries, int total, boolean capped, int capLimit)
+    {
+    }
+
+    /**
+     * Pages a playlist/album tracks endpoint up to {@code bound} tracks, then stops — the whole
+     * point of the cap described in this class's Caps section.
+     *
+     * <p>The first page's failure propagates as-is: nothing has been fetched yet, so there is
+     * nothing to salvage, and the caller should see the specific 401/403/429 detail {@link #get}
+     * builds. A later page's failure is different — some tracks are already in hand, so rather
+     * than throw them away this stops paging and returns what was fetched, honestly capped
+     * against the total the first page reported. The failure itself is not swallowed silently:
+     * it is logged with the same message {@code get()} would have handed the caller.
+     */
+    private PagedTracks fetchPagedTracks(String path, String extraFields, int pageSize, int bound, boolean wrapped)
+            throws IOException, InterruptedException
+    {
+        List<String> queries = new ArrayList<>();
+        int offset = 0;
+        int itemsRead = 0;
+
+        JsonNode firstPage = get(path, pagingQuery(pageSize, offset, extraFields));
+        JsonNode firstItems = firstPage.path("items");
+        itemsRead += firstItems.size();
+        queries.addAll(queriesFromItems(firstItems, wrapped));
+        int total = firstPage.path("total").asInt(itemsRead);
+        offset += pageSize;
+
+        while (offset < total && itemsRead < bound)
+        {
+            JsonNode page;
+            try
+            {
+                page = get(path, pagingQuery(pageSize, offset, extraFields));
+            }
+            catch (IOException ex)
+            {
+                // Tracks already fetched are still worth returning; the specific reason this
+                // page failed (rate limit, permissions, ...) is not lost, just not thrown.
+                LOG.warn("Spotify paging of {} stopped after {} tracks (of {} reported) because a later"
+                                + " page failed: {}",
+                        path, itemsRead, total, ex.getMessage());
+                break;
+            }
+            JsonNode items = page.path("items");
+            itemsRead += items.size();
+            queries.addAll(queriesFromItems(items, wrapped));
+            total = page.path("total").asInt(total);
+            offset += pageSize;
+        }
+
+        boolean capped = itemsRead < total;
+        return new PagedTracks(queries, total, capped, capped ? itemsRead : 0);
+    }
+
+    private static String pagingQuery(int pageSize, int offset, String extraFields)
+    {
+        String base = "limit=" + pageSize + "&offset=" + offset;
+        return extraFields == null ? base : base + "&fields=" + extraFields;
     }
 
     private SpotifyResolution resolveArtistTopTracks(String id) throws IOException, InterruptedException

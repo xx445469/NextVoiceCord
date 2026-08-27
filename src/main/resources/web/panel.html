@@ -850,6 +850,7 @@ async function openPreferences() {
     }
   } catch (e) { /* form still renders with the EN default */ }
   renderPreferencesForm();
+  refreshStagedStatus();
 }
 
 function renderPreferencesForm() {
@@ -899,6 +900,11 @@ function renderPreferencesForm() {
         <a class="btn" id="updateOpenLink" href="#" target="_blank" rel="noopener" hidden>${esc(L('gui.action.openInBrowser', 'Open in browser'))}</a>
         <span class="ctrl-result" id="updateResult"></span>
       </div>
+      <div class="hint" id="stagedVersionHint" style="margin:14px 0 8px;">${esc(L('gui.updates.noStagedUpdate', 'No update is staged yet. The bot checks GitHub automatically every hour.'))}</div>
+      <div class="formrow">
+        <button type="button" class="btn primary" id="installUpdateBtn" disabled>${esc(L('gui.updates.installButton', 'Install and restart'))}</button>
+        <span class="ctrl-result" id="installResult"></span>
+      </div>
     </div>`;
 }
 
@@ -942,6 +948,12 @@ document.addEventListener('click', e => {
 // Manual only, on purpose: this whole view has no polling interval (see REFRESH_MS above), and
 // this button does not get one of its own either — an automated timer hitting GitHub is exactly
 // the traffic a person pressing a button is not. It only ever runs from that click.
+//
+// The request behind this now checks AND, when something newer exists, downloads it — see
+// SelfUpdater.checkAndStage() on the server. Telling someone "version X is available" with no
+// way to act on that until the hourly background check happened to catch up was worse than not
+// telling them at all, so a successful check now also enables "Install and restart" directly
+// (via refreshStagedStatus() below) rather than leaving that to wait for the next hourly pass.
 async function checkForUpdates() {
   const btn = el('updateCheckBtn');
   const resultEl = el('updateResult');
@@ -950,11 +962,23 @@ async function checkForUpdates() {
   openLink.hidden = true;
   resultEl.className = 'ctrl-result';
   resultEl.textContent = L('gui.preferences.checkingForUpdates', 'Checking for updates…');
+
+  // This one request now covers both the check and, when something is found, a ~68 MB
+  // download — not instant, and there is no live "now downloading" signal to poll for a
+  // single request/response call. Switching the line after the check would ordinarily have
+  // long since answered says so rather than leaving the button looking stuck for however
+  // long the transfer takes. Cleared below regardless of how the request finishes.
+  const downloadHint = setTimeout(() => {
+    resultEl.textContent = L('gui.updates.downloading', 'Downloading the update… this can take a moment.');
+  }, 2500);
+
   try {
     const res = await fetch(withLang('/api/update-check'), { headers: authHeaders() });
     if (!res.ok) {
       if (res.status === 401 || res.status === 429) { noteHttpFailure(res.status); }
-      resultEl.textContent = fmt(L('web.result.requestFailed', 'Request failed ({0}).'), res.status);
+      resultEl.textContent = res.status === 409
+          ? L('gui.updates.notConnected', 'Not connected to Discord yet. Try again once the bot has finished starting up.')
+          : fmt(L('web.result.requestFailed', 'Request failed ({0}).'), res.status);
       resultEl.className = 'ctrl-result err';
       return;
     }
@@ -962,11 +986,15 @@ async function checkForUpdates() {
     if (d.status === 'upToDate') {
       resultEl.textContent = fmt(L('gui.preferences.updateUpToDate', "You're up to date ({0})."), d.currentVersion);
       resultEl.className = 'ctrl-result ok';
-    } else if (d.status === 'available') {
-      resultEl.textContent = fmt(L('gui.preferences.updateAvailable', 'Version {0} is available.'), d.latestVersion);
-      resultEl.className = 'ctrl-result';
-      openLink.href = d.url;
-      openLink.hidden = false;
+    } else if (d.status === 'staged') {
+      resultEl.textContent = fmt(L('gui.updates.stagedVersion', 'Version {0} is downloaded and ready to install.'), d.version);
+      resultEl.className = 'ctrl-result ok';
+      if (d.url) { openLink.href = d.url; openLink.hidden = false; }
+      refreshStagedStatus();
+    } else if (d.status === 'downloadFailed') {
+      resultEl.textContent = fmt(L('gui.updates.downloadFailed', 'Version {0} was found but could not be downloaded. See the log for details.'), d.version);
+      resultEl.className = 'ctrl-result err';
+      if (d.url) { openLink.href = d.url; openLink.hidden = false; }
     } else {
       resultEl.textContent = fmt(L('gui.preferences.updateCheckFailed', 'Could not check for updates: {0}'), d.detail || '');
       resultEl.className = 'ctrl-result err';
@@ -975,12 +1003,94 @@ async function checkForUpdates() {
     resultEl.textContent = L('web.result.networkError', 'Network error.');
     resultEl.className = 'ctrl-result err';
   } finally {
+    clearTimeout(downloadHint);
     btn.disabled = false;
   }
 }
 
 document.addEventListener('click', e => {
   if (e.target.id === 'updateCheckBtn') checkForUpdates();
+});
+
+// ==================== Install staged update ====================
+// Every call here is a dry run unless it carries confirm:true — see WebPanel.handleUpdateInstall
+// on the server. attemptInstall() always sends the unconfirmed call first and only ever shows a
+// person what installing right now would do; nothing is scheduled to actually happen until that
+// person has read a window.confirm() built from the server's own fresh answer and said to go
+// ahead — never a silent install, and never one sprung on someone mid-click.
+async function refreshStagedStatus() {
+  const hint = el('stagedVersionHint');
+  const btn = el('installUpdateBtn');
+  if (!hint || !btn) return;
+  try {
+    const { res, data } = await postJSON('/api/update-install', {});
+    if (!res.ok || !data) return;
+    if (data.status === 'installing') {
+      hint.textContent = fmt(L('gui.updates.stagedVersion', 'Version {0} is downloaded and ready to install.'), data.version || '');
+      btn.disabled = false;
+    } else {
+      hint.textContent = L('gui.updates.noStagedUpdate', 'No update is staged yet. The bot checks GitHub automatically every hour.');
+      btn.disabled = true;
+    }
+  } catch (e) { /* the card still renders with its default "not staged" text */ }
+}
+
+async function attemptInstall(force) {
+  const resultEl = el('installResult');
+  resultEl.className = 'ctrl-result';
+  resultEl.textContent = '';
+  try {
+    const { res, data } = await postJSON('/api/update-install', { force: force ? 'true' : 'false' });
+    if (!res.ok || !data) {
+      if (res.status === 401 || res.status === 429) { noteHttpFailure(res.status); }
+      resultEl.textContent = fmt(L('web.result.requestFailed', 'Request failed ({0}).'), res.status);
+      resultEl.className = 'ctrl-result err';
+      return;
+    }
+    if (data.status === 'notStaged') {
+      resultEl.textContent = L('gui.updates.notStaged', 'There is nothing staged to install right now.');
+      refreshStagedStatus();
+    } else if (data.status === 'blocked') {
+      const playing = (data.playing || []).join(', ');
+      if (window.confirm(fmt(L('gui.updates.confirmPlayingMessage',
+          'Music is currently playing in {0}. Installing now disconnects every listener there immediately. Continue anyway?'), playing))) {
+        await confirmInstall(true);
+      }
+    } else if (data.status === 'installing') {
+      if (window.confirm(fmt(L('gui.updates.confirmIdleMessage',
+          'This installs version {0} and restarts the bot immediately. Continue?'), data.version || ''))) {
+        await confirmInstall(force);
+      }
+    }
+  } catch (e) {
+    resultEl.textContent = L('web.result.networkError', 'Network error.');
+    resultEl.className = 'ctrl-result err';
+  }
+}
+
+async function confirmInstall(force) {
+  const resultEl = el('installResult');
+  el('installUpdateBtn').disabled = true;
+  resultEl.className = 'ctrl-result';
+  resultEl.textContent = L('gui.updates.installing', 'Installing…');
+  try {
+    const { res, data } = await postJSON('/api/update-install', { force: force ? 'true' : 'false', confirm: 'true' });
+    if (res.ok && data && data.status !== 'installing') {
+      // Covers the rare race where something changed between the dry run and this
+      // confirmed call — whatever the server actually decided just now is shown, rather
+      // than assuming the confirmed install went ahead.
+      resultEl.textContent = data.status === 'notStaged'
+          ? L('gui.updates.notStaged', 'There is nothing staged to install right now.')
+          : '';
+      refreshStagedStatus();
+    }
+  } catch (e) {
+    // Expected once the process actually restarts: the connection drops mid-response.
+  }
+}
+
+document.addEventListener('click', e => {
+  if (e.target.id === 'installUpdateBtn') attemptInstall(false);
 });
 
 // The panel-language picker takes effect immediately — it is a local display preference, not a

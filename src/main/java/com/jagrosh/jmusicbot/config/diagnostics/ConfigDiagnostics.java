@@ -45,13 +45,21 @@ public class ConfigDiagnostics {
      * self-updater's repository stopped being configurable (see {@code UpdateChecker}): the
      * repository is now a hardcoded constant — letting it be a setting was a way to point a
      * self-updater at arbitrary code — and the token existed only while that repository was
-     * private, which it no longer is. Recognising the leftover keys here, the same way as
+     * private, which it no longer is.
+     *
+     * <p>{@code updates.autoUpdate} and {@code updates.checkIntervalHours} were removed for a
+     * different reason (see {@code SelfUpdater}'s class javadoc): checking is now always on,
+     * every hour, and installing is never automatic — a person presses "Install and restart"
+     * every time — so neither one is a decision left to make any more.
+     *
+     * <p>Recognising all four leftover keys here, the same way as
      * {@link #LEGACY_GUI_ADVANCED_SECTIONS_KEY} above, keeps a {@code config.txt} written by an
      * older build from being endlessly re-flagged as carrying an unknown key and triggering a
      * fresh repair (and {@code config.txt.bakN} backup) on every restart.
      */
     private static final Set<String> LEGACY_UPDATE_KEYS = Set.of(
-            "updates.repository", "updates.githubToken");
+            "updates.repository", "updates.githubToken",
+            "updates.autoUpdate", "updates.checkIntervalHours");
 
     /**
      * Paths whose nested keys are user-defined and should not be flagged as deprecated.

@@ -789,7 +789,8 @@
       "status": "상태",
       "systemHealth": "시스템 상태",
       "theme": "테마",
-      "view": "보기"
+      "view": "보기",
+      "updates": "업데이트"
     },
     "nav": {
       "botConfig": "봇 설정",
@@ -799,7 +800,8 @@
       "preferences": "환경설정",
       "servers": "서버",
       "sources": "소스",
-      "system": "시스템"
+      "system": "시스템",
+      "updates": "업데이트"
     },
     "overview": {
       "connecting": "Discord에 연결하는 중…",
@@ -1016,6 +1018,21 @@
       "cannotOpen": "이 데스크톱에서는 브라우저를 자동으로 열 수 없어요.\n패널 주소를 클립보드에 복사했어요.",
       "title": "웹 패널",
       "notReady": "웹 패널은 봇이 Discord에 연결된 후에 시작돼요. 잠시 후 다시 시도해 주세요."
+    },
+    "updates": {
+      "confirmIdleMessage": "{0} 버전을 설치하고 봇을 즉시 재시작해요. 계속할까요?",
+      "confirmPlayingMessage": "{0}에서 지금 음악이 재생 중이에요. 지금 설치하면 그곳의 모든 청취자가 즉시 연결이 끊겨요. 그래도 계속할까요?",
+      "confirmTitle": "설치하고 재시작",
+      "downloadFailed": "{0} 버전을 찾았지만 다운로드하지 못했어요. 자세한 내용은 로그를 확인하세요.",
+      "downloading": "업데이트를 다운로드하는 중이에요… 잠시 걸릴 수 있어요.",
+      "installButton": "설치하고 재시작",
+      "installFailed": "업데이트를 설치하지 못했어요. 자세한 내용은 로그를 확인하세요.",
+      "installing": "설치하는 중…",
+      "noStagedUpdate": "아직 준비된 업데이트가 없어요. 봇이 한 시간마다 자동으로 GitHub을 확인해요.",
+      "notConnected": "아직 Discord에 연결되지 않았어요. 봇이 시작을 마친 후 다시 시도해 주세요.",
+      "notStaged": "지금은 설치할 준비가 된 업데이트가 없어요.",
+      "stagedVersion": "{0} 버전이 다운로드되어 설치할 준비가 됐어요.",
+      "subtitle": "한 시간마다 자동으로 확인하지만, 직접 승인하기 전에는 아무것도 설치되지 않아요."
     }
   },
   "web": {
@@ -1314,6 +1331,7 @@
     "playlistSummary": "Spotify 재생목록 **{0}**: {2}곡 중 {1}곡을 추가했어요 (YouTube 검색으로 매칭).",
     "artistSummary": "Spotify 아티스트(**{0}**)의 인기 트랙: {2}곡 중 {1}곡을 추가했어요 (YouTube 검색으로 매칭).",
     "summaryFailedSuffix": "\nYouTube에서 일치하는 항목을 찾지 못한 {0}곡을 건너뛰었어요.",
-    "summaryCappedSuffix": "\nSpotify에 따르면 전체 {0}곡 중 앞의 {1}곡만 확인했어요."
+    "summaryCappedSuffix": "\nSpotify에 따르면 전체 {0}곡 중 앞의 {1}곡만 확인했어요.",
+    "notConfigured": "Spotify 링크지만, 이 봇에는 Spotify 지원이 설정되어 있지 않아요. 사용하려면 봇 소유자에게 설정에서 `spotify.clientId`와 `spotify.clientSecret`을 설정해 달라고 요청하세요."
   }
 }

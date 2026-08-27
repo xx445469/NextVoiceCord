@@ -789,7 +789,8 @@
       "status": "Estado",
       "systemHealth": "Estado del sistema",
       "theme": "Tema",
-      "view": "Ver"
+      "view": "Ver",
+      "updates": "Actualizaciones"
     },
     "nav": {
       "botConfig": "Configuración del bot",
@@ -799,7 +800,8 @@
       "preferences": "Preferencias",
       "servers": "Servidores",
       "sources": "Fuentes",
-      "system": "Sistema"
+      "system": "Sistema",
+      "updates": "Actualizaciones"
     },
     "overview": {
       "connecting": "Conectando a Discord…",
@@ -1016,6 +1018,21 @@
       "cannotOpen": "Este equipo no puede abrir un navegador automáticamente.\nLa dirección del panel se copió al portapapeles.",
       "title": "Panel web",
       "notReady": "El panel web se inicia cuando el bot se conecta a Discord. Inténtalo de nuevo en un momento."
+    },
+    "updates": {
+      "confirmIdleMessage": "Esto instala la versión {0} y reinicia el bot de inmediato. ¿Continuar?",
+      "confirmPlayingMessage": "Ahora mismo se está reproduciendo música en {0}. Instalar ahora desconecta de inmediato a todos los oyentes de ahí. ¿Continuar de todos modos?",
+      "confirmTitle": "Instalar y reiniciar",
+      "downloadFailed": "Se encontró la versión {0}, pero no se pudo descargar. Consulta el registro para más detalles.",
+      "downloading": "Descargando la actualización… esto puede tardar un momento.",
+      "installButton": "Instalar y reiniciar",
+      "installFailed": "No se pudo instalar la actualización. Consulta el registro para más detalles.",
+      "installing": "Instalando…",
+      "noStagedUpdate": "Todavía no hay ninguna actualización preparada. El bot revisa GitHub automáticamente cada hora.",
+      "notConnected": "Aún no está conectado a Discord. Vuelve a intentarlo cuando el bot termine de iniciarse.",
+      "notStaged": "Ahora mismo no hay nada preparado para instalar.",
+      "stagedVersion": "La versión {0} está descargada y lista para instalarse.",
+      "subtitle": "Se revisa automáticamente cada hora. No se instala nada hasta que tú lo decidas."
     }
   },
   "web": {
@@ -1314,6 +1331,7 @@
     "playlistSummary": "Lista de reproducción de Spotify **{0}**: se añadieron {1} de {2} canciones (encontradas mediante YouTube).",
     "artistSummary": "Artista de Spotify **{0}**, mejores canciones: se añadieron {1} de {2} (encontradas mediante YouTube).",
     "summaryFailedSuffix": "\n{0} canción(es) no tuvieron coincidencia en YouTube y se omitieron.",
-    "summaryCappedSuffix": "\nSpotify indica {0} canciones en total; solo se comprobaron las primeras {1}."
+    "summaryCappedSuffix": "\nSpotify indica {0} canciones en total; solo se comprobaron las primeras {1}.",
+    "notConfigured": "Es un enlace de Spotify, pero la compatibilidad con Spotify no está configurada en este bot. Pide al propietario del bot que configure `spotify.clientId` y `spotify.clientSecret` en la configuración para activarla."
   }
 }

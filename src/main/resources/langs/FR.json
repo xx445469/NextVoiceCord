@@ -789,7 +789,8 @@
       "status": "État",
       "systemHealth": "État du système",
       "theme": "Thème",
-      "view": "Affichage"
+      "view": "Affichage",
+      "updates": "Mises à jour"
     },
     "nav": {
       "botConfig": "Configuration du bot",
@@ -799,7 +800,8 @@
       "preferences": "Préférences",
       "servers": "Serveurs",
       "sources": "Sources",
-      "system": "Système"
+      "system": "Système",
+      "updates": "Mises à jour"
     },
     "overview": {
       "connecting": "Connexion à Discord…",
@@ -1016,6 +1018,21 @@
       "cannotOpen": "Ce bureau ne peut pas ouvrir automatiquement un navigateur.\nL'adresse du panneau a été copiée dans le presse-papiers.",
       "title": "Panneau web",
       "notReady": "Le panneau web démarre une fois que le bot s'est connecté à Discord. Réessaie dans un instant."
+    },
+    "updates": {
+      "confirmIdleMessage": "Ceci installe la version {0} et redémarre le bot immédiatement. Continuer ?",
+      "confirmPlayingMessage": "De la musique est actuellement en cours de lecture dans {0}. Installer maintenant déconnecte immédiatement tous les auditeurs qui s'y trouvent. Continuer quand même ?",
+      "confirmTitle": "Installer et redémarrer",
+      "downloadFailed": "La version {0} a été trouvée, mais n'a pas pu être téléchargée. Consulte le log pour plus de détails.",
+      "downloading": "Téléchargement de la mise à jour… cela peut prendre un moment.",
+      "installButton": "Installer et redémarrer",
+      "installFailed": "Impossible d'installer la mise à jour. Consulte le log pour plus de détails.",
+      "installing": "Installation…",
+      "noStagedUpdate": "Aucune mise à jour n'est prête pour le moment. Le bot vérifie GitHub automatiquement toutes les heures.",
+      "notConnected": "Pas encore connecté à Discord. Réessaie une fois que le bot a fini de démarrer.",
+      "notStaged": "Il n'y a rien de prêt à installer pour le moment.",
+      "stagedVersion": "La version {0} est téléchargée et prête à être installée.",
+      "subtitle": "Vérifié automatiquement toutes les heures. Rien ne s'installe sans que tu le décides."
     }
   },
   "web": {
@@ -1314,6 +1331,7 @@
     "playlistSummary": "Playlist Spotify **{0}** : {1} titre(s) ajouté(s) sur {2} (trouvés via YouTube).",
     "artistSummary": "Meilleurs titres de l'artiste Spotify **{0}** : {1} ajouté(s) sur {2} (trouvés via YouTube).",
     "summaryFailedSuffix": "\n{0} titre(s) n'avaient pas d'équivalent sur YouTube et ont été ignorés.",
-    "summaryCappedSuffix": "\nSpotify indique {0} titres au total ; seuls les {1} premiers ont été vérifiés."
+    "summaryCappedSuffix": "\nSpotify indique {0} titres au total ; seuls les {1} premiers ont été vérifiés.",
+    "notConfigured": "C'est un lien Spotify, mais la prise en charge de Spotify n'est pas configurée sur ce bot. Demande au propriétaire de définir `spotify.clientId` et `spotify.clientSecret` dans la configuration pour l'activer."
   }
 }

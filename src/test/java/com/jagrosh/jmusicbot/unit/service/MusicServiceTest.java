@@ -154,12 +154,47 @@ public class MusicServiceTest
             String query = "test song";
 
             // When
-            musicService.play(fixture.getGuild(), fixture.getMember(), 
+            musicService.play(fixture.getGuild(), fixture.getMember(),
                     "\"" + query + "\"", fixture.getTextChannel(), output);
 
             // Then
-            verify(fixture.getPlayerManager()).loadItemOrdered(eq(fixture.getGuild()), 
+            verify(fixture.getPlayerManager()).loadItemOrdered(eq(fixture.getGuild()),
                     eq(query), any());
+        }
+
+        @Test
+        @DisplayName("play() with a Spotify link and no credentials configured reports it instead of loading")
+        void playWithSpotifyLink_whenUnconfigured_reportsInstead()
+        {
+            // Given: fixture's mocked BotConfig.hasSpotifyCredentials() defaults to false
+            String spotifyUrl = "https://open.spotify.com/playlist/7B6g5eTIgTkh31BS0S8Wgd?si=abc";
+
+            // When
+            musicService.play(fixture.getGuild(), fixture.getMember(), spotifyUrl,
+                    fixture.getTextChannel(), output);
+
+            // Then
+            verify(fixture.getPlayerManager(), never()).loadItemOrdered(any(), anyString(), any());
+            output.assertErrorMessageContains("spotify.clientId");
+            output.assertErrorMessageContains("spotify.clientSecret");
+        }
+
+        @Test
+        @DisplayName("play() with a Spotify link and credentials configured loads it normally")
+        void playWithSpotifyLink_whenConfigured_loadsNormally()
+        {
+            // Given
+            when(fixture.getConfig().hasSpotifyCredentials()).thenReturn(true);
+            String spotifyUrl = "https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT";
+
+            // When
+            musicService.play(fixture.getGuild(), fixture.getMember(), spotifyUrl,
+                    fixture.getTextChannel(), output);
+
+            // Then
+            verify(fixture.getPlayerManager()).loadItemOrdered(eq(fixture.getGuild()),
+                    eq(spotifyUrl), any());
+            output.assertNoErrors();
         }
     }
 
@@ -217,12 +252,29 @@ public class MusicServiceTest
             String url = "https://example.com/track";
 
             // When
-            musicService.playNext(fixture.getGuild(), fixture.getMember(), 
+            musicService.playNext(fixture.getGuild(), fixture.getMember(),
                     "<" + url + ">", fixture.getTextChannel(), output);
 
             // Then
-            verify(fixture.getPlayerManager()).loadItemOrdered(eq(fixture.getGuild()), 
+            verify(fixture.getPlayerManager()).loadItemOrdered(eq(fixture.getGuild()),
                     eq(url), any());
+        }
+
+        @Test
+        @DisplayName("playNext() with a Spotify link and no credentials configured reports it instead of loading")
+        void playNextWithSpotifyLink_whenUnconfigured_reportsInstead()
+        {
+            // Given: fixture's mocked BotConfig.hasSpotifyCredentials() defaults to false
+            String spotifyUrl = "spotify:playlist:7B6g5eTIgTkh31BS0S8Wgd";
+
+            // When
+            musicService.playNext(fixture.getGuild(), fixture.getMember(), spotifyUrl,
+                    fixture.getTextChannel(), output);
+
+            // Then
+            verify(fixture.getPlayerManager(), never()).loadItemOrdered(any(), anyString(), any());
+            output.assertErrorMessageContains("spotify.clientId");
+            output.assertErrorMessageContains("spotify.clientSecret");
         }
     }
 

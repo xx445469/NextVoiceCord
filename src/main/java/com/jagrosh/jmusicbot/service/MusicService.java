@@ -29,6 +29,7 @@ import com.jagrosh.jmusicbot.queue.PlaybackHistory;
 import com.jagrosh.jmusicbot.settings.QueueType;
 import com.jagrosh.jmusicbot.settings.RepeatMode;
 import com.jagrosh.jmusicbot.settings.Settings;
+import com.jagrosh.jmusicbot.spotify.SpotifyUrlParser;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.TimeUtil;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
@@ -254,6 +255,32 @@ public class MusicService
 
     // ========== Player Operations ==========
 
+    /**
+     * Whether {@code args} is a Spotify link that cannot actually be resolved because Spotify
+     * support is not configured, and — if so — tells the user why instead of letting the link
+     * fall through to a generic "no matches".
+     *
+     * <p>When {@link BotConfig#hasSpotifyCredentials()} is false, {@code AudioSource.SPOTIFY}
+     * never registers {@code SpotifyAudioSourceManager}, so nothing claims a Spotify URL and it
+     * silently reaches the generic search fallback instead. That is indistinguishable from a
+     * broken link unless something names the real cause. Every place that resolves a raw
+     * query/URL from a user should call this before handing it to the player manager.
+     *
+     * @return true if the caller already replied and should stop (do not load {@code args})
+     */
+    private boolean rejectUnconfiguredSpotifyLink(Guild guild, String args, OutputAdapter output)
+    {
+        if (bot.getConfig().hasSpotifyCredentials() || !SpotifyUrlParser.isSpotifyReference(args))
+        {
+            return false;
+        }
+
+        LOG.debug("Spotify link rejected: Spotify support is not configured, guild={}, query=\"{}\"",
+                guild.getId(), args);
+        output.replyError(bot.msg(guild, "spotify.notConfigured"));
+        return true;
+    }
+
     public void playNext(Guild guild, Member member, String args, GuildMessageChannel channel, OutputAdapter output)
     {
         LOG.debug("PlayNext requested: guild={}, user={}, query={}",
@@ -269,6 +296,9 @@ public class MusicService
         if (args.startsWith("<") && args.endsWith(">"))
             args = args.substring(1, args.length() - 1);
 
+        if (rejectUnconfiguredSpotifyLink(guild, args, output))
+            return;
+
         LOG.info("Loading track for playNext: guild={}, user={}, query=\"{}\"",
                 guild.getId(), member.getUser().getName(), args);
 
@@ -283,6 +313,9 @@ public class MusicService
 
         if (args != null && args.startsWith("\"") && args.endsWith("\""))
             args = args.substring(1, args.length() - 1);
+
+        if (rejectUnconfiguredSpotifyLink(guild, args, output))
+            return;
 
         // Lavalink boundary: separate end-to-end path (join already happened in
         // MusicCommandValidator; this loads/queues/resumes via the node instead of Lavaplayer).
@@ -2209,6 +2242,10 @@ public class MusicService
         if (url == null || url.isBlank())
         {
             output.replyError(bot.msg(guild, "player.errors.playlistEntryLoadFailed"));
+            return;
+        }
+        if (rejectUnconfiguredSpotifyLink(guild, url, output))
+        {
             return;
         }
         bot.getPlayerManager().loadItemOrdered(guild, url, bot.getAudioLoadWrapper().wrap(url, new AudioLoadResultHandler()

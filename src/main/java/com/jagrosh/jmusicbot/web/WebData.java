@@ -43,7 +43,7 @@ import com.jagrosh.jmusicbot.config.io.ConfigIO;
 import com.jagrosh.jmusicbot.config.loader.ConfigLoader;
 import com.jagrosh.jmusicbot.config.model.ConfigOption;
 import com.jagrosh.jmusicbot.i18n.Language;
-import com.jagrosh.jmusicbot.update.UpdateChecker;
+import com.jagrosh.jmusicbot.update.SelfUpdater;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 import com.jagrosh.jmusicbot.utils.TimeUtil;
@@ -169,10 +169,21 @@ final class WebData
             // Preferences — on-demand update check. Shared with the desktop window's own
             // "Check for updates" card rather than duplicated under web.*, same reasoning as the
             // YouTube sign-in card below: one outcome, one sentence, said the same way everywhere
-            // it is said at all.
+            // it is said at all. The check now also downloads — see SelfUpdater.checkAndStage()
+            // — so this set of keys covers that too: "downloading" while the transfer runs, and
+            // "downloadFailed"/"notConnected" alongside the check's own failure/up-to-date text.
             "gui.preferences.updates", "gui.preferences.currentVersion", "gui.preferences.checkForUpdates",
             "gui.preferences.checkingForUpdates", "gui.preferences.updateUpToDate",
-            "gui.preferences.updateAvailable", "gui.preferences.updateCheckFailed", "gui.action.openInBrowser",
+            "gui.preferences.updateCheckFailed", "gui.action.openInBrowser",
+            "gui.updates.downloading", "gui.updates.downloadFailed", "gui.updates.notConnected",
+
+            // Preferences — staged update / install. Shared with the desktop window's own
+            // "Install and restart" card for the same reason as the check-for-updates strings
+            // just above: one confirmation, said the same way everywhere it is said at all.
+            "gui.nav.updates", "gui.updates.subtitle", "gui.updates.stagedVersion",
+            "gui.updates.noStagedUpdate", "gui.updates.installButton", "gui.updates.installing",
+            "gui.updates.confirmTitle", "gui.updates.confirmIdleMessage", "gui.updates.confirmPlayingMessage",
+            "gui.updates.installFailed", "gui.updates.notStaged",
 
             // Bot config — YouTube sign-in card. Shared with the desktop window's own copy of
             // this card rather than duplicated under web.*: the burner-account warning and every
@@ -823,37 +834,80 @@ final class WebData
     // ==================== /api/update-check ====================
 
     /**
-     * Turns one {@link UpdateChecker.CheckOutcome} into the JSON shape {@code /api/update-check}
-     * answers with — the same three outcomes {@link com.jagrosh.jmusicbot.gui.panels.SettingsPanel}
-     * renders on the desktop, reported distinctly rather than collapsed into one "done" flag, for
-     * the same reason {@link UpdateChecker} itself keeps them as three separate record types.
+     * Turns one {@link SelfUpdater.CheckAndStageOutcome} into the JSON shape
+     * {@code /api/update-check} answers with — the same four outcomes
+     * {@link com.jagrosh.jmusicbot.gui.panels.UpdatesPanel} renders on the desktop, reported
+     * distinctly rather than collapsed into one "done" flag, for the same reason
+     * {@link SelfUpdater} itself keeps them as separate record types.
      *
      * <p>A pure function of the outcome, not an instance method: unlike every other payload in
      * this class it needs no {@link Bot} state, and it is called from {@link WebPanel}'s own
      * background check thread rather than a request thread, so it deliberately does not touch
      * anything the rest of this class assumes runs on one.
      */
-    static Map<String, Object> updateCheckPayload(UpdateChecker.CheckOutcome outcome)
+    static Map<String, Object> checkAndStagePayload(SelfUpdater.CheckAndStageOutcome outcome)
     {
         var payload = new LinkedHashMap<String, Object>();
         switch (outcome)
         {
-            case UpdateChecker.CheckOutcome.UpToDate upToDate ->
+            case SelfUpdater.CheckAndStageOutcome.UpToDate upToDate ->
             {
                 payload.put("status", "upToDate");
                 payload.put("currentVersion", upToDate.currentVersion());
             }
-            case UpdateChecker.CheckOutcome.UpdateAvailable available ->
+            case SelfUpdater.CheckAndStageOutcome.Staged staged ->
             {
-                payload.put("status", "available");
-                payload.put("currentVersion", available.currentVersion());
-                payload.put("latestVersion", available.latestVersion());
-                payload.put("url", available.releasesUrl());
+                payload.put("status", "staged");
+                payload.put("version", staged.version());
+                if (staged.releasesUrl() != null)
+                {
+                    payload.put("url", staged.releasesUrl());
+                }
             }
-            case UpdateChecker.CheckOutcome.Failed failed ->
+            case SelfUpdater.CheckAndStageOutcome.DownloadFailed downloadFailed ->
+            {
+                payload.put("status", "downloadFailed");
+                payload.put("version", downloadFailed.version());
+                if (downloadFailed.releasesUrl() != null)
+                {
+                    payload.put("url", downloadFailed.releasesUrl());
+                }
+            }
+            case SelfUpdater.CheckAndStageOutcome.CheckFailed failed ->
             {
                 payload.put("status", "failed");
                 payload.put("detail", failed.detail());
+            }
+        }
+        return payload;
+    }
+
+    // ==================== /api/update-install ====================
+
+    /**
+     * Turns one {@link SelfUpdater.InstallDecision} into the JSON shape
+     * {@code /api/update-install} answers with. A pure function, the same reasoning as {@link
+     * #checkAndStagePayload}: called from {@link WebPanel}'s request thread, not this class's own
+     * request-scoped methods, and it needs no {@link Bot} state of its own.
+     */
+    static Map<String, Object> installDecisionPayload(SelfUpdater.InstallDecision decision)
+    {
+        var payload = new LinkedHashMap<String, Object>();
+        switch (decision)
+        {
+            case SelfUpdater.InstallDecision.NotStaged notStaged ->
+            {
+                payload.put("status", "notStaged");
+            }
+            case SelfUpdater.InstallDecision.Blocked blocked ->
+            {
+                payload.put("status", "blocked");
+                payload.put("playing", blocked.playingGuilds());
+            }
+            case SelfUpdater.InstallDecision.Ready ready ->
+            {
+                payload.put("status", "installing");
+                payload.put("version", ready.version());
             }
         }
         return payload;

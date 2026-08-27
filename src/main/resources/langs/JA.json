@@ -789,7 +789,8 @@
       "status": "ステータス",
       "systemHealth": "システムの状態",
       "theme": "テーマ",
-      "view": "表示"
+      "view": "表示",
+      "updates": "更新"
     },
     "nav": {
       "botConfig": "Bot設定",
@@ -799,7 +800,8 @@
       "preferences": "環境設定",
       "servers": "サーバー",
       "sources": "ソース",
-      "system": "システム"
+      "system": "システム",
+      "updates": "更新"
     },
     "overview": {
       "connecting": "Discordに接続中…",
@@ -1016,6 +1018,21 @@
       "cannotOpen": "このデスクトップではブラウザを自動的に開けません。\nパネルのアドレスをクリップボードにコピーしました。",
       "title": "Webパネル",
       "notReady": "ウェブパネルはボットがDiscordに接続すると起動します。しばらくしてからもう一度お試しください。"
+    },
+    "updates": {
+      "confirmIdleMessage": "バージョン{0}をインストールし、Botをすぐに再起動します。続行しますか？",
+      "confirmPlayingMessage": "{0}では現在音楽が再生中です。今インストールすると、そこにいるリスナー全員が即座に切断されます。それでも続行しますか？",
+      "confirmTitle": "インストールして再起動",
+      "downloadFailed": "バージョン{0}が見つかりましたが、ダウンロードできませんでした。詳細はログを確認してください。",
+      "downloading": "更新をダウンロードしています…しばらくかかる場合があります。",
+      "installButton": "インストールして再起動",
+      "installFailed": "更新をインストールできませんでした。詳細はログを確認してください。",
+      "installing": "インストール中…",
+      "noStagedUpdate": "まだ準備された更新はありません。Botは1時間ごとに自動でGitHubを確認します。",
+      "notConnected": "まだDiscordに接続されていません。Botの起動が完了してから、もう一度お試しください。",
+      "notStaged": "現在、インストール準備が整った更新はありません。",
+      "stagedVersion": "バージョン{0}はダウンロード済みで、インストールできる状態です。",
+      "subtitle": "1時間ごとに自動で確認されます。あなたが指示するまで、何もインストールされません。"
     }
   },
   "web": {
@@ -1314,6 +1331,7 @@
     "playlistSummary": "Spotifyプレイリスト **{0}**: {2}曲中{1}曲を追加しました（YouTube検索でマッチ）。",
     "artistSummary": "Spotifyアーティスト **{0}** の人気曲: {2}曲中{1}曲を追加しました（YouTube検索でマッチ）。",
     "summaryFailedSuffix": "\nYouTubeで一致する曲が見つからず、{0}曲をスキップしました。",
-    "summaryCappedSuffix": "\nSpotifyによると全部で{0}曲あり、最初の{1}曲のみ確認しました。"
+    "summaryCappedSuffix": "\nSpotifyによると全部で{0}曲あり、最初の{1}曲のみ確認しました。",
+    "notConfigured": "Spotifyのリンクですが、このBotではSpotify対応が設定されていません。有効にするには、オーナーに設定で `spotify.clientId` と `spotify.clientSecret` を設定してもらってください。"
   }
 }

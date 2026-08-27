@@ -84,8 +84,6 @@ public class BotConfig {
     private String guiLanguageRaw;
     private String webBindAddress;
     private boolean webAllowConfigEdit;
-    private boolean autoUpdate;
-    private int updateIntervalHours;
     private OnlineStatus status;
     private Activity game;
     private Config aliases, transforms;
@@ -272,8 +270,6 @@ public class BotConfig {
         spotifyClientSecret = SPOTIFY_CLIENT_SECRET.getString(config);
         proxyUsername = PROXY_USERNAME.getString(config);
         proxyPassword = PROXY_PASSWORD.getString(config);
-        autoUpdate = UPDATE_AUTO.getBoolean(config);
-        updateIntervalHours = UPDATE_INTERVAL_HOURS.getInt(config);
         // An unrecognised code falls back to English with a warning rather than aborting
         // startup: a typo in one cosmetic setting should not stop the bot from running.
         defaultLanguage = Language.fromCode(LANGUAGE.getString(config)).orElseGet(() -> {
@@ -477,16 +473,6 @@ public class BotConfig {
     /** Default language for servers that have not chosen one. */
     public Language getDefaultLanguage() {
         return defaultLanguage;
-    }
-
-    /** Whether the bot installs new releases and restarts into them by itself. */
-    public boolean isAutoUpdate() {
-        return autoUpdate;
-    }
-
-    /** Hours between update checks. */
-    public int getUpdateIntervalHours() {
-        return updateIntervalHours;
     }
 
     /** Proxy username, or empty when the proxy needs no authentication. */

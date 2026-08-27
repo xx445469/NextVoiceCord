@@ -7,6 +7,60 @@ follow [semantic versioning](https://semver.org/spec/v2.0.0.html). Dates are ISO
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-08-27
+
+### Removed
+
+- **`updates.autoUpdate` and `updates.checkIntervalHours` are gone.** Checking now happens every
+  hour, always, and is not configurable. An old `config.txt` still carrying either key starts
+  normally; the keys are ignored.
+
+  This is a breaking change to the config file, and it changes behaviour for anyone who had
+  `autoUpdate = true`: **the bot will no longer restart itself into a new version.** Installing is
+  now always a decision someone makes.
+
+### Added
+
+- **Updates is its own place.** A top-level entry in the desktop window's sidebar, and a card in
+  the web panel. Both show the current version, check on demand, and offer "Install and restart"
+  once a release has been downloaded.
+
+  Pressing check downloads the release as well as looking for it — otherwise a person is told an
+  update exists and has no way to act on it until the hourly check happens to catch up.
+
+  If something is playing when install is pressed, both surfaces name the servers that are
+  playing and ask whether to continue, rather than refusing silently or cutting listeners off
+  without warning. A restart drops every voice connection instantly.
+
+  The web install endpoint is POST, requires the `Authorization: Bearer` header, is refused
+  outright when the panel is bound to a non-loopback address unless config editing is already
+  permitted, and does nothing without an explicit confirmation in the request body.
+
+### Fixed
+
+- **Commands work in a voice channel's built-in text chat.** They threw before doing anything.
+  Messages there arrive as a voice channel, and the command framework's `getTextChannel()` throws
+  for one, so every music command failed before validation even ran. Prefix commands, slash
+  commands and the queue and playlist buttons were all affected.
+
+  The now-playing message was broken one step further along for the same reason: the channel a
+  track was queued from was resolved as a text channel, which returns nothing for voice chat, so
+  updates went to the wrong channel or alerted the owner.
+
+- **A Spotify link now says when Spotify is not set up.** Without credentials the source is never
+  registered, so links fell through to generic handling and produced "no matches" — the actual
+  reason appeared only in a startup log line nobody reads. The reply now names
+  `spotify.clientId` and `spotify.clientSecret`.
+
+### Changed
+
+- **Spotify playlists and albums read up to 500 tracks**, up from one page (100 and 50). Anything
+  beyond that still reports the true total and says it was capped, as before. The bound stays
+  because every Spotify track becomes a YouTube search, so an unbounded playlist would mean an
+  unbounded number of searches.
+
+  A page failing part-way through no longer discards the tracks already fetched.
+
 ## [1.0.0] — 2026-08-27
 
 First stable release. It carries everything prepared under `0.9.0-beta.1`, which was never

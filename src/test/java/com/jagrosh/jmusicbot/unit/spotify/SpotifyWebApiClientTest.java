@@ -44,9 +44,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Exercises track-list resolution against a mock HTTP server — never the real Spotify API —
- * with particular attention to the playlist/album paging cap: the Web API pages at 100 (playlist)
- * and 50 (album) items, and this client is only supposed to read one page, reporting honestly
- * when that means it stopped short of the entity's real size.
+ * with particular attention to the playlist/album paging cap: the Web API pages at 100
+ * (playlist) and 50 (album) items per request, and this client walks pages up to a bound
+ * ({@link SpotifyWebApiClient#MAX_PLAYLIST_TRACKS} / {@link SpotifyWebApiClient#MAX_ALBUM_TRACKS}),
+ * reporting honestly when a list is bigger than that.
  */
 @DisplayName("SpotifyWebApiClient")
 class SpotifyWebApiClientTest
@@ -141,6 +142,20 @@ class SpotifyWebApiClientTest
         return "{\"track\":" + trackJson(name, artist) + "}";
     }
 
+    private static String albumItemsJson(int count, String label)
+    {
+        return IntStream.range(0, count)
+                .mapToObj(i -> trackJson(label + i, "Artist"))
+                .collect(Collectors.joining(","));
+    }
+
+    private static String playlistItemsJson(int count, String label)
+    {
+        return IntStream.range(0, count)
+                .mapToObj(i -> playlistItemJson(label + i, "Artist"))
+                .collect(Collectors.joining(","));
+    }
+
     // ---- Track -------------------------------------------------------------------------------
 
     @Test
@@ -161,17 +176,18 @@ class SpotifyWebApiClientTest
     // ---- Album paging cap ----------------------------------------------------------------------
 
     @Test
-    @DisplayName("caps an oversized album at MAX_ALBUM_TRACKS and reports the true total")
+    @DisplayName("pages an album across multiple requests up to MAX_ALBUM_TRACKS and reports the true total")
     void capsOversizedAlbum() throws Exception
     {
         enqueueToken();
         enqueueOk("{\"name\":\"Big Album\"}");
 
         int total = SpotifyWebApiClient.MAX_ALBUM_TRACKS + 37;
-        String items = IntStream.range(0, SpotifyWebApiClient.MAX_ALBUM_TRACKS)
-                .mapToObj(i -> trackJson("Track " + i, "Artist"))
-                .collect(Collectors.joining(","));
-        enqueueOk("{\"items\":[" + items + "],\"total\":" + total + "}");
+        int pages = SpotifyWebApiClient.MAX_ALBUM_TRACKS / SpotifyWebApiClient.ALBUM_PAGE_SIZE;
+        for (int p = 0; p < pages; p++)
+        {
+            enqueueOk("{\"items\":[" + albumItemsJson(SpotifyWebApiClient.ALBUM_PAGE_SIZE, "p" + p + "-") + "],\"total\":" + total + "}");
+        }
 
         SpotifyWebApiClient client = newClient();
         SpotifyResolution resolution = client.resolve(new SpotifyReference(SpotifyReference.EntityType.ALBUM, "abc"));
@@ -200,7 +216,27 @@ class SpotifyWebApiClientTest
     }
 
     @Test
-    @DisplayName("requests exactly one page of album tracks at the documented page size")
+    @DisplayName("an album spanning a few pages is read in full, within the bound")
+    void pagesMultiPageAlbumFully() throws Exception
+    {
+        enqueueToken();
+        enqueueOk("{\"name\":\"Box Set\"}");
+
+        int total = SpotifyWebApiClient.ALBUM_PAGE_SIZE * 2 + 15;
+        enqueueOk("{\"items\":[" + albumItemsJson(SpotifyWebApiClient.ALBUM_PAGE_SIZE, "a") + "],\"total\":" + total + "}");
+        enqueueOk("{\"items\":[" + albumItemsJson(SpotifyWebApiClient.ALBUM_PAGE_SIZE, "b") + "],\"total\":" + total + "}");
+        enqueueOk("{\"items\":[" + albumItemsJson(15, "c") + "],\"total\":" + total + "}");
+
+        SpotifyWebApiClient client = newClient();
+        SpotifyResolution resolution = client.resolve(new SpotifyReference(SpotifyReference.EntityType.ALBUM, "abc"));
+
+        assertEquals(total, resolution.searchQueries().size());
+        assertEquals(total, resolution.totalAvailable());
+        assertFalse(resolution.capped(), "the whole album fits within the bound, so it should not be reported as capped");
+    }
+
+    @Test
+    @DisplayName("requests album tracks at the documented page size, not the overall bound")
     void albumTracksRequestUsesPageSizeLimit() throws Exception
     {
         enqueueToken();
@@ -213,24 +249,25 @@ class SpotifyWebApiClientTest
         server.takeRequest(1, TimeUnit.SECONDS); // token
         server.takeRequest(1, TimeUnit.SECONDS); // album metadata
         RecordedRequest tracksRequest = server.takeRequest(1, TimeUnit.SECONDS);
-        assertTrue(tracksRequest.getPath().contains("limit=" + SpotifyWebApiClient.MAX_ALBUM_TRACKS),
+        assertTrue(tracksRequest.getPath().contains("limit=" + SpotifyWebApiClient.ALBUM_PAGE_SIZE),
                 "Expected the album tracks request to ask for the page-size limit, got: " + tracksRequest.getPath());
     }
 
     // ---- Playlist paging cap -------------------------------------------------------------------
 
     @Test
-    @DisplayName("caps an oversized playlist at MAX_PLAYLIST_TRACKS and reports the true total")
+    @DisplayName("pages a playlist across multiple requests up to MAX_PLAYLIST_TRACKS and reports the true total")
     void capsOversizedPlaylist() throws Exception
     {
         enqueueToken();
         enqueueOk("{\"name\":\"Huge Playlist\"}");
 
-        int total = 500;
-        String items = IntStream.range(0, SpotifyWebApiClient.MAX_PLAYLIST_TRACKS)
-                .mapToObj(i -> playlistItemJson("Track " + i, "Artist"))
-                .collect(Collectors.joining(","));
-        enqueueOk("{\"items\":[" + items + "],\"total\":" + total + "}");
+        int total = SpotifyWebApiClient.MAX_PLAYLIST_TRACKS + 150;
+        int pages = SpotifyWebApiClient.MAX_PLAYLIST_TRACKS / SpotifyWebApiClient.PLAYLIST_PAGE_SIZE;
+        for (int p = 0; p < pages; p++)
+        {
+            enqueueOk("{\"items\":[" + playlistItemsJson(SpotifyWebApiClient.PLAYLIST_PAGE_SIZE, "p" + p + "-") + "],\"total\":" + total + "}");
+        }
 
         SpotifyWebApiClient client = newClient();
         SpotifyResolution resolution = client.resolve(new SpotifyReference(SpotifyReference.EntityType.PLAYLIST, "abc"));
@@ -239,6 +276,70 @@ class SpotifyWebApiClientTest
         assertEquals(total, resolution.totalAvailable());
         assertTrue(resolution.capped());
         assertEquals(SpotifyWebApiClient.MAX_PLAYLIST_TRACKS, resolution.capLimit());
+    }
+
+    @Test
+    @DisplayName("a 142-track playlist (larger than one page) is paged in full and not reported as capped")
+    void pagesPlaylistLargerThanOnePage() throws Exception
+    {
+        // The real-world case this bound exists for: a user-made playlist with more tracks
+        // than fit in a single page, but comfortably under the overall bound.
+        enqueueToken();
+        enqueueOk("{\"name\":\"Real Playlist\"}");
+
+        int total = 142;
+        enqueueOk("{\"items\":[" + playlistItemsJson(SpotifyWebApiClient.PLAYLIST_PAGE_SIZE, "a") + "],\"total\":" + total + "}");
+        enqueueOk("{\"items\":[" + playlistItemsJson(total - SpotifyWebApiClient.PLAYLIST_PAGE_SIZE, "b") + "],\"total\":" + total + "}");
+
+        SpotifyWebApiClient client = newClient();
+        SpotifyResolution resolution = client.resolve(new SpotifyReference(SpotifyReference.EntityType.PLAYLIST, "abc"));
+
+        assertEquals(total, resolution.searchQueries().size());
+        assertEquals(total, resolution.totalAvailable());
+        assertFalse(resolution.capped());
+        assertEquals(0, resolution.capLimit());
+    }
+
+    @Test
+    @DisplayName("a failure on a later page keeps the tracks already fetched and reports them, capped, with the true total")
+    void laterPageFailureKeepsTracksAlreadyFetched() throws Exception
+    {
+        enqueueToken();
+        enqueueOk("{\"name\":\"Flaky Playlist\"}");
+
+        int total = 250;
+        enqueueOk("{\"items\":[" + playlistItemsJson(SpotifyWebApiClient.PLAYLIST_PAGE_SIZE, "a") + "],\"total\":" + total + "}");
+        // Second page fails with a rate-limit response; paging should stop there rather than
+        // throwing away the first page's 100 tracks or failing the whole lookup.
+        server.enqueue(new MockResponse().setResponseCode(429)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"error\":{\"status\":429,\"message\":\"rate limited\"}}"));
+
+        SpotifyWebApiClient client = newClient();
+        SpotifyResolution resolution = client.resolve(new SpotifyReference(SpotifyReference.EntityType.PLAYLIST, "abc"));
+
+        assertEquals(SpotifyWebApiClient.PLAYLIST_PAGE_SIZE, resolution.searchQueries().size(),
+                "the first page's tracks should not be lost when a later page fails");
+        assertEquals(total, resolution.totalAvailable(), "the total from the first page should still be reported");
+        assertTrue(resolution.capped());
+        assertEquals(SpotifyWebApiClient.PLAYLIST_PAGE_SIZE, resolution.capLimit());
+    }
+
+    @Test
+    @DisplayName("a failure on the very first page fails the whole lookup, with the specific error detail")
+    void firstPageFailurePropagates() throws Exception
+    {
+        enqueueToken();
+        enqueueOk("{\"name\":\"Doomed Playlist\"}");
+        server.enqueue(new MockResponse().setResponseCode(429)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"error\":{\"status\":429,\"message\":\"rate limited\"}}"));
+
+        SpotifyWebApiClient client = newClient();
+        IOException ex = assertThrows(IOException.class,
+                () -> client.resolve(new SpotifyReference(SpotifyReference.EntityType.PLAYLIST, "abc")));
+        assertTrue(ex.getMessage().contains("rate limit") || ex.getMessage().contains("429"),
+                "Expected the 429 detail to surface, got: " + ex.getMessage());
     }
 
     @Test
@@ -262,7 +363,7 @@ class SpotifyWebApiClientTest
     }
 
     @Test
-    @DisplayName("requests exactly one page of playlist tracks at the documented page size")
+    @DisplayName("requests playlist tracks at the documented page size, not the overall bound")
     void playlistTracksRequestUsesPageSizeLimit() throws Exception
     {
         enqueueToken();
@@ -275,7 +376,7 @@ class SpotifyWebApiClientTest
         server.takeRequest(1, TimeUnit.SECONDS); // token
         server.takeRequest(1, TimeUnit.SECONDS); // playlist metadata
         RecordedRequest tracksRequest = server.takeRequest(1, TimeUnit.SECONDS);
-        assertTrue(tracksRequest.getPath().contains("limit=" + SpotifyWebApiClient.MAX_PLAYLIST_TRACKS),
+        assertTrue(tracksRequest.getPath().contains("limit=" + SpotifyWebApiClient.PLAYLIST_PAGE_SIZE),
                 "Expected the playlist tracks request to ask for the page-size limit, got: " + tracksRequest.getPath());
     }
 

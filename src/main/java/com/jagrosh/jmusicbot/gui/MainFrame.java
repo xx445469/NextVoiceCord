@@ -32,6 +32,7 @@ import com.jagrosh.jmusicbot.gui.panels.SettingsPanel;
 import com.jagrosh.jmusicbot.gui.panels.SourceHealthPanel;
 import com.jagrosh.jmusicbot.gui.panels.StatusPanel;
 import com.jagrosh.jmusicbot.gui.panels.SystemHealthPanel;
+import com.jagrosh.jmusicbot.gui.panels.UpdatesPanel;
 import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +73,7 @@ public class MainFrame extends JFrame {
     private final SourceHealthPanel sourceHealthPanel;
     private final SettingsPanel settingsPanel;
     private final ConfigPanel configPanel;
+    private final UpdatesPanel updatesPanel;
     private final StatusBar statusBar;
     private final Instant startTime;
     private Timer statusUpdateTimer;
@@ -103,6 +105,7 @@ public class MainFrame extends JFrame {
         this.sourceHealthPanel = new SourceHealthPanel(bot.getTrackLoadingMonitor());
         this.settingsPanel = new SettingsPanel(bot);
         this.configPanel = new ConfigPanel(bot);
+        this.updatesPanel = new UpdatesPanel(bot);
         this.statusBar = new StatusBar();
         this.dashboardPanel = new DashboardPanel(bot);
         this.sidebar = new Sidebar(this::showView);
@@ -197,6 +200,7 @@ public class MainFrame extends JFrame {
             case "performance" -> performancePanel.updateMetrics();
             case "system" -> systemHealthPanel.updateMetrics();
             case "sources" -> sourceHealthPanel.refreshMetrics();
+            case "updates" -> updatesPanel.refreshStagedStatus();
             default -> { }
         }
     }
@@ -219,6 +223,7 @@ public class MainFrame extends JFrame {
         register("sources", sourceHealthPanel);
         register("settings", settingsPanel);
         register("config", configPanel);
+        register("updates", updatesPanel);
 
         sidebar.addItem("dashboard", GuiLanguage.msg("gui.nav.overview"), IconFactory.getIcon(IconFactory.IconType.STATUS, 16));
         sidebar.addItem("console", GuiLanguage.msg("gui.nav.console"), IconFactory.getIcon(IconFactory.IconType.CONSOLE, 16));
@@ -242,6 +247,8 @@ public class MainFrame extends JFrame {
 
         sidebar.addSpacer();
         sidebar.addSection(GuiLanguage.msg("gui.section.configure"));
+        sidebar.addItem("updates", GuiLanguage.msg("gui.nav.updates"),
+                        IconFactory.getIcon(IconFactory.IconType.REFRESH, 16));
         sidebar.addExpandableItem("settings", GuiLanguage.msg("gui.nav.preferences"),
                 IconFactory.getIcon(IconFactory.IconType.SETTINGS, 16), categoriesOf(settingsPanel));
         sidebar.addExpandableItem("config", GuiLanguage.msg("gui.nav.botConfig"),
@@ -397,6 +404,10 @@ public class MainFrame extends JFrame {
         JMenuItem sourcesTab = new JMenuItem(GuiLanguage.msg("gui.main.sources"));
         sourcesTab.addActionListener(e -> sidebar.select("sources"));
         viewMenu.add(sourcesTab);
+
+        JMenuItem updatesTab = new JMenuItem(GuiLanguage.msg("gui.main.updates"));
+        updatesTab.addActionListener(e -> sidebar.select("updates"));
+        viewMenu.add(updatesTab);
 
         JMenuItem settingsTab = new JMenuItem(GuiLanguage.msg("gui.main.settings"));
         settingsTab.addActionListener(e -> sidebar.select("settings"));

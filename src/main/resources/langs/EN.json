@@ -362,6 +362,7 @@
     "searchingSimple": "Searching... `[{0}]`"
   },
   "spotify": {
+    "notConfigured": "That's a Spotify link, but Spotify support isn't set up on this bot. Ask the owner to set `spotify.clientId` and `spotify.clientSecret` in the config to enable it.",
     "disclosure": " (matched via YouTube search — not the original Spotify audio)",
     "albumSummary": "Spotify album **{0}**: added {1} of {2} tracks, matched via YouTube.",
     "playlistSummary": "Spotify playlist **{0}**: added {1} of {2} tracks, matched via YouTube.",
@@ -886,6 +887,7 @@
       "status": "Status",
       "systemHealth": "System Health",
       "theme": "Theme",
+      "updates": "Updates",
       "view": "View"
     },
     "nav": {
@@ -896,7 +898,8 @@
       "preferences": "Preferences",
       "servers": "Servers",
       "sources": "Sources",
-      "system": "System"
+      "system": "System",
+      "updates": "Updates"
     },
     "overview": {
       "connecting": "Connecting to Discord…",
@@ -1108,6 +1111,21 @@
       "trackName": "Track: {0}<br>",
       "trackType": "<b>Track:</b> {0}<br>",
       "voiceType": "<b>Voice:</b> {0}<br>"
+    },
+    "updates": {
+      "confirmIdleMessage": "This installs version {0} and restarts the bot immediately. Continue?",
+      "confirmPlayingMessage": "Music is currently playing in {0}. Installing now disconnects every listener there immediately. Continue anyway?",
+      "confirmTitle": "Install and restart",
+      "downloadFailed": "Version {0} was found but could not be downloaded. See the log for details.",
+      "downloading": "Downloading the update… this can take a moment.",
+      "installButton": "Install and restart",
+      "installFailed": "Could not install the update. See the log for details.",
+      "installing": "Installing…",
+      "noStagedUpdate": "No update is staged yet. The bot checks GitHub automatically every hour.",
+      "notConnected": "Not connected to Discord yet. Try again once the bot has finished starting up.",
+      "notStaged": "There is nothing staged to install right now.",
+      "stagedVersion": "Version {0} is downloaded and ready to install.",
+      "subtitle": "Checked automatically every hour. Nothing installs until you say so."
     },
     "webPanel": {
       "cannotOpen": "This desktop cannot open a browser automatically.\nThe panel address has been copied to the clipboard.",

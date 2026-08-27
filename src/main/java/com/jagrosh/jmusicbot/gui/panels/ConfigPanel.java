@@ -198,12 +198,6 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
     private final JSpinner clearChannelAgeDaysSpinner;
     private final JTextArea aliasesTextArea;
 
-    // Updates section — all common now. The repository is a hard-coded constant (see
-    // UpdateChecker) and the GitHub token was removed once the repository stopped being
-    // private, so all that is left to configure is whether and how often to check.
-    private final JCheckBox updateAutoUpdateCheckBox;
-    private final JSpinner updateCheckIntervalSpinner;
-
     // Dangerous section (advanced) — dangerous.evalEngine, dangerous.eval
     private final JTextField evalEngineField;
     private final JCheckBox evalCheckBox;
@@ -365,10 +359,6 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         clearChannelAgeDaysSpinner = new JSpinner(new SpinnerNumberModel(14, 0, 36500, 1));
         aliasesTextArea = readOnlyConfigArea();
 
-        // Updates
-        updateAutoUpdateCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.updateAutoUpdate"));
-        updateCheckIntervalSpinner = new JSpinner(new SpinnerNumberModel(6, 1, 8760, 1));
-
         // Dangerous
         evalEngineField = new JTextField(15);
         evalCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.useEval"));
@@ -406,11 +396,11 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         applyFieldStyle(songInStatusCheckBox, stayInChannelCheckBox, useYouTubeOAuthCheckBox,
                 npImagesCheckBox, updateAlertsCheckBox, proxyLavaplayerCheckBox, proxyJdaCheckBox,
                 proxyGithubCheckBox, npMinimalMessageCheckBox, npShowButtonsCheckBox,
-                npShowProgressBarCheckBox, updateAutoUpdateCheckBox, evalCheckBox, guiEnabledCheckBox,
+                npShowProgressBarCheckBox, evalCheckBox, guiEnabledCheckBox,
                 webAllowConfigEditCheckBox);
         applyFieldStyle(aloneTimeSpinner, maxSecondsSpinner, maxYTPlaylistPagesSpinner, skipRatioSpinner,
                 proxyPortSpinner, discordOwnerSpinner, maxHistorySizeSpinner, clearChannelDeleteLimitSpinner,
-                clearChannelAgeDaysSpinner, updateCheckIntervalSpinner, guiFontSizeSpinner,
+                clearChannelAgeDaysSpinner, guiFontSizeSpinner,
                 nasBufferMsSpinner, frameBufferMsSpinner);
         applyFieldStyle(youtubeClientsJList, aliasesTextArea, transformsTextArea, lavalinkNodesJList,
                 lavalinkTestConnectionStatusLabel);
@@ -550,7 +540,6 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         addSection(content, createYoutubeAdvancedSection());
         addSection(content, createPlaybackAdvancedSection());
         addSection(content, createCommandsAdvancedSection());
-        addSection(content, createUpdatesSection());
         addSection(content, createDangerousSection());
         addSection(content, createAppearanceSection());
         addSection(content, createGuiWebAdvancedSection());
@@ -1673,30 +1662,6 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
     }
 
     /**
-     * Creates the common Updates section: updates.autoUpdate, updates.checkIntervalHours.
-     *
-     * <p>{@code updates.alerts} lives in {@link #createOtherSection()} instead, matching where
-     * it already was before this section existed. There is no repository or token field here —
-     * see {@link com.jagrosh.jmusicbot.update.UpdateChecker}'s class javadoc: the repository is
-     * a hard-coded constant, never a setting, and the token was removed once the repository
-     * stopped being private. That leaves nothing here worth tucking behind an advanced card.
-     */
-    private Component createUpdatesSection() {
-        JPanel panel = formPanel();
-        GridBagConstraints gbc = rowConstraints();
-        List<FilterRow> rows = new ArrayList<>();
-
-        rows.add(addSpanningRow(panel, gbc, 0, updateAutoUpdateCheckBox, "updates.autoUpdate"));
-        rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.updateCheckIntervalHours"), updateCheckIntervalSpinner,
-                "updates.checkIntervalHours"));
-
-        String title = GuiLanguage.msg("gui.config.updates");
-        Component card = titledCard(title, panel);
-        registerSection(title, card, null, rows);
-        return card;
-    }
-
-    /**
      * Creates the Dangerous section (advanced): dangerous.evalEngine, dangerous.eval.
      *
      * <p>eval is not presented as an ordinary toggle. What it turns on is the bot owner running
@@ -2043,10 +2008,6 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         clearChannelAgeDaysSpinner.setValue((int) config.getClearChannelAgeDays());
         aliasesTextArea.setText(renderConfig(config.getAliasesConfig()));
 
-        // Updates
-        updateAutoUpdateCheckBox.setSelected(config.isAutoUpdate());
-        updateCheckIntervalSpinner.setValue(config.getUpdateIntervalHours());
-
         // Dangerous
         evalEngineField.setText(config.getEvalEngine());
         evalCheckBox.setSelected(config.useEval());
@@ -2204,10 +2165,6 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         updates.put("commands.clearChannel.ageDays", String.valueOf(clearChannelAgeDaysSpinner.getValue()));
         // commands.aliases is shown read-only above; there is deliberately no entry for it
         // here — see createAdvancedReadOnlySection for why.
-
-        // Updates
-        updates.put("updates.autoUpdate", String.valueOf(updateAutoUpdateCheckBox.isSelected()));
-        updates.put("updates.checkIntervalHours", String.valueOf(updateCheckIntervalSpinner.getValue()));
 
         // Dangerous
         updates.put("dangerous.evalEngine", quoteString(evalEngineField.getText()));

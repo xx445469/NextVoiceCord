@@ -789,7 +789,8 @@
       "status": "Trạng thái",
       "systemHealth": "Tình trạng hệ thống",
       "theme": "Giao diện",
-      "view": "Xem"
+      "view": "Xem",
+      "updates": "Cập nhật"
     },
     "nav": {
       "botConfig": "Cấu hình bot",
@@ -799,7 +800,8 @@
       "preferences": "Tùy chọn",
       "servers": "Máy chủ",
       "sources": "Nguồn",
-      "system": "Hệ thống"
+      "system": "Hệ thống",
+      "updates": "Cập nhật"
     },
     "overview": {
       "connecting": "Đang kết nối tới Discord…",
@@ -1016,6 +1018,21 @@
       "cannotOpen": "Máy tính này không thể tự động mở trình duyệt.\nĐịa chỉ bảng điều khiển đã được sao chép vào khay nhớ tạm.",
       "title": "Bảng điều khiển web",
       "notReady": "Bảng điều khiển web sẽ khởi động khi bot kết nối với Discord. Vui lòng thử lại sau giây lát."
+    },
+    "updates": {
+      "confirmIdleMessage": "Thao tác này sẽ cài đặt phiên bản {0} và khởi động lại bot ngay lập tức. Tiếp tục?",
+      "confirmPlayingMessage": "Nhạc đang phát trong {0}. Cài đặt ngay bây giờ sẽ ngắt kết nối mọi người nghe ở đó ngay lập tức. Vẫn tiếp tục?",
+      "confirmTitle": "Cài đặt và khởi động lại",
+      "downloadFailed": "Đã tìm thấy phiên bản {0} nhưng không thể tải xuống. Xem nhật ký để biết chi tiết.",
+      "downloading": "Đang tải bản cập nhật… việc này có thể mất một chút thời gian.",
+      "installButton": "Cài đặt và khởi động lại",
+      "installFailed": "Không thể cài đặt bản cập nhật. Xem nhật ký để biết chi tiết.",
+      "installing": "Đang cài đặt…",
+      "noStagedUpdate": "Chưa có bản cập nhật nào sẵn sàng. Bot tự động kiểm tra GitHub mỗi giờ.",
+      "notConnected": "Chưa kết nối tới Discord. Hãy thử lại sau khi bot khởi động xong.",
+      "notStaged": "Hiện không có gì sẵn sàng để cài đặt.",
+      "stagedVersion": "Phiên bản {0} đã được tải xuống và sẵn sàng để cài đặt.",
+      "subtitle": "Tự động kiểm tra mỗi giờ. Sẽ không có gì được cài đặt cho đến khi bạn đồng ý."
     }
   },
   "web": {
@@ -1314,6 +1331,7 @@
     "playlistSummary": "Danh sách phát Spotify **{0}**: đã thêm {1}/{2} bài hát (khớp qua YouTube).",
     "artistSummary": "Bài hát nổi bật của nghệ sĩ Spotify **{0}**: đã thêm {1}/{2} (khớp qua YouTube).",
     "summaryFailedSuffix": "\nCó {0} bài hát không khớp trên YouTube nên đã bị bỏ qua.",
-    "summaryCappedSuffix": "\nSpotify báo cáo tổng cộng {0} bài hát; chỉ {1} bài đầu tiên được kiểm tra."
+    "summaryCappedSuffix": "\nSpotify báo cáo tổng cộng {0} bài hát; chỉ {1} bài đầu tiên được kiểm tra.",
+    "notConfigured": "Đây là liên kết Spotify, nhưng tính năng hỗ trợ Spotify chưa được thiết lập trên bot này. Hãy nhờ chủ sở hữu đặt `spotify.clientId` và `spotify.clientSecret` trong cấu hình để bật tính năng này."
   }
 }

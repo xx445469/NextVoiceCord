@@ -605,7 +605,8 @@
       "system": "系統",
       "sources": "音源",
       "preferences": "偏好設定",
-      "botConfig": "Bot 設定"
+      "botConfig": "Bot 設定",
+      "updates": "更新"
     },
     "section": {
       "diagnostics": "診斷",
@@ -825,7 +826,8 @@
       "status": "狀態",
       "systemHealth": "系統健康狀態",
       "theme": "主題",
-      "view": "檢視"
+      "view": "檢視",
+      "updates": "更新"
     },
     "performance": {
       "badgeNoData": "無資料",
@@ -1016,6 +1018,21 @@
       "trackName": "曲目：{0}<br>",
       "trackType": "<b>曲目：</b>{0}<br>",
       "voiceType": "<b>語音：</b>{0}<br>"
+    },
+    "updates": {
+      "confirmIdleMessage": "這會安裝版本 {0} 並立即重新啟動機器人。要繼續嗎？",
+      "confirmPlayingMessage": "{0} 目前正在播放音樂。現在安裝會立即中斷那裡所有聽眾的連線。仍要繼續嗎？",
+      "confirmTitle": "安裝並重新啟動",
+      "downloadFailed": "已找到版本 {0}，但無法下載。詳情請查看記錄。",
+      "downloading": "正在下載更新…這可能需要一點時間。",
+      "installButton": "安裝並重新啟動",
+      "installFailed": "無法安裝更新。詳情請查看記錄。",
+      "installing": "安裝中…",
+      "noStagedUpdate": "目前還沒有準備好的更新。機器人會每小時自動檢查一次 GitHub。",
+      "notConnected": "尚未連線到 Discord。請在機器人啟動完成後再試一次。",
+      "notStaged": "目前沒有可安裝的項目。",
+      "stagedVersion": "版本 {0} 已下載完成，可以安裝。",
+      "subtitle": "每小時自動檢查一次。在你同意之前不會安裝任何東西。"
     }
   },
   "web": {
@@ -1314,6 +1331,7 @@
     "playlistSummary": "Spotify 播放清單 **{0}**：已新增 {1}／{2} 首曲目（透過 YouTube 比對）。",
     "artistSummary": "Spotify 歌手 **{0}** 的熱門曲目：已新增 {1}／{2} 首（透過 YouTube 比對）。",
     "summaryFailedSuffix": "\n有 {0} 首曲目在 YouTube 上找不到比對結果，已略過。",
-    "summaryCappedSuffix": "\nSpotify 顯示總共有 {0} 首曲目，僅檢查了前 {1} 首。"
+    "summaryCappedSuffix": "\nSpotify 顯示總共有 {0} 首曲目，僅檢查了前 {1} 首。",
+    "notConfigured": "這是一個 Spotify 連結，但此機器人尚未設定 Spotify 支援。請讓擁有者在設定中設定 `spotify.clientId` 和 `spotify.clientSecret` 以啟用它。"
   }
 }

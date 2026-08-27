@@ -789,7 +789,8 @@
       "status": "状态",
       "systemHealth": "系统健康状态",
       "theme": "主题",
-      "view": "视图"
+      "view": "视图",
+      "updates": "更新"
     },
     "nav": {
       "botConfig": "Bot 配置",
@@ -799,7 +800,8 @@
       "preferences": "偏好设置",
       "servers": "服务器",
       "sources": "音源",
-      "system": "系统"
+      "system": "系统",
+      "updates": "更新"
     },
     "overview": {
       "connecting": "正在连接到 Discord…",
@@ -1016,6 +1018,21 @@
       "cannotOpen": "这个桌面环境无法自动打开浏览器。\n面板地址已复制到剪贴板。",
       "title": "网页面板",
       "notReady": "机器人连接到 Discord 后，网页面板才会启动。请稍后再试。"
+    },
+    "updates": {
+      "confirmIdleMessage": "这将安装版本 {0} 并立即重启机器人。是否继续？",
+      "confirmPlayingMessage": "{0} 中当前正在播放音乐。现在安装会立即断开那里的所有听众。仍要继续吗？",
+      "confirmTitle": "安装并重启",
+      "downloadFailed": "已找到版本 {0}，但无法下载。详情请查看日志。",
+      "downloading": "正在下载更新…这可能需要一点时间。",
+      "installButton": "安装并重启",
+      "installFailed": "无法安装更新。详情请查看日志。",
+      "installing": "正在安装…",
+      "noStagedUpdate": "目前还没有已准备好的更新。机器人会每小时自动检查一次 GitHub。",
+      "notConnected": "尚未连接到 Discord。请在机器人启动完成后重试。",
+      "notStaged": "目前没有可安装的内容。",
+      "stagedVersion": "版本 {0} 已下载完成，可以安装。",
+      "subtitle": "每小时自动检查一次。在你确认之前不会安装任何内容。"
     }
   },
   "web": {
@@ -1314,6 +1331,7 @@
     "playlistSummary": "Spotify 播放列表 **{0}**：已添加 {1}／{2} 首曲目（通过 YouTube 匹配）。",
     "artistSummary": "Spotify 歌手 **{0}** 的热门曲目：已添加 {1}／{2} 首（通过 YouTube 匹配）。",
     "summaryFailedSuffix": "\n有 {0} 首曲目在 YouTube 上未找到匹配，已跳过。",
-    "summaryCappedSuffix": "\nSpotify 显示总共有 {0} 首曲目，仅检查了前 {1} 首。"
+    "summaryCappedSuffix": "\nSpotify 显示总共有 {0} 首曲目，仅检查了前 {1} 首。",
+    "notConfigured": "这是一个 Spotify 链接，但此机器人尚未配置 Spotify 支持。请让所有者在配置中设置 `spotify.clientId` 和 `spotify.clientSecret` 以启用它。"
   }
 }
