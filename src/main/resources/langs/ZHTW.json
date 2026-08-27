@@ -739,7 +739,34 @@
       "appearance": "外觀與語言",
       "guiTheme": "主題",
       "searchLabel": "篩選設定",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "播放引擎",
+      "lavalinkEngineFallbackNote": "`fallback` 尚未實作（規劃於後續階段推出：兩種引擎同時運作，並在節點故障時自動切換）。目前選擇此選項只會在啟動時記錄一則警告，機器人仍會透過 lavaplayer 播放，直到此功能實作完成為止。",
+      "lavalinkIntro": "連線至 Lavalink 節點——一個由你自行架設的獨立音訊伺服器，會加入語音頻道並代替機器人串流音訊。這並非 HTTP/SOCKS 代理伺服器：若你想透過代理伺服器路由對外請求，請參閱下方的「代理伺服器」章節。",
+      "lavalinkNodeAdd": "新增",
+      "lavalinkNodeDialogHostRequired": "必須填寫主機。",
+      "lavalinkNodeDialogTitleAdd": "新增 Lavalink 節點",
+      "lavalinkNodeDialogTitleEdit": "編輯 Lavalink 節點",
+      "lavalinkNodeDown": "下移",
+      "lavalinkNodeEdit": "編輯",
+      "lavalinkNodeHost": "主機",
+      "lavalinkNodeName": "名稱",
+      "lavalinkNodePassword": "密碼",
+      "lavalinkNodePort": "連接埠",
+      "lavalinkNodeRemove": "移除",
+      "lavalinkNodeSecure": "安全連線（https/wss）",
+      "lavalinkNodeUp": "上移",
+      "lavalinkNodes": "Lavalink 節點",
+      "lavalinkNodesNote": "第一階段永遠只會使用此清單中的第一個節點。新增更多節點是為日後跨多節點路由功能做準備，該功能規劃於後續階段推出——在此之前，只有第一個節點會生效。",
+      "lavalinkTestConnection": "測試連線",
+      "lavalinkTestConnectionAuthFailed": "已連上 {0}，但密碼遭拒絕（HTTP {1}）。",
+      "lavalinkTestConnectionNoNode": "請先新增一個節點。",
+      "lavalinkTestConnectionOk": "已連線：Lavalink {0} — 音訊來源 {1} 個、外掛 {2} 個。",
+      "lavalinkTestConnectionRunning": "正在測試 {0}……",
+      "lavalinkTestConnectionUnreachable": "無法連上 {0}：{1}",
+      "performanceLavaplayerOnlyNote": "這些緩衝設定僅適用於內建的 Lavaplayer 引擎。Lavalink 節點會自行管理緩衝，因此當播放引擎設為 `lavalink` 時，這些設定不會產生任何效果。",
+      "proxyIntro": "用於機器人自身對外網路請求的 HTTP/SOCKS 代理伺服器——包括音訊串流、Discord API、GitHub 更新檢查。Lavalink 節點並非代理伺服器，不屬於此處設定：請參閱上方的「Lavalink」章節。"
     },
     "console": {
       "autoScroll": "自動捲動",
@@ -1246,5 +1273,24 @@
       "description": "清除以 /settc 設定的指令頻道中所有訊息（僅限擁有者）",
       "name": "清除頻道"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "此指令目前尚無法在 Lavalink 播放引擎下使用。第一階段僅支援播放、暫停、繼續播放、停止、跳過與音量調整。",
+    "nodeUnavailable": "Lavalink 節點目前未連線，請稍後再試一次。",
+    "nowPlaying": "正在播放 **{0}**",
+    "queued": "已將 **{0}** 加入佇列，位置為第 {1} 位",
+    "noMatches": "找不到符合該查詢的結果。",
+    "trackTooLong": "這首歌（**{0}**）超過允許的最大長度：`{1}`",
+    "loadFailed": "無法載入該曲目：{0}",
+    "paused": "已暫停 **{0}**。",
+    "stopped": "已停止播放並離開語音頻道。"
+  },
+  "spotify": {
+    "disclosure": " (透過 YouTube 搜尋比對，並非 Spotify 原始音訊)",
+    "albumSummary": "Spotify 專輯 **{0}**：已新增 {1}／{2} 首曲目（透過 YouTube 比對）。",
+    "playlistSummary": "Spotify 播放清單 **{0}**：已新增 {1}／{2} 首曲目（透過 YouTube 比對）。",
+    "artistSummary": "Spotify 歌手 **{0}** 的熱門曲目：已新增 {1}／{2} 首（透過 YouTube 比對）。",
+    "summaryFailedSuffix": "\n有 {0} 首曲目在 YouTube 上找不到比對結果，已略過。",
+    "summaryCappedSuffix": "\nSpotify 顯示總共有 {0} 首曲目，僅檢查了前 {1} 首。"
   }
 }

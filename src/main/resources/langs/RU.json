@@ -698,7 +698,34 @@
       "appearance": "Внешний вид и язык",
       "guiTheme": "Тема",
       "searchLabel": "Фильтр настроек",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "Движок воспроизведения",
+      "lavalinkEngineFallbackNote": "`fallback` пока не реализован (запланирован на более поздний этап: оба движка работают одновременно, с переключением при сбое узла). Если выбрать его сейчас, при запуске просто запишется предупреждение, а бот продолжит играть через lavaplayer, пока это не будет реализовано.",
+      "lavalinkIntro": "Подключается к узлу Lavalink — отдельному аудиосерверу, который ты запускаешь сам; он присоединяется к голосовому каналу и передаёт звук вместо бота. Это не HTTP/SOCKS-прокси: если ты хочешь направлять исходящие запросы через прокси, смотри раздел «Прокси» ниже.",
+      "lavalinkNodeAdd": "Добавить",
+      "lavalinkNodeDialogHostRequired": "Необходимо указать хост.",
+      "lavalinkNodeDialogTitleAdd": "Добавить узел Lavalink",
+      "lavalinkNodeDialogTitleEdit": "Изменить узел Lavalink",
+      "lavalinkNodeDown": "Переместить вниз",
+      "lavalinkNodeEdit": "Редактировать",
+      "lavalinkNodeHost": "Хост",
+      "lavalinkNodeName": "Название",
+      "lavalinkNodePassword": "Пароль",
+      "lavalinkNodePort": "Порт",
+      "lavalinkNodeRemove": "Удалить",
+      "lavalinkNodeSecure": "Безопасное соединение (https/wss)",
+      "lavalinkNodeUp": "Переместить вверх",
+      "lavalinkNodes": "Узлы Lavalink",
+      "lavalinkNodesNote": "На первом этапе всегда используется только первый узел из этого списка. Добавление новых узлов — задел на маршрутизацию между несколькими узлами, запланированную на более поздний этап; до тех пор активен только первый.",
+      "lavalinkTestConnection": "Проверить соединение",
+      "lavalinkTestConnectionAuthFailed": "Удалось подключиться к {0}, но пароль отклонён (HTTP {1}).",
+      "lavalinkTestConnectionNoNode": "Сначала добавь узел.",
+      "lavalinkTestConnectionOk": "Подключено: Lavalink {0} — источников звука: {1}, плагинов: {2}.",
+      "lavalinkTestConnectionRunning": "Проверка {0}…",
+      "lavalinkTestConnectionUnreachable": "Не удалось подключиться к {0}: {1}",
+      "performanceLavaplayerOnlyNote": "Эти буферы применяются только к встроенному движку Lavaplayer. Узел Lavalink управляет буферизацией самостоятельно, поэтому они не действуют, пока движок воспроизведения установлен в `lavalink`.",
+      "proxyIntro": "HTTP/SOCKS-прокси для собственных исходящих сетевых запросов бота — аудиопотоков, API Discord, проверок обновлений на GitHub. Узел Lavalink — не прокси, и ему здесь не место: см. раздел «Lavalink» выше."
     },
     "console": {
       "autoScroll": "Автопрокрутка",
@@ -1246,5 +1273,24 @@
       "description": "удаляет все сообщения в канале, заданном через /settc (только владелец)",
       "name": "очистить-канал"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "Эта команда пока недоступна при движке воспроизведения Lavalink. На первом этапе поддерживаются только воспроизведение, пауза, продолжение, остановка, пропуск и громкость.",
+    "nodeUnavailable": "Узел Lavalink сейчас не подключён. Попробуй ещё раз через минуту.",
+    "nowPlaying": "Сейчас играет: **{0}**",
+    "queued": "Добавлено в очередь на позицию {1}: **{0}**",
+    "noMatches": "По этому запросу ничего не найдено.",
+    "trackTooLong": "Этот трек (**{0}**) длиннее допустимого максимума: `{1}`",
+    "loadFailed": "Не удалось загрузить этот трек: {0}",
+    "paused": "Пауза: **{0}**.",
+    "stopped": "Воспроизведение остановлено, бот покинул голосовой канал."
+  },
+  "spotify": {
+    "disclosure": " (подобрано через поиск на YouTube — это не оригинальное аудио Spotify)",
+    "albumSummary": "Альбом Spotify **{0}**: добавлено треков — {1} из {2} (подбор через YouTube).",
+    "playlistSummary": "Плейлист Spotify **{0}**: добавлено треков — {1} из {2} (подбор через YouTube).",
+    "artistSummary": "Топ-треки исполнителя Spotify **{0}**: добавлено — {1} из {2} (подбор через YouTube).",
+    "summaryFailedSuffix": "\nТреков без совпадения на YouTube: {0} — пропущены.",
+    "summaryCappedSuffix": "\nВсего треков по данным Spotify: {0}; проверены только первые {1}."
   }
 }

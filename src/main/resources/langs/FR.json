@@ -698,7 +698,34 @@
       "appearance": "Apparence & langue",
       "guiTheme": "Thème",
       "searchLabel": "Filtrer les paramètres",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "Moteur de lecture",
+      "lavalinkEngineFallbackNote": "`fallback` n'est pas encore implémenté (prévu pour une étape ultérieure : les deux moteurs fonctionnent en parallèle, avec bascule en cas de panne d'un nœud). Le choisir maintenant se contente de consigner un avertissement au démarrage, et le bot continue de jouer via lavaplayer jusqu'à son implémentation.",
+      "lavalinkIntro": "Se connecte à un nœud Lavalink — un serveur audio séparé que tu héberges toi-même, qui rejoint le salon vocal et diffuse l'audio à la place du bot. Ce n'est pas un proxy HTTP/SOCKS : si tu veux plutôt faire passer les requêtes sortantes par un proxy, consulte la section Proxy plus bas.",
+      "lavalinkNodeAdd": "Ajouter",
+      "lavalinkNodeDialogHostRequired": "L'hôte est obligatoire.",
+      "lavalinkNodeDialogTitleAdd": "Ajouter un nœud Lavalink",
+      "lavalinkNodeDialogTitleEdit": "Modifier le nœud Lavalink",
+      "lavalinkNodeDown": "Descendre",
+      "lavalinkNodeEdit": "Modifier",
+      "lavalinkNodeHost": "Hôte",
+      "lavalinkNodeName": "Nom",
+      "lavalinkNodePassword": "Mot de passe",
+      "lavalinkNodePort": "Port",
+      "lavalinkNodeRemove": "Retirer",
+      "lavalinkNodeSecure": "Sécurisé (https/wss)",
+      "lavalinkNodeUp": "Monter",
+      "lavalinkNodes": "Nœuds Lavalink",
+      "lavalinkNodesNote": "L'étape 1 n'utilise toujours que le premier nœud de cette liste. En ajouter d'autres prépare le routage sur plusieurs nœuds, prévu pour une étape ultérieure — jusque-là, seul le premier est actif.",
+      "lavalinkTestConnection": "Tester la connexion",
+      "lavalinkTestConnectionAuthFailed": "{0} a été joint, mais le mot de passe a été refusé (HTTP {1}).",
+      "lavalinkTestConnectionNoNode": "Ajoute d'abord un nœud.",
+      "lavalinkTestConnectionOk": "Connecté : Lavalink {0} — {1} source(s) audio, {2} plugin(s).",
+      "lavalinkTestConnectionRunning": "Test de {0} en cours…",
+      "lavalinkTestConnectionUnreachable": "Impossible de joindre {0} : {1}",
+      "performanceLavaplayerOnlyNote": "Ces tampons ne s'appliquent qu'au moteur Lavaplayer intégré. Un nœud Lavalink gère son propre tamponnage, donc ils n'ont aucun effet tant que le moteur de lecture est réglé sur `lavalink`.",
+      "proxyIntro": "Un proxy HTTP/SOCKS pour les propres requêtes réseau sortantes du bot — flux audio, API Discord, vérifications de mise à jour GitHub. Un nœud Lavalink n'est pas un proxy et n'a pas sa place ici : voir la section Lavalink plus haut."
     },
     "console": {
       "autoScroll": "Défilement automatique",
@@ -1246,5 +1273,24 @@
       "description": "efface tous les messages du salon défini avec /settc (propriétaire uniquement)",
       "name": "vider-salon"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "Cette commande n'est pas encore disponible avec le moteur de lecture Lavalink. L'étape 1 ne prend en charge que la lecture, la pause, la reprise, l'arrêt, le passage au titre suivant et le volume.",
+    "nodeUnavailable": "Le nœud Lavalink n'est pas connecté pour le moment. Réessaie dans un instant.",
+    "nowPlaying": "Lecture en cours : **{0}**",
+    "queued": "**{0}** ajouté à la file d'attente en position {1}",
+    "noMatches": "Aucun résultat trouvé pour cette recherche.",
+    "trackTooLong": "Ce titre (**{0}**) dépasse la durée maximale autorisée : `{1}`",
+    "loadFailed": "Impossible de charger ce titre : {0}",
+    "paused": "**{0}** en pause.",
+    "stopped": "Lecture arrêtée et déconnexion du salon vocal."
+  },
+  "spotify": {
+    "disclosure": " (trouvé via une recherche YouTube — pas l'audio original de Spotify)",
+    "albumSummary": "Album Spotify **{0}** : {1} titre(s) ajouté(s) sur {2} (trouvés via YouTube).",
+    "playlistSummary": "Playlist Spotify **{0}** : {1} titre(s) ajouté(s) sur {2} (trouvés via YouTube).",
+    "artistSummary": "Meilleurs titres de l'artiste Spotify **{0}** : {1} ajouté(s) sur {2} (trouvés via YouTube).",
+    "summaryFailedSuffix": "\n{0} titre(s) n'avaient pas d'équivalent sur YouTube et ont été ignorés.",
+    "summaryCappedSuffix": "\nSpotify indique {0} titres au total ; seuls les {1} premiers ont été vérifiés."
   }
 }

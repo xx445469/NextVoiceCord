@@ -698,7 +698,34 @@
       "appearance": "外観＆言語",
       "guiTheme": "テーマ",
       "searchLabel": "フィルター設定",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "再生エンジン",
+      "lavalinkEngineFallbackNote": "`fallback` はまだ実装されていません（後の段階で予定: 両方のエンジンが同時に稼働し、ノード障害時に引き継ぎます）。今これを選択すると、起動時に警告が記録されるだけで、実装されるまでボットはlavaplayer経由で再生を続けます。",
+      "lavalinkIntro": "Lavalinkノードに接続します — 自分で運用する別の音声サーバーで、ボイスチャンネルに参加してボットの代わりに音声をストリーミングします。これはHTTP/SOCKSプロキシではありません。外向きのリクエストをプロキシ経由にしたい場合は、下にある「プロキシ」セクションを参照してください。",
+      "lavalinkNodeAdd": "追加",
+      "lavalinkNodeDialogHostRequired": "ホストは必須です。",
+      "lavalinkNodeDialogTitleAdd": "Lavalinkノードを追加",
+      "lavalinkNodeDialogTitleEdit": "Lavalinkノードを編集",
+      "lavalinkNodeDown": "下へ移動",
+      "lavalinkNodeEdit": "編集",
+      "lavalinkNodeHost": "ホスト",
+      "lavalinkNodeName": "名前",
+      "lavalinkNodePassword": "パスワード",
+      "lavalinkNodePort": "ポート",
+      "lavalinkNodeRemove": "削除",
+      "lavalinkNodeSecure": "セキュア接続（https/wss）",
+      "lavalinkNodeUp": "上へ移動",
+      "lavalinkNodes": "Lavalinkノード",
+      "lavalinkNodesNote": "第1段階では、常にこのリストの最初のノードのみが使用されます。追加のノードは、後の段階で予定されている複数ノード間のルーティング機能に向けた準備です — それまでは最初の1件のみが有効です。",
+      "lavalinkTestConnection": "接続テスト",
+      "lavalinkTestConnectionAuthFailed": "{0} には到達しましたが、パスワードが拒否されました（HTTP {1}）。",
+      "lavalinkTestConnectionNoNode": "まずノードを追加してください。",
+      "lavalinkTestConnectionOk": "接続しました: Lavalink {0} — オーディオソース {1} 件、プラグイン {2} 件。",
+      "lavalinkTestConnectionRunning": "{0} をテスト中...",
+      "lavalinkTestConnectionUnreachable": "{0} に到達できませんでした: {1}",
+      "performanceLavaplayerOnlyNote": "これらのバッファはビルトインのLavaplayerエンジンにのみ適用されます。Lavalinkノードは独自にバッファを管理するため、再生エンジンが `lavalink` に設定されている間はこれらの設定に効果はありません。",
+      "proxyIntro": "ボット自身の発信ネットワークリクエスト（音声ストリーム、Discord API、GitHubの更新確認）用のHTTP/SOCKSプロキシです。Lavalinkノードはプロキシではないため、ここには該当しません。上にある「Lavalink」セクションを参照してください。"
     },
     "console": {
       "autoScroll": "自動スクロール",
@@ -1246,5 +1273,24 @@
       "description": "/settcで設定したコマンドチャンネルのメッセージを全削除（オーナー専用）",
       "name": "チャンネル削除"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "このコマンドはLavalink再生エンジンではまだ利用できません。第1段階では再生・一時停止・再開・停止・スキップ・音量調整のみに対応しています。",
+    "nodeUnavailable": "Lavalinkノードが現在接続されていません。少し時間をおいてから、もう一度お試しください。",
+    "nowPlaying": "現在再生中: **{0}**",
+    "queued": "**{0}** をキューの {1} 番目に追加しました",
+    "noMatches": "そのクエリに一致する結果が見つかりませんでした。",
+    "trackTooLong": "この曲（**{0}**）は許容される最大長を超えています: `{1}`",
+    "loadFailed": "その曲を読み込めませんでした: {0}",
+    "paused": "**{0}** を一時停止しました。",
+    "stopped": "再生を停止し、ボイスチャンネルから退出しました。"
+  },
+  "spotify": {
+    "disclosure": " (YouTube検索でマッチしたもの — Spotifyの元の音声ではありません)",
+    "albumSummary": "Spotifyアルバム **{0}**: {2}曲中{1}曲を追加しました（YouTube検索でマッチ）。",
+    "playlistSummary": "Spotifyプレイリスト **{0}**: {2}曲中{1}曲を追加しました（YouTube検索でマッチ）。",
+    "artistSummary": "Spotifyアーティスト **{0}** の人気曲: {2}曲中{1}曲を追加しました（YouTube検索でマッチ）。",
+    "summaryFailedSuffix": "\nYouTubeで一致する曲が見つからず、{0}曲をスキップしました。",
+    "summaryCappedSuffix": "\nSpotifyによると全部で{0}曲あり、最初の{1}曲のみ確認しました。"
   }
 }

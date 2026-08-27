@@ -698,7 +698,34 @@
       "appearance": "外观与语言",
       "guiTheme": "主题",
       "searchLabel": "筛选设置",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "播放引擎",
+      "lavalinkEngineFallbackNote": "`fallback` 尚未实现（计划在后续阶段推出：两种引擎同时运行，并在节点故障时自动切换）。目前选择此选项只会在启动时记录一条警告，机器人仍会通过 lavaplayer 播放，直到该功能实现为止。",
+      "lavalinkIntro": "连接到 Lavalink 节点——一个由你自行搭建的独立音频服务器，它会加入语音频道并代替机器人串流音频。这不是 HTTP/SOCKS 代理：如果你想通过代理路由对外请求，请参阅下方的“代理”部分。",
+      "lavalinkNodeAdd": "添加",
+      "lavalinkNodeDialogHostRequired": "必须填写主机。",
+      "lavalinkNodeDialogTitleAdd": "添加 Lavalink 节点",
+      "lavalinkNodeDialogTitleEdit": "编辑 Lavalink 节点",
+      "lavalinkNodeDown": "下移",
+      "lavalinkNodeEdit": "编辑",
+      "lavalinkNodeHost": "主机",
+      "lavalinkNodeName": "名称",
+      "lavalinkNodePassword": "密码",
+      "lavalinkNodePort": "端口",
+      "lavalinkNodeRemove": "移除",
+      "lavalinkNodeSecure": "安全连接（https/wss）",
+      "lavalinkNodeUp": "上移",
+      "lavalinkNodes": "Lavalink 节点",
+      "lavalinkNodesNote": "第一阶段始终只会使用此列表中的第一个节点。添加更多节点是为日后跨多个节点路由做准备，该功能计划在后续阶段推出——在此之前，只有第一个节点会生效。",
+      "lavalinkTestConnection": "测试连接",
+      "lavalinkTestConnectionAuthFailed": "已连接到 {0}，但密码被拒绝（HTTP {1}）。",
+      "lavalinkTestConnectionNoNode": "请先添加一个节点。",
+      "lavalinkTestConnectionOk": "已连接：Lavalink {0} — 音频来源 {1} 个、插件 {2} 个。",
+      "lavalinkTestConnectionRunning": "正在测试 {0}……",
+      "lavalinkTestConnectionUnreachable": "无法连接到 {0}：{1}",
+      "performanceLavaplayerOnlyNote": "这些缓冲设置仅适用于内置的 Lavaplayer 引擎。Lavalink 节点会自行管理缓冲，因此当播放引擎设为 `lavalink` 时，这些设置不会产生任何效果。",
+      "proxyIntro": "用于机器人自身对外网络请求的 HTTP/SOCKS 代理——包括音频流、Discord API、GitHub 更新检查。Lavalink 节点不是代理，不属于此处设置：请参阅上方的“Lavalink”部分。"
     },
     "console": {
       "autoScroll": "自动滚动",
@@ -1246,5 +1273,24 @@
       "description": "清除以 /settc 设置的指令频道中所有消息（仅限所有者）",
       "name": "清除频道"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "此命令目前还无法在 Lavalink 播放引擎下使用。第一阶段仅支持播放、暂停、恢复播放、停止、跳过和音量调整。",
+    "nodeUnavailable": "Lavalink 节点当前未连接，请稍后再试。",
+    "nowPlaying": "正在播放 **{0}**",
+    "queued": "已将 **{0}** 加入队列，位置为第 {1} 位",
+    "noMatches": "未找到符合该查询的结果。",
+    "trackTooLong": "这首歌（**{0}**）超过了允许的最大长度：`{1}`",
+    "loadFailed": "无法加载该曲目：{0}",
+    "paused": "已暂停 **{0}**。",
+    "stopped": "已停止播放并离开语音频道。"
+  },
+  "spotify": {
+    "disclosure": " (通过 YouTube 搜索匹配，并非 Spotify 原始音频)",
+    "albumSummary": "Spotify 专辑 **{0}**：已添加 {1}／{2} 首曲目（通过 YouTube 匹配）。",
+    "playlistSummary": "Spotify 播放列表 **{0}**：已添加 {1}／{2} 首曲目（通过 YouTube 匹配）。",
+    "artistSummary": "Spotify 歌手 **{0}** 的热门曲目：已添加 {1}／{2} 首（通过 YouTube 匹配）。",
+    "summaryFailedSuffix": "\n有 {0} 首曲目在 YouTube 上未找到匹配，已跳过。",
+    "summaryCappedSuffix": "\nSpotify 显示总共有 {0} 首曲目，仅检查了前 {1} 首。"
   }
 }

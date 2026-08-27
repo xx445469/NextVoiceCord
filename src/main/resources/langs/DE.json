@@ -698,7 +698,34 @@
       "appearance": "Erscheinungsbild & Sprache",
       "guiTheme": "Design",
       "searchLabel": "Einstellungen filtern",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "Wiedergabe-Engine",
+      "lavalinkEngineFallbackNote": "`fallback` ist noch nicht implementiert (für eine spätere Stufe geplant: beide Engines laufen parallel, mit Übergabe bei Knotenausfall). Wählst du es jetzt aus, wird beim Start nur eine Warnung protokolliert, und der Bot spielt weiterhin über lavaplayer, bis es implementiert ist.",
+      "lavalinkIntro": "Verbindet sich mit einem Lavalink-Knoten — einem separaten Audioserver, den du selbst betreibst und der dem Sprachkanal beitritt und anstelle des Bots Audio streamt. Das ist kein HTTP/SOCKS-Proxy: Wenn du ausgehende Anfragen stattdessen über einen solchen leiten möchtest, sieh dir den Proxy-Abschnitt weiter unten an.",
+      "lavalinkNodeAdd": "Hinzufügen",
+      "lavalinkNodeDialogHostRequired": "Host ist erforderlich.",
+      "lavalinkNodeDialogTitleAdd": "Lavalink-Knoten hinzufügen",
+      "lavalinkNodeDialogTitleEdit": "Lavalink-Knoten bearbeiten",
+      "lavalinkNodeDown": "Nach unten verschieben",
+      "lavalinkNodeEdit": "Bearbeiten",
+      "lavalinkNodeHost": "Host",
+      "lavalinkNodeName": "Name",
+      "lavalinkNodePassword": "Passwort",
+      "lavalinkNodePort": "Port",
+      "lavalinkNodeRemove": "Entfernen",
+      "lavalinkNodeSecure": "Sicher (https/wss)",
+      "lavalinkNodeUp": "Nach oben verschieben",
+      "lavalinkNodes": "Lavalink-Knoten",
+      "lavalinkNodesNote": "Stufe 1 verwendet immer nur den ersten Knoten dieser Liste. Weitere Knoten hinzuzufügen, bereitet das Routing über mehrere Knoten vor, das für eine spätere Stufe geplant ist — bis dahin ist nur der erste aktiv.",
+      "lavalinkTestConnection": "Verbindung testen",
+      "lavalinkTestConnectionAuthFailed": "{0} wurde erreicht, aber das Passwort wurde abgelehnt (HTTP {1}).",
+      "lavalinkTestConnectionNoNode": "Füge zuerst einen Knoten hinzu.",
+      "lavalinkTestConnectionOk": "Verbunden: Lavalink {0} — {1} Audioquelle(n), {2} Plugin(s).",
+      "lavalinkTestConnectionRunning": "Teste {0} …",
+      "lavalinkTestConnectionUnreachable": "{0} war nicht erreichbar: {1}",
+      "performanceLavaplayerOnlyNote": "Diese Puffer gelten nur für die integrierte Lavaplayer-Engine. Ein Lavalink-Knoten verwaltet sein eigenes Puffering, daher haben sie keine Wirkung, solange die Wiedergabe-Engine auf `lavalink` eingestellt ist.",
+      "proxyIntro": "Ein HTTP/SOCKS-Proxy für die eigenen ausgehenden Netzwerkanfragen des Bots — Audiostreams, die Discord-API, GitHub-Update-Prüfungen. Ein Lavalink-Knoten ist kein Proxy und gehört nicht hierher: siehe den Lavalink-Abschnitt weiter oben."
     },
     "console": {
       "autoScroll": "Automatisch scrollen",
@@ -1246,5 +1273,24 @@
       "description": "löscht alle Nachrichten im mit /settc festgelegten Befehlskanal (nur Owner)",
       "name": "kanalleeren"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "Dieser Befehl ist mit der Lavalink-Wiedergabe-Engine noch nicht verfügbar. Stufe 1 unterstützt nur Abspielen, Pausieren, Fortsetzen, Stoppen, Überspringen und Lautstärke.",
+    "nodeUnavailable": "Der Lavalink-Knoten ist momentan nicht verbunden. Bitte versuche es gleich noch einmal.",
+    "nowPlaying": "Läuft jetzt: **{0}**",
+    "queued": "**{0}** an Position {1} zur Warteschlange hinzugefügt",
+    "noMatches": "Für diese Suchanfrage wurden keine Ergebnisse gefunden.",
+    "trackTooLong": "Dieser Titel (**{0}**) ist länger als das erlaubte Maximum: `{1}`",
+    "loadFailed": "Dieser Titel konnte nicht geladen werden: {0}",
+    "paused": "**{0}** pausiert.",
+    "stopped": "Wiedergabe gestoppt und den Sprachkanal verlassen."
+  },
+  "spotify": {
+    "disclosure": " (per YouTube-Suche gefunden — nicht das Original-Audio von Spotify)",
+    "albumSummary": "Spotify-Album **{0}**: {1} von {2} Titeln hinzugefügt (per YouTube-Suche gefunden).",
+    "playlistSummary": "Spotify-Playlist **{0}**: {1} von {2} Titeln hinzugefügt (per YouTube-Suche gefunden).",
+    "artistSummary": "Spotify-Künstler **{0}** – Top-Titel: {1} von {2} hinzugefügt (per YouTube-Suche gefunden).",
+    "summaryFailedSuffix": "\n{0} Titel hatten keine Entsprechung auf YouTube und wurden übersprungen.",
+    "summaryCappedSuffix": "\nSpotify meldet insgesamt {0} Titel; es wurden nur die ersten {1} geprüft."
   }
 }

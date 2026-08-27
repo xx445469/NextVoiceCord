@@ -698,7 +698,34 @@
       "appearance": "Apariencia e idioma",
       "guiTheme": "Tema",
       "searchLabel": "Filtrar ajustes",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "Motor de reproducción",
+      "lavalinkEngineFallbackNote": "`fallback` todavía no está implementado (previsto para una etapa posterior: ambos motores activos a la vez, con traspaso si falla un nodo). Elegirlo ahora solo registra una advertencia al iniciar, y el bot sigue reproduciendo mediante lavaplayer hasta que se implemente.",
+      "lavalinkIntro": "Se conecta a un nodo de Lavalink, un servidor de audio independiente que gestionas tú mismo, que se une al canal de voz y transmite el audio en lugar del bot. Esto no es un proxy HTTP/SOCKS: si quieres enrutar las solicitudes salientes por uno de esos, consulta la sección Proxy más abajo.",
+      "lavalinkNodeAdd": "Añadir",
+      "lavalinkNodeDialogHostRequired": "El host es obligatorio.",
+      "lavalinkNodeDialogTitleAdd": "Añadir nodo de Lavalink",
+      "lavalinkNodeDialogTitleEdit": "Editar nodo de Lavalink",
+      "lavalinkNodeDown": "Bajar",
+      "lavalinkNodeEdit": "Editar",
+      "lavalinkNodeHost": "Host",
+      "lavalinkNodeName": "Nombre",
+      "lavalinkNodePassword": "Contraseña",
+      "lavalinkNodePort": "Puerto",
+      "lavalinkNodeRemove": "Quitar",
+      "lavalinkNodeSecure": "Seguro (https/wss)",
+      "lavalinkNodeUp": "Subir",
+      "lavalinkNodes": "Nodos de Lavalink",
+      "lavalinkNodesNote": "La etapa 1 siempre usa únicamente el primer nodo de esta lista. Añadir más nodos prepara el enrutamiento entre varios nodos, previsto para una etapa posterior; hasta entonces, solo el primero está activo.",
+      "lavalinkTestConnection": "Probar conexión",
+      "lavalinkTestConnectionAuthFailed": "Se alcanzó {0}, pero rechazó la contraseña (HTTP {1}).",
+      "lavalinkTestConnectionNoNode": "Añade primero un nodo.",
+      "lavalinkTestConnectionOk": "Conectado: Lavalink {0} — {1} fuente(s) de audio, {2} complemento(s).",
+      "lavalinkTestConnectionRunning": "Probando {0}…",
+      "lavalinkTestConnectionUnreachable": "No se pudo conectar con {0}: {1}",
+      "performanceLavaplayerOnlyNote": "Estos búferes solo se aplican al motor Lavaplayer integrado. Un nodo de Lavalink gestiona su propio búfer, por lo que no tienen efecto mientras el motor de reproducción esté configurado en `lavalink`.",
+      "proxyIntro": "Un proxy HTTP/SOCKS para las propias solicitudes de red salientes del bot: transmisiones de audio, la API de Discord, comprobaciones de actualización de GitHub. Un nodo de Lavalink no es un proxy y no pertenece aquí: consulta la sección Lavalink más arriba."
     },
     "console": {
       "autoScroll": "Desplazamiento automático",
@@ -1246,5 +1273,24 @@
       "description": "borra todos los mensajes del canal definido con /settc (solo el dueño)",
       "name": "limpiar-canal"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "Este comando aún no está disponible con el motor de reproducción Lavalink. La etapa 1 solo admite reproducir, pausar, reanudar, detener, saltar y volumen.",
+    "nodeUnavailable": "El nodo de Lavalink no está conectado en este momento. Inténtalo de nuevo en un momento.",
+    "nowPlaying": "Reproduciendo ahora: **{0}**",
+    "queued": "**{0}** añadido a la cola en la posición {1}",
+    "noMatches": "No se encontraron resultados para esa búsqueda.",
+    "trackTooLong": "Esta canción (**{0}**) supera la duración máxima permitida: `{1}`",
+    "loadFailed": "No se pudo cargar esa canción: {0}",
+    "paused": "**{0}** en pausa.",
+    "stopped": "Reproducción detenida y se salió del canal de voz."
+  },
+  "spotify": {
+    "disclosure": " (encontrado mediante búsqueda en YouTube; no es el audio original de Spotify)",
+    "albumSummary": "Álbum de Spotify **{0}**: se añadieron {1} de {2} canciones (encontradas mediante YouTube).",
+    "playlistSummary": "Lista de reproducción de Spotify **{0}**: se añadieron {1} de {2} canciones (encontradas mediante YouTube).",
+    "artistSummary": "Artista de Spotify **{0}**, mejores canciones: se añadieron {1} de {2} (encontradas mediante YouTube).",
+    "summaryFailedSuffix": "\n{0} canción(es) no tuvieron coincidencia en YouTube y se omitieron.",
+    "summaryCappedSuffix": "\nSpotify indica {0} canciones en total; solo se comprobaron las primeras {1}."
   }
 }

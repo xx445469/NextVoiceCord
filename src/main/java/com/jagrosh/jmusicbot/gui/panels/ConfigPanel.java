@@ -554,7 +554,10 @@ public class ConfigPanel extends JPanel {
         gbc.fill = GridBagConstraints.NONE;
         JLabel l = new JLabel(label);
         l.setFont(Tokens.fontLabel());
-        l.setForeground(Tokens.textMuted());
+        // Primary, not muted. A field label names the setting; the hint underneath explains it.
+        // Both being muted made the label read as secondary to the value beside it, which is
+        // backwards — you look for the label to find the setting.
+        l.setForeground(Tokens.text());
         panel.add(l, gbc);
 
         gbc.gridx = 1;
@@ -1471,6 +1474,13 @@ public class ConfigPanel extends JPanel {
         Widgets.Card card = new Widgets.Card();
         card.setLayout(new BorderLayout(0, Tokens.SPACE_XS));
 
+        // This card sits below the scroll area rather than inside it, so it does not get the
+        // gutter Widgets.scrollable adds. Without matching that inset it ran wider than every
+        // card above it and its right edge sat under where the scrollbar track is.
+        JPanel aligned = Widgets.transparent(new BorderLayout());
+        aligned.add(card, BorderLayout.CENTER);
+        aligned.add(Box.createHorizontalStrut(Tokens.SPACE_SM), BorderLayout.EAST);
+
         JPanel buttonPanel = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
 
         JButton saveButton = Widgets.primaryButton(GuiLanguage.msg("gui.config.saveChanges"));
@@ -1487,7 +1497,7 @@ public class ConfigPanel extends JPanel {
         // view; every option on this panel needs a restart, not just the original ones.
         card.add(Widgets.hint(GuiLanguage.msg("gui.config.restartRequired")), BorderLayout.SOUTH);
 
-        return card;
+        return aligned;
     }
 
     /**

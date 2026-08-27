@@ -698,7 +698,34 @@
       "appearance": "외관 및 언어",
       "guiTheme": "테마",
       "searchLabel": "필터 설정",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "재생 엔진",
+      "lavalinkEngineFallbackNote": "`fallback`은 아직 구현되지 않았어요(이후 단계에서 예정: 두 엔진이 함께 동작하며 노드 장애 시 전환돼요). 지금 선택해도 시작할 때 경고만 기록되고, 구현되기 전까지는 봇이 lavaplayer로 재생을 이어가요.",
+      "lavalinkIntro": "Lavalink 노드에 연결해요 — 직접 운영하는 별도의 오디오 서버로, 음성 채널에 참여해서 봇 대신 오디오를 스트리밍해요. 이는 HTTP/SOCKS 프록시가 아니에요. 나가는 요청을 프록시로 경유하고 싶다면 아래의 프록시 섹션을 참고하세요.",
+      "lavalinkNodeAdd": "추가",
+      "lavalinkNodeDialogHostRequired": "호스트는 필수예요.",
+      "lavalinkNodeDialogTitleAdd": "Lavalink 노드 추가",
+      "lavalinkNodeDialogTitleEdit": "Lavalink 노드 편집",
+      "lavalinkNodeDown": "아래로 이동",
+      "lavalinkNodeEdit": "편집",
+      "lavalinkNodeHost": "호스트",
+      "lavalinkNodeName": "이름",
+      "lavalinkNodePassword": "비밀번호",
+      "lavalinkNodePort": "포트",
+      "lavalinkNodeRemove": "제거",
+      "lavalinkNodeSecure": "보안 연결(https/wss)",
+      "lavalinkNodeUp": "위로 이동",
+      "lavalinkNodes": "Lavalink 노드",
+      "lavalinkNodesNote": "1단계에서는 이 목록의 첫 번째 노드만 항상 사용해요. 노드를 더 추가하는 건 여러 노드에 걸친 라우팅 기능을 위한 준비 작업으로, 이후 단계에서 예정돼 있어요 — 그때까지는 첫 번째 노드만 실제로 동작해요.",
+      "lavalinkTestConnection": "연결 테스트",
+      "lavalinkTestConnectionAuthFailed": "{0}에는 연결했지만 비밀번호가 거부됐어요 (HTTP {1}).",
+      "lavalinkTestConnectionNoNode": "먼저 노드를 추가해 주세요.",
+      "lavalinkTestConnectionOk": "연결됨: Lavalink {0} — 오디오 소스 {1}개, 플러그인 {2}개.",
+      "lavalinkTestConnectionRunning": "{0} 테스트 중...",
+      "lavalinkTestConnectionUnreachable": "{0}에 연결할 수 없었어요: {1}",
+      "performanceLavaplayerOnlyNote": "이 버퍼 설정은 내장된 Lavaplayer 엔진에만 적용돼요. Lavalink 노드는 자체적으로 버퍼링을 관리하므로, 재생 엔진이 `lavalink`로 설정된 동안에는 이 설정이 아무 효과가 없어요.",
+      "proxyIntro": "봇 자체의 아웃바운드 네트워크 요청(오디오 스트림, Discord API, GitHub 업데이트 확인)을 위한 HTTP/SOCKS 프록시예요. Lavalink 노드는 프록시가 아니므로 여기에 해당하지 않아요. 위의 Lavalink 섹션을 참고하세요."
     },
     "console": {
       "autoScroll": "자동 스크롤",
@@ -1246,5 +1273,24 @@
       "description": "/settc로 설정한 명령어 채널의 메시지를 모두 삭제해요 (소유자 전용)",
       "name": "채널초기화"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "이 명령어는 Lavalink 재생 엔진에서 아직 사용할 수 없어요. 1단계에서는 재생, 일시정지, 재개, 정지, 건너뛰기, 음량 조절만 지원해요.",
+    "nodeUnavailable": "Lavalink 노드가 지금 연결되어 있지 않아요. 잠시 후 다시 시도해 주세요.",
+    "nowPlaying": "현재 재생 중: **{0}**",
+    "queued": "트랙(**{0}**)을 대기열 {1}번째 위치에 추가했어요",
+    "noMatches": "해당 검색어에 대한 결과를 찾지 못했어요.",
+    "trackTooLong": "이 트랙(**{0}**)이 허용된 최대 길이를 초과했어요: `{1}`",
+    "loadFailed": "해당 트랙을 불러오지 못했어요: {0}",
+    "paused": "**{0}** 일시정지했어요.",
+    "stopped": "재생을 정지하고 음성 채널에서 나갔어요."
+  },
+  "spotify": {
+    "disclosure": " (YouTube 검색으로 매칭된 항목 — Spotify 원본 오디오가 아니에요)",
+    "albumSummary": "Spotify 앨범 **{0}**: {2}곡 중 {1}곡을 추가했어요 (YouTube 검색으로 매칭).",
+    "playlistSummary": "Spotify 재생목록 **{0}**: {2}곡 중 {1}곡을 추가했어요 (YouTube 검색으로 매칭).",
+    "artistSummary": "Spotify 아티스트(**{0}**)의 인기 트랙: {2}곡 중 {1}곡을 추가했어요 (YouTube 검색으로 매칭).",
+    "summaryFailedSuffix": "\nYouTube에서 일치하는 항목을 찾지 못한 {0}곡을 건너뛰었어요.",
+    "summaryCappedSuffix": "\nSpotify에 따르면 전체 {0}곡 중 앞의 {1}곡만 확인했어요."
   }
 }

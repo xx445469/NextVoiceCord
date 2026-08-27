@@ -698,7 +698,34 @@
       "appearance": "Diện mạo & Ngôn ngữ",
       "guiTheme": "Giao diện",
       "searchLabel": "Lọc cài đặt",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "Công cụ phát nhạc",
+      "lavalinkEngineFallbackNote": "`fallback` chưa được triển khai (dự kiến cho giai đoạn sau: cả hai công cụ cùng hoạt động, chuyển giao khi máy chủ gặp sự cố). Chọn tuỳ chọn này lúc này chỉ ghi một cảnh báo khi khởi động, và bot vẫn phát qua lavaplayer cho đến khi tính năng được triển khai.",
+      "lavalinkIntro": "Kết nối tới một máy chủ Lavalink — một máy chủ âm thanh riêng do bạn tự vận hành, tham gia kênh thoại và phát âm thanh thay cho bot. Đây không phải là proxy HTTP/SOCKS: nếu bạn muốn định tuyến các yêu cầu đi ra qua proxy, hãy xem phần Proxy bên dưới.",
+      "lavalinkNodeAdd": "Thêm",
+      "lavalinkNodeDialogHostRequired": "Cần nhập máy chủ.",
+      "lavalinkNodeDialogTitleAdd": "Thêm máy chủ Lavalink",
+      "lavalinkNodeDialogTitleEdit": "Sửa máy chủ Lavalink",
+      "lavalinkNodeDown": "Di chuyển xuống",
+      "lavalinkNodeEdit": "Sửa",
+      "lavalinkNodeHost": "Máy chủ",
+      "lavalinkNodeName": "Tên",
+      "lavalinkNodePassword": "Mật khẩu",
+      "lavalinkNodePort": "Cổng",
+      "lavalinkNodeRemove": "Xóa",
+      "lavalinkNodeSecure": "Bảo mật (https/wss)",
+      "lavalinkNodeUp": "Di chuyển lên",
+      "lavalinkNodes": "Máy chủ Lavalink",
+      "lavalinkNodesNote": "Giai đoạn 1 luôn chỉ dùng máy chủ đầu tiên trong danh sách này. Việc thêm nhiều máy chủ hơn là bước chuẩn bị cho định tuyến giữa nhiều máy chủ, dự kiến ở giai đoạn sau — cho đến lúc đó, chỉ máy chủ đầu tiên hoạt động.",
+      "lavalinkTestConnection": "Kiểm tra kết nối",
+      "lavalinkTestConnectionAuthFailed": "Đã tới được {0}, nhưng mật khẩu bị từ chối (HTTP {1}).",
+      "lavalinkTestConnectionNoNode": "Hãy thêm một máy chủ trước.",
+      "lavalinkTestConnectionOk": "Đã kết nối: Lavalink {0} — {1} nguồn âm thanh, {2} plugin.",
+      "lavalinkTestConnectionRunning": "Đang kiểm tra {0}...",
+      "lavalinkTestConnectionUnreachable": "Không thể kết nối tới {0}: {1}",
+      "performanceLavaplayerOnlyNote": "Các bộ đệm này chỉ áp dụng cho công cụ Lavaplayer tích hợp sẵn. Máy chủ Lavalink tự quản lý việc đệm dữ liệu của nó, nên các thiết lập này không có tác dụng khi công cụ phát được đặt thành `lavalink`.",
+      "proxyIntro": "Một proxy HTTP/SOCKS cho các yêu cầu mạng đi ra của chính bot — luồng âm thanh, API Discord, kiểm tra cập nhật GitHub. Máy chủ Lavalink không phải là proxy và không thuộc mục này: xem phần Proxy ở trên."
     },
     "console": {
       "autoScroll": "Tự động cuộn",
@@ -1246,5 +1273,24 @@
       "description": "xóa tất cả tin nhắn trong kênh lệnh đã đặt bằng /settc (chỉ chủ sở hữu)",
       "name": "dọn-kênh"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "Lệnh này chưa khả dụng với công cụ phát Lavalink. Giai đoạn 1 chỉ hỗ trợ phát, tạm dừng, tiếp tục, dừng, bỏ qua và âm lượng.",
+    "nodeUnavailable": "Máy chủ Lavalink hiện chưa kết nối. Vui lòng thử lại sau giây lát.",
+    "nowPlaying": "Đang phát **{0}**",
+    "queued": "Đã thêm **{0}** vào hàng đợi tại vị trí {1}",
+    "noMatches": "Không tìm thấy kết quả nào cho truy vấn đó.",
+    "trackTooLong": "Bài hát này (**{0}**) dài hơn mức tối đa cho phép: `{1}`",
+    "loadFailed": "Không thể tải bài hát đó: {0}",
+    "paused": "Đã tạm dừng **{0}**.",
+    "stopped": "Đã dừng phát và rời khỏi kênh thoại."
+  },
+  "spotify": {
+    "disclosure": " (khớp qua tìm kiếm YouTube — không phải âm thanh gốc từ Spotify)",
+    "albumSummary": "Album Spotify **{0}**: đã thêm {1}/{2} bài hát (khớp qua YouTube).",
+    "playlistSummary": "Danh sách phát Spotify **{0}**: đã thêm {1}/{2} bài hát (khớp qua YouTube).",
+    "artistSummary": "Bài hát nổi bật của nghệ sĩ Spotify **{0}**: đã thêm {1}/{2} (khớp qua YouTube).",
+    "summaryFailedSuffix": "\nCó {0} bài hát không khớp trên YouTube nên đã bị bỏ qua.",
+    "summaryCappedSuffix": "\nSpotify báo cáo tổng cộng {0} bài hát; chỉ {1} bài đầu tiên được kiểm tra."
   }
 }

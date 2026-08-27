@@ -698,7 +698,34 @@
       "appearance": "Wygląd i język",
       "guiTheme": "Motyw",
       "searchLabel": "Filtruj ustawienia",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "Silnik odtwarzania",
+      "lavalinkEngineFallbackNote": "`fallback` nie jest jeszcze zaimplementowany (zaplanowany na późniejszy etap: oba silniki działają jednocześnie, z przełączeniem przy awarii węzła). Wybranie go teraz tylko zapisuje ostrzeżenie przy starcie, a bot nadal odtwarza przez lavaplayer, dopóki funkcja nie zostanie zaimplementowana.",
+      "lavalinkIntro": "Łączy się z węzłem Lavalink — osobnym serwerem audio, który uruchamiasz samodzielnie i który dołącza do kanału głosowego oraz strumieniuje dźwięk zamiast bota. To nie jest proxy HTTP/SOCKS: jeśli chcesz kierować żądania wychodzące przez taki proxy, zobacz sekcję Proxy poniżej.",
+      "lavalinkNodeAdd": "Dodaj",
+      "lavalinkNodeDialogHostRequired": "Host jest wymagany.",
+      "lavalinkNodeDialogTitleAdd": "Dodaj węzeł Lavalink",
+      "lavalinkNodeDialogTitleEdit": "Edytuj węzeł Lavalink",
+      "lavalinkNodeDown": "Przesuń w dół",
+      "lavalinkNodeEdit": "Edytuj",
+      "lavalinkNodeHost": "Host",
+      "lavalinkNodeName": "Nazwa",
+      "lavalinkNodePassword": "Hasło",
+      "lavalinkNodePort": "Port",
+      "lavalinkNodeRemove": "Usuń",
+      "lavalinkNodeSecure": "Bezpieczne (https/wss)",
+      "lavalinkNodeUp": "Przesuń w górę",
+      "lavalinkNodes": "Węzły Lavalink",
+      "lavalinkNodesNote": "Etap 1 zawsze korzysta wyłącznie z pierwszego węzła na tej liście. Dodawanie kolejnych przygotowuje grunt pod routing między wieloma węzłami, zaplanowany na późniejszy etap — do tego czasu działa tylko pierwszy.",
+      "lavalinkTestConnection": "Testuj połączenie",
+      "lavalinkTestConnectionAuthFailed": "Połączono z {0}, ale hasło zostało odrzucone (HTTP {1}).",
+      "lavalinkTestConnectionNoNode": "Najpierw dodaj węzeł.",
+      "lavalinkTestConnectionOk": "Połączono: Lavalink {0} — źródeł dźwięku: {1}, wtyczek: {2}.",
+      "lavalinkTestConnectionRunning": "Testowanie {0}…",
+      "lavalinkTestConnectionUnreachable": "Nie udało się połączyć z {0}: {1}",
+      "performanceLavaplayerOnlyNote": "Te bufory dotyczą wyłącznie wbudowanego silnika Lavaplayer. Węzeł Lavalink zarządza własnym buforowaniem, więc nie mają żadnego efektu, gdy silnik odtwarzania jest ustawiony na `lavalink`.",
+      "proxyIntro": "Proxy HTTP/SOCKS dla własnych wychodzących żądań sieciowych bota — strumieni audio, API Discorda, sprawdzania aktualizacji GitHub. Węzeł Lavalink nie jest proxy i nie należy tu do niego: zobacz sekcję Lavalink powyżej."
     },
     "console": {
       "autoScroll": "Autoprzewijanie",
@@ -1246,5 +1273,24 @@
       "description": "czyści wiadomości w kanale komend ustawionym przez /settc (tylko właściciel)",
       "name": "wyczyść-kanał"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "To polecenie nie jest jeszcze dostępne przy silniku odtwarzania Lavalink. Etap 1 obsługuje tylko odtwarzanie, wstrzymywanie, wznawianie, zatrzymywanie, pomijanie i głośność.",
+    "nodeUnavailable": "Węzeł Lavalink nie jest teraz połączony. Spróbuj ponownie za chwilę.",
+    "nowPlaying": "Teraz gra: **{0}**",
+    "queued": "Dodano do kolejki na pozycji {1}: **{0}**",
+    "noMatches": "Nie znaleziono wyników dla tego zapytania.",
+    "trackTooLong": "Ten utwór (**{0}**) jest dłuższy niż dozwolone maksimum: `{1}`",
+    "loadFailed": "Nie udało się wczytać tego utworu: {0}",
+    "paused": "Wstrzymano: **{0}**.",
+    "stopped": "Zatrzymano odtwarzanie i opuszczono kanał głosowy."
+  },
+  "spotify": {
+    "disclosure": " (dopasowane przez wyszukiwanie YouTube — to nie oryginalne audio ze Spotify)",
+    "albumSummary": "Album Spotify **{0}**: dodano {1} z {2} utworów (dopasowano przez YouTube).",
+    "playlistSummary": "Playlista Spotify **{0}**: dodano {1} z {2} utworów (dopasowano przez YouTube).",
+    "artistSummary": "Popularne utwory artysty Spotify **{0}**: dodano {1} z {2} (dopasowano przez YouTube).",
+    "summaryFailedSuffix": "\n{0} utworów nie miało dopasowania na YouTube i zostały pominięte.",
+    "summaryCappedSuffix": "\nSpotify podaje łącznie {0} utworów; sprawdzono tylko pierwsze {1}."
   }
 }

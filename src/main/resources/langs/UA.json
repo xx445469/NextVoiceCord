@@ -698,7 +698,34 @@
       "appearance": "Зовнішній вигляд та мова",
       "guiTheme": "Тема",
       "searchLabel": "Фільтр налаштувань",
-      "youtube": "YouTube"
+      "youtube": "YouTube",
+      "lavalink": "Lavalink",
+      "lavalinkEngine": "Рушій відтворення",
+      "lavalinkEngineFallbackNote": "`fallback` поки не реалізовано (заплановано на пізніший етап: обидва рушії працюють одночасно, з перемиканням у разі збою вузла). Якщо вибрати його зараз, під час запуску просто з'явиться попередження, а бот продовжить грати через lavaplayer, доки це не буде реалізовано.",
+      "lavalinkIntro": "Підключається до вузла Lavalink — окремого аудіосервера, який ти запускаєш самостійно; він приєднується до голосового каналу й транслює звук замість бота. Це не HTTP/SOCKS-проксі: якщо ти хочеш спрямовувати вихідні запити через проксі, дивись розділ «Проксі» нижче.",
+      "lavalinkNodeAdd": "Додати",
+      "lavalinkNodeDialogHostRequired": "Потрібно вказати хост.",
+      "lavalinkNodeDialogTitleAdd": "Додати вузол Lavalink",
+      "lavalinkNodeDialogTitleEdit": "Редагувати вузол Lavalink",
+      "lavalinkNodeDown": "Перемістити вниз",
+      "lavalinkNodeEdit": "Редагувати",
+      "lavalinkNodeHost": "Хост",
+      "lavalinkNodeName": "Назва",
+      "lavalinkNodePassword": "Пароль",
+      "lavalinkNodePort": "Порт",
+      "lavalinkNodeRemove": "Видалити",
+      "lavalinkNodeSecure": "Безпечне з'єднання (https/wss)",
+      "lavalinkNodeUp": "Перемістити вгору",
+      "lavalinkNodes": "Вузли Lavalink",
+      "lavalinkNodesNote": "На першому етапі завжди використовується лише перший вузол зі списку. Додавання нових вузлів — це підготовка до маршрутизації між кількома вузлами, запланованої на пізніший етап; до того часу активний лише перший.",
+      "lavalinkTestConnection": "Перевірити з'єднання",
+      "lavalinkTestConnectionAuthFailed": "Вдалося підключитися до {0}, але пароль відхилено (HTTP {1}).",
+      "lavalinkTestConnectionNoNode": "Спочатку додай вузол.",
+      "lavalinkTestConnectionOk": "Підключено: Lavalink {0} — джерел звуку: {1}, плагінів: {2}.",
+      "lavalinkTestConnectionRunning": "Перевірка {0}…",
+      "lavalinkTestConnectionUnreachable": "Не вдалося підключитися до {0}: {1}",
+      "performanceLavaplayerOnlyNote": "Ці буфери стосуються лише вбудованого рушія Lavaplayer. Вузол Lavalink керує буферизацією самостійно, тому вони не діють, поки рушій відтворення встановлено на `lavalink`.",
+      "proxyIntro": "HTTP/SOCKS-проксі для власних вихідних мережевих запитів бота — аудіопотоків, API Discord, перевірок оновлень на GitHub. Вузол Lavalink — не проксі, і йому тут не місце: див. розділ «Lavalink» вище."
     },
     "console": {
       "autoScroll": "Автопрокрутка",
@@ -1246,5 +1273,24 @@
       "description": "видаляє всі повідомлення в каналі, заданому через /settc (лише власник)",
       "name": "очистити-канал"
     }
+  },
+  "lavalink": {
+    "notYetSupported": "Ця команда поки що недоступна з рушієм відтворення Lavalink. На першому етапі підтримуються лише відтворення, пауза, відновлення, зупинка, пропуск і гучність.",
+    "nodeUnavailable": "Вузол Lavalink зараз не підключений. Спробуй ще раз за хвилину.",
+    "nowPlaying": "Зараз грає: **{0}**",
+    "queued": "Додано до черги на позицію {1}: **{0}**",
+    "noMatches": "За цим запитом нічого не знайдено.",
+    "trackTooLong": "Цей трек (**{0}**) довший за дозволений максимум: `{1}`",
+    "loadFailed": "Не вдалося завантажити цей трек: {0}",
+    "paused": "Призупинено: **{0}**.",
+    "stopped": "Відтворення зупинено, бот покинув голосовий канал."
+  },
+  "spotify": {
+    "disclosure": " (підібрано через пошук на YouTube — це не оригінальне аудіо Spotify)",
+    "albumSummary": "Альбом Spotify **{0}**: додано треків — {1} з {2} (підбір через YouTube).",
+    "playlistSummary": "Плейлист Spotify **{0}**: додано треків — {1} з {2} (підбір через YouTube).",
+    "artistSummary": "Топ-треки виконавця Spotify **{0}**: додано — {1} з {2} (підбір через YouTube).",
+    "summaryFailedSuffix": "\nТреків без збігу на YouTube: {0} — пропущено.",
+    "summaryCappedSuffix": "\nУсього треків за даними Spotify: {0}; перевірено лише перші {1}."
   }
 }
