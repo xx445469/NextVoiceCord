@@ -182,4 +182,44 @@ public class MusicSlashCommandTest
         // Then
         assertTrue(command.wasDoCommandCalled(), "doCommand should be called when user is listening");
     }
+
+    // ==================== Voice Channel Text Chat Invocation Tests ====================
+    //
+    // Regression coverage for commands invoked from a voice channel's built-in text chat.
+    // The invocation channel is mocked as a VoiceChannel whose asTextChannel() throws
+    // IllegalStateException, exactly as the real JDA union type does - a fixture that quietly
+    // handed back a TextChannel instead would pass even if the production code regressed to
+    // calling SlashCommandEvent.getTextChannel().
+
+    @Test
+    void testExecute_InvokedFromVoiceChannelChat_CallsDoCommand()
+    {
+        // Given: no settc restriction, and the command was used in a voice channel's text chat
+        ValidationScenarioBuilder.with(fixture).validBasic().build();
+        fixture.withInvocationInVoiceChannelChat(fixture.getVoiceChannel());
+        command = TestMusicSlashCommand.createBasic(fixture.getBot());
+
+        // When
+        command.testExecute(fixture.getEvent());
+
+        // Then
+        assertTrue(command.wasDoCommandCalled(), "doCommand should run for a command used in voice-channel chat");
+    }
+
+    @Test
+    void testExecute_InvokedFromVoiceChannelChatWithTextChannelRestriction_SendsRedirectReplyNotException()
+    {
+        // Given: settc points at a text channel, but the command was used in voice-channel chat
+        ValidationScenarioBuilder.with(fixture).wrongTextChannel().build();
+        fixture.withInvocationInVoiceChannelChat(fixture.getVoiceChannel());
+        command = TestMusicSlashCommand.createBasic(fixture.getBot());
+
+        // When
+        command.testExecute(fixture.getEvent());
+
+        // Then: the normal "you must be in #channel" redirect, not an exception
+        verify(fixture.getEvent()).reply("❌ You can only use that command in #music!");
+        verify(fixture.getReplyAction()).setEphemeral(true);
+        assertFalse(command.wasDoCommandCalled(), "doCommand must not run when settc points elsewhere");
+    }
 }

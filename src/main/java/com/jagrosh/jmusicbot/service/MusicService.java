@@ -40,7 +40,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,14 +181,14 @@ public class MusicService
      * @param member      The member adding the track
      * @param track       The track to add
      * @param queryArgs   The original query/args used to find this track
-     * @param channel     The text channel for request metadata
+     * @param channel     The channel for request metadata (may be a voice channel's text chat)
      * @param adder       The strategy for adding the track to the queue
      * @param reason      The reason to log (e.g., "added to the queue")
      * @param logLocation Description for logging (e.g., "queue" or "front of queue")
      * @return TrackAddResult containing position and formatted message, or null if track is too long
      */
     private TrackAddResult addTrackInternal(Guild guild, Member member, AudioTrack track,
-                                            String queryArgs, TextChannel channel,
+                                            String queryArgs, GuildMessageChannel channel,
                                             TrackAdder adder, PlaybackReason.Kind reasonKind, String logLocation)
     {
         LOG.debug("Adding track to {}: guild={}, user={}, track={}",
@@ -225,11 +225,11 @@ public class MusicService
      * @param member    The member adding the track
      * @param track     The track to add
      * @param queryArgs The original query/args used to find this track
-     * @param channel   The text channel for request metadata
+     * @param channel   The channel for request metadata (may be a voice channel's text chat)
      * @return TrackAddResult containing position and formatted message, or null if track is too long
      */
     public TrackAddResult addTrackToQueue(Guild guild, Member member, AudioTrack track,
-                                          String queryArgs, TextChannel channel)
+                                          String queryArgs, GuildMessageChannel channel)
     {
         return addTrackInternal(guild, member, track, queryArgs, channel,
                 AudioHandler::addTrack, PlaybackReason.Kind.ADDED_TO_QUEUE, "queue");
@@ -242,11 +242,11 @@ public class MusicService
      * @param member    The member adding the track
      * @param track     The track to add
      * @param queryArgs The original query/args used to find this track
-     * @param channel   The text channel for request metadata
+     * @param channel   The channel for request metadata (may be a voice channel's text chat)
      * @return TrackAddResult containing position and formatted message, or null if track is too long
      */
     public TrackAddResult addTrackToFront(Guild guild, Member member, AudioTrack track,
-                                          String queryArgs, TextChannel channel)
+                                          String queryArgs, GuildMessageChannel channel)
     {
         return addTrackInternal(guild, member, track, queryArgs, channel,
                 AudioHandler::addTrackToFront, PlaybackReason.Kind.ADDED_TO_FRONT, "front of queue");
@@ -254,7 +254,7 @@ public class MusicService
 
     // ========== Player Operations ==========
 
-    public void playNext(Guild guild, Member member, String args, TextChannel channel, OutputAdapter output)
+    public void playNext(Guild guild, Member member, String args, GuildMessageChannel channel, OutputAdapter output)
     {
         LOG.debug("PlayNext requested: guild={}, user={}, query={}",
                 guild.getId(), member.getUser().getName(), args);
@@ -276,7 +276,7 @@ public class MusicService
                 bot.getAudioLoadWrapper().wrap(args, new AudioLoadResultHandlers.PlayNextResultHandler(this, bot, output, guild, member, args, false, channel)));
     }
 
-    public void play(Guild guild, Member member, String args, TextChannel channel, OutputAdapter output)
+    public void play(Guild guild, Member member, String args, GuildMessageChannel channel, OutputAdapter output)
     {
         LOG.debug("Play requested: guild={}, user={}, args={}",
                 guild.getId(), member.getUser().getName(), args);
@@ -1580,10 +1580,10 @@ public class MusicService
      * @param guild           The guild
      * @param member          The member adding the track
      * @param historyPosition 1-based position (1 = most recent)
-     * @param channel         The text channel for request metadata
+     * @param channel         The channel for request metadata (may be a voice channel's text chat)
      * @param output          The output adapter
      */
-    public void queueFromHistory(Guild guild, Member member, int historyPosition, TextChannel channel, OutputAdapter output)
+    public void queueFromHistory(Guild guild, Member member, int historyPosition, GuildMessageChannel channel, OutputAdapter output)
     {
         AudioHandler handler = getHandler(guild);
         if (handler == null)
@@ -1635,10 +1635,10 @@ public class MusicService
      *
      * @param guild   The guild
      * @param member  The member adding the tracks
-     * @param channel The text channel for request metadata
+     * @param channel The channel for request metadata (may be a voice channel's text chat)
      * @param output  The output adapter
      */
-    public void queueAllFromHistory(Guild guild, Member member, TextChannel channel, OutputAdapter output)
+    public void queueAllFromHistory(Guild guild, Member member, GuildMessageChannel channel, OutputAdapter output)
     {
         AudioHandler handler = getHandler(guild);
         if (handler == null)
@@ -1706,10 +1706,10 @@ public class MusicService
      * @param guild           The guild
      * @param member          The member
      * @param historyPosition 1-based position (1 = most recent)
-     * @param channel         The text channel for request metadata
+     * @param channel         The channel for request metadata (may be a voice channel's text chat)
      * @param output          The output adapter
      */
-    public void playFromHistoryNow(Guild guild, Member member, int historyPosition, TextChannel channel, OutputAdapter output)
+    public void playFromHistoryNow(Guild guild, Member member, int historyPosition, GuildMessageChannel channel, OutputAdapter output)
     {
         AudioHandler handler = getHandler(guild);
         if (handler == null)
@@ -1799,10 +1799,10 @@ public class MusicService
      * @param guild        The guild
      * @param member       The member requesting playback
      * @param playlistName The saved playlist name
-     * @param channel      The text channel for request metadata
+     * @param channel      The channel for request metadata (may be a voice channel's text chat)
      * @param output       The output adapter
      */
-    public void queuePlaylist(Guild guild, Member member, String playlistName, TextChannel channel, OutputAdapter output)
+    public void queuePlaylist(Guild guild, Member member, String playlistName, GuildMessageChannel channel, OutputAdapter output)
     {
         PlaylistLoader.PlaylistResult<Playlist> playlistResult = bot.getPlaylistLoader().getPlaylistResult(playlistName);
         if (!playlistResult.isSuccess())
@@ -1857,10 +1857,10 @@ public class MusicService
      * @param guild        The guild
      * @param member       The member requesting playback
      * @param playlistName The saved playlist name
-     * @param channel      The text channel for request metadata
+     * @param channel      The channel for request metadata (may be a voice channel's text chat)
      * @param output       The output adapter
      */
-    public void playPlaylistNow(Guild guild, Member member, String playlistName, TextChannel channel, OutputAdapter output)
+    public void playPlaylistNow(Guild guild, Member member, String playlistName, GuildMessageChannel channel, OutputAdapter output)
     {
         PlaylistLoader.PlaylistResult<Playlist> playlistResult = bot.getPlaylistLoader().getPlaylistResult(playlistName);
         if (!playlistResult.isSuccess())
@@ -2204,7 +2204,7 @@ public class MusicService
     /**
      * Loads a URL and adds it to the front of queue, then starts it immediately.
      */
-    public void playNowFromUrl(Guild guild, Member member, String url, TextChannel channel, OutputAdapter output)
+    public void playNowFromUrl(Guild guild, Member member, String url, GuildMessageChannel channel, OutputAdapter output)
     {
         if (url == null || url.isBlank())
         {

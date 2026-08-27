@@ -39,6 +39,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -79,6 +80,7 @@ public class SlashCommandTestFixture
     private final User user;
     private final SelfMember selfMember;
     private final TextChannel textChannel;
+    private final MessageChannelUnion channelUnion;
     private final AudioManager audioManager;
     private final AudioHandler audioHandler;
 
@@ -134,6 +136,7 @@ public class SlashCommandTestFixture
         user = mock(User.class);
         selfMember = mock(SelfMember.class);
         textChannel = mock(TextChannel.class);
+        channelUnion = mock(MessageChannelUnion.class);
         audioManager = mock(AudioManager.class);
         audioHandler = mock(AudioHandler.class);
         selfVoiceState = mock(GuildVoiceState.class);
@@ -190,8 +193,18 @@ public class SlashCommandTestFixture
         when(event.getJDA()).thenReturn(jda);
         when(event.getGuild()).thenReturn(guild);
         when(event.getMember()).thenReturn(member);
-        when(event.getTextChannel()).thenReturn(textChannel);
+        // Real slash command events resolve the invocation channel through
+        // getChannel().asGuildMessageChannel(), which covers both text channels and a voice
+        // channel's built-in text chat - never getTextChannel(), which throws for the latter.
+        // Wire getTextChannel() to actually delegate to the union mock (like the real
+        // jda-chewtils implementation does) so a production regression back to getTextChannel()
+        // is caught by tests instead of quietly returning a channel.
+        when(event.getTextChannel()).thenAnswer(inv -> channelUnion.asTextChannel());
         when(event.getUser()).thenReturn(user);
+
+        when(event.getChannel()).thenReturn(channelUnion);
+        when(channelUnion.asTextChannel()).thenReturn(textChannel);
+        when(channelUnion.asGuildMessageChannel()).thenReturn(textChannel);
 
         // Client defaults
         when(client.getError()).thenReturn("❌");
@@ -264,6 +277,21 @@ public class SlashCommandTestFixture
     public SlashCommandTestFixture withRequiredTextChannel(TextChannel requiredChannel)
     {
         when(settings.getTextChannel(guild)).thenReturn(requiredChannel);
+        return this;
+    }
+
+    /**
+     * Configures the command as having been invoked from a voice channel's built-in text
+     * chat rather than a text channel. Mirrors real JDA behaviour: {@code getChannel()} returns
+     * a union whose {@code asTextChannel()} throws {@link IllegalStateException} (as it does for
+     * a real voice channel) while {@code asGuildMessageChannel()} succeeds and returns the given
+     * voice channel.
+     */
+    public SlashCommandTestFixture withInvocationInVoiceChannelChat(VoiceChannel voiceChatChannel)
+    {
+        when(channelUnion.asGuildMessageChannel()).thenReturn(voiceChatChannel);
+        when(channelUnion.asTextChannel()).thenThrow(new IllegalStateException(
+                "Cannot convert MessageChannel of type VoiceChannel to TextChannel!"));
         return this;
     }
 
@@ -428,6 +456,11 @@ public class SlashCommandTestFixture
     public TextChannel getTextChannel()
     {
         return textChannel;
+    }
+
+    public MessageChannelUnion getChannelUnion()
+    {
+        return channelUnion;
     }
 
     public AudioManager getAudioManager()

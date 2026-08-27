@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import org.slf4j.Logger;
@@ -41,7 +42,9 @@ public final class MusicCommandValidator
      *
      * @param guild         The guild where the command was invoked
      * @param member        The member who invoked the command
-     * @param textChannel   The text channel where the command was invoked
+     * @param textChannel   The channel where the command was invoked (may be a voice channel's
+     *                      built-in text chat, a thread, or a news channel - not only a
+     *                      {@link TextChannel})
      * @param settings      The guild settings
      * @param bot           The bot instance
      * @param jda           The JDA instance (for checking if music is playing)
@@ -50,7 +53,7 @@ public final class MusicCommandValidator
      * @param errorHandler  Callback for error messages
      * @return true if validation passed, false if an error was sent
      */
-    public static boolean validate(Guild guild, Member member, TextChannel textChannel,
+    public static boolean validate(Guild guild, Member member, GuildMessageChannel textChannel,
                                    Settings settings, Bot bot, JDA jda,
                                    boolean bePlaying, boolean beListening,
                                    ErrorHandler errorHandler)

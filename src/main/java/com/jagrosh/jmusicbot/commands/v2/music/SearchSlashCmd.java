@@ -67,7 +67,7 @@ public class SearchSlashCmd extends MusicSlashCommand
         event.reply(searchingEmoji + " " + bot.msg(event.getGuild(), "search.searching", searchPlatform, query)).queue(hook ->
         {
             bot.getSearchService().search(event.getGuild(), event.getMember(), query, searchPrefix,
-                    event.getTextChannel(), new SearchService.SearchCallback()
+                    event.getChannel().asGuildMessageChannel(), new SearchService.SearchCallback()
                     {
                         @Override
                         public void onTrackLoaded(AudioTrack track, int queuePosition, String formattedMessage)
@@ -153,7 +153,7 @@ public class SearchSlashCmd extends MusicSlashCommand
                                                                 event.getMember(),
                                                                 selectedTrack,
                                                                 query,
-                                                                event.getTextChannel()
+                                                                event.getChannel().asGuildMessageChannel()
                                                         );
 
                                                         if (result != null)

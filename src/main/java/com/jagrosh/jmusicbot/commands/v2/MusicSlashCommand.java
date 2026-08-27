@@ -31,7 +31,7 @@ public abstract class MusicSlashCommand extends LocalizedSlashCommand
         boolean valid = MusicCommandValidator.validate(
                 event.getGuild(),
                 event.getMember(),
-                event.getTextChannel(),
+                event.getChannel().asGuildMessageChannel(),
                 settings,
                 bot,
                 event.getJDA(),

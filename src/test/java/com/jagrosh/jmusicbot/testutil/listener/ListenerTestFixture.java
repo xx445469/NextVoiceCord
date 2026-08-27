@@ -41,6 +41,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
+import net.dv8tion.jda.api.entities.channel.unions.GuildMessageChannelUnion;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -151,13 +152,15 @@ public class ListenerTestFixture
         user = mock(User.class);
         selfMember = mock(SelfMember.class);
         selfUser = mock(SelfUser.class);
-        textChannel = mock(TextChannel.class);
+        textChannel = mock(TextChannel.class, withSettings().extraInterfaces(GuildMessageChannelUnion.class));
         audioManager = mock(AudioManager.class);
         audioHandler = mock(AudioHandler.class);
         audioPlayer = mock(AudioPlayer.class);
         selfVoiceState = mock(GuildVoiceState.class);
         memberVoiceState = mock(GuildVoiceState.class);
-        voiceChannel = mock(VoiceChannel.class, withSettings().extraInterfaces(AudioChannelUnion.class));
+        // Also implements GuildMessageChannelUnion so this same channel can stand in for a
+        // voice channel's built-in text chat as a button/modal interaction's invocation channel.
+        voiceChannel = mock(VoiceChannel.class, withSettings().extraInterfaces(AudioChannelUnion.class, GuildMessageChannelUnion.class));
 
         // Event mocks
         readyEvent = mock(ReadyEvent.class);
@@ -259,6 +262,11 @@ public class ListenerTestFixture
         when(buttonInteractionEvent.getJDA()).thenReturn(jda);
         when(buttonInteractionEvent.getComponentId()).thenReturn("unknown");
         when(buttonInteractionEvent.reply(anyString())).thenReturn(replyAction);
+        // Real button/modal interaction events resolve the invocation channel through
+        // getGuildChannel(), which returns the channel whether it's a text channel or a
+        // voice channel's built-in text chat - never getChannel().asTextChannel(), which
+        // throws for the latter. Default to the shared text channel mock here.
+        when(buttonInteractionEvent.getGuildChannel()).thenReturn((GuildMessageChannelUnion) textChannel);
         when(replyAction.setEphemeral(anyBoolean())).thenReturn(replyAction);
         doNothing().when(replyAction).queue();
 
@@ -353,6 +361,22 @@ public class ListenerTestFixture
         when(memberVoiceState.inAudioChannel()).thenReturn(true);
         when(memberVoiceState.getChannel()).thenReturn((AudioChannelUnion) voiceChannel);
         when(selfVoiceState.getChannel()).thenReturn((AudioChannelUnion) voiceChannel);
+        return this;
+    }
+
+    /**
+     * Configures the button interaction as having been invoked from a voice channel's
+     * built-in text chat rather than a text channel. Mirrors real JDA behaviour: the shared
+     * voice channel mock's {@code asTextChannel()} throws {@link IllegalStateException} (as it
+     * does for a real voice channel), while {@code getGuildChannel()} on the event returns it
+     * directly and succeeds.
+     */
+    public ListenerTestFixture withInvocationInVoiceChannelChat()
+    {
+        GuildMessageChannelUnion voiceChatChannel = (GuildMessageChannelUnion) voiceChannel;
+        when(buttonInteractionEvent.getGuildChannel()).thenReturn(voiceChatChannel);
+        when(voiceChatChannel.asTextChannel()).thenThrow(new IllegalStateException(
+                "Cannot convert MessageChannel of type VoiceChannel to TextChannel!"));
         return this;
     }
 

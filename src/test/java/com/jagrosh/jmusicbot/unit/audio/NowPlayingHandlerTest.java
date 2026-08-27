@@ -27,9 +27,12 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.RoleColors;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.managers.Presence;
 import net.dv8tion.jda.api.requests.restaction.CacheRestAction;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
@@ -285,6 +288,42 @@ public class NowPlayingHandlerTest
 
             // Then
             verify(fixture.getTextChannel()).sendMessage(any(MessageCreateData.class));
+        }
+
+        @Test
+        @DisplayName("onTrackUpdate() sends now playing to a voice channel's built-in chat when the track was queued from one")
+        void onTrackUpdate_sendsNowPlayingToVoiceChannelChat_whenTrackQueuedFromVoiceChannelChat()
+        {
+            // Given: the track's stored request channel id is a voice channel, not a text
+            // channel - exactly what happens when a command is used in a voice channel's
+            // built-in text chat. guild.getTextChannelById(id) returns null for a voice channel
+            // id; the fix resolves it through the widened GuildMessageChannel lookup instead of
+            // silently failing to find a channel to post to.
+            long voiceChannelId = 999888777L;
+            VoiceChannel voiceChatChannel = mock(VoiceChannel.class);
+            when(voiceChatChannel.getIdLong()).thenReturn(voiceChannelId);
+            MessageCreateAction sendAction = mock(MessageCreateAction.class);
+            when(voiceChatChannel.sendMessage(any(MessageCreateData.class))).thenReturn(sendAction);
+            doNothing().when(sendAction).queue(any(), any());
+            when(fixture.getGuild().getChannelById(GuildMessageChannel.class, voiceChannelId)).thenReturn(voiceChatChannel);
+            // A TextChannel-only lookup for the same id must not be relied on - it is null for
+            // a voice channel, mirroring real JDA (getTextChannelById never returns non-text
+            // channels).
+            when(fixture.getGuild().getTextChannelById(voiceChannelId)).thenReturn(null);
+
+            AudioTrack track = fixture.createMockTrack("Race Song", "Artist", 180000);
+            RequestMetadata metadata = new RequestMetadata(null,
+                    new RequestMetadata.RequestInfo("play", "https://example.com/race"),
+                    voiceChannelId);
+            when(track.getUserData(RequestMetadata.class)).thenReturn(metadata);
+            when(fixture.getAudioPlayer().getPlayingTrack()).thenReturn(track);
+            when(audioHandler.getNowPlaying(fixture.getJda())).thenReturn(createNowPlayingMessage());
+
+            // When
+            nowPlayingHandler.onTrackUpdate(GUILD_ID, track);
+
+            // Then
+            verify(voiceChatChannel).sendMessage(any(MessageCreateData.class));
         }
 
         @Test

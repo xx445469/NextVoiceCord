@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -230,7 +231,7 @@ public class NowPlayingHandler
             return;
         }
 
-        TextChannel tc = guild.getTextChannelById(loc.channelId());
+        GuildMessageChannel tc = guild.getChannelById(GuildMessageChannel.class, loc.channelId());
         if (tc == null)
         {
             synchronized (state)
@@ -274,13 +275,13 @@ public class NowPlayingHandler
     private void sendPlayingMessage(long guildId, Guild guild, AudioTrack currentTrack, NPLocation previousLocation,
                                     MessageCreateData msg, long reconcileVersion)
     {
-        TextChannel tc;
+        GuildMessageChannel tc;
         if(previousLocation == null)
         {
             if (currentTrack.getUserData(RequestMetadata.class) != null)
             {
                 long channelId = currentTrack.getUserData(RequestMetadata.class).channelId;
-                tc = guild.getTextChannelById(channelId);
+                tc = guild.getChannelById(GuildMessageChannel.class, channelId);
             }
             else
             {
@@ -289,7 +290,7 @@ public class NowPlayingHandler
         }
         else
         {
-            tc = guild.getTextChannelById(previousLocation.channelId());
+            tc = guild.getChannelById(GuildMessageChannel.class, previousLocation.channelId());
         }
 
         if (tc == null)

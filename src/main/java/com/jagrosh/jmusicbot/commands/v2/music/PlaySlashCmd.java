@@ -43,14 +43,14 @@ public class PlaySlashCmd extends MusicSlashCommand
     {
         if (event.getOption("query") == null)
         {
-            musicService.play(event.getGuild(), event.getMember(), "", event.getTextChannel(),
+            musicService.play(event.getGuild(), event.getMember(), "", event.getChannel().asGuildMessageChannel(),
                     new SlashEventOutputAdapter(event));
             return;
         }
 
         String args = event.getOption("query").getAsString();
         event.reply(loadingEmoji + " " + bot.msg(event.getGuild(), "search.loading", args)).queue(hook -> {
-            musicService.play(event.getGuild(), event.getMember(), args, event.getTextChannel(),
+            musicService.play(event.getGuild(), event.getMember(), args, event.getChannel().asGuildMessageChannel(),
                     new InteractionHookOutputAdapter(hook, event.getJDA(), event.getClient().getWarning()));
         });
     }

@@ -42,6 +42,7 @@ import net.dv8tion.jda.api.entities.SelfMember;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.managers.AudioManager;
@@ -190,6 +191,9 @@ public class AudioTestFixture
         when(guild.getSelfMember()).thenReturn(selfMember);
         when(guild.getAudioManager()).thenReturn(audioManager);
         when(guild.getTextChannelById(CHANNEL_ID)).thenReturn(textChannel);
+        // NowPlayingHandler resolves the stored request channel (which may be a voice
+        // channel's text chat) via the widened GuildMessageChannel lookup, not getTextChannelById.
+        when(guild.getChannelById(GuildMessageChannel.class, CHANNEL_ID)).thenReturn(textChannel);
 
         // JDA relationships
         when(jda.getGuildById(GUILD_ID)).thenReturn(guild);

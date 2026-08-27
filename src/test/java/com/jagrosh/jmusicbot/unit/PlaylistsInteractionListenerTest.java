@@ -296,4 +296,34 @@ class PlaylistsInteractionListenerTest
         verify(fixture.getMusicService()).discardPlaylistDraft(draftContext);
         verify(fixture.getButtonInteractionEvent()).editMessageEmbeds(any(MessageEmbed[].class));
     }
+
+    @Test
+    @DisplayName("onButtonInteraction() queue action invoked from voice-channel chat dispatches to MusicService instead of throwing")
+    void onButtonInteraction_queueInvokedFromVoiceChannelChat_dispatchesToMusicService()
+    {
+        fixture.withButtonId("playlists_queue_1_1_" + fixture.getUser().getIdLong())
+                .withMemberInVoiceChannel()
+                .withInvocationInVoiceChannelChat();
+
+        when(fixture.getMusicService().getAvailablePlaylistNames())
+                .thenReturn(MusicService.PlaylistNamesInfo.success(List.of("favorite")));
+
+        MessageEditCallbackAction editAction = mock(MessageEditCallbackAction.class);
+        when(fixture.getButtonInteractionEvent().editMessageEmbeds(any(MessageEmbed[].class))).thenReturn(editAction);
+        when(editAction.setComponents(anyList())).thenReturn(editAction);
+        doNothing().when(editAction).queue();
+
+        listener.onButtonInteraction(fixture.getButtonInteractionEvent());
+
+        // The bug: getChannel().asTextChannel() throws IllegalStateException for a voice
+        // channel's built-in text chat. Reaching this verify (rather than an uncaught
+        // exception failing the test) proves the command succeeded from voice chat.
+        verify(fixture.getMusicService()).queuePlaylist(
+                eq(fixture.getGuild()),
+                eq(fixture.getMember()),
+                eq("favorite"),
+                eq(fixture.getVoiceChannel()),
+                any(MusicService.OutputAdapter.class)
+        );
+    }
 }
