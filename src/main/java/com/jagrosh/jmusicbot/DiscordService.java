@@ -3,8 +3,6 @@ package com.jagrosh.jmusicbot;
 import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.jagrosh.jmusicbot.audio.VoiceConnectionMonitor;
-import com.jagrosh.jmusicbot.entities.UserInteraction.Level;
-import com.jagrosh.jmusicbot.entities.UserInteraction;
 import com.jagrosh.jmusicbot.listener.ControllerEditorListener;
 import com.jagrosh.jmusicbot.listener.HistoryInteractionListener;
 import com.jagrosh.jmusicbot.listener.NowPlayingCleanupListener;
@@ -15,7 +13,6 @@ import com.jagrosh.jmusicbot.listener.StartupLifecycleListener;
 import com.jagrosh.jmusicbot.listener.SettingsInteractionListener;
 import com.jagrosh.jmusicbot.listener.UserSettingsInteractionListener;
 import com.jagrosh.jmusicbot.listener.VoiceStateListener;
-import com.jagrosh.jmusicbot.utils.OtherUtil;
 import com.jagrosh.jmusicbot.utils.ProxyUtil;
 import com.sedmelluq.discord.lavaplayer.jdaudp.NativeAudioSendFactory;
 import club.minnced.discord.jdave.interop.JDaveSessionFactory;
@@ -35,7 +32,7 @@ import java.util.Arrays;
 public class DiscordService {
     private static final Logger LOG = LoggerFactory.getLogger(DiscordService.class);
 
-    public static JDA createJDA(BotConfig config, Bot bot, EventWaiter waiter, CommandClient client, UserInteraction userInteraction) throws Exception {
+    public static JDA createJDA(BotConfig config, Bot bot, EventWaiter waiter, CommandClient client) throws Exception {
         JDABuilder jdaBuilder = JDABuilder.create(config.getToken(), Arrays.asList(JMusicBot.INTENTS))
                 .enableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE)
                 .disableCache(
@@ -88,14 +85,6 @@ public class DiscordService {
         }
 
         JDA jda = jdaBuilder.build();
-
-        // Perform post-startup validation
-        String unsupportedReason = OtherUtil.getUnsupportedBotReason(jda);
-        if (unsupportedReason != null) {
-            userInteraction.alert(Level.ERROR, "NextVoiceCord", "NextVoiceCord cannot be run on this Discord bot: " + unsupportedReason);
-            jda.shutdown();
-            System.exit(1);
-        }
 
         if (!"@mention".equals(config.getPrefix())) {
             LOG.info("You currently have a custom prefix set. If it's not working, ensure 'MESSAGE CONTENT INTENT' is enabled.");

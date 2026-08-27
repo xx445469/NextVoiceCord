@@ -18,11 +18,8 @@ package com.jagrosh.jmusicbot.utils;
 import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.entities.UserInteraction;
 import com.jagrosh.jmusicbot.entities.UserInteraction.Level;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.ApplicationInfo;
-import net.dv8tion.jda.api.entities.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;
@@ -51,7 +48,7 @@ public class OtherUtil
     public final static String NEW_VERSION_AVAILABLE = "There is a new version of NextVoiceCord available!\n"
                     + "Current version: %s\n"
                     + "New Version: %s\n\n"
-                    + "Please visit https://github.com/arif-banai/MusicBot/releases/latest to get the latest release.";
+                    + "Please visit https://github.com/xx445469/NextVoiceCord/releases/latest to get the latest release.";
     private final static String WINDOWS_INVALID_PATH = "c:\\windows\\system32\\";
     
     /**
@@ -179,7 +176,7 @@ public class OtherUtil
     
     public static String getLatestVersion()
     {
-        return getLatestVersion("https://api.github.com/repos/arif-banai/MusicBot", null);
+        return getLatestVersion("https://api.github.com/repos/xx445469/NextVoiceCord", null);
     }
     
     /**
@@ -195,14 +192,14 @@ public class OtherUtil
             proxy = ProxyUtil.createProxy(config);
             ProxyUtil.installJvmAuthenticator(config);
         }
-        return getLatestVersion("https://api.github.com/repos/arif-banai/MusicBot", proxy);
+        return getLatestVersion("https://api.github.com/repos/xx445469/NextVoiceCord", proxy);
     }
     
     /**
      * Gets the latest non-prerelease version from GitHub releases API.
      * This method is public to allow testing with mock servers.
      * 
-     * @param baseUrl the base URL for the GitHub API (e.g., "https://api.github.com/repos/arif-banai/MusicBot")
+     * @param baseUrl the base URL for the GitHub API (e.g., "https://api.github.com/repos/xx445469/NextVoiceCord")
      * @return the latest non-prerelease version tag (without 'v' prefix), or null if not found
      */
     public static String getLatestVersion(String baseUrl)
@@ -214,7 +211,7 @@ public class OtherUtil
      * Gets the latest non-prerelease version from GitHub releases API with optional proxy support.
      * This method is public to allow testing with mock servers.
      * 
-     * @param baseUrl the base URL for the GitHub API (e.g., "https://api.github.com/repos/arif-banai/MusicBot")
+     * @param baseUrl the base URL for the GitHub API (e.g., "https://api.github.com/repos/xx445469/NextVoiceCord")
      * @param proxy the proxy to use for HTTP requests (may be null)
      * @return the latest non-prerelease version tag (without 'v' prefix), or null if not found
      */
@@ -350,24 +347,5 @@ public class OtherUtil
             if (late < curr) return false;
         }
         return false;
-    }
-
-    /**
-     * Checks if the bot JMusicBot is being run on is supported & returns the reason if it is not.
-     * @return A string with the reason, or null if it is supported.
-     */
-    public static String getUnsupportedBotReason(JDA jda) 
-    {
-        if (jda.getSelfUser().getFlags().contains(User.UserFlag.VERIFIED_BOT))
-            return "The bot is verified. Using NextVoiceCord in a verified bot is not supported.";
-
-        ApplicationInfo info = jda.retrieveApplicationInfo().complete();
-        if (info.isBotPublic())
-            return "\"Public Bot\" is enabled. Using NextVoiceCord as a public bot is not supported. Please disable it in the "
-                    + "Developer Dashboard at https://discord.com/developers/applications/" + jda.getSelfUser().getId() + "/bot ."
-                    + "You may also need to disable all Installation Contexts at https://discord.com/developers/applications/" 
-                    + jda.getSelfUser().getId() + "/installation .";
-
-        return null;
     }
 }

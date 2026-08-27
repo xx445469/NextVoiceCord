@@ -266,7 +266,7 @@ public class JMusicBot
         // attempt to log in and start
         try
         {
-            JDA jda = DiscordService.createJDA(config, bot, waiter, client, userInteraction);
+            JDA jda = DiscordService.createJDA(config, bot, waiter, client);
             bot.setJDA(jda);
 
             // Started after the connection, not before: a panel that came up first would
