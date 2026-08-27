@@ -25,6 +25,7 @@ import com.jagrosh.jmusicbot.audio.AudioHandler;
 import com.jagrosh.jmusicbot.config.model.ConfigOption;
 import com.jagrosh.jmusicbot.gui.GuiPreferences;
 import com.jagrosh.jmusicbot.i18n.Language;
+import com.jagrosh.jmusicbot.utils.YoutubeOauth2TokenHandler;
 
 import net.dv8tion.jda.api.entities.Guild;
 
@@ -284,6 +285,37 @@ final class WebWrites
 
         LOG.info("Web panel: {} sent '{}' to {}", from, action, guild.getName());
         return new Result(true, List.of(action), List.of(), "Done.");
+    }
+
+    // ==================== YouTube sign-in ====================
+
+    /**
+     * Deletes the stored YouTube refresh token, so the next boot has to sign in again.
+     *
+     * <p>Only ever deletes; never reads or returns the token itself — see {@link
+     * YoutubeOauth2TokenHandler#deleteStoredToken()}, which this delegates to, and {@link
+     * WebData#youtubeOauth} for the read side of this feature, which likewise never sends the
+     * token's contents anywhere.
+     */
+    Result youtubeSignOut(String from)
+    {
+        try
+        {
+            boolean deleted = YoutubeOauth2TokenHandler.deleteStoredToken();
+            if (!deleted)
+            {
+                return Result.failed("Not signed in.");
+            }
+        }
+        catch (java.io.IOException ex)
+        {
+            LOG.warn("Web panel: {} tried to sign out of YouTube, but the token file could not be deleted: {}",
+                     from, ex.toString());
+            return Result.failed("Could not delete the stored token: " + ex.getMessage());
+        }
+
+        LOG.info("Web panel: {} signed the bot out of YouTube.", from);
+        return new Result(true, List.of("youtube.signOut"), List.of(), "Signed out.");
     }
 
     // ==================== Validation ====================

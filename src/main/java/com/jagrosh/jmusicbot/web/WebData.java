@@ -46,6 +46,8 @@ import com.jagrosh.jmusicbot.i18n.Language;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 import com.jagrosh.jmusicbot.utils.TimeUtil;
+import com.jagrosh.jmusicbot.utils.YoutubeOauth2TokenHandler;
+import com.jagrosh.jmusicbot.utils.YoutubeSignInState;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.typesafe.config.Config;
@@ -162,6 +164,23 @@ final class WebData
             "gui.config.title", "gui.config.subtitle", "gui.config.loading", "gui.config.saveChanges",
             "gui.config.commands", "gui.config.presence", "gui.config.voice", "gui.config.playback",
             "gui.config.uiEmojis",
+
+            // Bot config — YouTube sign-in card. Shared with the desktop window's own copy of
+            // this card rather than duplicated under web.*: the burner-account warning and every
+            // phase's wording must say exactly the same thing on both surfaces (see the class
+            // javadoc on YoutubeSignInState), and two translations of the same sentence are two
+            // chances for them to drift apart.
+            "gui.config.youtubeSignInTitle", "gui.config.youtubeSignInWarning",
+            "gui.config.youtubeSignInConfirmTitle", "gui.config.youtubeSignInConfirmMessage",
+            "gui.config.youtubeSignInConfirmButton", "gui.config.youtubeSignInDisabled",
+            "gui.config.youtubeSignInWaiting", "gui.config.youtubeSignInCodeReady",
+            "gui.config.youtubeSignInBrowserOpened", "gui.config.youtubeSignInClipboardFallback",
+            "gui.config.youtubeSignInFailed", "gui.config.youtubeSignInSignedIn",
+            "gui.config.youtubeSignInButton", "gui.config.youtubeSignInCodeLabel",
+            "gui.config.youtubeSignInUrlLabel", "gui.config.youtubeSignInCopyCode",
+            "gui.config.youtubeSignInCopyCodeDone", "gui.config.youtubeSignInSignOut",
+            "gui.config.youtubeSignInSignOutConfirmTitle", "gui.config.youtubeSignInSignOutConfirmMessage",
+            "gui.config.youtubeSignInSignOutFailed",
 
             // Web-only: the polling status dot.
             "web.status.connecting", "web.status.live", "web.status.disconnected",
@@ -744,6 +763,51 @@ final class WebData
         {
             LOG.warn("Web panel: could not build /api/config: {}", ex.toString());
             return Map.of("editable", false, "sections", List.of());
+        }
+    }
+
+    // ==================== /api/youtube-oauth ====================
+
+    /**
+     * The same phase the desktop window's "Sign in to YouTube" card renders — see the class
+     * javadoc on {@link com.jagrosh.jmusicbot.utils.YoutubeSignInState}.
+     *
+     * <p>{@code youtubetoken.txt}'s contents never leave the process: this reads only whether the
+     * file exists ({@link YoutubeOauth2TokenHandler#tokenFileExists()}), never its bytes, and the
+     * payload below carries nothing named "token" at all — only a phase, and, while a code is
+     * pending, the verification URL and the code itself, both of which are printed to the console
+     * and DMed to the owner already. See {@link WebSecrets} for why a credential never becomes a
+     * response body in this panel.
+     */
+    Object youtubeOauth()
+    {
+        try
+        {
+            YoutubeOauth2TokenHandler handler = bot.getYouTubeOauth2Handler();
+            YoutubeOauth2TokenHandler.Data pending = handler == null ? null : handler.getData();
+            String pendingUrl = pending == null ? null : pending.getAuthorisationUrl();
+            String pendingCode = pending == null ? null : pending.getCode();
+
+            YoutubeSignInState state = YoutubeSignInState.compute(
+                    bot.getConfig().useYouTubeOauth(), YoutubeOauth2TokenHandler.tokenFileExists(),
+                    pendingUrl, pendingCode);
+
+            var payload = new LinkedHashMap<String, Object>();
+            payload.put("phase", state.phase().name());
+            payload.put("url", state.url());
+            payload.put("code", state.code());
+            return payload;
+        }
+        catch (RuntimeException ex)
+        {
+            LOG.warn("Web panel: could not build /api/youtube-oauth: {}", ex.toString());
+            // Map.of(...) refuses null values, and url/code are legitimately null outside
+            // CODE_READY/BROWSER_OPENED — a LinkedHashMap says that plainly instead of throwing.
+            var fallback = new LinkedHashMap<String, Object>();
+            fallback.put("phase", YoutubeSignInState.Phase.OAUTH_DISABLED.name());
+            fallback.put("url", null);
+            fallback.put("code", null);
+            return fallback;
         }
     }
 

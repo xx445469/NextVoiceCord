@@ -28,6 +28,8 @@ import com.jagrosh.jmusicbot.gui.components.Widgets;
 import com.jagrosh.jmusicbot.gui.theme.ThemeManager;
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
 import com.jagrosh.jmusicbot.i18n.Language;
+import com.jagrosh.jmusicbot.utils.YoutubeOauth2TokenHandler;
+import com.jagrosh.jmusicbot.utils.YoutubeSignInState;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
@@ -97,6 +99,10 @@ public class ConfigPanel extends JPanel {
     };
 
     private final BotConfig config;
+    // Held for the YouTube sign-in card (createYoutubeSignInSection): it needs the live
+    // YoutubeOauth2TokenHandler to register a listener on and to read youtubetoken.txt's
+    // existence through, neither of which BotConfig exposes.
+    private final Bot bot;
 
     // Commands section
     private final JTextField prefixField;
@@ -117,6 +123,18 @@ public class ConfigPanel extends JPanel {
     private final JSpinner maxYTPlaylistPagesSpinner;
     private final JSpinner skipRatioSpinner;
     private final JCheckBox useYouTubeOAuthCheckBox;
+
+    // YouTube sign-in (common) — not a config key itself, but the acting-on-it companion to
+    // playback.youtube.useOAuth just above. See createYoutubeSignInSection.
+    private final JLabel youtubeSignInWarningLabel;
+    private final JLabel youtubeSignInStatusLabel;
+    private final JLabel youtubeSignInCodeLabel;
+    private final JLabel youtubeSignInUrlLabel;
+    private final JButton youtubeSignInCopyButton;
+    private final JButton youtubeSignInActionButton;
+    private final JButton youtubeSignInSignOutButton;
+    private final JPanel youtubeSignInCard;
+    private YoutubeSignInState youtubeSignInState;
 
     // Lavalink section (common) — playback.engine, lavalink.nodes. See createLavalinkSection
     // for why this is common rather than tucked behind an advanced card.
@@ -215,6 +233,7 @@ public class ConfigPanel extends JPanel {
      * @param bot the bot instance
      */
     public ConfigPanel(Bot bot) {
+        this.bot = bot;
         this.config = bot.getConfig();
         // Read before any section is built: createXAdvancedSection() below consults this to
         // decide whether that section starts open or collapsed.
@@ -245,6 +264,24 @@ public class ConfigPanel extends JPanel {
         maxYTPlaylistPagesSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
         skipRatioSpinner = new JSpinner(new SpinnerNumberModel(0.55, 0.0, 1.0, 0.05));
         useYouTubeOAuthCheckBox = Widgets.toggleSwitch(GuiLanguage.msg("gui.config.useYouTubeOAuth"));
+
+        // YouTube sign-in — see createYoutubeSignInSection for the full picture. The warning
+        // label carries the same "burner account" text the startup DM sends, in the danger
+        // colour, so it is seen before the action button is ever pressed — not after, and not
+        // only in a log line.
+        youtubeSignInWarningLabel = warningLabel(GuiLanguage.msg("gui.config.youtubeSignInWarning"));
+        youtubeSignInStatusLabel = new JLabel(" ");
+        youtubeSignInStatusLabel.setFont(Tokens.fontBody());
+        youtubeSignInCodeLabel = new JLabel(" ");
+        youtubeSignInCodeLabel.setFont(Tokens.fontMono());
+        youtubeSignInUrlLabel = noteLabel(" ");
+        youtubeSignInCopyButton = Widgets.secondaryButton(GuiLanguage.msg("gui.config.youtubeSignInCopyCode"));
+        youtubeSignInCopyButton.addActionListener(e -> copyYoutubeSignInCode());
+        youtubeSignInActionButton = Widgets.primaryButton(GuiLanguage.msg("gui.config.youtubeSignInButton"));
+        youtubeSignInActionButton.addActionListener(e -> beginYoutubeSignIn());
+        youtubeSignInSignOutButton = Widgets.secondaryButton(GuiLanguage.msg("gui.config.youtubeSignInSignOut"));
+        youtubeSignInSignOutButton.addActionListener(e -> signOutOfYoutube());
+        youtubeSignInCard = buildYoutubeSignInCard();
 
         // Lavalink — "fallback" is offered because config.txt accepts it, not because it works;
         // see createLavalinkSection for the note shown beside it.
@@ -387,6 +424,11 @@ public class ConfigPanel extends JPanel {
 
         // Load current values
         loadCurrentValues();
+
+        // After loadCurrentValues(): renderYoutubeSignIn() reads Tokens/GuiLanguage only, not
+        // any field loadCurrentValues() sets, but this keeps constructor ordering "everything is
+        // in its default/loaded state, then live wiring happens" rather than interleaving them.
+        initYoutubeSignIn();
     }
 
     private void applyFieldStyle(JComponent... components) {
@@ -496,6 +538,7 @@ public class ConfigPanel extends JPanel {
         addSection(content, createPresenceSection());
         addSection(content, createVoiceSection());
         addSection(content, createPlaybackSection());
+        addSection(content, createYoutubeSignInSection());
         addSection(content, createLavalinkSection());
         addSection(content, createEmojisSection());
         addSection(content, createOtherSection());
@@ -678,6 +721,272 @@ public class ConfigPanel extends JPanel {
         Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.playback"), panel);
         registerSection(card, null, rows);
         return card;
+    }
+
+    /**
+     * Creates the YouTube sign-in section: not a config key of its own, but the button that acts
+     * on {@code playback.youtube.useOAuth} right above — see {@link YoutubeSignInState} for the
+     * full set of outcomes {@link #renderYoutubeSignIn()} renders.
+     *
+     * <p>Common, not collapsed behind an advanced card: someone who just turned OAuth on has no
+     * reason to go hunting for this, and this section is exactly what tells someone who did not
+     * why the button in it cannot do anything yet.
+     */
+    private Component createYoutubeSignInSection() {
+        JPanel panel = formPanel();
+        GridBagConstraints gbc = rowConstraints();
+        List<FilterRow> rows = new ArrayList<>();
+
+        // Not the FilterRow addSpanningRow would build itself: that one derives its searchable
+        // label from a JCheckBox's own text, which youtubeSignInCard is not, and would leave the
+        // row findable only by typing the raw config key. Built directly instead, so searching
+        // "sign in" (or "youtube") finds this section too, not just "useoauth".
+        addSpanningRow(panel, gbc, 0, youtubeSignInCard, null);
+        rows.add(new FilterRow(GuiLanguage.msg("gui.config.youtubeSignInTitle"),
+                "playback.youtube.useOAuth", youtubeSignInCard));
+
+        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.youtubeSignInTitle"), panel);
+        registerSection(card, null, rows);
+        return card;
+    }
+
+    /**
+     * The composite every phase of {@link YoutubeSignInState} renders into — {@link
+     * #renderYoutubeSignIn()} shows/hides and relabels these same components rather than
+     * rebuilding them, the same way {@link #testLavalinkConnection} reuses one status label.
+     */
+    private JPanel buildYoutubeSignInCard() {
+        JPanel body = Widgets.transparent(null);
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+
+        youtubeSignInStatusLabel.setAlignmentX(LEFT_ALIGNMENT);
+        youtubeSignInWarningLabel.setAlignmentX(LEFT_ALIGNMENT);
+        youtubeSignInCodeLabel.setAlignmentX(LEFT_ALIGNMENT);
+        youtubeSignInUrlLabel.setAlignmentX(LEFT_ALIGNMENT);
+
+        body.add(youtubeSignInStatusLabel);
+        body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
+        // The burner-account warning sits above the code and above the button: it must be read
+        // before there is anything to press, not discovered afterwards.
+        body.add(youtubeSignInWarningLabel);
+        body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
+        body.add(youtubeSignInCodeLabel);
+        body.add(youtubeSignInUrlLabel);
+        body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
+
+        JPanel buttons = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
+        buttons.setAlignmentX(LEFT_ALIGNMENT);
+        buttons.add(youtubeSignInActionButton);
+        buttons.add(youtubeSignInCopyButton);
+        buttons.add(youtubeSignInSignOutButton);
+        body.add(buttons);
+
+        return body;
+    }
+
+    /**
+     * Computes the starting phase from the ground truth (config, the token file, whatever code
+     * is already pending) and subscribes to further updates.
+     *
+     * <p>Called once, at the end of the constructor. {@link YoutubeOauth2TokenHandler#decide} —
+     * where every update originates — runs on whichever thread logback calls it from, never the
+     * Swing event thread, so each callback below marshals onto it itself via {@link
+     * SwingUtilities#invokeLater} before touching a single component. This is the "add a
+     * listener… do not poll" this section exists to satisfy: nothing here spins a timer waiting
+     * for a code to show up.
+     */
+    private void initYoutubeSignIn() {
+        youtubeSignInState = computeYoutubeSignInState();
+        renderYoutubeSignIn();
+
+        YoutubeOauth2TokenHandler handler = bot.getYouTubeOauth2Handler();
+        if (handler == null) {
+            // Only null in a test harness holding a bare mock; a real Bot always has one.
+            return;
+        }
+        handler.addListener(new YoutubeOauth2TokenHandler.Listener() {
+            @Override
+            public void onCodeReady(YoutubeOauth2TokenHandler.Data data) {
+                SwingUtilities.invokeLater(() -> {
+                    youtubeSignInState = YoutubeSignInState.codeReady(data.getAuthorisationUrl(), data.getCode());
+                    renderYoutubeSignIn();
+                });
+            }
+
+            @Override
+            public void onSignedIn() {
+                SwingUtilities.invokeLater(() -> {
+                    youtubeSignInState = YoutubeSignInState.signedIn();
+                    renderYoutubeSignIn();
+                });
+            }
+
+            @Override
+            public void onFailed(String message) {
+                SwingUtilities.invokeLater(() -> {
+                    youtubeSignInState = YoutubeSignInState.failed(message);
+                    renderYoutubeSignIn();
+                });
+            }
+        });
+    }
+
+    /** The phase implied right now by config, the token file and any code already pending. */
+    private YoutubeSignInState computeYoutubeSignInState() {
+        YoutubeOauth2TokenHandler handler = bot.getYouTubeOauth2Handler();
+        YoutubeOauth2TokenHandler.Data pending = handler == null ? null : handler.getData();
+        String url = pending == null ? null : pending.getAuthorisationUrl();
+        String code = pending == null ? null : pending.getCode();
+        return YoutubeSignInState.compute(config.useYouTubeOauth(), YoutubeOauth2TokenHandler.tokenFileExists(), url, code);
+    }
+
+    /**
+     * Renders {@link #youtubeSignInState} into {@link #youtubeSignInCard}'s components. Every
+     * phase gets its own status colour and text — see the class javadoc on {@link
+     * YoutubeSignInState} — so pressing the button never lands on "nothing happened".
+     */
+    private void renderYoutubeSignIn() {
+        YoutubeSignInState state = youtubeSignInState;
+        YoutubeSignInState.Phase phase = state.phase();
+
+        boolean showCode = state.code() != null;
+        youtubeSignInCodeLabel.setVisible(showCode);
+        youtubeSignInUrlLabel.setVisible(showCode);
+        youtubeSignInCopyButton.setVisible(showCode);
+        if (showCode) {
+            youtubeSignInCodeLabel.setText(GuiLanguage.msg("gui.config.youtubeSignInCodeLabel", state.code()));
+            youtubeSignInUrlLabel.setText(GuiLanguage.msg("gui.config.youtubeSignInUrlLabel", state.url()));
+        }
+
+        // Shown for every phase where signing in has not finished (or has just failed) — visible
+        // long before the button is ever pressed, per the class javadoc on YoutubeSignInState.
+        youtubeSignInWarningLabel.setVisible(phase == YoutubeSignInState.Phase.WAITING_FOR_CODE
+                || phase == YoutubeSignInState.Phase.CODE_READY
+                || phase == YoutubeSignInState.Phase.BROWSER_OPENED
+                || phase == YoutubeSignInState.Phase.FAILED);
+
+        youtubeSignInSignOutButton.setVisible(phase == YoutubeSignInState.Phase.SIGNED_IN);
+        youtubeSignInActionButton.setVisible(phase != YoutubeSignInState.Phase.SIGNED_IN
+                && phase != YoutubeSignInState.Phase.OAUTH_DISABLED
+                && phase != YoutubeSignInState.Phase.FAILED);
+        youtubeSignInActionButton.setEnabled(phase == YoutubeSignInState.Phase.CODE_READY
+                || phase == YoutubeSignInState.Phase.BROWSER_OPENED);
+
+        switch (phase) {
+            case OAUTH_DISABLED -> {
+                youtubeSignInStatusLabel.setForeground(Tokens.textMuted());
+                youtubeSignInStatusLabel.setText(GuiLanguage.msg("gui.config.youtubeSignInDisabled"));
+            }
+            case SIGNED_IN -> {
+                youtubeSignInStatusLabel.setForeground(Tokens.success());
+                youtubeSignInStatusLabel.setText(GuiLanguage.msg("gui.config.youtubeSignInSignedIn"));
+            }
+            case WAITING_FOR_CODE -> {
+                youtubeSignInStatusLabel.setForeground(Tokens.textMuted());
+                youtubeSignInStatusLabel.setText(GuiLanguage.msg("gui.config.youtubeSignInWaiting"));
+            }
+            case CODE_READY -> {
+                youtubeSignInStatusLabel.setForeground(Tokens.accent());
+                youtubeSignInStatusLabel.setText(GuiLanguage.msg("gui.config.youtubeSignInCodeReady"));
+            }
+            case BROWSER_OPENED -> {
+                youtubeSignInStatusLabel.setForeground(
+                        state.clipboardFallback() ? Tokens.warning() : Tokens.success());
+                youtubeSignInStatusLabel.setText(state.clipboardFallback()
+                        ? GuiLanguage.msg("gui.config.youtubeSignInClipboardFallback")
+                        : GuiLanguage.msg("gui.config.youtubeSignInBrowserOpened"));
+            }
+            case FAILED -> {
+                youtubeSignInStatusLabel.setForeground(Tokens.danger());
+                youtubeSignInStatusLabel.setText(GuiLanguage.msg("gui.config.youtubeSignInFailed", state.message()));
+            }
+        }
+
+        youtubeSignInCard.revalidate();
+        youtubeSignInCard.repaint();
+    }
+
+    /**
+     * Confirms the burner-account warning — again, in a modal dialog someone has to click
+     * through, not just a label they might not have read — then opens the verification URL with
+     * the code pre-filled. Falls back to the clipboard exactly like {@code
+     * MainFrame.openWebPanel} does: a headless-capable desktop or a Linux box with no default
+     * browser handler leaves {@link Desktop#browse} unsupported or throwing, and the code is
+     * still strictly more useful on the clipboard than behind a dead button. Either way the code
+     * stays on screen afterwards — a pre-fill is not guaranteed to survive a redirect.
+     */
+    private void beginYoutubeSignIn() {
+        YoutubeSignInState state = youtubeSignInState;
+        String url = state.url();
+        String code = state.code();
+        if (url == null || code == null) {
+            return; // the button should not be enabled outside CODE_READY/BROWSER_OPENED
+        }
+
+        int choice = JOptionPane.showConfirmDialog(this,
+                GuiLanguage.msg("gui.config.youtubeSignInConfirmMessage"),
+                GuiLanguage.msg("gui.config.youtubeSignInConfirmTitle"),
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (choice != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        boolean opened = false;
+        try {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(java.net.URI.create(url));
+                opened = true;
+            }
+        } catch (Exception ex) {
+            LOG.warn("Could not open the YouTube sign-in page: {}", ex.toString());
+        }
+
+        if (!opened) {
+            copyYoutubeTextToClipboard(code);
+        }
+
+        youtubeSignInState = YoutubeSignInState.browserOpened(url, code, !opened);
+        renderYoutubeSignIn();
+    }
+
+    /** Copies just the code — not the whole URL — since that is what {@code google.com/device} asks someone to type. */
+    private void copyYoutubeSignInCode() {
+        String code = youtubeSignInState.code();
+        if (code != null) {
+            copyYoutubeTextToClipboard(code);
+        }
+    }
+
+    private void copyYoutubeTextToClipboard(String text) {
+        Toolkit.getDefaultToolkit().getSystemClipboard()
+                .setContents(new java.awt.datatransfer.StringSelection(text), null);
+    }
+
+    /**
+     * Deletes {@code youtubetoken.txt} after an explicit confirmation — this is the "offer to
+     * sign out rather than pretending a fresh sign-in is needed" branch: the bot is already
+     * signed in, and the only way out of that is deleting the stored token and restarting.
+     */
+    private void signOutOfYoutube() {
+        int choice = JOptionPane.showConfirmDialog(this,
+                GuiLanguage.msg("gui.config.youtubeSignInSignOutConfirmMessage"),
+                GuiLanguage.msg("gui.config.youtubeSignInSignOutConfirmTitle"),
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (choice != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        try {
+            YoutubeOauth2TokenHandler.deleteStoredToken();
+        } catch (java.io.IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    GuiLanguage.msg("gui.config.youtubeSignInSignOutFailed", ex.getMessage()),
+                    GuiLanguage.msg("gui.config.youtubeSignInTitle"), JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        youtubeSignInState = computeYoutubeSignInState();
+        renderYoutubeSignIn();
     }
 
     /**

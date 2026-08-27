@@ -18,7 +18,9 @@ package com.jagrosh.jmusicbot.unit.utils;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.core.spi.FilterReply;
+import com.jagrosh.jmusicbot.utils.OtherUtil;
 import com.jagrosh.jmusicbot.utils.YoutubeOauth2TokenHandler;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,10 +31,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for YoutubeOauth2TokenHandler.
- * 
+ *
  * This handler captures OAuth authorization messages from the YouTube source library
  * and stores the authorization URL and code so they can be sent to the bot owner.
- * 
+ *
  * @see YoutubeOauth2TokenHandler
  */
 @DisplayName("YoutubeOauth2TokenHandler Tests")
@@ -46,6 +48,15 @@ class YoutubeOauth2TokenHandlerTest {
         handler = new YoutubeOauth2TokenHandler();
         // Get the logger that the YouTube library uses
         youtubeOauthLogger = (Logger) LoggerFactory.getLogger("dev.lavalink.youtube.http.YoutubeOauth2Handler");
+    }
+
+    // The "success" message below is a real write to youtubetoken.txt, relative to the working
+    // directory — there is nowhere else for it to go, since OtherUtil.getPath resolves relative
+    // to wherever the process runs from, not to this test. Left behind, it makes every other
+    // test that checks "is the bot signed in" start out wrong.
+    @AfterEach
+    void cleanUpTokenFile() throws java.io.IOException {
+        java.nio.file.Files.deleteIfExists(OtherUtil.getPath("youtubetoken.txt"));
     }
 
     @Nested

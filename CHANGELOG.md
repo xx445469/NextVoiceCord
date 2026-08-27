@@ -11,6 +11,22 @@ follow [semantic versioning](https://semver.org/spec/v2.0.0.html). Dates are ISO
 
 ### Added
 
+- **One-click YouTube sign-in.** The desktop window and the web panel now open the Google device
+  page with the code already filled in, instead of printing a URL and a code for the owner to
+  read out of a console and retype.
+
+  The card reports which of six states the flow is actually in, including the two that used to
+  look like a broken button: OAuth switched off (it says what to turn on), and enabled but with
+  no code delivered yet. When a browser cannot be opened — a headless host, a Linux box with no
+  default handler — the code goes to the clipboard and the link stays on screen.
+
+  It carries the same warning the owner DM has always carried, and shows it before the browser
+  opens rather than after: **authorise with a burner Google account, not your main one.** The
+  sign-in grants ongoing access to whichever account is used, and the resulting token is stored
+  in plain text next to the bot. Signing out deletes it.
+
+  The stored token is never sent to the web panel.
+
 - **Optional Lavalink playback engine.** `playback.engine` selects `lavaplayer` or `lavalink`.
   `lavaplayer` remains the default and is unchanged.
 

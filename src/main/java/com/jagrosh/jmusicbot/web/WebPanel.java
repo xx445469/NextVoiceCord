@@ -114,6 +114,7 @@ public final class WebPanel
             server.createContext("/api/config", this::handleConfig);
             server.createContext("/api/prefs", this::handlePrefs);
             server.createContext("/api/control", this::handleControl);
+            server.createContext("/api/youtube-oauth", this::handleYoutubeOauth);
 
             server.setExecutor(Executors.newFixedThreadPool(THREADS));
             server.start();
@@ -311,6 +312,36 @@ public final class WebPanel
         }
 
         WebWrites.Result result = writes.control(command, clientAddress(exchange));
+        send(exchange, result.ok() ? 200 : 400, "application/json; charset=utf-8",
+             MAPPER.writeValueAsString(result.asMap()));
+    }
+
+    /**
+     * GET reports the current sign-in phase (see {@link WebData#youtubeOauth}); POST signs the
+     * bot out by deleting the stored token. Both are covered by the same authorisation GET/POST
+     * split every other endpoint uses — a query-string token is enough to read the phase (that's
+     * what makes the page load at all), but signing out requires the header, the same CSRF
+     * defence {@link #handleConfig} relies on.
+     */
+    private void handleYoutubeOauth(HttpExchange exchange) throws IOException
+    {
+        if ("GET".equals(exchange.getRequestMethod()))
+        {
+            serveJson(exchange, e -> data.youtubeOauth());
+            return;
+        }
+
+        if (!"POST".equals(exchange.getRequestMethod()))
+        {
+            send(exchange, 405, "text/plain; charset=utf-8", "Method not allowed.");
+            return;
+        }
+        if (!authorised(exchange, true))
+        {
+            return;
+        }
+
+        WebWrites.Result result = writes.youtubeSignOut(clientAddress(exchange));
         send(exchange, result.ok() ? 200 : 400, "application/json; charset=utf-8",
              MAPPER.writeValueAsString(result.asMap()));
     }

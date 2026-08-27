@@ -162,6 +162,13 @@
     padding: 12px 14px; margin-bottom: 16px; font-size: 13.5px;
   }
   .banner code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  /* The burner-account warning: the danger colour, not the ordinary warning one, because
+     authorising with the wrong Google account is not a recoverable mistake the way most of
+     this panel's other warnings are. */
+  .banner.danger { border-color: var(--err); color: var(--err); font-weight: 560; }
+  .ytoauth-code { font: 15px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 4px 0; }
+  .ytoauth-link { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; margin-bottom: 10px; }
+  .ytoauth-link a { color: var(--accent); }
 
   .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); margin-bottom: 14px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -292,6 +299,7 @@
       <section class="view" id="view-config" hidden>
         <h2 data-i18n="gui.config.title">Bot config</h2>
         <p class="hint" style="margin:-8px 0 14px;" data-i18n="gui.config.subtitle">Edit config.txt and save — the bot must restart to apply changes</p>
+        <div id="ytOauthBody"></div>
         <div id="cfgBody"><div class="empty small">Loading…</div></div>
       </section>
 
@@ -927,6 +935,128 @@ document.addEventListener('change', e => {
 let cfgData = null;
 let cfgInitial = {};
 
+// ==================== YouTube sign-in ====================
+// The same phases the desktop window's own card renders — see the class javadoc on
+// com.jagrosh.jmusicbot.utils.YoutubeSignInState. Rendered into its own div (ytOauthBody),
+// separate from cfgBody, so its own short poll (see VIEW_START.config below) never touches —
+// and never risks clobbering — whatever the viewer is mid-typing in the config form.
+let ytOauthData = null;
+
+const YT_OAUTH_STATUS_KEY = {
+  OAUTH_DISABLED: 'gui.config.youtubeSignInDisabled',
+  SIGNED_IN: 'gui.config.youtubeSignInSignedIn',
+  WAITING_FOR_CODE: 'gui.config.youtubeSignInWaiting',
+  CODE_READY: 'gui.config.youtubeSignInCodeReady',
+  BROWSER_OPENED: 'gui.config.youtubeSignInBrowserOpened',
+};
+
+async function pollYoutubeOauth() {
+  try {
+    const res = await fetch(withLang('/api/youtube-oauth'), { headers: authHeaders() });
+    if (!res.ok) { noteHttpFailure(res.status); return; }
+    ytOauthData = await res.json();
+    renderYoutubeOauth();
+  } catch (e) { /* keep showing whatever was last rendered; a dropped poll is not "failed" */ }
+}
+
+function renderYoutubeOauth() {
+  const body = el('ytOauthBody');
+  if (!ytOauthData) { body.innerHTML = ''; return; }
+  const d = ytOauthData;
+  const showCode = !!(d.code && d.url);
+  // The warning is shown for every phase where signing in has not finished — visible before
+  // the sign-in button is ever pressed, per the same reasoning as the desktop window's card.
+  const showWarning = d.phase === 'WAITING_FOR_CODE' || d.phase === 'CODE_READY' || d.phase === 'BROWSER_OPENED';
+  const statusKey = YT_OAUTH_STATUS_KEY[d.phase] || 'gui.config.youtubeSignInWaiting';
+  const statusClass = d.phase === 'SIGNED_IN' ? 'ok' : '';
+
+  let html = `<div class="card">
+      <h3>${esc(L('gui.config.youtubeSignInTitle', 'YouTube sign-in'))}</h3>
+      <p class="ctrl-result ${statusClass}" style="margin-bottom:10px;">${esc(L(statusKey, ''))}</p>`;
+
+  if (showWarning) {
+    html += `<div class="banner danger">${esc(L('gui.config.youtubeSignInWarning', ''))}</div>`;
+  }
+  if (showCode) {
+    html += `<div class="ytoauth-code">${esc(fmt(L('gui.config.youtubeSignInCodeLabel', 'Code: {0}'), d.code))}</div>
+      <div class="ytoauth-link"><a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.url)}</a></div>`;
+  }
+
+  html += '<div class="formrow">';
+  if (d.phase === 'CODE_READY' || d.phase === 'BROWSER_OPENED') {
+    html += `<button type="button" class="btn primary" id="ytOauthSignIn">${esc(L('gui.config.youtubeSignInButton', 'Sign in to YouTube'))}</button>`;
+  }
+  if (showCode) {
+    html += `<button type="button" class="btn" id="ytOauthCopy">${esc(L('gui.config.youtubeSignInCopyCode', 'Copy code'))}</button>`;
+  }
+  if (d.phase === 'SIGNED_IN') {
+    html += `<button type="button" class="btn" id="ytOauthSignOut">${esc(L('gui.config.youtubeSignInSignOut', 'Sign out'))}</button>`;
+  }
+  html += `<span class="ctrl-result" id="ytOauthResult"></span></div></div>`;
+
+  body.innerHTML = html;
+}
+
+// Confirms the burner-account warning a second time — in a modal someone has to click
+// through, not just the banner they might not have read — then opens the link exactly the
+// way any other link on this page would. The link stays visible either way afterwards
+// (rendered by renderYoutubeOauth above), so a popup blocker is an inconvenience, not a dead end.
+function beginYoutubeSignIn() {
+  const d = ytOauthData;
+  if (!d || !d.url || !d.code) return;
+  if (!window.confirm(L('gui.config.youtubeSignInConfirmMessage', ''))) return;
+
+  const win = window.open(d.url, '_blank', 'noopener');
+  const resultEl = el('ytOauthResult');
+  if (win) {
+    resultEl.textContent = L('gui.config.youtubeSignInBrowserOpened', '');
+    resultEl.className = 'ctrl-result ok';
+  } else {
+    resultEl.textContent = L('gui.config.youtubeSignInClipboardFallback', '');
+    resultEl.className = 'ctrl-result err';
+  }
+}
+
+async function copyYoutubeSignInCode() {
+  const d = ytOauthData;
+  const resultEl = el('ytOauthResult');
+  if (!d || !d.code) return;
+  try {
+    if (!navigator.clipboard) throw new Error('clipboard unavailable');
+    await navigator.clipboard.writeText(d.code);
+    resultEl.textContent = L('gui.config.youtubeSignInCopyCodeDone', 'Copied');
+    resultEl.className = 'ctrl-result ok';
+  } catch (e) {
+    resultEl.textContent = L('web.result.requestFailed', 'Request failed.');
+    resultEl.className = 'ctrl-result err';
+  }
+}
+
+async function signOutOfYoutube() {
+  if (!window.confirm(L('gui.config.youtubeSignInSignOutConfirmMessage', ''))) return;
+  const resultEl = el('ytOauthResult');
+  resultEl.textContent = L('web.result.saving', 'Saving…');
+  resultEl.className = 'ctrl-result';
+  try {
+    const { res, data } = await postJSON('/api/youtube-oauth', {});
+    if (!res.ok) {
+      resultEl.textContent = (data && data.message) || L('web.result.requestFailed', 'Request failed.');
+      resultEl.className = 'ctrl-result err';
+      return;
+    }
+    pollYoutubeOauth();
+  } catch (e) {
+    resultEl.textContent = L('web.result.networkError', 'Network error.');
+    resultEl.className = 'ctrl-result err';
+  }
+}
+
+document.addEventListener('click', e => {
+  if (e.target.id === 'ytOauthSignIn') beginYoutubeSignIn();
+  if (e.target.id === 'ytOauthCopy') copyYoutubeSignInCode();
+  if (e.target.id === 'ytOauthSignOut') signOutOfYoutube();
+});
+
 // A handful of section prefixes match a titled card the desktop config panel already has a
 // name for; the rest (discord, web, logging, ...) are internal config namespaces the desktop
 // panel does not curate into a section of its own, so they fall back to a capitalised slug.
@@ -1104,7 +1234,7 @@ const VIEW_REFRESH = {
   system: () => pollSystem(),
   sources: () => pollSources(),
   preferences: () => openPreferences(),
-  config: () => openConfig()
+  config: () => { openConfig(); pollYoutubeOauth(); }
 };
 
 const VIEW_START = {};
@@ -1115,6 +1245,17 @@ for (const view of Object.keys(VIEW_REFRESH)) {
       ? () => { refresh(); pollTimer = setInterval(refresh, intervalMs); }
       : refresh;
 }
+
+// Overridden rather than added to REFRESH_MS above: re-fetching the whole config form on a
+// timer would clobber whatever the viewer is mid-typing (that's exactly why "config" has no
+// entry in REFRESH_MS at all). The YouTube sign-in card is different — it's read-only, and the
+// whole point of it is noticing a code arrive or a sign-in finish without a manual reload — so
+// it gets its own short-interval poll instead.
+VIEW_START.config = () => {
+  openConfig();
+  pollYoutubeOauth();
+  pollTimer = setInterval(pollYoutubeOauth, 4000);
+};
 
 function refreshCurrentView() {
   if (currentView && VIEW_REFRESH[currentView]) VIEW_REFRESH[currentView]();
