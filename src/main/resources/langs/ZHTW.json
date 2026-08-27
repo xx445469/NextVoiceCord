@@ -787,7 +787,9 @@
       "youtubeSignInTitle": "YouTube 登入",
       "youtubeSignInUrlLabel": "連結：{0}",
       "youtubeSignInWaiting": "正在等待 YouTube 的登入代碼。通常會在機器人連上後不久出現 — 如果一直沒有變化，請重新啟動機器人。",
-      "youtubeSignInWarning": "警告：絕對不要用你的主要 Google 帳號完成這個授權。請另外建立或使用一個小號 Google 帳號（不是你常用的那個）——這會讓 NextVoiceCord 持續存取你用來登入的帳號，產生的登入權杖也會以明文形式儲存在機器人旁邊。"
+      "youtubeSignInWarning": "警告：絕對不要用你的主要 Google 帳號完成這個授權。請另外建立或使用一個小號 Google 帳號（不是你常用的那個）——這會讓 NextVoiceCord 持續存取你用來登入的帳號，產生的登入權杖也會以明文形式儲存在機器人旁邊。",
+      "showDetails": "顯示詳細資訊",
+      "hideDetails": "隱藏詳細資訊"
     },
     "console": {
       "autoScroll": "自動捲動",

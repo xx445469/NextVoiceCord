@@ -80,11 +80,11 @@ public class SettingsPanel extends JPanel implements SectionedPanel {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
         content.add(createAppearanceSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(Box.createVerticalStrut(Tokens.SPACE_SM));
         content.add(createConfigSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(Box.createVerticalStrut(Tokens.SPACE_SM));
         content.add(createUpdatesSection());
-        content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+        content.add(Box.createVerticalStrut(Tokens.SPACE_SM));
         content.add(createInfoSection());
 
         return Widgets.scrollable(content);
@@ -105,6 +105,15 @@ public class SettingsPanel extends JPanel implements SectionedPanel {
         controlWrap.add(control);
         row.add(controlWrap, BorderLayout.EAST);
         return row;
+    }
+
+    /**
+     * {@link Widgets#titledCard(String, Component)}, tightened for this page's own density
+     * budget — the same reasoning, and the same values, as {@code ConfigPanel}'s own copy of
+     * this helper.
+     */
+    private JPanel titledCard(String title, Component body) {
+        return Widgets.titledCard(title, body, Tokens.SPACE_MD, Tokens.SPACE_SM);
     }
 
     /**
@@ -152,8 +161,9 @@ public class SettingsPanel extends JPanel implements SectionedPanel {
     }
 
     private JPanel createAppearanceSection() {
-        JPanel body = Widgets.transparent(null);
-        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        // Packs the theme and font-size rows two-to-a-line once the card is wide enough — see
+        // Widgets.FormGrid — rather than always stacking every row, one per line.
+        Widgets.FormGrid body = new Widgets.FormGrid();
 
         // A segmented control rather than a combo box: four themes are few enough that every
         // choice can stay on screen at once, so comparing them does not require opening a menu.
@@ -185,18 +195,16 @@ public class SettingsPanel extends JPanel implements SectionedPanel {
             fontSaveDelay.restart();
         });
 
-        body.add(preferenceRow(GuiLanguage.msg("gui.language.label"), buildLanguageBox()));
+        body.addField(preferenceRow(GuiLanguage.msg("gui.language.label"), buildLanguageBox()));
         // The distinction is worth stating outright: someone changing this expects it to
         // affect what the bot says in Discord, and it does not.
-        body.add(Widgets.hint(GuiLanguage.msg("gui.language.hint")));
-        body.add(Box.createVerticalStrut(Tokens.SPACE_MD));
-        body.add(preferenceRow(GuiLanguage.msg("gui.appearance.theme"), themeControl));
-        body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
-        body.add(preferenceRow(GuiLanguage.msg("gui.appearance.fontSize"), fontSpinner));
-        body.add(Widgets.hint(GuiLanguage.msg("gui.appearance.savedNote")));
+        body.addFull(Widgets.hint(GuiLanguage.msg("gui.language.hint")));
+        body.addField(preferenceRow(GuiLanguage.msg("gui.appearance.theme"), themeControl));
+        body.addField(preferenceRow(GuiLanguage.msg("gui.appearance.fontSize"), fontSpinner));
+        body.addFull(Widgets.hint(GuiLanguage.msg("gui.appearance.savedNote")));
 
         String title = GuiLanguage.msg("gui.section.appearance");
-        JPanel card = Widgets.titledCard(title, body);
+        JPanel card = titledCard(title, body);
         sections.add(new Section(title, card));
         return card;
     }
@@ -223,7 +231,7 @@ public class SettingsPanel extends JPanel implements SectionedPanel {
         body.add(Widgets.hint(GuiLanguage.msg("gui.preferences.location", getConfigPath())));
 
         String title = GuiLanguage.msg("gui.preferences.configuration");
-        JPanel card = Widgets.titledCard(title, body);
+        JPanel card = titledCard(title, body);
         sections.add(new Section(title, card));
         return card;
     }
@@ -269,7 +277,7 @@ public class SettingsPanel extends JPanel implements SectionedPanel {
         body.add(statusLabel);
 
         String title = GuiLanguage.msg("gui.preferences.updates");
-        JPanel card = Widgets.titledCard(title, body);
+        JPanel card = titledCard(title, body);
         sections.add(new Section(title, card));
         return card;
     }
@@ -371,22 +379,17 @@ public class SettingsPanel extends JPanel implements SectionedPanel {
      * Creates the system info section.
      */
     private JPanel createInfoSection() {
-        JPanel body = Widgets.transparent(null);
-        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        Widgets.FormGrid body = new Widgets.FormGrid();
 
-        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.javaVersion"), mutedValue(System.getProperty("java.version"))));
-        body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
-        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.javaVendor"), mutedValue(System.getProperty("java.vendor"))));
-        body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
-        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.os"),
+        body.addField(preferenceRow(GuiLanguage.msg("gui.preferences.javaVersion"), mutedValue(System.getProperty("java.version"))));
+        body.addField(preferenceRow(GuiLanguage.msg("gui.preferences.javaVendor"), mutedValue(System.getProperty("java.vendor"))));
+        body.addField(preferenceRow(GuiLanguage.msg("gui.preferences.os"),
                 mutedValue(System.getProperty("os.name") + " " + System.getProperty("os.version"))));
-        body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
-        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.currentTheme"), mutedValue(ThemeManager.getCurrentTheme().getDisplayName())));
-        body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
-        body.add(preferenceRow(GuiLanguage.msg("gui.preferences.flatlaf"), mutedValue("3.7")));
+        body.addField(preferenceRow(GuiLanguage.msg("gui.preferences.currentTheme"), mutedValue(ThemeManager.getCurrentTheme().getDisplayName())));
+        body.addField(preferenceRow(GuiLanguage.msg("gui.preferences.flatlaf"), mutedValue("3.7")));
 
         String title = GuiLanguage.msg("gui.preferences.systemInfo");
-        JPanel card = Widgets.titledCard(title, body);
+        JPanel card = titledCard(title, body);
         sections.add(new Section(title, card));
         return card;
     }

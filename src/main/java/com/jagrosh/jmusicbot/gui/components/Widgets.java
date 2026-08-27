@@ -29,6 +29,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
+import java.awt.Container;
+import java.awt.LayoutManager;
+import java.awt.Window;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
+
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -41,8 +48,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
+import javax.swing.JViewport;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import com.jagrosh.jmusicbot.gui.theme.Tokens;
 
@@ -86,10 +95,15 @@ public final class Widgets
 
         public Card(int radius)
         {
+            this(radius, Tokens.SPACE_LG);
+        }
+
+        /** @param padding this card's own outer padding, on all four sides */
+        public Card(int radius, int padding)
+        {
             this.radius = radius;
             setOpaque(false);
-            setBorder(BorderFactory.createEmptyBorder(
-                    Tokens.SPACE_LG, Tokens.SPACE_LG, Tokens.SPACE_LG, Tokens.SPACE_LG));
+            setBorder(BorderFactory.createEmptyBorder(padding, padding, padding, padding));
         }
 
         @Override
@@ -129,8 +143,21 @@ public final class Widgets
     /** A card holding a heading and a body, which is most of what the panels need. */
     public static Card titledCard(String title, Component body)
     {
-        Card card = new Card();
-        card.setLayout(new BorderLayout(0, Tokens.SPACE_MD));
+        return titledCard(title, body, Tokens.SPACE_LG, Tokens.SPACE_MD);
+    }
+
+    /**
+     * {@link #titledCard(String, Component)}, with the outer padding and the heading-to-body
+     * gap both spelled out — for a page with its own, tighter density budget rather than the
+     * comfortable default every other card on the page uses.
+     *
+     * @param padding this card's own outer padding, on all four sides
+     * @param headingGap the gap between the heading and the body beneath it
+     */
+    public static Card titledCard(String title, Component body, int padding, int headingGap)
+    {
+        Card card = new Card(Tokens.RADIUS, padding);
+        card.setLayout(new BorderLayout(0, headingGap));
 
         JLabel heading = new JLabel(title);
         heading.setFont(Tokens.fontHeading());
@@ -163,10 +190,21 @@ public final class Widgets
 
         public CollapsibleCard(String title, Component body, boolean initiallyExpanded)
         {
+            this(title, body, initiallyExpanded, Tokens.SPACE_LG, Tokens.SPACE_MD);
+        }
+
+        /**
+         * {@link #CollapsibleCard(String, Component, boolean)}, with the outer padding and the
+         * heading-to-body gap both spelled out — see {@link Widgets#titledCard(String,
+         * Component, int, int)}, which this mirrors for the collapsible case.
+         */
+        public CollapsibleCard(String title, Component body, boolean initiallyExpanded, int padding, int headingGap)
+        {
+            super(Tokens.RADIUS, padding);
             this.title = title;
             this.userExpanded = initiallyExpanded;
 
-            setLayout(new BorderLayout(0, Tokens.SPACE_MD));
+            setLayout(new BorderLayout(0, headingGap));
 
             header = new JButton();
             header.setFont(Tokens.fontHeading());
@@ -677,5 +715,197 @@ public final class Widgets
         JPanel panel = new JPanel(layout);
         panel.setOpaque(false);
         return panel;
+    }
+
+    /**
+     * A form panel that packs its rows two to a line once it is wide enough, and falls back to
+     * one row per line — the every-page-is-one-column layout every settings card used before —
+     * when it is not.
+     *
+     * <p>A row is added as either {@link #addField(Component)} (a label paired with a short
+     * value: a prefix, a port, a toggle's own row) or {@link #addFull(Component)} (something
+     * that should always own the whole line regardless of width — a warning, a multi-line note,
+     * a list editor). Only {@code addField} rows are ever paired; an {@code addFull} row always
+     * starts a fresh line and always ends the one before it.
+     *
+     * <p>Swing asks a container how tall it wants to be before that container has necessarily
+     * been given a final width — for a panel inside a {@link BoxLayout}, well before. Reading
+     * this panel's own {@link #getWidth()} at that point would answer with whatever stale value
+     * (often zero) is left over from the last layout, which is why {@link #resolveWidth} instead
+     * reads the width of the nearest {@link JViewport} ancestor: by the time anything below a
+     * scroll pane is asked for a preferred size, the viewport itself has already been given its
+     * final size by whatever laid out the scroll pane — one level higher, earlier in the same
+     * top-down pass. Actually positioning the rows ({@link #layoutContainer}) runs later still,
+     * once this panel's own width is no longer stale, so it reads that directly instead.
+     */
+    public static final class FormGrid extends JPanel
+    {
+        /** Below this, a column reads as cramped rather than merely narrow — checked in German. */
+        private static final int MIN_COLUMN_WIDTH = 280;
+        /**
+         * The chrome between a viewport's width and this panel's own: the scrollbar track, the
+         * gutter {@link #scrollable} adds beside it, and the padding a {@link Card} and a page's
+         * own outer border each contribute. Approximate and deliberately generous — overestimating
+         * it only ever costs a little unused space at the bottom of a card; underestimating it is
+         * what would let a two-column guess turn out too wide for the space actually available.
+         */
+        private static final int VIEWPORT_CHROME = 120;
+        private static final int COLUMN_GAP = Tokens.SPACE_LG;
+        private static final int ROW_GAP = Tokens.SPACE_SM;
+
+        private final Set<Component> fullWidth = Collections.newSetFromMap(new IdentityHashMap<>());
+
+        public FormGrid()
+        {
+            setOpaque(false);
+            setAlignmentX(LEFT_ALIGNMENT);
+            setLayout(new Flow());
+        }
+
+        /** A row paired two-to-a-line once the panel is wide enough for that. */
+        public void addField(Component c)
+        {
+            add(c);
+        }
+
+        /** A row that always takes the whole line, at any width. */
+        public void addFull(Component c)
+        {
+            fullWidth.add(c);
+            add(c);
+        }
+
+        @Override
+        public void remove(Component comp)
+        {
+            fullWidth.remove(comp);
+            super.remove(comp);
+        }
+
+        private int resolveWidth(boolean exact)
+        {
+            if (exact)
+            {
+                int w = getWidth() - getInsets().left - getInsets().right;
+                if (w > 0)
+                {
+                    return w;
+                }
+            }
+            int hint = 0;
+            Container viewport = SwingUtilities.getAncestorOfClass(JViewport.class, this);
+            if (viewport != null)
+            {
+                hint = viewport.getWidth();
+            }
+            if (hint <= 0)
+            {
+                Window window = SwingUtilities.getWindowAncestor(this);
+                hint = window != null ? window.getWidth() : 0;
+            }
+            if (hint > 0)
+            {
+                return Math.max(hint - VIEWPORT_CHROME, MIN_COLUMN_WIDTH);
+            }
+            // Nothing sized anywhere above this yet (a dialog on its first pack, say) — a
+            // single, generously wide column is the safe guess rather than reaching for two
+            // columns sight unseen.
+            return getWidth() > 0 ? getWidth() : 480;
+        }
+
+        /**
+         * The layout itself. Two public entry points ({@link #preferredLayoutSize} and
+         * {@link #layoutContainer}) share one measuring pass ({@link #place}) that both sizes
+         * and, when told to, positions every visible row.
+         */
+        private final class Flow implements LayoutManager
+        {
+            @Override
+            public void addLayoutComponent(String name, Component comp) { }
+
+            @Override
+            public void removeLayoutComponent(Component comp) { }
+
+            @Override
+            public Dimension preferredLayoutSize(Container parent)
+            {
+                return place(resolveWidth(false), false);
+            }
+
+            @Override
+            public Dimension minimumLayoutSize(Container parent)
+            {
+                return place(MIN_COLUMN_WIDTH, false);
+            }
+
+            @Override
+            public void layoutContainer(Container parent)
+            {
+                place(resolveWidth(true), true);
+            }
+
+            private Dimension place(int width, boolean apply)
+            {
+                boolean twoColumns = width >= MIN_COLUMN_WIDTH * 2 + COLUMN_GAP;
+                int columnWidth = twoColumns ? (width - COLUMN_GAP) / 2 : width;
+
+                int y = 0;
+                int maxWidth = 0;
+                // Set once a "field" row claims column 0, waiting for a second one to share the
+                // line; a "full" row (or the end of the loop) always closes it out first.
+                boolean pairPending = false;
+                int pairHeight = 0;
+
+                for (Component c : getComponents())
+                {
+                    if (!c.isVisible())
+                    {
+                        continue;
+                    }
+                    boolean full = fullWidth.contains(c) || !twoColumns;
+                    int h = c.getPreferredSize().height;
+
+                    if (full)
+                    {
+                        if (pairPending)
+                        {
+                            y += pairHeight + ROW_GAP;
+                            pairPending = false;
+                        }
+                        if (apply)
+                        {
+                            c.setBounds(0, y, width, h);
+                        }
+                        y += h + ROW_GAP;
+                        maxWidth = Math.max(maxWidth, width);
+                    }
+                    else if (!pairPending)
+                    {
+                        if (apply)
+                        {
+                            c.setBounds(0, y, columnWidth, h);
+                        }
+                        pairPending = true;
+                        pairHeight = h;
+                        maxWidth = Math.max(maxWidth, width);
+                    }
+                    else
+                    {
+                        if (apply)
+                        {
+                            c.setBounds(columnWidth + COLUMN_GAP, y, columnWidth, h);
+                        }
+                        pairHeight = Math.max(pairHeight, h);
+                        y += pairHeight + ROW_GAP;
+                        pairPending = false;
+                    }
+                }
+                if (pairPending)
+                {
+                    y += pairHeight + ROW_GAP;
+                }
+                return new Dimension(maxWidth, Math.max(0, y - ROW_GAP));
+            }
+        }
     }
 }

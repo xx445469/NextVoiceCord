@@ -746,7 +746,9 @@
       "youtubeSignInTitle": "YouTube 登录",
       "youtubeSignInUrlLabel": "链接：{0}",
       "youtubeSignInWaiting": "正在等待 YouTube 的登录代码。通常会在机器人连接后不久出现 — 如果一直没有变化，请重启机器人。",
-      "youtubeSignInWarning": "警告：绝不要用你的主 Google 账号为此完成授权。请另外新建或使用一个小号 Google 账号（不是你常用的那个）——这会让 NextVoiceCord 持续访问你用来登录的账号，生成的登录令牌也会以明文形式保存在机器人旁边。"
+      "youtubeSignInWarning": "警告：绝不要用你的主 Google 账号为此完成授权。请另外新建或使用一个小号 Google 账号（不是你常用的那个）——这会让 NextVoiceCord 持续访问你用来登录的账号，生成的登录令牌也会以明文形式保存在机器人旁边。",
+      "showDetails": "显示详情",
+      "hideDetails": "隐藏详情"
     },
     "console": {
       "autoScroll": "自动滚动",

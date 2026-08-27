@@ -562,55 +562,102 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
 
     private void addSection(JPanel content, Component section) {
         if (content.getComponentCount() > 0) {
-            content.add(Box.createVerticalStrut(Tokens.SPACE_MD));
+            // Tighter than a card's own internal padding (see Widgets.Card): two settings
+            // cards stacked are already visually separated by each one's border, so the gap
+            // between them only needs to read as "a new card," not repeat that separation.
+            content.add(Box.createVerticalStrut(Tokens.SPACE_SM));
         }
         content.add(section);
     }
 
-    /** A form panel: label column left, control column right, growing horizontally. */
+    /**
+     * A form panel that packs its rows two to a line once it is wide enough — see
+     * {@link Widgets.FormGrid} — and one per line otherwise, which is what every settings card
+     * used unconditionally before.
+     */
     private JPanel formPanel() {
-        JPanel panel = Widgets.transparent(new GridBagLayout());
-        panel.setAlignmentX(LEFT_ALIGNMENT);
-        return panel;
+        Widgets.FormGrid grid = new Widgets.FormGrid();
+        return grid;
     }
 
+    /**
+     * Vestigial: every row used to carry its own {@link GridBagConstraints}, back when {@link
+     * #formPanel()} returned a raw {@code GridBagLayout} panel. {@link #addRow} and
+     * {@link #addSpanningRow} no longer read it — {@link Widgets.FormGrid} owns the layout now
+     * — but every call site still has one to pass, and touching all of them to remove a
+     * parameter neither reads nor mutates would be a much larger, purely mechanical diff for no
+     * behaviour change.
+     */
     private GridBagConstraints rowConstraints() {
-        GridBagConstraints gbc = new GridBagConstraints();
-        // SPACE_SM rather than SPACE_XS: rows this close together read as one dense block
-        // rather than a list of separate settings — the same reason every card already keeps
-        // SPACE_MD from its neighbour (see addSection).
-        gbc.insets = new Insets(Tokens.SPACE_SM, 0, Tokens.SPACE_SM, Tokens.SPACE_MD);
-        gbc.anchor = GridBagConstraints.WEST;
-        return gbc;
+        return new GridBagConstraints();
     }
 
     /**
      * Adds a label/control row and returns it as a {@link FilterRow}, searchable on both the
-     * label text and {@code configKey}.
+     * label text and {@code configKey}. Paired two-to-a-line by the enclosing
+     * {@link Widgets.FormGrid} once it is wide enough for a short value like this one — a
+     * prefix, a port, a spinner — except for a composite editor (the Lavalink node list, the
+     * YouTube client list), which stays full width: see {@link #isCompact}.
      */
     private FilterRow addRow(JPanel panel, GridBagConstraints gbc, int row, String label,
                               JComponent control, String configKey) {
-        gbc.gridx = 0;
-        gbc.gridy = row;
-        gbc.gridwidth = 1;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
         JLabel l = new JLabel(label);
         l.setFont(Tokens.fontLabel());
         // Primary, not muted. A field label names the setting; the hint underneath explains it.
         // Both being muted made the label read as secondary to the value beside it, which is
         // backwards — you look for the label to find the setting.
         l.setForeground(Tokens.text());
-        panel.add(l, gbc);
+
+        JComponent cell = fieldCell(l, control);
+        Widgets.FormGrid grid = (Widgets.FormGrid) panel;
+        if (isCompact(control)) {
+            grid.addField(cell);
+        } else {
+            grid.addFull(cell);
+        }
+
+        return new FilterRow(label, configKey, cell);
+    }
+
+    /**
+     * A label to the left of its control, sized to sit inside either a full-width row or one
+     * half of a two-column one — {@link Widgets.FormGrid} decides which by resizing this cell,
+     * not by anything this method does.
+     */
+    private JComponent fieldCell(JLabel label, JComponent control) {
+        JPanel cell = Widgets.transparent(new GridBagLayout());
+        cell.setAlignmentX(LEFT_ALIGNMENT);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        gbc.gridx = 0;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = new Insets(0, 0, 0, Tokens.SPACE_MD);
+        cell.add(label, gbc);
 
         gbc.gridx = 1;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(gbc.insets.top, 0, gbc.insets.bottom, 0);
-        panel.add(control, gbc);
-        gbc.insets = new Insets(gbc.insets.top, 0, gbc.insets.bottom, Tokens.SPACE_MD);
+        gbc.insets = new Insets(0, 0, 0, 0);
+        cell.add(control, gbc);
 
-        return new FilterRow(label, configKey, l, control);
+        return cell;
+    }
+
+    /**
+     * Whether {@code control} is a short enough value to pair two-to-a-line — a text field, a
+     * spinner, a combo box, the theme segmented control — as opposed to a composite editor (a
+     * list with its own add/remove/reorder buttons, a read-only HOCON dump) that needs the
+     * whole line to stay usable at any width.
+     */
+    private static boolean isCompact(JComponent control) {
+        return control instanceof JTextField
+                || control instanceof JSpinner
+                || control instanceof JComboBox
+                || control instanceof Widgets.Segmented;
     }
 
     /**
@@ -621,13 +668,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
      */
     private FilterRow addSpanningRow(JPanel panel, GridBagConstraints gbc, int row,
                                       JComponent control, String configKey) {
-        gbc.gridx = 0;
-        gbc.gridy = row;
-        gbc.gridwidth = 2;
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(control, gbc);
-        gbc.gridwidth = 1;
+        ((Widgets.FormGrid) panel).addFull(control);
 
         String label = control instanceof JCheckBox ? ((JCheckBox) control).getText() : "";
         return new FilterRow(label, configKey, control);
@@ -649,10 +690,20 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
      */
     private Widgets.CollapsibleCard advancedCard(String key, String title, JPanel body) {
         Widgets.CollapsibleCard card = new Widgets.CollapsibleCard(
-                title, body, expandedAdvancedSections.contains(key));
+                title, body, expandedAdvancedSections.contains(key), Tokens.SPACE_MD, Tokens.SPACE_SM);
         card.onToggle(expanded -> onAdvancedSectionToggled(key, expanded));
         advancedSections.put(key, card);
         return card;
+    }
+
+    /**
+     * {@link Widgets#titledCard(String, Component)}, tightened for this page's own density
+     * budget: a card's own outer padding and the gap under its heading both cost real height
+     * repeated over twenty-odd cards, and neither needs the room the shared default keeps for
+     * a page with far fewer of them.
+     */
+    private Component titledCard(String title, Component body) {
+        return Widgets.titledCard(title, body, Tokens.SPACE_MD, Tokens.SPACE_SM);
     }
 
     /**
@@ -668,7 +719,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.helpWord"), helpWordField, "commands.help"));
 
         String title = GuiLanguage.msg("gui.config.commands");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -686,7 +737,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         rows.add(addSpanningRow(panel, gbc, 2, songInStatusCheckBox, "presence.songInStatus"));
 
         String title = GuiLanguage.msg("gui.config.presence");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -704,7 +755,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
                 "voice.aloneTimeUntilStopSeconds"));
 
         String title = GuiLanguage.msg("gui.config.voice");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -726,7 +777,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         rows.add(addSpanningRow(panel, gbc, 3, useYouTubeOAuthCheckBox, "playback.youtube.useOAuth"));
 
         String title = GuiLanguage.msg("gui.config.playback");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -754,7 +805,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
                 "playback.youtube.useOAuth", youtubeSignInCard));
 
         String title = GuiLanguage.msg("gui.config.youtubeSignInTitle");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -1032,12 +1083,12 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         GridBagConstraints gbc = rowConstraints();
         List<FilterRow> rows = new ArrayList<>();
 
-        rows.add(addSpanningRow(panel, gbc, 0, noteLabel(GuiLanguage.msg("gui.config.lavalinkIntro")), null));
+        rows.add(addSpanningRow(panel, gbc, 0, collapsibleNote(GuiLanguage.msg("gui.config.lavalinkIntro")), null));
 
         FilterRow engineRow = addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.lavalinkEngine"),
                 lavalinkEngineComboBox, "playback.engine");
         engineRow.merge(addSpanningRow(panel, gbc, 2,
-                noteLabel(GuiLanguage.msg("gui.config.lavalinkEngineFallbackNote")), null));
+                collapsibleNote(GuiLanguage.msg("gui.config.lavalinkEngineFallbackNote")), null));
         rows.add(engineRow);
 
         FilterRow nodesRow = addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.lavalinkNodes"),
@@ -1048,7 +1099,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         rows.add(nodesRow);
 
         String title = GuiLanguage.msg("gui.config.lavalink");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -1335,7 +1386,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         rows.add(addRow(panel, gbc, 4, GuiLanguage.msg("gui.config.searching"), searchingEmojiField, "ui.emojis.searching"));
 
         String title = GuiLanguage.msg("gui.config.uiEmojis");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -1355,7 +1406,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
                 "paths.playlistsFolder"));
 
         String title = GuiLanguage.msg("gui.config.other");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -1425,7 +1476,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.discordOwner"), discordOwnerSpinner, "discord.owner"));
 
         String title = GuiLanguage.msg("gui.config.discord");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -1444,7 +1495,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.botLanguage"), botLanguageComboBox, "ui.language"));
 
         String title = GuiLanguage.msg("gui.config.localization");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -1462,7 +1513,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         rows.add(addSpanningRow(panel, gbc, 2, npShowProgressBarCheckBox, "nowPlaying.showProgressBar"));
 
         String title = GuiLanguage.msg("gui.config.nowPlaying");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -1485,7 +1536,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
                 "playback.youtube.clients"));
 
         String title = GuiLanguage.msg("gui.config.youtube");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -1640,7 +1691,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
                 "updates.checkIntervalHours"));
 
         String title = GuiLanguage.msg("gui.config.updates");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -1691,7 +1742,7 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.guiFontSize"), guiFontSizeSpinner, "gui.fontSize"));
 
         String title = GuiLanguage.msg("gui.config.appearance");
-        Component card = Widgets.titledCard(title, panel);
+        Component card = titledCard(title, panel);
         registerSection(title, card, null, rows);
         return card;
     }
@@ -1803,11 +1854,72 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
     }
 
     /**
-     * Creates the bottom panel with save/reset buttons and warning.
+     * A paragraph worth reading once — what a Lavalink node actually is, why {@code fallback}
+     * does not work yet — behind a small toggle instead of shown permanently. Unlike
+     * {@link #warningLabel}, nothing here is a risk someone must see before they act; it is
+     * background someone new to the setting benefits from and someone who already read it once
+     * does not need taking up a card's height on every later visit. Starts collapsed, and stays
+     * reachable with one click rather than being dropped — the same "explain, don't just hide"
+     * reasoning {@link #createLavalinkSection()}'s own javadoc gives for having this text at all.
+     */
+    private JComponent collapsibleNote(String text) {
+        JLabel note = noteLabel(text);
+        note.setVisible(false);
+        note.setAlignmentX(LEFT_ALIGNMENT);
+
+        JButton toggle = new JButton(GuiLanguage.msg("gui.config.showDetails"));
+        toggle.setFont(Tokens.fontSmall());
+        toggle.setForeground(Tokens.accent());
+        toggle.setBorderPainted(false);
+        toggle.setContentAreaFilled(false);
+        toggle.setFocusPainted(false);
+        toggle.setMargin(new Insets(0, 0, 0, 0));
+        toggle.setHorizontalAlignment(SwingConstants.LEFT);
+        toggle.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        toggle.setAlignmentX(LEFT_ALIGNMENT);
+
+        JPanel wrap = Widgets.transparent(null);
+        wrap.setLayout(new BoxLayout(wrap, BoxLayout.Y_AXIS));
+        wrap.setAlignmentX(LEFT_ALIGNMENT);
+        wrap.add(toggle);
+        wrap.add(note);
+
+        toggle.addActionListener(e -> {
+            boolean expanded = !note.isVisible();
+            note.setVisible(expanded);
+            toggle.setText(GuiLanguage.msg(expanded ? "gui.config.hideDetails" : "gui.config.showDetails"));
+            wrap.revalidate();
+            wrap.repaint();
+        });
+
+        return wrap;
+    }
+
+    /**
+     * Creates the bottom bar: Save, Reset, and the restart hint, all on one compact strip.
+     *
+     * <p>Used to be a full {@link Widgets.titledCard}-style block with the hint on its own line
+     * below the buttons — permanent height that, at the window's minimum size, ran to roughly a
+     * quarter of the visible content area. The hint matters (a config editor whose changes
+     * silently do nothing until a restart is a real trap) but does not need a line of its own
+     * every second the page is open, so it now rides beside the buttons on the same row instead
+     * of under them — reachable at a glance, without reserving space nothing else can use.
      */
     private Component buildBottomPanel() {
         Widgets.Card card = new Widgets.Card();
-        card.setLayout(new BorderLayout(0, Tokens.SPACE_XS));
+        // Tighter than a Card's own default padding (see Widgets.Card): that padding is sized
+        // for a card full of settings, not a one-line strip of two buttons and a hint.
+        card.setBorder(BorderFactory.createEmptyBorder(
+                Tokens.SPACE_SM, Tokens.SPACE_MD, Tokens.SPACE_SM, Tokens.SPACE_MD));
+        // BorderLayout rather than FlowLayout: FlowLayout wraps when the row will not fit but
+        // reports a single row's height as its preferred size, so the wrapped line is simply
+        // clipped. German hits that at the minimum window width - the restart hint wrapped and
+        // its second line was cut off by the card's bottom edge. Here the hint shrinks instead
+        // of wrapping, and the strip is exactly one row tall at every width.
+        card.setLayout(new BorderLayout(Tokens.SPACE_SM, 0));
+
+        JPanel buttons = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
+        card.add(buttons, BorderLayout.WEST);
 
         // This card sits below the scroll area rather than inside it, so it does not get the
         // gutter Widgets.scrollable adds. Without matching that inset it ran wider than every
@@ -1816,21 +1928,21 @@ public class ConfigPanel extends JPanel implements SectionedPanel {
         aligned.add(card, BorderLayout.CENTER);
         aligned.add(Box.createHorizontalStrut(Tokens.SPACE_SM), BorderLayout.EAST);
 
-        JPanel buttonPanel = Widgets.transparent(new FlowLayout(FlowLayout.LEFT, Tokens.SPACE_SM, 0));
-
         JButton saveButton = Widgets.primaryButton(GuiLanguage.msg("gui.config.saveChanges"));
         saveButton.addActionListener(e -> saveConfiguration());
-        buttonPanel.add(saveButton);
+        buttons.add(saveButton);
 
         JButton resetButton = Widgets.secondaryButton(GuiLanguage.msg("gui.config.resetToCurrent"));
         resetButton.addActionListener(e -> loadCurrentValues());
-        buttonPanel.add(resetButton);
+        buttons.add(resetButton);
 
-        card.add(buttonPanel, BorderLayout.NORTH);
-        // Fixed to the bottom of the whole panel rather than inside the scrollable content, so
-        // it stays visible regardless of which section — old or newly added — is scrolled into
-        // view; every option on this panel needs a restart, not just the original ones.
-        card.add(Widgets.hint(GuiLanguage.msg("gui.config.restartRequired")), BorderLayout.SOUTH);
+        // Given a minimum size of zero, BorderLayout.CENTER lets Swing ellipsize the label rather
+        // than forcing the strip wider than the window. The tooltip carries the full sentence, so
+        // a narrow window costs legibility at a glance but never the information itself.
+        JLabel restartHint = Widgets.muted(GuiLanguage.msg("gui.config.restartRequired"));
+        restartHint.setToolTipText(GuiLanguage.msg("gui.config.restartRequired"));
+        restartHint.setMinimumSize(new Dimension(0, restartHint.getPreferredSize().height));
+        card.add(restartHint, BorderLayout.CENTER);
 
         return aligned;
     }

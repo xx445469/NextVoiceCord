@@ -746,7 +746,9 @@
       "youtubeSignInTitle": "YouTube 로그인",
       "youtubeSignInUrlLabel": "링크: {0}",
       "youtubeSignInWaiting": "YouTube에서 로그인 코드를 기다리는 중이에요. 보통 봇이 연결된 직후에 나타나요 — 바뀌지 않으면 봇을 재시작해 주세요.",
-      "youtubeSignInWarning": "메인 구글 계정으로는 절대로 승인하지 마세요. 대신 버리는 구글 계정을 새로 만들거나 이미 있는 버리는 계정을 사용하세요 — 이렇게 하면 로그인에 사용한 계정에 NextVoiceCord가 계속 접근할 수 있게 되고, 생성된 로그인 토큰은 봇 옆에 평문(암호화되지 않은 상태)으로 저장돼요."
+      "youtubeSignInWarning": "메인 구글 계정으로는 절대로 승인하지 마세요. 대신 버리는 구글 계정을 새로 만들거나 이미 있는 버리는 계정을 사용하세요 — 이렇게 하면 로그인에 사용한 계정에 NextVoiceCord가 계속 접근할 수 있게 되고, 생성된 로그인 토큰은 봇 옆에 평문(암호화되지 않은 상태)으로 저장돼요.",
+      "showDetails": "세부 정보 표시",
+      "hideDetails": "세부 정보 숨기기"
     },
     "console": {
       "autoScroll": "자동 스크롤",

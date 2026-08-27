@@ -746,7 +746,9 @@
       "youtubeSignInTitle": "YouTubeログイン",
       "youtubeSignInUrlLabel": "リンク: {0}",
       "youtubeSignInWaiting": "YouTubeからのログインコードを待っています。通常はBotが接続してからすぐに表示されます — 変化がない場合はBotを再起動してください。",
-      "youtubeSignInWarning": "【警告】メインのGoogleアカウントでは絶対に認証しないでください。代わりに、使い捨てのGoogleアカウントを新しく作るか、既存の使い捨てアカウントを使ってください — これにより、ログインしたアカウントへNextVoiceCordが継続的にアクセスできるようになり、生成されたログイン用トークンはBotの隣に平文（暗号化されていない状態）で保存されます。"
+      "youtubeSignInWarning": "【警告】メインのGoogleアカウントでは絶対に認証しないでください。代わりに、使い捨てのGoogleアカウントを新しく作るか、既存の使い捨てアカウントを使ってください — これにより、ログインしたアカウントへNextVoiceCordが継続的にアクセスできるようになり、生成されたログイン用トークンはBotの隣に平文（暗号化されていない状態）で保存されます。",
+      "showDetails": "詳細を表示",
+      "hideDetails": "詳細を非表示"
     },
     "console": {
       "autoScroll": "自動スクロール",

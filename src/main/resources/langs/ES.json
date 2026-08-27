@@ -746,7 +746,9 @@
       "youtubeSignInTitle": "Inicio de sesión de YouTube",
       "youtubeSignInUrlLabel": "Enlace: {0}",
       "youtubeSignInWaiting": "Esperando un código de inicio de sesión de YouTube. Normalmente aparece poco después de que el bot se conecte — reinicia el bot si esto no cambia.",
-      "youtubeSignInWarning": "NO AUTORICES ESTO CON TU CUENTA PRINCIPAL DE GOOGLE. Crea o usa una cuenta de Google secundaria y desechable — esto le concede a NextVoiceCord acceso continuo a la cuenta con la que inicies sesión, y el token de inicio de sesión resultante se guarda en texto plano junto al bot."
+      "youtubeSignInWarning": "NO AUTORICES ESTO CON TU CUENTA PRINCIPAL DE GOOGLE. Crea o usa una cuenta de Google secundaria y desechable — esto le concede a NextVoiceCord acceso continuo a la cuenta con la que inicies sesión, y el token de inicio de sesión resultante se guarda en texto plano junto al bot.",
+      "showDetails": "Mostrar detalles",
+      "hideDetails": "Ocultar detalles"
     },
     "console": {
       "autoScroll": "Desplazamiento automático",

@@ -746,7 +746,9 @@
       "youtubeSignInTitle": "Logowanie do YouTube",
       "youtubeSignInUrlLabel": "Link: {0}",
       "youtubeSignInWaiting": "Oczekiwanie na kod logowania z YouTube. Zwykle pojawia się krótko po połączeniu bota — zrestartuj bota, jeśli to się nie zmienia.",
-      "youtubeSignInWarning": "NIE AUTORYZUJ TEGO SWOIM GŁÓWNYM KONTEM GOOGLE. Utwórz lub użyj dodatkowego, jednorazowego konta Google — to daje NextVoiceCord stały dostęp do konta, którym się zalogujesz, a powstały token logowania jest przechowywany jawnym tekstem obok bota."
+      "youtubeSignInWarning": "NIE AUTORYZUJ TEGO SWOIM GŁÓWNYM KONTEM GOOGLE. Utwórz lub użyj dodatkowego, jednorazowego konta Google — to daje NextVoiceCord stały dostęp do konta, którym się zalogujesz, a powstały token logowania jest przechowywany jawnym tekstem obok bota.",
+      "showDetails": "Pokaż szczegóły",
+      "hideDetails": "Ukryj szczegóły"
     },
     "console": {
       "autoScroll": "Autoprzewijanie",

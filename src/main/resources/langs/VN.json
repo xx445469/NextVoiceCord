@@ -746,7 +746,9 @@
       "youtubeSignInTitle": "Đăng nhập YouTube",
       "youtubeSignInUrlLabel": "Liên kết: {0}",
       "youtubeSignInWaiting": "Đang chờ mã đăng nhập từ YouTube. Mã này thường xuất hiện ngay sau khi bot kết nối — hãy khởi động lại bot nếu tình trạng này không thay đổi.",
-      "youtubeSignInWarning": "KHÔNG CẤP QUYỀN CHO MỤC NÀY BẰNG TÀI KHOẢN GOOGLE CHÍNH CỦA BẠN. Hãy tạo hoặc dùng một tài khoản Google phụ mà bạn không tiếc nếu mất — việc này cấp cho NextVoiceCord quyền truy cập liên tục vào tài khoản mà bạn dùng để đăng nhập, và token đăng nhập tạo ra sẽ được lưu dưới dạng văn bản thuần ngay cạnh bot."
+      "youtubeSignInWarning": "KHÔNG CẤP QUYỀN CHO MỤC NÀY BẰNG TÀI KHOẢN GOOGLE CHÍNH CỦA BẠN. Hãy tạo hoặc dùng một tài khoản Google phụ mà bạn không tiếc nếu mất — việc này cấp cho NextVoiceCord quyền truy cập liên tục vào tài khoản mà bạn dùng để đăng nhập, và token đăng nhập tạo ra sẽ được lưu dưới dạng văn bản thuần ngay cạnh bot.",
+      "showDetails": "Hiện chi tiết",
+      "hideDetails": "Ẩn chi tiết"
     },
     "console": {
       "autoScroll": "Tự động cuộn",

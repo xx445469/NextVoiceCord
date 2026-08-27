@@ -746,7 +746,9 @@
       "youtubeSignInTitle": "Connexion YouTube",
       "youtubeSignInUrlLabel": "Lien : {0}",
       "youtubeSignInWaiting": "En attente d'un code de connexion de la part de YouTube. Il apparaît normalement peu après la connexion du bot — redémarre le bot si cela ne change pas.",
-      "youtubeSignInWarning": "N'AUTORISE PAS CECI AVEC TON COMPTE GOOGLE PRINCIPAL. Crée ou utilise un compte Google secondaire et jetable — ceci accorde à NextVoiceCord un accès permanent au compte avec lequel tu te connectes, et le token de connexion obtenu est stocké en texte clair à côté du bot."
+      "youtubeSignInWarning": "N'AUTORISE PAS CECI AVEC TON COMPTE GOOGLE PRINCIPAL. Crée ou utilise un compte Google secondaire et jetable — ceci accorde à NextVoiceCord un accès permanent au compte avec lequel tu te connectes, et le token de connexion obtenu est stocké en texte clair à côté du bot.",
+      "showDetails": "Afficher les détails",
+      "hideDetails": "Masquer les détails"
     },
     "console": {
       "autoScroll": "Défilement automatique",

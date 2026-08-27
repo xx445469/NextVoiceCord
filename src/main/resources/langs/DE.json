@@ -640,7 +640,7 @@
       "title": "Bot-Konfiguration",
       "uiEmojis": "UI / Emojis",
       "useYouTubeOAuth": "YouTube-OAuth für die Wiedergabe verwenden",
-      "voice": "Sprache",
+      "voice": "Sprachkanal",
       "warning": "Warnung",
       "proxy": "Proxy",
       "proxyGithub": "Update-Prüfungen (GitHub) über Proxy leiten",
@@ -746,7 +746,9 @@
       "youtubeSignInTitle": "YouTube-Anmeldung",
       "youtubeSignInUrlLabel": "Link: {0}",
       "youtubeSignInWaiting": "Warte auf einen Anmeldecode von YouTube. Dieser erscheint normalerweise kurz nach dem Verbinden des Bots — starte den Bot neu, falls sich das nicht ändert.",
-      "youtubeSignInWarning": "AUTORISIERE DIES NICHT MIT DEINEM HAUPT-GOOGLE-KONTO. Erstelle oder nutze ein separates Wegwerf-Google-Konto — dies gewährt NextVoiceCord dauerhaften Zugriff auf das Konto, mit dem du dich anmeldest, und das resultierende Anmelde-Token wird im Klartext neben dem Bot gespeichert."
+      "youtubeSignInWarning": "AUTORISIERE DIES NICHT MIT DEINEM HAUPT-GOOGLE-KONTO. Erstelle oder nutze ein separates Wegwerf-Google-Konto — dies gewährt NextVoiceCord dauerhaften Zugriff auf das Konto, mit dem du dich anmeldest, und das resultierende Anmelde-Token wird im Klartext neben dem Bot gespeichert.",
+      "showDetails": "Details anzeigen",
+      "hideDetails": "Details ausblenden"
     },
     "console": {
       "autoScroll": "Automatisch scrollen",
