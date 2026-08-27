@@ -43,6 +43,7 @@ import com.jagrosh.jmusicbot.config.io.ConfigIO;
 import com.jagrosh.jmusicbot.config.loader.ConfigLoader;
 import com.jagrosh.jmusicbot.config.model.ConfigOption;
 import com.jagrosh.jmusicbot.i18n.Language;
+import com.jagrosh.jmusicbot.update.UpdateChecker;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
 import com.jagrosh.jmusicbot.utils.OtherUtil;
 import com.jagrosh.jmusicbot.utils.TimeUtil;
@@ -164,6 +165,14 @@ final class WebData
             "gui.config.title", "gui.config.subtitle", "gui.config.loading", "gui.config.saveChanges",
             "gui.config.commands", "gui.config.presence", "gui.config.voice", "gui.config.playback",
             "gui.config.uiEmojis",
+
+            // Preferences — on-demand update check. Shared with the desktop window's own
+            // "Check for updates" card rather than duplicated under web.*, same reasoning as the
+            // YouTube sign-in card below: one outcome, one sentence, said the same way everywhere
+            // it is said at all.
+            "gui.preferences.updates", "gui.preferences.currentVersion", "gui.preferences.checkForUpdates",
+            "gui.preferences.checkingForUpdates", "gui.preferences.updateUpToDate",
+            "gui.preferences.updateAvailable", "gui.preferences.updateCheckFailed", "gui.action.openInBrowser",
 
             // Bot config — YouTube sign-in card. Shared with the desktop window's own copy of
             // this card rather than duplicated under web.*: the burner-account warning and every
@@ -809,6 +818,45 @@ final class WebData
             fallback.put("code", null);
             return fallback;
         }
+    }
+
+    // ==================== /api/update-check ====================
+
+    /**
+     * Turns one {@link UpdateChecker.CheckOutcome} into the JSON shape {@code /api/update-check}
+     * answers with — the same three outcomes {@link com.jagrosh.jmusicbot.gui.panels.SettingsPanel}
+     * renders on the desktop, reported distinctly rather than collapsed into one "done" flag, for
+     * the same reason {@link UpdateChecker} itself keeps them as three separate record types.
+     *
+     * <p>A pure function of the outcome, not an instance method: unlike every other payload in
+     * this class it needs no {@link Bot} state, and it is called from {@link WebPanel}'s own
+     * background check thread rather than a request thread, so it deliberately does not touch
+     * anything the rest of this class assumes runs on one.
+     */
+    static Map<String, Object> updateCheckPayload(UpdateChecker.CheckOutcome outcome)
+    {
+        var payload = new LinkedHashMap<String, Object>();
+        switch (outcome)
+        {
+            case UpdateChecker.CheckOutcome.UpToDate upToDate ->
+            {
+                payload.put("status", "upToDate");
+                payload.put("currentVersion", upToDate.currentVersion());
+            }
+            case UpdateChecker.CheckOutcome.UpdateAvailable available ->
+            {
+                payload.put("status", "available");
+                payload.put("currentVersion", available.currentVersion());
+                payload.put("latestVersion", available.latestVersion());
+                payload.put("url", available.releasesUrl());
+            }
+            case UpdateChecker.CheckOutcome.Failed failed ->
+            {
+                payload.put("status", "failed");
+                payload.put("detail", failed.detail());
+            }
+        }
+        return payload;
     }
 
     /**

@@ -130,6 +130,7 @@
   .btn {
     appearance: none; border: 1px solid var(--border); background: var(--bg); color: var(--text);
     padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 560;
+    display: inline-block; text-decoration: none;
   }
   .btn:hover:not(:disabled) { border-color: var(--accent); }
   .btn:disabled { opacity: .5; cursor: not-allowed; }
@@ -829,6 +830,9 @@ document.addEventListener('change', e => {
 //    so it can be changed remotely; saving it calls /api/prefs exactly as it always has.
 const FALLBACK_LANGS = [{ code: 'EN', native: 'English', english: 'English' }];
 let prefsLanguage = 'EN';
+// Filled in from /api/status, which already reports it for the page header — read again here
+// so the Updates card below can show "Current version" without a request of its own.
+let currentVersion = '';
 
 function langOptionsHtml(selectedCode) {
   const langs = AVAILABLE_LANGS.length ? AVAILABLE_LANGS : FALLBACK_LANGS;
@@ -842,6 +846,7 @@ async function openPreferences() {
       const d = await res.json();
       renderHeader(d);
       if (d.language) prefsLanguage = d.language;
+      if (d.version) currentVersion = d.version;
     }
   } catch (e) { /* form still renders with the EN default */ }
   renderPreferencesForm();
@@ -882,6 +887,18 @@ function renderPreferencesForm() {
         <button type="button" class="btn primary" id="prefsSave">${esc(L('web.preferences.save', 'Save preferences'))}</button>
         <span class="ctrl-result" id="prefsResult"></span>
       </div>
+    </div>
+    <div class="card">
+      <h3>${esc(L('gui.preferences.updates', 'Updates'))}</h3>
+      <div class="field">
+        <span class="fieldlabel">${esc(L('gui.preferences.currentVersion', 'Current version'))}</span>
+        <span class="hint">${esc(currentVersion || '—')}</span>
+      </div>
+      <div class="formrow">
+        <button type="button" class="btn primary" id="updateCheckBtn">${esc(L('gui.preferences.checkForUpdates', 'Check for updates'))}</button>
+        <a class="btn" id="updateOpenLink" href="#" target="_blank" rel="noopener" hidden>${esc(L('gui.action.openInBrowser', 'Open in browser'))}</a>
+        <span class="ctrl-result" id="updateResult"></span>
+      </div>
     </div>`;
 }
 
@@ -919,6 +936,51 @@ async function savePreferences() {
 
 document.addEventListener('click', e => {
   if (e.target.id === 'prefsSave') savePreferences();
+});
+
+// ==================== Updates ====================
+// Manual only, on purpose: this whole view has no polling interval (see REFRESH_MS above), and
+// this button does not get one of its own either — an automated timer hitting GitHub is exactly
+// the traffic a person pressing a button is not. It only ever runs from that click.
+async function checkForUpdates() {
+  const btn = el('updateCheckBtn');
+  const resultEl = el('updateResult');
+  const openLink = el('updateOpenLink');
+  btn.disabled = true;
+  openLink.hidden = true;
+  resultEl.className = 'ctrl-result';
+  resultEl.textContent = L('gui.preferences.checkingForUpdates', 'Checking for updates…');
+  try {
+    const res = await fetch(withLang('/api/update-check'), { headers: authHeaders() });
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 429) { noteHttpFailure(res.status); }
+      resultEl.textContent = fmt(L('web.result.requestFailed', 'Request failed ({0}).'), res.status);
+      resultEl.className = 'ctrl-result err';
+      return;
+    }
+    const d = await res.json();
+    if (d.status === 'upToDate') {
+      resultEl.textContent = fmt(L('gui.preferences.updateUpToDate', "You're up to date ({0})."), d.currentVersion);
+      resultEl.className = 'ctrl-result ok';
+    } else if (d.status === 'available') {
+      resultEl.textContent = fmt(L('gui.preferences.updateAvailable', 'Version {0} is available.'), d.latestVersion);
+      resultEl.className = 'ctrl-result';
+      openLink.href = d.url;
+      openLink.hidden = false;
+    } else {
+      resultEl.textContent = fmt(L('gui.preferences.updateCheckFailed', 'Could not check for updates: {0}'), d.detail || '');
+      resultEl.className = 'ctrl-result err';
+    }
+  } catch (e) {
+    resultEl.textContent = L('web.result.networkError', 'Network error.');
+    resultEl.className = 'ctrl-result err';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.addEventListener('click', e => {
+  if (e.target.id === 'updateCheckBtn') checkForUpdates();
 });
 
 // The panel-language picker takes effect immediately — it is a local display preference, not a

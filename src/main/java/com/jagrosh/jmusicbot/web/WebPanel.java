@@ -22,11 +22,14 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.i18n.Language;
+import com.jagrosh.jmusicbot.update.UpdateChecker;
+import com.jagrosh.jmusicbot.utils.OtherUtil;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -81,13 +84,55 @@ public final class WebPanel
     private final WebWrites writes;
     private HttpServer server;
 
+    /**
+     * Runs the one outbound call {@code /api/update-check} makes — see {@link
+     * #handleUpdateCheck}. Kept apart from {@link #server}'s own executor, which is sized for
+     * answering local reads instantly, not for a thread sitting on a socket to GitHub for up to
+     * {@link UpdateChecker}'s own 30-second timeout.
+     */
+    private final ExecutorService updateCheckExecutor = Executors.newVirtualThreadPerTaskExecutor();
+
+    /**
+     * Overrides where {@link #handleUpdateCheck} points {@link UpdateChecker} — {@code null}
+     * means the real GitHub API. The same seam {@link UpdateChecker#UpdateChecker(String)}
+     * itself offers, threaded one layer further out so an HTTP-level test of this class can
+     * point a real request at a local server instead of the network, the same way {@link
+     * UpdateChecker}'s own tests do.
+     */
+    private final String updateCheckApiRoot;
+
+    /**
+     * Overrides {@link OtherUtil#getCurrentVersion()} for {@link #handleUpdateCheck} — {@code
+     * null} means the real running version. {@link OtherUtil#getCurrentVersion()} answers
+     * {@code "UNKNOWN"} for anything not run from the packaged jar — this project's own test
+     * suite included — and {@link UpdateChecker#isNewer} treats {@code "UNKNOWN"} as never
+     * newer than anything, by design: a build that cannot name its own version has nothing
+     * trustworthy to compare against. That is exactly right for the running bot and exactly
+     * wrong for a test that needs to reach the "update available" outcome at all, hence this.
+     */
+    private final String updateCheckCurrentVersion;
+
     public WebPanel(Bot bot, int port)
+    {
+        this(bot, port, null, null);
+    }
+
+    /** Test-only: see {@link #updateCheckApiRoot}; the running version is used as normal. */
+    WebPanel(Bot bot, int port, String updateCheckApiRoot)
+    {
+        this(bot, port, updateCheckApiRoot, null);
+    }
+
+    /** Test-only: see {@link #updateCheckApiRoot} and {@link #updateCheckCurrentVersion}. */
+    WebPanel(Bot bot, int port, String updateCheckApiRoot, String updateCheckCurrentVersion)
     {
         this.bot = bot;
         this.port = port;
         this.auth = new WebAuth();
         this.data = new WebData(bot);
         this.writes = new WebWrites(bot);
+        this.updateCheckApiRoot = updateCheckApiRoot;
+        this.updateCheckCurrentVersion = updateCheckCurrentVersion;
     }
 
     /**
@@ -115,6 +160,7 @@ public final class WebPanel
             server.createContext("/api/prefs", this::handlePrefs);
             server.createContext("/api/control", this::handleControl);
             server.createContext("/api/youtube-oauth", this::handleYoutubeOauth);
+            server.createContext("/api/update-check", this::handleUpdateCheck);
 
             server.setExecutor(Executors.newFixedThreadPool(THREADS));
             server.start();
@@ -194,6 +240,7 @@ public final class WebPanel
             server.stop(0);
             server = null;
         }
+        updateCheckExecutor.shutdownNow();
     }
 
     // ==================== Routing ====================
@@ -344,6 +391,59 @@ public final class WebPanel
         WebWrites.Result result = writes.youtubeSignOut(clientAddress(exchange));
         send(exchange, result.ok() ? 200 : 400, "application/json; charset=utf-8",
              MAPPER.writeValueAsString(result.asMap()));
+    }
+
+    /**
+     * Checks GitHub for a newer release, matching what the desktop window's own "Check for
+     * updates" button does — see {@link com.jagrosh.jmusicbot.gui.panels.SettingsPanel} and
+     * {@link UpdateChecker}. Only ever checks and reports; never downloads or installs anything,
+     * that stays {@link com.jagrosh.jmusicbot.update.SelfUpdater}'s job on its own schedule.
+     *
+     * <p>GET only, authorised the same way every other read here is — a query-string token is
+     * enough. That is deliberately what stops this from being usable to make the bot hammer
+     * GitHub from an unauthenticated caller: {@link #authorised} runs, and can refuse, before
+     * {@link UpdateChecker} is ever constructed, so a missing or wrong token never reaches the
+     * network.
+     *
+     * <p>The outbound call itself is dispatched to {@link #updateCheckExecutor} rather than run
+     * inline. Running it on this thread — one of the four the whole server answers every request
+     * with — would let a slow or stalled connection to GitHub tie that thread up for as long as
+     * {@link UpdateChecker}'s own 30-second timeout, leaving every other open tab of the panel
+     * unable to load anything for the same stretch. Dispatching returns this thread to the pool
+     * immediately; the exchange is completed later, from the background thread, once the check
+     * finishes.
+     */
+    private void handleUpdateCheck(HttpExchange exchange) throws IOException
+    {
+        if (!"GET".equals(exchange.getRequestMethod()))
+        {
+            send(exchange, 405, "text/plain; charset=utf-8", "Method not allowed.");
+            return;
+        }
+        if (!authorised(exchange, false))
+        {
+            return;
+        }
+
+        updateCheckExecutor.execute(() -> {
+            UpdateChecker checker = updateCheckApiRoot == null
+                    ? new UpdateChecker() : new UpdateChecker(updateCheckApiRoot);
+            String currentVersion = updateCheckCurrentVersion == null
+                    ? OtherUtil.getCurrentVersion() : updateCheckCurrentVersion;
+            UpdateChecker.CheckOutcome outcome = checker.checkForUpdate(currentVersion);
+            try
+            {
+                send(exchange, 200, "application/json; charset=utf-8",
+                     MAPPER.writeValueAsString(WebData.updateCheckPayload(outcome)));
+            }
+            catch (IOException ex)
+            {
+                // Most likely the caller's tab was closed or navigated away before GitHub
+                // answered — nothing is listening for a response any more, and there is
+                // nothing more useful to do here than note it and move on.
+                LOG.debug("Web panel: could not deliver an update-check response: {}", ex.toString());
+            }
+        });
     }
 
     // ==================== Request helpers ====================

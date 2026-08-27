@@ -7,7 +7,71 @@ follow [semantic versioning](https://semver.org/spec/v2.0.0.html). Dates are ISO
 
 ## [Unreleased]
 
-## [0.9.0-beta.1] — 2026-08-27
+## [1.0.0] — 2026-08-27
+
+First stable release. It carries everything prepared under `0.9.0-beta.1`, which was never
+tagged, plus the interface work below.
+
+### Known limitations
+
+Stated here rather than discovered later:
+
+- `youtube-source` is pinned to an unreleased build (commit `f45bbb7`) rather than a published
+  release. The pin is exact, so builds are reproducible while that artifact remains on the
+  snapshot repository — but snapshot repositories prune, and if it is removed this version can
+  no longer be built from source.
+- The eleven non-English languages are machine-translated and have not been reviewed by a
+  speaker. `_meta.reviewed` is `false` in every one of them.
+- `playback.engine = fallback` is accepted, logged as unimplemented, and resolves to
+  `lavaplayer`.
+- The `lyrics` command is present but does nothing; its dependency was dropped upstream.
+
+### Added
+
+- **The web panel can check for updates.** It never could — the desktop window has had the
+  button for a while and the web panel was simply missed. It now has the same card: current
+  version, a check button, and the three outcomes reported distinctly, with a link through to
+  the release when one exists.
+
+  It checks and links, and does not install. Installing stays with the scheduled updater rather
+  than becoming something a network listener will do on request.
+
+  The token is checked before any outbound request is made, so an unauthenticated caller cannot
+  use the endpoint to make the bot talk to GitHub. The call runs off the server's thread pool, so
+  a stalled connection cannot starve the threads serving every other open tab.
+
+- **Settings categories in the sidebar.** "Preferences" and "Bot config" expand to list their own
+  cards, and picking one reveals and scrolls to it. Both pages were previously one long scroll
+  behind a single row whose name did not say what it held.
+
+  The categories come from the panels themselves rather than a list kept in step by hand, and a
+  test fails the build if a page grows a card the sidebar cannot see.
+
+### Changed
+
+- **The settings pages are considerably denser.** Bot config went from 4246px to 2845px tall at
+  940px wide. Short values now pair two to a line once the window is wide enough, falling back to
+  one per line when narrow; two long explanatory notes moved behind a details toggle. Every
+  category except Lavalink's node editor now fits without scrolling even at the minimum window
+  size, and all of them from 1200px up.
+
+  Nothing was removed to achieve this — the token, `dangerous.eval` and `web.allowConfigEdit`
+  warnings stay permanently visible.
+
+- **The save bar is one compact row** instead of a card taking roughly a quarter of the content
+  area at the minimum window size. The restart hint sits beside the buttons rather than below
+  them.
+
+### Fixed
+
+- The German voice-channel card was titled "Sprache" — German for *language* — which collided
+  with the Language card and left two sidebar categories reading identically. It is now
+  "Sprachkanal".
+- In German at the minimum window width, the save bar's restart hint wrapped to a second line
+  that was then clipped by the card's edge. The strip is now exactly one row tall at any width.
+
+### Previously prepared under 0.9.0-beta.1
+
 
 ### Added
 
