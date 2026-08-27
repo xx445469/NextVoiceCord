@@ -102,16 +102,19 @@ public final class GuiLanguage
     /**
      * Hands the theme a sample of the language so it can check the font can draw it.
      *
-     * <p>The interface font is chosen before any of this runs, and on Linux the candidates are
-     * Latin-only families. Picking one and then asking it to render Chinese produces a row of
+     * <p>The interface font is chosen before any of this runs, and several platforms' candidates
+     * are Latin-only families. Picking one and then asking it to render Chinese produces a row of
      * empty boxes, which is what this exists to prevent.
      *
-     * <p>Uses a real translated string rather than a hard-coded specimen, so the check is
-     * against the script the window will actually contain.
+     * <p>Sends every distinct character the language can display, not one specimen string. A
+     * single nav label was not enough: a font that draws those two characters can still be
+     * missing hundreds of others, and the window then renders mostly correctly with boxes
+     * scattered through it — which is harder to recognise as a font problem than if it had
+     * failed outright.
      */
     private static void tellTheThemeWhatToRender()
     {
-        String sample = languages == null ? "" : languages.get(current, "gui.nav.overview");
+        String sample = languages == null ? "" : languages.getDistinctCharacters(current);
         com.jagrosh.jmusicbot.gui.theme.ThemeManager.setRequiredGlyphs(sample);
     }
 

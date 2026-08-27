@@ -235,4 +235,39 @@ class LanguageManagerTest
                     "a key present in English must resolve when the default is " + configured);
         }
     }
+
+    @Test
+    @DisplayName("getDistinctCharacters covers the whole language, not one sample string")
+    void distinctCharactersCoverTheWholeLanguage()
+    {
+        // The font check used to be handed a single nav label. A font that can draw those two
+        // characters can still be missing hundreds of others, so the window rendered mostly
+        // correctly with boxes scattered through it - reported on Windows as "lots of broken
+        // characters". The sample has to be everything the language can put on screen.
+        LanguageManager manager = LanguageManager.load(Language.EN);
+
+        for (Language language : new Language[] { Language.ZHTW, Language.JA, Language.RU })
+        {
+            String sample = manager.getDistinctCharacters(language);
+            String oneLabel = manager.get(language, "gui.nav.overview");
+
+            assertTrue(sample.codePointCount(0, sample.length()) > 100,
+                    language + " should contribute far more than a single label's characters");
+            oneLabel.codePoints().forEach(cp ->
+                    assertTrue(sample.codePoints().anyMatch(c -> c == cp),
+                            language + " sample is missing a character its own labels use"));
+        }
+    }
+
+    @Test
+    @DisplayName("getDistinctCharacters deduplicates and survives an unknown language")
+    void distinctCharactersAreDeduplicated()
+    {
+        LanguageManager manager = LanguageManager.load(Language.EN);
+        String sample = manager.getDistinctCharacters(Language.EN);
+
+        assertEquals(sample.codePoints().distinct().count(), sample.codePointCount(0, sample.length()),
+                "every character should appear exactly once");
+        assertFalse(sample.isEmpty(), "English must produce a non-empty sample");
+    }
 }

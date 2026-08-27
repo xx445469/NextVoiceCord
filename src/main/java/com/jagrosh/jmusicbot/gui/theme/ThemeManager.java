@@ -212,8 +212,17 @@ public final class ThemeManager {
             "Segoe UI Variable Text", "Segoe UI",                    // Windows
             "Inter", "Ubuntu", "Cantarell", "Noto Sans",             // Linux, Latin-only
             // Named CJK families, tried before giving up on a platform look entirely.
+            // Windows ships a different family per script rather than one that covers them
+            // all, and the "UI" variants are separate family names from their base fonts -
+            // "Microsoft JhengHei UI" is not "Microsoft JhengHei". Listing only one of these
+            // left every other script falling through to the logical family.
+            "Microsoft JhengHei UI", "Microsoft JhengHei",           // Windows, Traditional Chinese
+            "Microsoft YaHei UI", "Microsoft YaHei",                 // Windows, Simplified Chinese
+            "Yu Gothic UI", "Yu Gothic", "Meiryo UI", "MS Gothic",   // Windows, Japanese
+            "Malgun Gothic",                                         // Windows, Korean
+            "PMingLiU", "MingLiU", "SimSun",                         // Windows, older but common
             "Noto Sans CJK TC", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR",
-            "Source Han Sans", "WenQuanYi Micro Hei", "Microsoft JhengHei", "PingFang TC"
+            "Source Han Sans", "WenQuanYi Micro Hei", "PingFang TC"
         };
 
         java.util.Set<String> available = new java.util.HashSet<>(java.util.Arrays.asList(
@@ -227,9 +236,23 @@ public final class ThemeManager {
             }
             Font candidate = new Font(family, Font.PLAIN, size);
             if (sample.isEmpty() || candidate.canDisplayUpTo(sample) < 0) {
+                LOG.debug("Interface font: {} (checked against {} distinct characters)",
+                          family, sample.codePointCount(0, sample.length()));
                 return candidate;
             }
         }
+        // Nothing named could draw the language. The logical family is the only thing the JVM
+        // composes across several physical fonts, so it is the one option that cannot leave
+        // boxes on screen.
+        //
+        // Logged because this is otherwise invisible: the window still looks reasonable, and if
+        // it does not, there is no way to tell from a screenshot which font was picked or why.
+        // canDisplayUpTo is also not equally trustworthy everywhere - on macOS a named family
+        // resolves to a composite that reports covering scripts its own glyphs do not include,
+        // which is why a font problem there stays hidden until the same build runs on Windows.
+        LOG.info("No installed font could draw all {} characters of the interface language; "
+                 + "using the logical sans-serif family, which composes across fonts.",
+                 sample.codePointCount(0, sample.length()));
         return new Font(Font.SANS_SERIF, Font.PLAIN, size);
     }
 

@@ -420,6 +420,40 @@ public final class LanguageManager
         return translations.containsKey(language) && !unreviewed.contains(language);
     }
 
+    /**
+     * Every distinct character {@code language} can put on screen, as one string.
+     *
+     * <p>For checking that a font can actually draw a language before the interface commits to
+     * it. Testing one sample string is not enough: a font that renders a two-character nav label
+     * can still be missing hundreds of the characters the rest of the window contains, which
+     * shows up as text that is mostly fine with boxes scattered through it.
+     *
+     * <p>Deduplicated to distinct code points, so the result is a few thousand characters at
+     * most rather than the whole translation file, and the caller can hand it straight to
+     * {@link java.awt.Font#canDisplayUpTo}.
+     */
+    public String getDistinctCharacters(Language language)
+    {
+        Map<String, String> strings = translations.get(language);
+        if (strings == null)
+        {
+            return "";
+        }
+        // A code point at a time, not a char at a time: a surrogate pair split in half is not a
+        // character any font can be asked about.
+        Set<Integer> seen = new java.util.LinkedHashSet<>();
+        for (String value : strings.values())
+        {
+            if (value != null)
+            {
+                value.codePoints().forEach(seen::add);
+            }
+        }
+        StringBuilder sample = new StringBuilder(seen.size());
+        seen.forEach(sample::appendCodePoint);
+        return sample.toString();
+    }
+
     /** Languages that loaded successfully. */
     public Set<Language> getAvailableLanguages()
     {
