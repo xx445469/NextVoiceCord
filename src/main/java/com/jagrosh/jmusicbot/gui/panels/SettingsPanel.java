@@ -30,6 +30,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,9 +38,14 @@ import java.util.List;
  *
  * @author Arif Banai (arif-banai)
  */
-public class SettingsPanel extends JPanel {
+public class SettingsPanel extends JPanel implements SectionedPanel {
 
     private final Bot bot;
+
+    // The panel's own cards, in the order they appear — see getSections(). Every
+    // create*Section() below appends itself here, right at the point where its title and its
+    // card come together, so this list can never name a card that isn't actually on the page.
+    private final List<Section> sections = new ArrayList<>();
 
     public SettingsPanel(Bot bot) {
         this.bot = bot;
@@ -51,6 +57,15 @@ public class SettingsPanel extends JPanel {
 
         add(buildHeader(), BorderLayout.NORTH);
         add(buildScrollArea(), BorderLayout.CENTER);
+    }
+
+    /**
+     * This panel's cards, in the order they appear on the page. See {@link SectionedPanel} for
+     * why this — not a list kept in the sidebar — is the only place that names them.
+     */
+    @Override
+    public List<Section> getSections() {
+        return List.copyOf(sections);
     }
 
     private Component buildHeader() {
@@ -180,7 +195,10 @@ public class SettingsPanel extends JPanel {
         body.add(preferenceRow(GuiLanguage.msg("gui.appearance.fontSize"), fontSpinner));
         body.add(Widgets.hint(GuiLanguage.msg("gui.appearance.savedNote")));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.section.appearance"), body);
+        String title = GuiLanguage.msg("gui.section.appearance");
+        JPanel card = Widgets.titledCard(title, body);
+        sections.add(new Section(title, card));
+        return card;
     }
 
     /**
@@ -204,7 +222,10 @@ public class SettingsPanel extends JPanel {
         body.add(buttonPanel);
         body.add(Widgets.hint(GuiLanguage.msg("gui.preferences.location", getConfigPath())));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.preferences.configuration"), body);
+        String title = GuiLanguage.msg("gui.preferences.configuration");
+        JPanel card = Widgets.titledCard(title, body);
+        sections.add(new Section(title, card));
+        return card;
     }
 
     /**
@@ -247,7 +268,10 @@ public class SettingsPanel extends JPanel {
         body.add(Box.createVerticalStrut(Tokens.SPACE_SM));
         body.add(statusLabel);
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.preferences.updates"), body);
+        String title = GuiLanguage.msg("gui.preferences.updates");
+        JPanel card = Widgets.titledCard(title, body);
+        sections.add(new Section(title, card));
+        return card;
     }
 
     /**
@@ -361,7 +385,10 @@ public class SettingsPanel extends JPanel {
         body.add(Box.createVerticalStrut(Tokens.SPACE_XS));
         body.add(preferenceRow(GuiLanguage.msg("gui.preferences.flatlaf"), mutedValue("3.7")));
 
-        return Widgets.titledCard(GuiLanguage.msg("gui.preferences.systemInfo"), body);
+        String title = GuiLanguage.msg("gui.preferences.systemInfo");
+        JPanel card = Widgets.titledCard(title, body);
+        sections.add(new Section(title, card));
+        return card;
     }
 
     private JLabel mutedValue(String text) {

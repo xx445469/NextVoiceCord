@@ -78,7 +78,7 @@ import java.util.Set;
  *
  * @author Arif Banai (arif-banai)
  */
-public class ConfigPanel extends JPanel {
+public class ConfigPanel extends JPanel implements SectionedPanel {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigPanel.class);
 
@@ -633,9 +633,13 @@ public class ConfigPanel extends JPanel {
         return new FilterRow(label, configKey, control);
     }
 
-    /** Registers a section's rows with the search filter. {@code collapsible} is null for a common section. */
-    private void registerSection(Component card, Widgets.CollapsibleCard collapsible, List<FilterRow> rows) {
-        filterSections.add(new FilterSection(card, collapsible, rows));
+    /**
+     * Registers a section's rows with the search filter, and its title with {@link #getSections()}
+     * — the sidebar's only source for what this panel contains. {@code collapsible} is null for a
+     * common section.
+     */
+    private void registerSection(String title, Component card, Widgets.CollapsibleCard collapsible, List<FilterRow> rows) {
+        filterSections.add(new FilterSection(title, card, collapsible, rows));
     }
 
     /**
@@ -663,8 +667,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.altPrefix"), altPrefixField, "commands.altPrefix"));
         rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.helpWord"), helpWordField, "commands.help"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.commands"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.commands");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -680,8 +685,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.onlineStatus"), statusComboBox, "presence.status"));
         rows.add(addSpanningRow(panel, gbc, 2, songInStatusCheckBox, "presence.songInStatus"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.presence"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.presence");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -697,8 +703,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.aloneTimeUntilStop"), aloneTimeSpinner,
                 "voice.aloneTimeUntilStopSeconds"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.voice"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.voice");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -718,8 +725,9 @@ public class ConfigPanel extends JPanel {
                 "playback.maxYouTubePlaylistPages"));
         rows.add(addSpanningRow(panel, gbc, 3, useYouTubeOAuthCheckBox, "playback.youtube.useOAuth"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.playback"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.playback");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -745,8 +753,9 @@ public class ConfigPanel extends JPanel {
         rows.add(new FilterRow(GuiLanguage.msg("gui.config.youtubeSignInTitle"),
                 "playback.youtube.useOAuth", youtubeSignInCard));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.youtubeSignInTitle"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.youtubeSignInTitle");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -1038,8 +1047,9 @@ public class ConfigPanel extends JPanel {
         nodesRow.merge(addSpanningRow(panel, gbc, 5, lavalinkTestConnectionStatusLabel, null));
         rows.add(nodesRow);
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.lavalink"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.lavalink");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -1324,8 +1334,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.loading"), loadingEmojiField, "ui.emojis.loading"));
         rows.add(addRow(panel, gbc, 4, GuiLanguage.msg("gui.config.searching"), searchingEmojiField, "ui.emojis.searching"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.uiEmojis"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.uiEmojis");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -1343,8 +1354,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 3, GuiLanguage.msg("gui.config.playlistsFolder"), playlistsFolderField,
                 "paths.playlistsFolder"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.other"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.other");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -1386,8 +1398,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addSpanningRow(panel, gbc, 6, proxyJdaCheckBox, "proxy.jda"));
         rows.add(addSpanningRow(panel, gbc, 7, proxyGithubCheckBox, "proxy.github"));
 
-        Widgets.CollapsibleCard card = advancedCard("proxy", GuiLanguage.msg("gui.config.proxy"), panel);
-        registerSection(card, card, rows);
+        String title = GuiLanguage.msg("gui.config.proxy");
+        Widgets.CollapsibleCard card = advancedCard("proxy", title, panel);
+        registerSection(title, card, card, rows);
         return card;
     }
 
@@ -1411,8 +1424,9 @@ public class ConfigPanel extends JPanel {
         rows.add(tokenRow);
         rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.discordOwner"), discordOwnerSpinner, "discord.owner"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.discord"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.discord");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -1429,8 +1443,9 @@ public class ConfigPanel extends JPanel {
 
         rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.botLanguage"), botLanguageComboBox, "ui.language"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.localization"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.localization");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -1446,8 +1461,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addSpanningRow(panel, gbc, 1, npShowButtonsCheckBox, "nowPlaying.showButtons"));
         rows.add(addSpanningRow(panel, gbc, 2, npShowProgressBarCheckBox, "nowPlaying.showProgressBar"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.nowPlaying"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.nowPlaying");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -1468,8 +1484,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 0, GuiLanguage.msg("gui.config.youtubeClients"), buildYoutubeClientsEditor(),
                 "playback.youtube.clients"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.youtube"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.youtube");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -1548,8 +1565,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.youtubeVisitorData"), youtubeVisitorDataField,
                 "playback.youtube.visitorData"));
 
-        Widgets.CollapsibleCard card = advancedCard("youtubeAdvanced", GuiLanguage.msg("gui.config.youtubeAdvanced"), panel);
-        registerSection(card, card, rows);
+        String title = GuiLanguage.msg("gui.config.youtubeAdvanced");
+        Widgets.CollapsibleCard card = advancedCard("youtubeAdvanced", title, panel);
+        registerSection(title, card, card, rows);
         return card;
     }
 
@@ -1578,8 +1596,9 @@ public class ConfigPanel extends JPanel {
         FilterRow sourcesRow = addSpanningRow(panel, gbc, row, sourcesGrid, "playback.audioSources");
         rows.add(sourcesRow.merge(audioSourcesLabelRow));
 
-        Widgets.CollapsibleCard card = advancedCard("playbackAdvanced", GuiLanguage.msg("gui.config.playbackAdvanced"), panel);
-        registerSection(card, card, rows);
+        String title = GuiLanguage.msg("gui.config.playbackAdvanced");
+        Widgets.CollapsibleCard card = advancedCard("playbackAdvanced", title, panel);
+        registerSection(title, card, card, rows);
         return card;
     }
 
@@ -1596,8 +1615,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.clearChannelAgeDays"), clearChannelAgeDaysSpinner,
                 "commands.clearChannel.ageDays"));
 
-        Widgets.CollapsibleCard card = advancedCard("commandsAdvanced", GuiLanguage.msg("gui.config.commandsAdvanced"), panel);
-        registerSection(card, card, rows);
+        String title = GuiLanguage.msg("gui.config.commandsAdvanced");
+        Widgets.CollapsibleCard card = advancedCard("commandsAdvanced", title, panel);
+        registerSection(title, card, card, rows);
         return card;
     }
 
@@ -1619,8 +1639,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.updateCheckIntervalHours"), updateCheckIntervalSpinner,
                 "updates.checkIntervalHours"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.updates"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.updates");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -1644,8 +1665,9 @@ public class ConfigPanel extends JPanel {
         evalRow.merge(addSpanningRow(panel, gbc, 2, warningLabel(GuiLanguage.msg("gui.config.evalWarning")), null));
         rows.add(evalRow);
 
-        Widgets.CollapsibleCard card = advancedCard("dangerous", GuiLanguage.msg("gui.config.dangerous"), panel);
-        registerSection(card, card, rows);
+        String title = GuiLanguage.msg("gui.config.dangerous");
+        Widgets.CollapsibleCard card = advancedCard("dangerous", title, panel);
+        registerSection(title, card, card, rows);
         return card;
     }
 
@@ -1668,8 +1690,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 1, GuiLanguage.msg("gui.config.guiLanguage"), guiLanguageComboBox, "gui.language"));
         rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.guiFontSize"), guiFontSizeSpinner, "gui.fontSize"));
 
-        Component card = Widgets.titledCard(GuiLanguage.msg("gui.config.appearance"), panel);
-        registerSection(card, null, rows);
+        String title = GuiLanguage.msg("gui.config.appearance");
+        Component card = Widgets.titledCard(title, panel);
+        registerSection(title, card, null, rows);
         return card;
     }
 
@@ -1695,8 +1718,9 @@ public class ConfigPanel extends JPanel {
                 warningLabel(GuiLanguage.msg("gui.config.webAllowConfigEditWarning")), null));
         rows.add(allowEditRow);
 
-        Widgets.CollapsibleCard card = advancedCard("guiWebAdvanced", GuiLanguage.msg("gui.config.guiWeb"), panel);
-        registerSection(card, card, rows);
+        String title = GuiLanguage.msg("gui.config.guiWeb");
+        Widgets.CollapsibleCard card = advancedCard("guiWebAdvanced", title, panel);
+        registerSection(title, card, card, rows);
         return card;
     }
 
@@ -1721,8 +1745,9 @@ public class ConfigPanel extends JPanel {
         rows.add(addRow(panel, gbc, 2, GuiLanguage.msg("gui.config.frameBufferMs"), frameBufferMsSpinner,
                 "performance.frameBufferMs"));
 
-        Widgets.CollapsibleCard card = advancedCard("performance", GuiLanguage.msg("gui.config.performance"), panel);
-        registerSection(card, card, rows);
+        String title = GuiLanguage.msg("gui.config.performance");
+        Widgets.CollapsibleCard card = advancedCard("performance", title, panel);
+        registerSection(title, card, card, rows);
         return card;
     }
 
@@ -1751,8 +1776,9 @@ public class ConfigPanel extends JPanel {
         transformsRow.merge(addSpanningRow(panel, gbc, 3, new JScrollPane(transformsTextArea), null));
         rows.add(transformsRow);
 
-        Widgets.CollapsibleCard card = advancedCard("advancedReadOnly", GuiLanguage.msg("gui.config.advancedReadOnly"), panel);
-        registerSection(card, card, rows);
+        String title = GuiLanguage.msg("gui.config.advancedReadOnly");
+        Widgets.CollapsibleCard card = advancedCard("advancedReadOnly", title, panel);
+        registerSection(title, card, card, rows);
         return card;
     }
 
@@ -2470,16 +2496,38 @@ public class ConfigPanel extends JPanel {
         }
     }
 
-    /** A card and the {@link FilterRow}s inside it, plus its {@link Widgets.CollapsibleCard} if it has one. */
+    /**
+     * A card and the {@link FilterRow}s inside it, plus its {@link Widgets.CollapsibleCard} if it
+     * has one, and the title it was built with — the same value {@link #getSections()} reports.
+     */
     private static final class FilterSection {
+        final String title;
         final Component card;
         final Widgets.CollapsibleCard collapsible;
         final List<FilterRow> rows;
 
-        FilterSection(Component card, Widgets.CollapsibleCard collapsible, List<FilterRow> rows) {
+        FilterSection(String title, Component card, Widgets.CollapsibleCard collapsible, List<FilterRow> rows) {
+            this.title = title;
             this.card = card;
             this.collapsible = collapsible;
             this.rows = rows;
         }
+    }
+
+    /**
+     * This panel's cards, in the order they appear on the page — built from {@link #filterSections},
+     * so a card the search filter can find is a card the sidebar can jump to, and there is no
+     * second list to fall out of sync with the first. A {@link Widgets.CollapsibleCard} reveals
+     * itself the same way it does for a matching search: see {@link Widgets.CollapsibleCard#expand()}.
+     */
+    @Override
+    public List<Section> getSections() {
+        List<Section> sections = new ArrayList<>(filterSections.size());
+        for (FilterSection section : filterSections) {
+            Widgets.CollapsibleCard collapsible = section.collapsible;
+            Runnable reveal = collapsible == null ? null : collapsible::expand;
+            sections.add(new Section(section.title, (JComponent) section.card, reveal));
+        }
+        return sections;
     }
 }

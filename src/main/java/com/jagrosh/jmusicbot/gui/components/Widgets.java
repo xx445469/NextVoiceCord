@@ -231,6 +231,26 @@ public final class Widgets
             this.onToggle = listener;
         }
 
+        /**
+         * Opens the section exactly as if its heading had been clicked while collapsed — for
+         * navigation that jumps straight here (the sidebar) rather than a person reading down
+         * the page and clicking it themselves. A no-op if it is already open, so jumping back to
+         * an already-expanded section never collapses it.
+         */
+        public void expand()
+        {
+            if (!userExpanded)
+            {
+                userExpanded = true;
+                filterActive = false;
+                applyVisibility();
+                if (onToggle != null)
+                {
+                    onToggle.accept(true);
+                }
+            }
+        }
+
         private void applyVisibility()
         {
             boolean expanded = filterActive ? filterExpanded : userExpanded;

@@ -27,6 +27,7 @@ import com.jagrosh.jmusicbot.gui.components.StatusBar;
 import com.jagrosh.jmusicbot.gui.model.BotStatusData;
 import com.jagrosh.jmusicbot.gui.panels.ConfigPanel;
 import com.jagrosh.jmusicbot.gui.panels.PerformancePanel;
+import com.jagrosh.jmusicbot.gui.panels.SectionedPanel;
 import com.jagrosh.jmusicbot.gui.panels.SettingsPanel;
 import com.jagrosh.jmusicbot.gui.panels.SourceHealthPanel;
 import com.jagrosh.jmusicbot.gui.panels.StatusPanel;
@@ -41,6 +42,8 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Main application frame for JMusicBot with modern FlatLaf styling.
@@ -239,8 +242,43 @@ public class MainFrame extends JFrame {
 
         sidebar.addSpacer();
         sidebar.addSection(GuiLanguage.msg("gui.section.configure"));
-        sidebar.addItem("settings", GuiLanguage.msg("gui.nav.preferences"), IconFactory.getIcon(IconFactory.IconType.SETTINGS, 16));
-        sidebar.addItem("config", GuiLanguage.msg("gui.nav.botConfig"), IconFactory.getIcon(IconFactory.IconType.COPY, 16));
+        sidebar.addExpandableItem("settings", GuiLanguage.msg("gui.nav.preferences"),
+                IconFactory.getIcon(IconFactory.IconType.SETTINGS, 16), categoriesOf(settingsPanel));
+        sidebar.addExpandableItem("config", GuiLanguage.msg("gui.nav.botConfig"),
+                IconFactory.getIcon(IconFactory.IconType.COPY, 16), categoriesOf(configPanel));
+    }
+
+    /**
+     * Turns a panel's own {@link SectionedPanel#getSections()} into the sidebar's category list
+     * for it — never a second, hand-maintained list of the same names. See {@link SectionedPanel}
+     * for why: a card the panel grows is a card the sidebar can already see, with nothing here to
+     * remember to update.
+     */
+    private List<Sidebar.Category> categoriesOf(SectionedPanel panel) {
+        List<Sidebar.Category> categories = new ArrayList<>();
+        for (SectionedPanel.Section section : panel.getSections()) {
+            categories.add(new Sidebar.Category(section.title(), () -> revealAndScrollTo(section)));
+        }
+        return categories;
+    }
+
+    /**
+     * Opens {@code section}'s card — for one that starts collapsed, such as an "advanced" card in
+     * {@link ConfigPanel} — and scrolls it into view.
+     *
+     * <p>Deferred a tick: by the time a category's action runs, {@link Sidebar} has already
+     * called {@link Sidebar#select} to switch which page is showing via {@link CardLayout}, and
+     * {@link com.jagrosh.jmusicbot.gui.components.Widgets.CollapsibleCard#expand()} just below may
+     * have laid a previously-hidden body out for the first time. Either can leave the card's
+     * bounds stale until Swing's pending layout pass runs, and {@code scrollRectToVisible} needs
+     * the bounds it leaves behind, not the ones it had before the switch.
+     */
+    private void revealAndScrollTo(SectionedPanel.Section section) {
+        section.reveal();
+        SwingUtilities.invokeLater(() -> {
+            JComponent anchor = section.anchor();
+            anchor.scrollRectToVisible(new Rectangle(0, 0, anchor.getWidth(), anchor.getHeight()));
+        });
     }
 
     /**
