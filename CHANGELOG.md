@@ -7,6 +7,44 @@ follow [semantic versioning](https://semver.org/spec/v2.0.0.html). Dates are ISO
 
 ## [Unreleased]
 
+## [1.1.1] — 2026-08-28
+
+### Fixed
+
+- **Interface text no longer renders as boxes on Windows.** The font check asked whether a
+  candidate could draw one nav label — two characters in Chinese. Any font that managed those was
+  then used for the whole window, so one missing hundreds of the other characters the interface
+  contains was still accepted. The result was text that looked mostly right with boxes scattered
+  through it.
+
+  The check now uses every distinct character the language can display: 669 for Traditional
+  Chinese, 96 for English.
+
+  The Windows candidates were also too thin — one Traditional Chinese family and nothing for
+  Simplified Chinese, Japanese or Korean, because Windows ships a separate family per script
+  rather than one covering all of them.
+
+  Which font was chosen is now logged. `canDisplayUpTo` is not equally trustworthy across
+  platforms: on macOS a named family resolves to a composite that reports covering scripts its
+  own glyphs do not include, which is why this stayed invisible there and appeared only once the
+  same build ran on Windows.
+
+- **The owner's new-version alert pointed at the wrong repository.** It queried the upstream
+  fork's releases and told the owner to download from there. The `about` command linked there
+  too. The newer update checker already used the right one; the older path beside it did not.
+
+### Changed
+
+- **The bot no longer refuses to start when its Discord application is public.** The check was
+  inherited from upstream, where it exists because this design has no multi-tenancy: one process,
+  one config, one YouTube account, no sharding. Those reasons still hold — running publicly means
+  every server's playback goes through a single Google account, and there are no limits on how
+  many servers can add it — but whether to accept them is the operator's decision, not something
+  the bot should make by exiting.
+
+  The verified-bot refusal is gone with it, since keeping it would have blocked the same operator
+  again at the hundred-guild mark where Discord requires verification.
+
 ## [1.1.0] — 2026-08-27
 
 ### Removed
