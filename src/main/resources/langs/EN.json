@@ -828,7 +828,7 @@
       "youtubeSignInCodeLabel": "Code: {0}",
       "youtubeSignInCodeReady": "A sign-in code is ready.",
       "youtubeSignInConfirmButton": "I understand, continue",
-      "youtubeSignInConfirmMessage": "DO NOT AUTHORISE THIS WITH YOUR MAIN GOOGLE ACCOUNT.\nCreate or use an alternative/burner Google account — this grants NextVoiceCord ongoing access to whichever account you sign in with, and the resulting sign-in token is stored in plain text next to the bot.\n\nContinue with a burner account?",
+      "youtubeSignInConfirmMessage": "DO NOT AUTHORISE THIS WITH YOUR MAIN GOOGLE ACCOUNT.\nCreate or use an alternative, burner Google account — this grants NextVoiceCord ongoing access to whichever account you sign in with, and the resulting sign-in token is stored in plain text next to the bot.\n\nContinue with a burner account?",
       "youtubeSignInConfirmTitle": "Use a burner account",
       "youtubeSignInCopyCode": "Copy code",
       "youtubeSignInCopyCodeDone": "Copied",
@@ -842,7 +842,7 @@
       "youtubeSignInTitle": "YouTube sign-in",
       "youtubeSignInUrlLabel": "Link: {0}",
       "youtubeSignInWaiting": "Waiting for a sign-in code from YouTube. This normally appears shortly after the bot connects — restart the bot if this doesn't change.",
-      "youtubeSignInWarning": "DO NOT AUTHORISE THIS WITH YOUR MAIN GOOGLE ACCOUNT. Create or use an alternative/burner Google account — this grants NextVoiceCord ongoing access to whichever account you sign in with, and the resulting sign-in token is stored in plain text next to the bot.",
+      "youtubeSignInWarning": "DO NOT AUTHORISE THIS WITH YOUR MAIN GOOGLE ACCOUNT. Create or use an alternative, burner Google account — this grants NextVoiceCord ongoing access to whichever account you sign in with, and the resulting sign-in token is stored in plain text next to the bot.",
       "youtubeVisitorData": "Visitor data"
     },
     "console": {
