@@ -11,3 +11,6 @@
 # Docker files should use LF
 Dockerfile text eol=lf
 .dockerignore text eol=lf
+
+# Vendored Maven artifacts are byte-exact copies - never normalise them
+vendor/m2/** binary

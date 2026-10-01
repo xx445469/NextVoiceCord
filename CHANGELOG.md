@@ -7,6 +7,59 @@ follow [semantic versioning](https://semver.org/spec/v2.0.0.html). Dates are ISO
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-10-01
+
+### Added
+
+- **The status line names the artist** when the track title does not already carry it.
+  The line under the bot's name in the member list has always shown the title alone,
+  whatever the source, and that lands differently depending on where a track came from.
+  A YouTube title usually reads `Artist - Title` by itself, so the line looked right by
+  accident; a local file's title tag holds only the song name, with the artist in a
+  separate field, so the tracks with the cleanest metadata were the ones showing half of
+  what the now-playing embed showed.
+
+  The match is on letters and digits alone, so spacing and punctuation cannot cause a
+  false miss, and non-Latin names stay whole — normalising to `[a-z0-9]` would empty a
+  Cyrillic or Japanese name, which then matches every title and silently disables the
+  feature for the people who asked for it. YouTube channel suffixes are stripped first
+  (`- Topic`, `VEVO`), without which `RickAstleyVEVO` matches nothing in a
+  `Rick Astley - ...` title and would be prefixed onto it.
+
+  An uploader whose name appears nowhere in the title is still prefixed: separating a
+  performer from an unrelated uploader needs a music database.
+
+### Fixed
+
+- **Korean told readers to run commands that do not exist in their client.** Command
+  names are localized, not just descriptions, so a Korean client offers `/재생` and
+  `/설정` — but the help text, both settings panel errors and the `clearchannel`
+  description still named `/play`, `/settings`, `/queue`, `/skip`, `/volume` and
+  `/settc`. Four other strings read awkwardly: an honorific clause where a label was
+  meant, the `http(s)` shorthand, `프레즌스` where `활동 상태` is the term, and `출발`
+  (departure) where `출처` (source) was meant.
+
+  Reported and fixed by [@YJSoft](https://github.com/YJSoft), whose original pull
+  request was closed by the mistake below.
+
+- **The translation validator rejected localized command names.** It required every
+  `/command` in English prose to survive verbatim into every translation, which assumed
+  command names are not localized — in this project they are. The rule now accepts
+  either the English name or the one that language registers with Discord, and rejects
+  only a third spelling, which would name no command at all. Both forms have to be
+  allowed: the language the bot replies in is a per-user setting, independent of the
+  client locale that decides which name Discord shows in the picker.
+
+### Internal
+
+- **The pinned `youtube-source` build is kept in `vendor/m2`.** `maven.lavalink.dev`
+  no longer serves its `releases` repository at all — Reposilite reports it as not
+  found, while `/snapshots` works — and upstream releases have stalled since
+  `1.18.2` (2026-07-27). The artifact this build pins therefore exists in one place
+  only, so there is now a verified copy in the repository. Nothing points at it; the
+  build still resolves upstream exactly as before.
+
+
 ## [1.1.1] — 2026-08-28
 
 ### Fixed
