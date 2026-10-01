@@ -67,3 +67,6 @@ config.txt.bak*
 # Scratch worktrees used during development. They are full checkouts of this same
 # repository, so committing one nests a copy of the repo inside itself.
 /.*/worktrees/
+
+# Vendored Maven artifacts (see vendor/m2/README.md) are deliberately tracked
+!vendor/m2/**
