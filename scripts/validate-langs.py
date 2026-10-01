@@ -15,9 +15,12 @@ Checks per language:
                                 may differ, because word order does
   3. markdown parity          - ** and ` counts must match, since an unclosed pair eats
                                 the rest of the message in Discord
-  4. untranslated literals    - command names, config paths and enum values must survive
-                                verbatim; translating `/settc` or `linear` breaks the
-                                instruction it appears in
+  4. untranslated literals    - config paths and enum values must survive verbatim;
+                                translating `linear` breaks the instruction it appears in.
+                                Slash commands are the exception: their names are localized
+                                too, so a reference may be either the English name or the
+                                one this language registers with Discord - but not a third
+                                thing, which would name no command at all
   5. metadata present         - _meta.reviewed must exist, so review status is explicit
 
 Usage:
@@ -33,8 +36,9 @@ import sys
 
 PLACEHOLDER = re.compile(r"\{(\d{1,2})\}")
 
-# Text that must appear byte-identical in every language. These are things a user types
-# or a machine parses, not prose: translating them produces instructions that do not work.
+# Text a user types or a machine parses, not prose: translating it produces instructions
+# that do not work. Slash commands are checked against this language's own command names
+# rather than byte-identically - see localized_command_names().
 LITERALS = re.compile(
     r"(/[a-z]+\b"                      # slash commands: /settc, /play
     r"|`(?:off|all|single|linear|fair|full|minimal|inherit"
@@ -45,6 +49,25 @@ LITERALS = re.compile(
 )
 
 SOURCE = "EN"
+
+SLASH_COMMAND = re.compile(r"^/([a-z]+)$")
+
+
+def localized_command_names(raw):
+    """Map each English slash-command name to the name this language registers.
+
+    Command names are localized, not just descriptions: `commands.<name>.name` feeds
+    `SlashCommandData.setNameLocalizations`, so a reader whose Discord client is in
+    this language sees `/재생` and has no `/play` to type. Prose in this file may
+    therefore use either form - which one is right depends on the reader's client
+    locale, which is independent of the language the bot replies in, so neither can
+    be required.
+    """
+    names = {}
+    for command, node in (raw.get("commands") or {}).items():
+        if isinstance(node, dict) and isinstance(node.get("name"), str):
+            names[command] = node["name"]
+    return names
 
 
 def flatten(node, prefix=""):
@@ -63,6 +86,7 @@ def flatten(node, prefix=""):
 
 def check(code, translated, english, raw):
     problems = []
+    command_names = localized_command_names(raw)
 
     orphans = sorted(set(translated) - set(english))
     if orphans:
@@ -91,7 +115,18 @@ def check(code, translated, english, raw):
                     f"but {text.count(marker)}x here — an unclosed pair eats the message")
 
         for literal in set(LITERALS.findall(source_text)):
-            if literal not in text:
+            if literal in text:
+                continue
+
+            slash = SLASH_COMMAND.match(literal)
+            registered = command_names.get(slash.group(1)) if slash else None
+            if registered is not None:
+                if f"/{registered}" in text:
+                    continue
+                problems.append(
+                    f"{key}: {literal!r} is neither itself nor '/{registered}', the name "
+                    f"this language registers for that command — it names no command")
+            else:
                 problems.append(f"{key}: {literal!r} was translated; it must stay verbatim")
 
         if source_text.count("\n") != text.count("\n"):
