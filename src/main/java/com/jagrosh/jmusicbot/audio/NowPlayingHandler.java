@@ -112,8 +112,8 @@ public class NowPlayingHandler
         {
             if(track != null)
             {
-                String title = FormatUtil.getTrackTitle(track);
-                bot.getJDA().getPresence().setActivity(Activity.listening(title));
+                String status = FormatUtil.getStatusText(track);
+                bot.getJDA().getPresence().setActivity(Activity.listening(status));
             }
             else
             {
