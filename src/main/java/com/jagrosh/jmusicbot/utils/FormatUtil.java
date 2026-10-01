@@ -123,19 +123,114 @@ public class FormatUtil {
     }
 
     public static String getTrackTitle(AudioTrack track) {
-        String title = track.getInfo().title;
-        if (track instanceof LocalAudioTrack && (title == null || title.equals("Unknown title"))) {
+        String title = resolveTitle(track);
+
+        // The filename fallback is shown whole; it is a name someone chose, not a title
+        // a source generated, and truncating it loses the part that identifies the file.
+        if (title != null && isFilenameFallback(track)) {
+            return title;
+        }
+
+        return truncateForDisplay(title);
+    }
+
+    /**
+     * The track as it should read in the bot's Discord status, artist included.
+     *
+     * <p>Prefixes the artist when the title does not already carry it. A YouTube title
+     * usually reads {@code Artist - Title} by itself, so the status line looks right with
+     * no help; a local file's title tag holds only the song name, with the artist in a
+     * separate field, so the status showed half of what the now-playing embed showed.
+     *
+     * <p>The comparison ignores case, spacing and punctuation, and drops the suffixes
+     * YouTube appends to channel names, so {@code RickAstleyVEVO} still matches a
+     * {@code Rick Astley - ...} title rather than being prefixed onto it. An uploader
+     * whose name appears nowhere in the title is still prefixed — there is no way to tell
+     * a performer from an unrelated uploader without a music database.
+     *
+     * @param track the playing track
+     * @return {@code Artist - Title}, or just the title when it already names the artist,
+     *         when there is no usable artist, or when the title itself is unknown
+     */
+    public static String getStatusText(AudioTrack track) {
+        String title = resolveTitle(track);
+        if (title == null || title.isBlank()) {
+            return getTrackTitle(track);
+        }
+
+        String artist = usableArtist(track.getInfo().author);
+        if (artist == null || titleNames(title, artist)) {
+            return getTrackTitle(track);
+        }
+
+        return truncateForDisplay(artist + " - " + title);
+    }
+
+    /** The raw title, with a local file falling back to its filename. Never truncated. */
+    private static String resolveTitle(AudioTrack track) {
+        if (isFilenameFallback(track)) {
             String identifier = track.getIdentifier();
             int lastSeparator = Math.max(identifier.lastIndexOf('/'), identifier.lastIndexOf('\\'));
             return (lastSeparator != -1) ? identifier.substring(lastSeparator + 1) : identifier;
         }
+        return track.getInfo().title;
+    }
 
-        // Truncate if the title is too long for Discord displays
-        if (title != null && title.length() > 100) {
-            title = title.substring(0, 97) + "...";
+    /** Whether this track has no title of its own and must be named by its filename. */
+    private static boolean isFilenameFallback(AudioTrack track) {
+        String title = track.getInfo().title;
+        return track instanceof LocalAudioTrack && (title == null || title.equals("Unknown title"));
+    }
+
+    /** Truncate if too long for Discord displays. */
+    private static String truncateForDisplay(String text) {
+        return (text != null && text.length() > 100) ? text.substring(0, 97) + "..." : text;
+    }
+
+    /**
+     * The artist worth showing, or null. Strips the suffixes YouTube adds to channel names
+     * — {@code - Topic} on its auto-generated artist channels, {@code VEVO} on label ones —
+     * since neither is part of the name a listener would recognise.
+     */
+    private static String usableArtist(String author) {
+        if (author == null) {
+            return null;
         }
 
-        return title;
+        String artist = author.trim();
+        if (artist.regionMatches(true, artist.length() - 8, " - Topic", 0, 8)) {
+            artist = artist.substring(0, artist.length() - 8).trim();
+        } else if (artist.regionMatches(true, artist.length() - 4, "VEVO", 0, 4)) {
+            artist = artist.substring(0, artist.length() - 4).trim();
+        }
+
+        // A name that was nothing but a suffix ("VEVO") leaves nothing to show, and
+        // "Unknown artist" is what the now-playing embed already declines to show.
+        if (artist.isEmpty() || artist.equalsIgnoreCase("unknown artist")) {
+            return null;
+        }
+        return artist;
+    }
+
+    /**
+     * Whether the title already names this artist, compared on letters and digits alone so
+     * that spacing and punctuation cannot cause a false miss.
+     */
+    private static boolean titleNames(String title, String artist) {
+        String needle = lettersAndDigits(artist);
+        // Nothing comparable left — a punctuation-only name matches everything, so decline.
+        return needle.isEmpty() || lettersAndDigits(title).contains(needle);
+    }
+
+    private static String lettersAndDigits(String text) {
+        StringBuilder out = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (Character.isLetterOrDigit(c)) {
+                out.append(Character.toLowerCase(c));
+            }
+        }
+        return out.toString();
     }
 
     /**
