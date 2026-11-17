@@ -7,6 +7,14 @@ follow [semantic versioning](https://semver.org/spec/v2.0.0.html). Dates are ISO
 
 ## [Unreleased]
 
+## [1.2.1] — 2026-11-18
+
+### Security
+
+- Update `org.json:json` from `20240303` to `20260719` (PR #12), including
+  the CVE-2026-59171 fixes that bound large `BigInteger` / `BigDecimal`
+  conversions and add configurable number-length limits.
+
 ## [1.2.0] — 2026-10-01
 
 ### Added
