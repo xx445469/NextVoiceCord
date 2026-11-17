@@ -636,7 +636,7 @@
         <slf4j.version>2.0.17</slf4j.version>
         <kotlin-stdlib.version>2.2.21</kotlin-stdlib.version>
         <jetbrains-annotations.version>24.0.0</jetbrains-annotations.version>
-        <org-json.version>20240303</org-json.version>
+        <org-json.version>20260719</org-json.version>
         <rhino-engine.version>1.7.15</rhino-engine.version>
         <lava-common.version>2.2.7</lava-common.version>
 
