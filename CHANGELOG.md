@@ -7,6 +7,13 @@ follow [semantic versioning](https://semver.org/spec/v2.0.0.html). Dates are ISO
 
 ## [Unreleased]
 
+## [1.2.2] — 2026-11-17
+
+### Changed
+
+- Update `org.jsoup:jsoup` from `1.23.1` to `1.23.2` (PR #13), including
+  HTML/XML parsing fixes, URL handling corrections, and HTTP client reuse improvements.
+
 ## [1.2.1] — 2026-11-18
 
 ### Security
